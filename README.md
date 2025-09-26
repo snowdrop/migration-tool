@@ -98,19 +98,6 @@ java -jar target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-
 java -jar target/quarkus-app/quarkus-run.jar transform ./applications/spring-boot-todo-app
 ```
 
-## Start using the JdtlsFactory Main application
-
-Before to run the server and client, configure the following system properties or override the Quarkus properties[application.properties](src/main/resources/application.properties):
-- `JDT_WKS`: Path of the folder containing the jdt-ls workspace, .metadata and log. Default: `./jdt/`
-- `JDT_LS_PATH`: Path of the jdt language server folder. Default: `./jdt/konveyor-jdtls`
-- `LS_CMD`: Language server command to be executed. Default: `io.konveyor.tackle.ruleEntry`, etc
-- `APP_PATH`: Path of the java project to analyze. Default: `./applications/spring-boot-todo-app`
-- `RULES_PATH`: Path of the rules. Default: `./rules`
-
-```shell
-mvn exec:java
-```
-
 ## Tips
 
 Here are the [openrewrite maven plugin command](https://docs.openrewrite.org/reference/rewrite-maven-plugin) to be used to apply recipe(s) top of a spring boot project. Take care that your project is under git control as code will be transformed !
@@ -144,5 +131,20 @@ mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
   -Drewrite.recipeArtifactCoordinates=org.openrewrite:rewrite-java:8.61.1,org.openrewrite.recipe:rewrite-java-dependencies:1.42.0,dev.snowdrop:java-analyzer-quarkus:1.0.0-SNAPSHOT \
   -Drewrite.exportDatatables=true \
   -Drewrite.configLocation=my-rewrite.yml
+```
+
+## Deprecated
+
+## Start using the JdtlsFactory Main application
+
+Before to run the server and client, configure the following system properties or override the Quarkus properties[application.properties](src/main/resources/application.properties):
+- `JDT_WKS`: Path of the folder containing the jdt-ls workspace, .metadata and log. Default: `./jdt/`
+- `JDT_LS_PATH`: Path of the jdt language server folder. Default: `./jdt/konveyor-jdtls`
+- `LS_CMD`: Language server command to be executed. Default: `io.konveyor.tackle.ruleEntry`, etc
+- `APP_PATH`: Path of the java project to analyze. Default: `./applications/spring-boot-todo-app`
+- `RULES_PATH`: Path of the rules. Default: `./rules`
+
+```shell
+mvn exec:java
 ```
 

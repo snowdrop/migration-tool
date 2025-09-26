@@ -1,10 +1,10 @@
-package openrewrite;
+package dev.snowdrop.openrewrite;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import openrewrite.model.Result;
-import openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain;
+import dev.snowdrop.openrewrite.model.Result;
+import dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain;
 import org.eclipse.lsp4j.SymbolKind;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.InMemoryExecutionContext;

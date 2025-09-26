@@ -1,4 +1,4 @@
-package openrewrite.model;
+package dev.snowdrop.openrewrite.model;
 
 import org.eclipse.lsp4j.SymbolKind;
 

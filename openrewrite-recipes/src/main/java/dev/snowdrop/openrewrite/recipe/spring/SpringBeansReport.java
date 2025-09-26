@@ -1,4 +1,4 @@
-package openrewrite.recipe.spring;
+package dev.snowdrop.openrewrite.recipe.spring;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import lombok.Value;

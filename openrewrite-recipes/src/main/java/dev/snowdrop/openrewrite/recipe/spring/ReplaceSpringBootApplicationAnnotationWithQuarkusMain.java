@@ -1,4 +1,4 @@
-package openrewrite.recipe.spring;
+package dev.snowdrop.openrewrite.recipe.spring;
 
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.Recipe;
