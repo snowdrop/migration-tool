@@ -1,4 +1,6 @@
 .DS_Store
 cmd.txt
 jdt/
+
 /.env
+applications/**/*.json
