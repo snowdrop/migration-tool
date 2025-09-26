@@ -113,7 +113,7 @@ java -jar migration-tool/target/quarkus-app/quarkus-run.jar transform $(pwd)/app
 Here are the [openrewrite maven plugin command](https://docs.openrewrite.org/reference/rewrite-maven-plugin) to be used to apply recipe(s) top of a spring boot project. Take care that your project is under git control as code will be transformed !
 
 ```shell
-cd ./applications/spring-boot-todo-app
+cd applications/spring-boot-todo-app
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:run \
    -Drewrite.recipeArtifactCoordinates=dev.snowdrop:java-analyzer-quarkus:1.0.0-SNAPSHOT \
    -Dorg.openrewrite.quarkus.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
@@ -121,26 +121,28 @@ mvn -U org.openrewrite.maven:rewrite-maven-plugin:run \
 
 Instead of changing the code, you can use the dryrun mode to get a patch
 ```shell
+cd applications/spring-boot-todo-app
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
-   -Drewrite.recipeArtifactCoordinates=dev.snowdrop:java-analyzer-quarkus:1.0.0-SNAPSHOT \
+   -Drewrite.recipeArtifactCoordinates=dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT \
    -Drewrite.activeRecipes=dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain  
 ```
-When done, open the diff patch generated: `/PATH/TO/spring-to-quarkus-guide/java-analyzer-quarkus/applications/spring-boot-todo-app/target/rewrite/rewrite.patch`
-
-You can play with your own recipes and by example clean the imports and add an apache license header using the following command:
-```shell
-mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
-  -Drewrite.activeRecipes=com.mycompany.recipes.StandardJavaConventions \
-  -Drewrite.configLocation=/PATH/TO/spring-to-quarkus-guide/java-analyzer-quarkus/recipes/clean-code.yml
-```
+When done, open the diff patch generated: `/PATH/TO/spring-boot-todo-app/target/rewrite/rewrite.patch`
 
 To execute several recipes aggregated in a yaml file placed at the root of the project, execute this command:
 ```shell
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
   -Drewrite.activeRecipes=dev.snowdrop.text.SearchText,dev.snowdrop.java.StandardJavaConventions,dev.snowdrop.java.spring.SearchSpringBootAnnotation \
-  -Drewrite.recipeArtifactCoordinates=org.openrewrite:rewrite-java:8.61.1,org.openrewrite.recipe:rewrite-java-dependencies:1.42.0,dev.snowdrop:java-analyzer-quarkus:1.0.0-SNAPSHOT \
+  -Drewrite.recipeArtifactCoordinates=org.openrewrite:rewrite-java:8.61.1,org.openrewrite.recipe:rewrite-java-dependencies:1.42.0,dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT \
   -Drewrite.exportDatatables=true \
   -Drewrite.configLocation=my-rewrite.yml
+...
+[WARNING] These recipes would make changes to applications/spring-boot-todo-app/my-rewrite.yml:
+[WARNING]     dev.snowdrop.text.SearchText
+[WARNING]         org.openrewrite.text.Find: {find=public class TaskController}
+[WARNING] Patch file available:
+[WARNING]     /Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/spring-boot-todo-app/target/rewrite/rewrite.patch
+[WARNING] Estimate time saved: 40m
+[WARNING] Run 'mvn rewrite:run' to apply the recipes.  
 ```
 
 ## Deprecated
