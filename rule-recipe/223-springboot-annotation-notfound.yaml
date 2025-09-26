@@ -1,0 +1,16 @@
+- category: mandatory
+  customVariables: []
+  description: Remove the SpringBoot @SpringBootApplication annotation
+  effort: 1
+  labels:
+  - konveyor.io/source=springboot
+  - konveyor.io/target=quarkus
+  links: []
+  message: "Remove the SpringBoot @SpringApplication annotation"
+  ruleID: springboot-annotations-notfound-00000
+  when:
+    java.referenced:
+      location: ANNOTATION
+      pattern: org.springframework.boot.autoconfigure.SpringApplication
+  actions:
+    - "Remove the SpringBoot @SpringApplication annotation from classes"

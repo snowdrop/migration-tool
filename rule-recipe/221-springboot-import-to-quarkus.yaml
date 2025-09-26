@@ -1,0 +1,16 @@
+- category: mandatory
+  customVariables: []
+  description: Remove the import of the SpringBootApplication annotation
+  effort: 1
+  labels:
+  - konveyor.io/source=springboot
+  - konveyor.io/target=quarkus
+  links: []
+  message: "Remove the import of the SpringBootApplication annotation within the class annotated."
+  ruleID: springboot-import-to-quarkus-00000
+  when:
+    java.referenced:
+      location: IMPORT
+      pattern: org.springframework.boot.autoconfigure.SpringBootApplication
+  actions:
+    - "Remove the imported annotation: org.springframework.boot.autoconfigure.SpringBootApplication"

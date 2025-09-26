@@ -1,0 +1,92 @@
+{
+  "title" : "Migration Analysis Results",
+  "projectPath" : "./applications/spring-boot-todo-app",
+  "timestamp" : "2025-09-25_11:49",
+  "migrationTasks" : {
+    "springboot-annotations-notfound-00000" : {
+      "rule" : {
+        "category" : "mandatory",
+        "description" : "Remove the SpringBoot @SpringBootApplication annotation",
+        "effort" : 1,
+        "labels" : [ "konveyor.io/source=springboot", "konveyor.io/target=quarkus" ],
+        "message" : "Remove the SpringBoot @SpringApplication annotation",
+        "ruleID" : "springboot-annotations-notfound-00000",
+        "when" : {
+          "java.referenced" : {
+            "location" : "ANNOTATION",
+            "pattern" : "org.springframework.boot.autoconfigure.SpringApplication"
+          }
+        },
+        "actions" : [ "Remove the SpringBoot @SpringApplication annotation from classes" ]
+      }
+    },
+    "springboot-annotations-to-quarkus-00000" : {
+      "rule" : {
+        "category" : "mandatory",
+        "description" : "Remove the SpringBoot @SpringBootApplication annotation",
+        "effort" : 1,
+        "labels" : [ "konveyor.io/source=springboot", "konveyor.io/target=quarkus" ],
+        "message" : "Remove the SpringBoot @SpringBootApplication annotation.\n\n A Spring Boot application contains a \"main\" class with the @SpringBootApplication annotation. A Quarkus application does not have such a class. Two different alternatives can be followed - either\n to remove the \"main\" class associated with the annotation, or add the `org.springframework.boot:spring-boot-autoconfigure` dependency as an `optional` Maven dependency. An optional dependency \n is available when an application compiles but is not packaged with the application at runtime. Doing this would allow the application to compile without modification, but you\n would also need to maintain a Spring version along with the Quarkus application.",
+        "ruleID" : "springboot-annotations-to-quarkus-00000",
+        "when" : {
+          "java.referenced" : {
+            "location" : "ANNOTATION",
+            "pattern" : "org.springframework.boot.autoconfigure.SpringBootApplication"
+          }
+        },
+        "actions" : [ "Remove the SpringBoot @SpringBootApplication annotation from classes" ]
+      },
+      "results" : [ {
+        "name" : "SpringBootApplication",
+        "kind" : "Class",
+        "location" : {
+          "uri" : "file:///Users/cmoullia/code/application-modernisation/spring-to-quarkus-guide/java-analyzer-quarkus/applications/spring-boot-todo-app/src/main/java/com/todo/app/AppApplication.java",
+          "range" : {
+            "start" : {
+              "line" : 5,
+              "character" : 1
+            },
+            "end" : {
+              "line" : 5,
+              "character" : 22
+            }
+          }
+        }
+      } ]
+    },
+    "springboot-import-to-quarkus-00000" : {
+      "rule" : {
+        "category" : "mandatory",
+        "description" : "Remove the import of the SpringBootApplication annotation",
+        "effort" : 1,
+        "labels" : [ "konveyor.io/source=springboot", "konveyor.io/target=quarkus" ],
+        "message" : "Remove the import of the SpringBootApplication annotation within the class annotated.",
+        "ruleID" : "springboot-import-to-quarkus-00000",
+        "when" : {
+          "java.referenced" : {
+            "location" : "IMPORT",
+            "pattern" : "org.springframework.boot.autoconfigure.SpringBootApplication"
+          }
+        },
+        "actions" : [ "Remove the imported annotation: org.springframework.boot.autoconfigure.SpringBootApplication" ]
+      },
+      "results" : [ {
+        "name" : "org.springframework.boot.autoconfigure.SpringBootApplication",
+        "kind" : "Module",
+        "location" : {
+          "uri" : "file:///Users/cmoullia/code/application-modernisation/spring-to-quarkus-guide/java-analyzer-quarkus/applications/spring-boot-todo-app/src/main/java/com/todo/app/AppApplication.java",
+          "range" : {
+            "start" : {
+              "line" : 3,
+              "character" : 7
+            },
+            "end" : {
+              "line" : 3,
+              "character" : 67
+            }
+          }
+        }
+      } ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: dev.snowdrop.openrewrite.spring.SpringBootToQuarkus
+displayName: Migrate Spring Boot to Quarkus
+description: Replace Spring Boot with Quarkus.
+tags:
+  - spring
+  - quarkus
+  - migration
+  - annotation
+preconditions:
+  - org.openrewrite.maven.search.ParentPomInsight:
+      groupIdPattern: org.springframework.boot
+      artifactIdPattern: spring-boot-starter-parent
+      version: 3.x
+recipeList:
+  - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
