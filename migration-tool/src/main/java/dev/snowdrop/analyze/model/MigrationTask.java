@@ -9,8 +9,14 @@ import java.util.List;
 public class MigrationTask {
     private Rule rule;
     private List<SymbolInformation> results;
+    private Rule.Instruction instruction;
 
     public MigrationTask() {
+    }
+
+    public MigrationTask withInstruction(Rule.Instruction instruction) {
+        this.instruction = instruction;
+        return this;
     }
 
     public MigrationTask withRule(Rule rule) {

@@ -196,7 +196,7 @@ public class LsSearchService {
         List<Rule> rules = parseRulesFromFolder(factory.rulesPath);
         Map<String, MigrationTask> ruleMigrationTasks = new HashMap<>();
 
-        // Collect all results from all the rule's queries executed
+        // Collect all results from all the rule's queries executed and add the instructions
         for (Rule rule : rules) {
             Map<String, List<SymbolInformation>> ruleResults = executeLsCmd(factory, rule);
             ruleMigrationTasks.putAll(Map.of(
@@ -204,6 +204,7 @@ public class LsSearchService {
                 new MigrationTask()
                     .withRule(rule)
                     .withResults(ruleResults.get(rule.ruleID()))
+                    .withInstruction(rule.instructions())
                     ));
         }
 

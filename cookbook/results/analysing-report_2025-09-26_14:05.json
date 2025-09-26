@@ -1,0 +1,110 @@
+{
+  "title" : "Migration Analysis Results",
+  "projectPath" : "../applications/spring-boot-todo-app",
+  "timestamp" : "2025-09-26_14:05",
+  "migrationTasks" : {
+    "springboot-annotations-notfound-00000" : {
+      "rule" : {
+        "category" : "mandatory",
+        "description" : "Remove the SpringBoot @SpringBootApplication annotation",
+        "effort" : 1,
+        "labels" : [ "konveyor.io/source=springboot", "konveyor.io/target=quarkus" ],
+        "message" : "Remove the SpringBoot @SpringApplication annotation",
+        "ruleID" : "springboot-annotations-notfound-00000",
+        "when" : {
+          "java.referenced" : {
+            "location" : "ANNOTATION",
+            "pattern" : "org.springframework.boot.autoconfigure.SpringApplication"
+          }
+        },
+        "actions" : [ "Remove the SpringBoot @SpringApplication annotation from classes" ]
+      }
+    },
+    "springboot-annotations-to-quarkus-00000" : {
+      "rule" : {
+        "category" : "mandatory",
+        "description" : "Replace the Spring Boot Application Annotation with QuarkusMain and add Quarkus.run",
+        "effort" : 1,
+        "labels" : [ "konveyor.io/source=springboot", "konveyor.io/target=quarkus" ],
+        "message" : "Replace the Spring Boot Application Annotation with QuarkusMain and add Quarkus.run.",
+        "ruleID" : "springboot-annotations-to-quarkus-00000",
+        "when" : {
+          "java.referenced" : {
+            "location" : "ANNOTATION",
+            "pattern" : "org.springframework.boot.autoconfigure.SpringBootApplication"
+          }
+        },
+        "instructions" : {
+          "ai" : [ {
+            "promptMessage" : "Remove the org.springframework.boot.autoconfigure.SpringBootApplication annotation from the main Spring Boot Application class"
+          } ],
+          "manual" : [ {
+            "todo" : "Remove the org.springframework.boot.autoconfigure.SpringBootApplication annotation from the main Spring Boot Application class"
+          } ],
+          "openrewrite" : [ {
+            "name" : "Migrate Spring Boot to Quarkus",
+            "preconditions" : [ {
+              "name" : "org.openrewrite.java.dependencies.search.ModuleHasDependency",
+              "groupIdPattern" : "org.springframework.boot",
+              "artifactIdPattern" : "spring-boot",
+              "version" : "[3.5,)"
+            } ],
+            "recipeList" : [ "dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain", "dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun" ],
+            "gav" : [ "dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT" ]
+          } ]
+        }
+      },
+      "results" : [ {
+        "name" : "SpringBootApplication",
+        "kind" : "Class",
+        "location" : {
+          "uri" : "file:///Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/spring-boot-todo-app/src/main/java/com/todo/app/AppApplication.java",
+          "range" : {
+            "start" : {
+              "line" : 5,
+              "character" : 1
+            },
+            "end" : {
+              "line" : 5,
+              "character" : 22
+            }
+          }
+        }
+      } ]
+    },
+    "springboot-import-to-quarkus-00000" : {
+      "rule" : {
+        "category" : "mandatory",
+        "description" : "Remove the import of the SpringBootApplication annotation",
+        "effort" : 1,
+        "labels" : [ "konveyor.io/source=springboot", "konveyor.io/target=quarkus" ],
+        "message" : "Remove the import of the SpringBootApplication annotation within the class annotated.",
+        "ruleID" : "springboot-import-to-quarkus-00000",
+        "when" : {
+          "java.referenced" : {
+            "location" : "IMPORT",
+            "pattern" : "org.springframework.boot.autoconfigure.SpringBootApplication"
+          }
+        },
+        "actions" : [ "Remove the imported annotation: org.springframework.boot.autoconfigure.SpringBootApplication" ]
+      },
+      "results" : [ {
+        "name" : "org.springframework.boot.autoconfigure.SpringBootApplication",
+        "kind" : "Module",
+        "location" : {
+          "uri" : "file:///Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/spring-boot-todo-app/src/main/java/com/todo/app/AppApplication.java",
+          "range" : {
+            "start" : {
+              "line" : 3,
+              "character" : 7
+            },
+            "end" : {
+              "line" : 3,
+              "character" : 67
+            }
+          }
+        }
+      } ]
+    }
+  }
+}
