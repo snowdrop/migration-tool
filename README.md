@@ -1,6 +1,9 @@
 # Migration Tool project
 
-TODO: To be rephrased as we have expanded the scope !
+TODO: 
+
+- Review the introduction as scope changed and has been expanded.
+- Check what [spring-migrator-tool](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-support-boot/src/main/resources/recipes/initialize-spring-boot-migration.yaml) did to reuse some ideas to configure the instructions part of a rule using Actions. The [action](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-core/src/main/java/org/springframework/sbm/build/migration/actions/AddMavenDependencyManagementAction.java)'s definition is used as input to apply the corresponding openrewrite's [recipe](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-core/src/main/java/org/springframework/sbm/build/impl/OpenRewriteMavenBuildFile.java#L376).
 
 This project demonstrates how to launch the Eclipse Java Language Server (aka: Eclipse jdt-ls) and access it using a Java Language client able to pass commands and get JSON responses converted to objects
 

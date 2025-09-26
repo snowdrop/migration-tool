@@ -20,5 +20,5 @@
     java.referenced:
       location: ANNOTATION
       pattern: org.springframework.boot.autoconfigure.SpringBootApplication
-  actions:
+  instructions:
     - "Remove the SpringBoot @SpringBootApplication annotation from classes"
