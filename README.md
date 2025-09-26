@@ -75,32 +75,37 @@ mvn quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-qua
 To avoid to pass the arguments to the command, you can use the "default" [application.properties](src/main/resources/application.properties) and just pass the path of the application to be analyzed
 
 ```shell
-cd migration-tool
-mvn quarkus:dev -Dquarkus.args="analyze ./applications/spring-boot-todo-app"
+mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app"
 ```
 
-You can check the log of the server from the parent folder within: `.jdt_workspace/.metadata/.log` !
+You can check the log of the server from the parent folder within: `jdt/.jdt_workspace/.metadata/.log` !
 
-If you want to populate an analysis report (kind of migration) then add the parameter `-o json` and a json file having as
+If you want to populate an analysis report (kind of migration plan) then pass the parameter `-o json` top the command. A json file having as
 name: `analysing-report_yyyy-mm-dd_hh:mm.json` will be generated within the project scanned
 
 ```shell
-cd migration-tool
-mvn quarkus:dev -Dquarkus.args="analyze ./applications/spring-boot-todo-app o json"
+mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -o json"
 ```
 
 ## Transform your application
 
 ```shell
- cd migration-tool
-mvn quarkus:dev -Dquarkus.args="transform ./applications/spring-boot-todo-app"
+mvn -pl migration-tool quarkus:dev -Dquarkus.args="transform ./applications/spring-boot-todo-app"
 ```
 
-The commands can also be executed using the jar file
+The commands can also be executed using the jar file. Create, in this case, an `.env` file to configure properly the jdt, rules and workspace properties
+
+```properties
+# .env file content
+ANALYZER_JDT_LS_PATH=jdt/konveyor-jdtls
+ANALYZER_JDT_WORKSPACE_PATH=jdt
+ANALYZER_RULES_PATH=cookbook/rules
+```
+Next source it and execute the following java commands:
+
 ```shell
-cd migration-tool
-java -jar target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app
-java -jar target/quarkus-app/quarkus-run.jar transform ./applications/spring-boot-todo-app
+java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze $(pwd)/applications/spring-boot-todo-app
+java -jar migration-tool/target/quarkus-app/quarkus-run.jar transform $(pwd)/applications/spring-boot-todo-app
 ```
 
 ## Tips
