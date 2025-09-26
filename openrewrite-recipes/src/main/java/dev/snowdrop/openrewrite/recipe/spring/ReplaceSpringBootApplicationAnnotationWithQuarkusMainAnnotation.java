@@ -8,16 +8,16 @@ import org.openrewrite.java.JavaParser;
 import org.openrewrite.java.JavaTemplate;
 import org.openrewrite.java.tree.J;
 
-public class ReplaceSpringBootApplicationAnnotationWithQuarkusMain extends Recipe {
+public class ReplaceSpringBootApplicationAnnotationWithQuarkusMainAnnotation extends Recipe {
 
     @Override
     public String getDisplayName() {
-        return "Convert @SpringBootApplication with @QuarkusMain Annotation";
+        return "Convert the @SpringBootApplication annotation to @QuarkusMain";
     }
 
     @Override
     public String getDescription() {
-        return "Convert @SpringBootApplication with @QuarkusMain Annotation, removes the old import and add the new one.";
+        return "Convert the @SpringBootApplication annotation to @QuarkusMain.";
     }
 
     transient SpringBootScanReport report = new SpringBootScanReport(this);
@@ -40,8 +40,7 @@ public class ReplaceSpringBootApplicationAnnotationWithQuarkusMain extends Recip
             String simpleName = a.getSimpleName();
 
             if ("SpringBootApplication".equals(simpleName)) {
-
-                report.insertRow(ctx, new SpringBootScanReport.Row(simpleName, "123"));
+                report.insertRow(ctx, new SpringBootScanReport.Row(simpleName, "n/a"));
 
                 maybeRemoveImport("org.springframework.boot.autoconfigure.SpringBootApplication");
                 maybeRemoveImport("org.springframework.boot.SpringApplication");
@@ -55,21 +54,6 @@ public class ReplaceSpringBootApplicationAnnotationWithQuarkusMain extends Recip
                     .apply(getCursor(), a.getCoordinates().replace());
             }
             return a;
-        }
-
-        @Override
-        public J.MethodInvocation visitMethodInvocation(J.MethodInvocation method, ExecutionContext ctx) {
-            J.MethodInvocation m = super.visitMethodInvocation(method, ctx);
-            if (! m.getArguments().isEmpty() && m.getArguments().size() > 1) {
-                maybeAddImport("io.quarkus.runtime.Quarkus");
-                return JavaTemplate.builder("Quarkus.run(#{any(java.lang.String[])})")
-                    .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
-                    .imports("io.quarkus.runtime.Quarkus")
-                    .build()
-                    .apply(getCursor(), m.getCoordinates().replace(), m.getArguments().get(1));
-            } else {
-                return m;
-            }
         }
     }
 }

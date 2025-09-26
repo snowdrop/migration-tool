@@ -22,16 +22,6 @@ public class YamlRuleParser {
     public YamlRuleParser() {
     }
 
-    public static Rule parseRuleFromFile(Path filePath) throws IOException {
-        logger.debugf("Parsing YAML rule from file: {}", filePath);
-        try {
-            return yamlMapper.readValue(Files.newInputStream(filePath), Rule.class);
-        } catch (IOException e) {
-            logger.error("Failed to parse YAML rule from file: {}", filePath, e);
-            throw e;
-        }
-    }
-
     public static List<Rule> parseRulesFromFile(Path filePath) throws IOException {
         logger.debugf("Parsing YAML rules list from file: {}", filePath);
         try {
@@ -39,26 +29,6 @@ public class YamlRuleParser {
                 yamlMapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
         } catch (IOException e) {
             logger.error("Failed to parse YAML rules list from file: {}", filePath, e);
-            throw e;
-        }
-    }
-
-    public void writeRuleToFile(Rule rule, Path filePath) throws IOException {
-        logger.debugf("Writing YAML rule to file: {}", filePath);
-        try {
-            yamlMapper.writeValue(Files.newOutputStream(filePath), rule);
-        } catch (IOException e) {
-            logger.error("Failed to write YAML rule to file: {}", filePath, e);
-            throw e;
-        }
-    }
-
-    public String ruleToYamlString(Rule rule) throws IOException {
-        logger.debugf("Converting rule to YAML string");
-        try {
-            return yamlMapper.writeValueAsString(rule);
-        } catch (IOException e) {
-            logger.error("Failed to convert rule to YAML string", e);
             throw e;
         }
     }

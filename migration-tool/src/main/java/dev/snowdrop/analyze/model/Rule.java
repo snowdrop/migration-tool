@@ -2,6 +2,7 @@ package dev.snowdrop.analyze.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.openrewrite.Recipe;
 
 import java.util.List;
 
@@ -18,8 +19,38 @@ public record Rule(
     String lsCmd,
     When when,
     @Deprecated @JsonProperty("actions") List<String> actions,
-    List<String> instructions
+    Instruction instructions
 ) {
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public record Instruction(
+        Ai[] ai,
+        Manual[] manual,
+        Openrewrite[] openrewrite
+    ) {}
+
+    public record Ai(
+       String promptMessage
+    ) {}
+
+    public record Manual(
+        String todo
+    ) {}
+
+    public record Openrewrite(
+        String name,
+        Precondition[] preconditions,
+        String[] recipeList,
+        String[] gav
+    ) {}
+
+    public record Precondition(
+        String name,
+        String groupIdPattern,
+        String artifactIdPattern,
+        String version
+    ) {}
+
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public record When(

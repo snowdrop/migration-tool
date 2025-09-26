@@ -127,7 +127,7 @@ Instead of changing the code, you can use the dryrun mode to get a patch
 cd applications/spring-boot-todo-app
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
    -Drewrite.recipeArtifactCoordinates=dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT \
-   -Drewrite.activeRecipes=dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain  
+   -Drewrite.activeRecipes=dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMainAnnotation  
 ```
 When done, open the diff patch generated: `/PATH/TO/spring-boot-todo-app/target/rewrite/rewrite.patch`
 
