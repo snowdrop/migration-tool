@@ -1,4 +1,4 @@
-# Instructions to analyze a java application and transform it
+# Migration Tool project
 
 TODO: To be rephrased as we have expanded the scope !
 
@@ -11,7 +11,7 @@ The project uses the [Spring TODO](../applications/spring-boot-todo-app) applica
 First, compile the project
 
 ```shell
-./mvnw clean package
+./mvnw clean install
 ```
 
 ## Konveyor jdt-ls
