@@ -10,7 +10,7 @@ import static org.openrewrite.java.Assertions.java;
 public class ReplaceSpringBootApplicationAnnotationTest implements RewriteTest {
     @Override
     public void defaults(RecipeSpec spec) {
-        spec.recipeFromResource("/META-INF/rewrite/spring-boot-to-quarkus.yml","dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain")
+        spec.recipeFromResource("/META-INF/rewrite/spring-boot-to-quarkus.yml","dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMainAnnotation")
             .parser((Parser.Builder) JavaParser.fromJavaVersion().classpath("spring-data","spring-beans","spring-context","spring-boot").logCompilationWarningsAndErrors(true));
     }
 
@@ -38,13 +38,13 @@ public class ReplaceSpringBootApplicationAnnotationTest implements RewriteTest {
                 """
                 package com.todo.app;
                 
-                import io.quarkus.runtime.Quarkus;
                 import io.quarkus.runtime.annotations.QuarkusMain;
+                import org.springframework.boot.SpringApplication;
                 
                 @QuarkusMain
                  public class AppApplication {
                  	public static void main(String[] args) {
-                         Quarkus.run(args);
+                         SpringApplication.run(AppApplication.class, args);
                  	}
                 }
                 """
