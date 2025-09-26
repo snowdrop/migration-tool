@@ -41,7 +41,7 @@ public class ReplaceSpringBootApplicationAnnotationWithQuarkusMain extends Recip
 
             if ("SpringBootApplication".equals(simpleName)) {
 
-                report.insertRow(ctx,new SpringBootScanReport.Row(simpleName,"123"));
+                report.insertRow(ctx, new SpringBootScanReport.Row(simpleName, "123"));
 
                 maybeRemoveImport("org.springframework.boot.autoconfigure.SpringBootApplication");
                 maybeRemoveImport("org.springframework.boot.SpringApplication");

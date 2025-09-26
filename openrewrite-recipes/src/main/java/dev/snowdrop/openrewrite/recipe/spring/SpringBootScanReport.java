@@ -1,6 +1,5 @@
 package dev.snowdrop.openrewrite.recipe.spring;
 
-import lombok.Value;
 import org.jspecify.annotations.Nullable;
 import org.openrewrite.Column;
 import org.openrewrite.DataTable;
@@ -12,7 +11,6 @@ public class SpringBootScanReport extends DataTable<SpringBootScanReport.Row> {
         super(recipe, "Spring Boot scanning report", "Record occurences of the Spring Boot annotations, etc. discovered");
     }
 
-    @Value
     public static class Row {
         @Column(displayName = "Name",
             description = "Fully qualified name of the symbol.")
@@ -21,5 +19,18 @@ public class SpringBootScanReport extends DataTable<SpringBootScanReport.Row> {
         @Column(displayName = "Position",
             description = "Position. TODO")
         String position;
+
+        public Row(String name, String position) {
+            this.name = name;
+            this.position = position;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getPosition() {
+            return position;
+        }
     }
 }

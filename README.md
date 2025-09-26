@@ -68,12 +68,14 @@ Analyze a project for migration
   
 ...  
 
+cd migration-tool
 mvn quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
 ```
 
 To avoid to pass the arguments to the command, you can use the "default" [application.properties](src/main/resources/application.properties) and just pass the path of the application to be analyzed
 
 ```shell
+cd migration-tool
 mvn quarkus:dev -Dquarkus.args="analyze ./applications/spring-boot-todo-app"
 ```
 
@@ -83,17 +85,20 @@ If you want to populate an analysis report (kind of migration) then add the para
 name: `analysing-report_yyyy-mm-dd_hh:mm.json` will be generated within the project scanned
 
 ```shell
+cd migration-tool
 mvn quarkus:dev -Dquarkus.args="analyze ./applications/spring-boot-todo-app o json"
 ```
 
 ## Transform your application
 
 ```shell
+ cd migration-tool
 mvn quarkus:dev -Dquarkus.args="transform ./applications/spring-boot-todo-app"
 ```
 
 The commands can also be executed using the jar file
 ```shell
+cd migration-tool
 java -jar target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app
 java -jar target/quarkus-app/quarkus-run.jar transform ./applications/spring-boot-todo-app
 ```
