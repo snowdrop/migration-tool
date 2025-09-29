@@ -76,6 +76,7 @@ The poc has been designed using the following technology:
 - [Quarkus and Picocli](https://quarkus.io/guides/picocli) to manage the CLI part 
 - [konveyor jdt language server](https://github.com/konveyor/java-analyzer-bundle) to scan the java files to find using a rule definition: an annotation, import, method, etc
 - [Openrewrite recipe](https://docs.openrewrite.org/concepts-and-explanations/recipes) to execute using the `maven rewrite` goal the transformation as defined part of the rule's instructions
+- The launch of the jdt-ls server like the maven openrewrite's goal command are executed as OS processes using Java `ProcessBuilder`.
 
 **Remark**: The rule engine of this PoC is pretty basic and only translate the YAML `java.referenced` value to the corresponding `json request` needed to execute the JSON-RPC call with the command [io.konveyor.tackle.RuleEntry](https://github.com/konveyor/java-analyzer-bundle/blob/b387834212adb6271a233efe310e6c3e0b113029/java-analyzer-bundle.core/src/main/java/io/konveyor/tackle/core/internal/SampleDelegateCommandHandler.java#L47-L53).
 
