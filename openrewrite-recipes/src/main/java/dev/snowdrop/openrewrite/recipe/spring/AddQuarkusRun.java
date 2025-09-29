@@ -6,9 +6,12 @@ import org.openrewrite.TreeVisitor;
 import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.JavaParser;
 import org.openrewrite.java.JavaTemplate;
+import org.openrewrite.java.MethodMatcher;
 import org.openrewrite.java.tree.J;
 
 public class AddQuarkusRun extends Recipe {
+
+    private static final MethodMatcher QUARKUS_MAIN_RUN_MATCHER = new MethodMatcher("io.quarkus.runtime.Quarkus run()");
 
     @Override
     public String getDisplayName() {
@@ -37,16 +40,18 @@ public class AddQuarkusRun extends Recipe {
         @Override
         public J.MethodInvocation visitMethodInvocation(J.MethodInvocation method, ExecutionContext ctx) {
             J.MethodInvocation m = super.visitMethodInvocation(method, ctx);
-            if (! m.getArguments().isEmpty() && m.getArguments().size() > 1) {
-                maybeAddImport("io.quarkus.runtime.Quarkus");
-                return JavaTemplate.builder("Quarkus.run(#{any(java.lang.String[])})")
-                    .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
-                    .imports("io.quarkus.runtime.Quarkus")
-                    .build()
-                    .apply(getCursor(), m.getCoordinates().replace(), m.getArguments().get(1));
-            } else {
-                return m;
+
+            if (QUARKUS_MAIN_RUN_MATCHER.matches(method)) {
+                if (! m.getArguments().isEmpty() && m.getArguments().size() > 1) {
+                    maybeAddImport("io.quarkus.runtime.Quarkus");
+                    return JavaTemplate.builder("Quarkus.run(#{any(java.lang.String[])})")
+                        .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
+                        .imports("io.quarkus.runtime.Quarkus")
+                        .build()
+                        .apply(getCursor(), m.getCoordinates().replace(), m.getArguments().get(1));
+                }
             }
+            return m;
         }
     }
 }
