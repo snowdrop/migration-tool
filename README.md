@@ -192,11 +192,33 @@ mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/sprin
 
 ## Transform your application
 
+Now that we have a migration plan (aka list of instructions to be executed by a provider like openrewrite), we can now execute the command transform
+with or without the `dryRun` mode.
+
 ```shell
-mvn -pl migration-tool quarkus:dev -Dquarkus.args="transform ./applications/spring-boot-todo-app"
+mvn -pl migration-tool quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app --dry-run"
 ```
 
-The commands can also be executed using the jar file. Create, in this case, an `.env` file to configure properly the jdt, rules and workspace properties
+Log of the command executed 
+```text
+2025-09-29 13:03:20,735 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) ✅ Starting transformation for project at: /Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/spring-boot-todo-app
+2025-09-29 13:03:20,739 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) 📄 Loading migration tasks from: analysing-report_2025-09-26_14:05.json
+2025-09-29 13:03:20,879 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) 📋 Found 3 migration tasks to process
+2025-09-29 13:03:20,880 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) 🔄 Processing migration task: springboot-annotations-notfound-00000
+2025-09-29 13:03:20,881 WARN  [dev.sno.com.TransformCommand] (Quarkus Main Thread)    ⚠️  No OpenRewrite instructions found for task, skipping
+2025-09-29 13:03:20,882 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) 🔄 Processing migration task: springboot-annotations-to-quarkus-00000
+2025-09-29 13:03:28,091 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread)    ✅ OpenRewrite execution completed successfully
+2025-09-29 13:03:28,092 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) 🔄 Processing migration task: springboot-import-to-quarkus-00000
+2025-09-29 13:03:28,093 WARN  [dev.sno.com.TransformCommand] (Quarkus Main Thread)    ⚠️  No OpenRewrite instructions found for task, skipping
+2025-09-29 13:03:28,094 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) ----------------------------------------
+2025-09-29 13:03:28,095 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) --- Elapsed time: 7359 ms ---
+2025-09-29 13:03:28,096 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) ----------------------------------------
+```
+
+**Remark**: If you use the `--dry-run` parameter, then openrewrite will generate a `rewrite.patch` file under the scanned project: `target/rewrite` instead of changing the code directly !
+
+
+**Remark**: The commands can also be executed using the jar file. Create in this case, an `.env` file, to configure properly the jdt, rules and workspace properties
 
 ```properties
 # .env file content
