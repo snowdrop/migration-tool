@@ -11,21 +11,22 @@ This project demonstrates how we could manage end-to-end the migration of a Java
 ```mermaid
 flowchart TD
     A[Rule Definition] --> B[Scan Code]
-    B --> C{Results?}
-    C -->|Empty| D[No Action]
-    C -->|Matches| E[Generate Report]
-    E --> F{Provider}
-    F -->|Manual| G[Manual Tasks]
-    F -->|AI| H[AI Transform]
-    F -->|OpenRewrite| I[OR Recipe]
-    G --> J[Migrated Code]
-    H --> J
-    I --> J
+    B --> C[Analysis report / Migration plan]
+    C --> D{Results?}
+    D -->|Empty| E[No Action]
+    D -->|Matches| F[Generate Report]
+    F --> G{Provider}
+    G -->|User| H[Execute manual Tasks]
+    G -->|AI| I[Prompt AI augmented messages]
+    G -->|OpenRewrite| J[Apply Recipe]
+    H --> K[Migrated Code]
+    I --> K
+    J --> K
 
     style A fill:#e1f5fe
     style C fill:#fff3e0
     style E fill:#f3e5f5
-    style J fill:#e8f5e8
+    style K fill:#e8f5e8
     style F fill:#fff8e1
 ```
 
