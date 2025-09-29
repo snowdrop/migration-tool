@@ -85,6 +85,10 @@ The poc has been designed using the following technology:
 - Check what [spring-migrator-tool](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-support-boot/src/main/resources/recipes/initialize-spring-boot-migration.yaml) did to reuse some ideas to configure the instructions part of a rule using Actions. The [action](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-core/src/main/java/org/springframework/sbm/build/migration/actions/AddMavenDependencyManagementAction.java)'s definition is used as input to apply the corresponding openrewrite's [recipe](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-core/src/main/java/org/springframework/sbm/build/impl/OpenRewriteMavenBuildFile.java#L376).
 - Investigate if the language server could be replaced using Openrewrite concepts: [searchResult](https://docs.openrewrite.org/concepts-and-explanations/markers#searchresult)'s marker and [DataTable](https://docs.openrewrite.org/authoring-recipes/data-tables#writing-a-recipe-that-produces-a-data-table)
 
+## Requirements
+
+- Java 21 installed and Maven 3.9
+
 ## Setup
 
 First, compile the project
@@ -105,32 +109,10 @@ podman cp $ID:/jdtls ./jdt/konveyor-jdtls
 
 **optional**: Copy the `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/java-analyzer-bundle.core-1.0.0-SNAPSHOT.jarjava-analyzer-bundle.core-1.0.0-SNAPSHOT.jar` to the `./lib/` folder of this project to use it as dependency (to access the code) as it is not published on a maven repository server !
 
-### Trick to path the eclipse osgi server
 
-Here is the trick to do to add a bundle to the OSGI jdt-ls server. This step is optional as we will pass the bundle path as initialization parameter to the language server !
+## Scan and analyze
 
-Edit the `config.ini` file corresponding to your architecture: mac, linux, mac_arm under the folder konveyor-jdtls/config_<ARCH>
-
-Modify within the config.ini file the `osgi.bundles` property and include after the `org.apache.commons.lang3...` jar the BundleSymbolicName of: java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar
-```text
-osgi.bundles=...org.apache.commons.lang3_3.14.0.jar@4,reference\:file\:java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar@2,...
-```
-
-Copy the java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar file from the path `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/` to the `plugins` folder
-
-## Download jdt-ls
-
-Alternatively, you can also download the [Eclipse JDT Language Server](https://github.com/eclipse-jdtls/eclipse.jdt.ls):
-
-```shell
-wget https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.50.0/jdt-language-server-1.50.0-202509041425.tar.gz > jdt-language-server-1.50.0.tar.gz
-mkdir jdt-ls
-tar -vxf jdt-language-server-1.50.0.tar.gz -C jdt-ls
-```
-
-## Start the language server and client using Quarkus CLI
-
-To execute a command (analyze, etc) using the Quarkus Picocli CLI, execute this command 
+To execute the command using the Quarkus Picocli CLI able to scan, analyze and generate the migration plan report (optional), execute this command 
 ```shell
 Usage: java-analyzer analyze [-v] [--jdt-ls-path=<jdtLsPath>]
                              [--jdt-workspace=<jdtWorkspace>] [-r=<rulesPath>]
@@ -147,17 +129,59 @@ Analyze a project for migration
   
 ...  
 
-cd migration-tool
-mvn quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
+mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
 ```
 
-To avoid to pass the arguments to the command, you can use the "default" [application.properties](src/main/resources/application.properties) and just pass the path of the application to be analyzed
+To avoid to pass the parameters to the command, you can use the "defaults" [application.properties](src/main/resources/application.properties) and just pass the path of the application to be analyzed
 
 ```shell
 mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app"
 ```
 
-You can check the log of the server from the parent folder within: `jdt/.jdt_workspace/.metadata/.log` !
+You can check the log of the language server from this folder: `jdt/.jdt_workspace/.metadata/.log` !
+
+During the execution of the command, you will be able to see within the terminal the log reporting the JSON responses like also a summary table
+```text
+2025-09-29 12:52:43,605 INFO  [dev.sno.ana.ser.LsSearchService] (ForkJoinPool.commonPool-worker-5) ==== CLIENT: --- Search Results found for rule: springboot-import-to-quarkus-00000.
+2025-09-29 12:52:43,606 INFO  [dev.sno.ana.ser.LsSearchService] (ForkJoinPool.commonPool-worker-5) ==== CLIENT: --- JSON response: [
+  {
+    "name": "org.springframework.boot.autoconfigure.SpringBootApplication",
+    "kind": 2.0,
+    "location": {
+      "uri": "file:///Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/spring-boot-todo-app/src/main/java/com/todo/app/AppApplication.java",
+      "range": {
+        "start": {
+          "line": 3.0,
+          "character": 7.0
+        },
+        "end": {
+          "line": 3.0,
+          "character": 67.0
+        }
+      }
+    },
+    "containerName": ""
+  }
+]
+...
+
+=== Code Analysis Results ===
+┌─────────────────────────────────────────────┬─────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                   Rule ID                   │Found│                                                       Information Details                                                        │
+├─────────────────────────────────────────────┼─────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│springboot-annotations-notfound-00000        │ No  │No symbols found                                                                                                                  │
+├─────────────────────────────────────────────┼─────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│springboot-annotations-to-quarkus-00000      │ Yes │Found SpringBootApplication at line 6, char: 1 - 22                                                                               │
+│                                             │     │file:///Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/spring-boot-todo-app/src/main/java/com/to│
+│                                             │     │do/app/AppApplication.java                                                                                                        │
+├─────────────────────────────────────────────┼─────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│springboot-import-to-quarkus-00000           │ Yes │Found org.springframework.boot.autoconfigure.SpringBootApplication at line 4, char: 7 - 67                                        │
+│                                             │     │file:///Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/spring-boot-todo-app/src/main/java/com/to│
+│                                             │     │do/app/AppApplication.java                                                                                                        │
+└─────────────────────────────────────────────┴─────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+```
 
 If you want to populate an analysis report (kind of migration plan) then pass the parameter `-o json` top the command. A json file having as
 name: `analysing-report_yyyy-mm-dd_hh:mm.json` will be generated within the project scanned
@@ -237,5 +261,29 @@ Before to run the server and client, configure the following system properties o
 
 ```shell
 mvn exec:java
+```
+
+### Trick to path the eclipse osgi server
+
+Here is the trick to do to add a bundle to the OSGI jdt-ls server. This step is optional as we will pass the bundle path as initialization parameter to the language server !
+
+Edit the `config.ini` file corresponding to your architecture: mac, linux, mac_arm under the folder konveyor-jdtls/config_<ARCH>
+
+Modify within the config.ini file the `osgi.bundles` property and include after the `org.apache.commons.lang3...` jar the BundleSymbolicName of: java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar
+```text
+osgi.bundles=...org.apache.commons.lang3_3.14.0.jar@4,reference\:file\:java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar@2,...
+```
+
+Copy the java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar file from the path `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/` to the `plugins` folder
+
+
+## Download jdt-ls
+
+Alternatively, you can also download the [Eclipse JDT Language Server](https://github.com/eclipse-jdtls/eclipse.jdt.ls):
+
+```shell
+wget https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.50.0/jdt-language-server-1.50.0-202509041425.tar.gz > jdt-language-server-1.50.0.tar.gz
+mkdir jdt-ls
+tar -vxf jdt-language-server-1.50.0.tar.gz -C jdt-ls
 ```
 
