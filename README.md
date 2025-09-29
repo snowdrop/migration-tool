@@ -58,6 +58,7 @@ The poc has been designed using the following technology:
 ## TODO
 
 - Check what [spring-migrator-tool](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-support-boot/src/main/resources/recipes/initialize-spring-boot-migration.yaml) did to reuse some ideas to configure the instructions part of a rule using Actions. The [action](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-core/src/main/java/org/springframework/sbm/build/migration/actions/AddMavenDependencyManagementAction.java)'s definition is used as input to apply the corresponding openrewrite's [recipe](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-core/src/main/java/org/springframework/sbm/build/impl/OpenRewriteMavenBuildFile.java#L376).
+- Investigate if the language server could be replaced using Openrewrite concepts: [searchResult](https://docs.openrewrite.org/concepts-and-explanations/markers#searchresult)'s marker and [DataTable](https://docs.openrewrite.org/authoring-recipes/data-tables#writing-a-recipe-that-produces-a-data-table)
 
 ## Setup
 
