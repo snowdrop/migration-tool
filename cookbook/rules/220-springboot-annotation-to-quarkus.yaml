@@ -25,7 +25,7 @@
             artifactIdPattern: spring-boot
             version: '[3.5,)'
         recipeList:
-          - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
+          - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMainAnnotation
           - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
         gav:
           - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
