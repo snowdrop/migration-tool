@@ -13,17 +13,22 @@ The rule represents per se the contract definition between what we would like to
 ```yaml
 - category: mandatory
   description: Replace the Spring Boot Application Annotation with QuarkusMain
-  effort: 1
   labels:
     - konveyor.io/source=springboot
     - konveyor.io/target=quarkus
-  links: []
+
   message: "Replace the Spring Boot Application Annotation with QuarkusMain"
   ruleID: springboot-annotations-to-quarkus-00000
+  
   when:
     java.referenced:
       location: ANNOTATION
       pattern: org.springframework.boot.autoconfigure.SpringBootApplication
+
+  # Order to apply the instructions against the flow
+  order: 2
+  
+  # New section added to help to transform properly the code !
   instructions:
     ai:
       - promptMessage: "Remove the org.springframework.boot.autoconfigure.SpringBootApplication annotation from the main Spring Boot Application class"
