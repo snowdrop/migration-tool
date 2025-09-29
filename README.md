@@ -8,7 +8,7 @@ This project demonstrates how we could manage end-to-end the migration of a Java
 
 The project uses the [Spring TODO](./applications/spring-boot-todo-app) example as the project to be analyzed using augmented [rules](./cookbook/rules).
 
-The rule represents per se the contract definition between what we would like to discover within the code source scanned: java, properties, xml, json, maven or gradle files and what a provider should do to properly transform the code. Ideally we should provide a list of instructions as presented hereafter and tight to the provider able to execute them manually, a well established technology as [openrewrite](https://docs.openrewrite.org/) or AI.
+The rule represents per se the contract definition between what we would like to discover within the code source scanned: java, properties, xml, json, maven or gradle files and what a provider should do to properly transform the code. Ideally we should provide a list of instructions as presented hereafter and tight to the provider able to execute them manually or using a well established technology as [openrewrite](https://docs.openrewrite.org/) or AI, etc ...
 
 ```yaml
 - category: mandatory
@@ -33,20 +33,27 @@ The rule represents per se the contract definition between what we would like to
     ai:
       - promptMessage: "Remove the org.springframework.boot.autoconfigure.SpringBootApplication annotation from the main Spring Boot Application class"
     manual:
-     - todo: "Remove the org.springframework.boot.autoconfigure.SpringBootApplication annotation from the main Spring Boot Application class"
+      - todo: "Remove the org.springframework.boot.autoconfigure.SpringBootApplication annotation from the main Spring Boot Application class"
     openrewrite:
-     - name: Migrate Spring Boot to Quarkus
-       preconditions:
-         - name: org.openrewrite.java.dependencies.search.ModuleHasDependency
-           groupIdPattern: org.springframework.boot
-           artifactIdPattern: spring-boot
-           version: '[3.5,)'
-       recipeList:
-         - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
-         - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
-       gav:
-         - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
+      - name: Migrate Spring Boot to Quarkus
+        preconditions:
+          - name: org.openrewrite.java.dependencies.search.ModuleHasDependency
+            groupIdPattern: org.springframework.boot
+            artifactIdPattern: spring-boot
+            version: '[3.5,)'
+        recipeList:
+          - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
+          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
+        gav:
+          - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
 ```
+
+The poc has been designed using the following technology:
+- [Quarkus and Picocli](https://quarkus.io/guides/picocli) to manage the CLI part 
+- [konveyor jdt language server](https://github.com/konveyor/java-analyzer-bundle) to scan the java files to find using a rule definition: an annotation, import, method, etc
+- [Openrewrite recipe](https://docs.openrewrite.org/concepts-and-explanations/recipes) to execute using the `maven rewrite` goal the transformation as defined part of the rule's instructions
+
+**Remark**: The rule engine of this PoC is pretty basic and only translate the YAML `java.referenced` value to the corresponding `json request` needed to execute the JSON-RPC call with the command [io.konveyor.tackle.RuleEntry](https://github.com/konveyor/java-analyzer-bundle/blob/b387834212adb6271a233efe310e6c3e0b113029/java-analyzer-bundle.core/src/main/java/io/konveyor/tackle/core/internal/SampleDelegateCommandHandler.java#L47-L53).
 
 ## TODO
 
