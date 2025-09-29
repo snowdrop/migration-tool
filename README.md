@@ -14,8 +14,8 @@ flowchart TD
     B --> C[Analysis report / Migration plan]
     C --> D{Results?}
     D -->|Empty| E[No Action]
-    D -->|Matches| F[Generate Report]
-    F --> G{Provider}
+    D -->|Matches| F[Select the provider]
+    F --> G{Provider?}
     G -->|User| H[Execute manual Tasks]
     G -->|AI| I[Prompt AI augmented messages]
     G -->|OpenRewrite| J[Apply Recipe]
