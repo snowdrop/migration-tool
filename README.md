@@ -272,7 +272,7 @@ mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
 
 ## Deprecated
 
-## Start using the JdtlsFactory Main application
+### Start using the JdtlsFactory Main application
 
 Before to run the server and client, configure the following system properties or override the Quarkus properties[application.properties](src/main/resources/application.properties):
 - `JDT_WKS`: Path of the folder containing the jdt-ls workspace, .metadata and log. Default: `./jdt/`
@@ -298,8 +298,7 @@ osgi.bundles=...org.apache.commons.lang3_3.14.0.jar@4,reference\:file\:java-anal
 
 Copy the java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar file from the path `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/` to the `plugins` folder
 
-
-## Download jdt-ls
+### Download jdt-ls
 
 Alternatively, you can also download the [Eclipse JDT Language Server](https://github.com/eclipse-jdtls/eclipse.jdt.ls):
 
