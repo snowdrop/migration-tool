@@ -8,6 +8,41 @@ This project demonstrates how we could manage end-to-end the migration of a Java
 
 The project uses the [Spring TODO](./applications/spring-boot-todo-app) example as the project to be analyzed using augmented [rules](./cookbook/rules).
 
+The rule represents per se the contract definition between what we would like to discover within the code source scanned: java, properties, xml, json, maven or gradle files and what a provider should do to properly transform the code. Ideally we should provide a list of instructions as presented hereafter and tight to the provider able to execute them manually, a well established technology as [openrewrite](https://docs.openrewrite.org/) or AI.
+
+```yaml
+- category: mandatory
+  description: Replace the Spring Boot Application Annotation with QuarkusMain
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "Replace the Spring Boot Application Annotation with QuarkusMain"
+  ruleID: springboot-annotations-to-quarkus-00000
+  when:
+    java.referenced:
+      location: ANNOTATION
+      pattern: org.springframework.boot.autoconfigure.SpringBootApplication
+  instructions:
+    ai:
+      - promptMessage: "Remove the org.springframework.boot.autoconfigure.SpringBootApplication annotation from the main Spring Boot Application class"
+    manual:
+     - todo: "Remove the org.springframework.boot.autoconfigure.SpringBootApplication annotation from the main Spring Boot Application class"
+    openrewrite:
+     - name: Migrate Spring Boot to Quarkus
+       preconditions:
+         - name: org.openrewrite.java.dependencies.search.ModuleHasDependency
+           groupIdPattern: org.springframework.boot
+           artifactIdPattern: spring-boot
+           version: '[3.5,)'
+       recipeList:
+         - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
+         - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
+       gav:
+         - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
+```
+
 ## TODO
 
 - Check what [spring-migrator-tool](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-support-boot/src/main/resources/recipes/initialize-spring-boot-migration.yaml) did to reuse some ideas to configure the instructions part of a rule using Actions. The [action](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-core/src/main/java/org/springframework/sbm/build/migration/actions/AddMavenDependencyManagementAction.java)'s definition is used as input to apply the corresponding openrewrite's [recipe](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-core/src/main/java/org/springframework/sbm/build/impl/OpenRewriteMavenBuildFile.java#L376).
