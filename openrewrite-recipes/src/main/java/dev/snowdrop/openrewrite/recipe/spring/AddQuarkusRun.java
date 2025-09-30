@@ -61,8 +61,8 @@ public class AddQuarkusRun extends Recipe {
         }
 
         @Override
-        public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration methodDeclaration, ExecutionContext ctx) {
-            J.MethodDeclaration m = super.visitMethodDeclaration(methodDeclaration, ctx);
+        public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration m, ExecutionContext ctx) {
+            //J.MethodDeclaration m = super.visitMethodDeclaration(methodDeclaration, ctx);
 
             JavaType.Method mType = m.getMethodType();
 
@@ -88,7 +88,7 @@ public class AddQuarkusRun extends Recipe {
                         .builder("Quarkus.run();") // java.lang.String[]
                         .contextSensitive()
                         .build()
-                        .apply(getCursor(),m.getCoordinates().replaceBody());
+                        .apply(getCursor(),m.getCoordinates().replaceBody(),"args");
                 }
             }
             return m;

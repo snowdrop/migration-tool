@@ -39,8 +39,9 @@ public record Rule(
 
     public record Openrewrite(
         String name,
+        String description,
         Precondition[] preconditions,
-        String[] recipeList,
+        List<Object> recipeList,
         String[] gav
     ) {}
 
