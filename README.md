@@ -252,9 +252,9 @@ To execute several recipes aggregated in a yaml file placed at the root of the p
 ```shell
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
   -Drewrite.activeRecipes=dev.snowdrop.text.SearchText,dev.snowdrop.java.StandardJavaConventions,dev.snowdrop.java.spring.SearchSpringBootAnnotation \
-  -Drewrite.recipeArtifactCoordinates=org.openrewrite:rewrite-java:8.61.1,org.openrewrite.recipe:rewrite-java-dependencies:1.42.0,dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT \
+  -Drewrite.recipeArtifactCoordinates=org.openrewrite:rewrite-java:8.62.4,org.openrewrite.recipe:rewrite-java-dependencies:1.42.0,dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT \
   -Drewrite.exportDatatables=true \
-  -Drewrite.configLocation=my-rewrite.yml
+  -Drewrite.configLocation=my-rewrite-1.yml
 ...
 [WARNING] These recipes would make changes to applications/spring-boot-todo-app/my-rewrite.yml:
 [WARNING]     dev.snowdrop.text.SearchText
@@ -264,6 +264,24 @@ mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
 [WARNING] Estimate time saved: 40m
 [WARNING] Run 'mvn rewrite:run' to apply the recipes.  
 ```
+
+Command using another YAML example
+```shell
+mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
+  -Drewrite.activeRecipes=dev.snowdrop.java.spring.SearchSpringBootAnnotation \
+  -Drewrite.recipeArtifactCoordinates=org.openrewrite:rewrite-java:8.62.4,org.openrewrite.recipe:rewrite-java-dependencies:1.42.0,dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT \
+  -Drewrite.exportDatatables=true \
+  -Drewrite.configLocation=my-rewrite-2.yml
+```
+
+Example where we set the parameters of the recipe using the `options`. Until now, it is only possible to pass the options of a recipe and not a list !!
+```shell
+mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
+  -Drewrite.activeRecipes=org.openrewrite.java.ReplaceAnnotation \
+  -Drewrite.option=ReplaceAnnotation.annotationPatternToReplace="@org.springframework.boot.autoconfigure.SpringBootApplication",annotationTemplateToInsert="@io.quarkus.runtime.annotations.QuarkusMain" \
+  -Drewrite.recipeArtifactCoordinates=org.openrewrite:rewrite-java:8.62.4,org.openrewrite.recipe:rewrite-java-dependencies:1.42.0
+```
+
 
 ## TODO
 
