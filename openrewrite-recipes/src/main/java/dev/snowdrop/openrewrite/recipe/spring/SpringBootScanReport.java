@@ -8,7 +8,7 @@ import org.openrewrite.Recipe;
 public class SpringBootScanReport extends DataTable<SpringBootScanReport.Row> {
 
     public SpringBootScanReport(@Nullable Recipe recipe) {
-        super(recipe, "Spring Boot scanning report", "Record occurences of the Spring Boot annotations, etc. discovered");
+        super(recipe, "Spring Boot scanning report", "Record occurrences of the Spring Boot annotations, etc. discovered");
     }
 
     public static class Row {
