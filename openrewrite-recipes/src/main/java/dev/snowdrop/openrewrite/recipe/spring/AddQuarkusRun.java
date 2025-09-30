@@ -5,14 +5,31 @@ import org.openrewrite.Recipe;
 import org.openrewrite.TreeVisitor;
 import org.openrewrite.java.AnnotationMatcher;
 import org.openrewrite.java.JavaIsoVisitor;
-import org.openrewrite.java.JavaParser;
 import org.openrewrite.java.JavaTemplate;
 import org.openrewrite.java.tree.J;
 import org.openrewrite.java.tree.JavaType;
-import org.openrewrite.java.tree.Statement;
 
 import java.util.List;
+/*
+   The purpose of this recipe is to:
+   - Find the Java Class having as Annotation class: @QuarkusMain
+   - Check if the class includes a public void static main() method
+   - Use the main method arguments to pass them to the Quarkus.run(); method to be included within the body of the method
+   - Add the import package: io.quarkus.runtime.Quarkus
 
+   package com.todo.app;
+
+   import io.quarkus.runtime.annotations.QuarkusMain;
+   import io.quarkus.runtime.Quarkus;
+
+   @QuarkusMain
+   public class AppApplication {
+     public static void main(String[] args) {
+            Quarkus.run(args);
+     }
+   }
+
+ */
 public class AddQuarkusRun extends Recipe {
 
     private static final String QUARKUS_MAIN_ANNOTATION = "@io.quarkus.runtime.annotations.QuarkusMain";
