@@ -1,53 +1,99 @@
 package org.openrewrite.quarkus.spring;
 
+import dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun;
+import dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.Parser;
 import org.openrewrite.java.JavaParser;
-import org.openrewrite.test.RecipeSpec;
+import org.openrewrite.java.RemoveMethodInvocations;
 import org.openrewrite.test.RewriteTest;
+
 import static org.openrewrite.java.Assertions.java;
 
 public class ReplaceSpringBootApplicationAnnotationTest implements RewriteTest {
-    @Override
-    public void defaults(RecipeSpec spec) {
-        spec.recipeFromResource("/META-INF/rewrite/spring-boot-to-quarkus.yml","dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMainAnnotation")
-            .parser((Parser.Builder) JavaParser.fromJavaVersion().classpath("spring-data","spring-beans","spring-context","spring-boot").logCompilationWarningsAndErrors(true));
-    }
 
-    // Replace the @SpringBootApplication annotation with @QuarkusMain
-    // Replace SpringApplication.run() with Quarkus.run()
     @Test
-    void shouldReplaceAnnotationAndRunMethod() {
+    void ShouldReplaceAnnotationAndMain() {
+        rewriteRun(spec -> spec.recipes(
+            new ReplaceSpringBootApplicationWithQuarkusMainAnnotation(),
+            new RemoveMethodInvocations("org.springframework.boot.SpringApplication run(..)"),
+            new AddQuarkusRun()),
+            java(
+      """
+             package com.todo.app;
+             
+             import org.springframework.boot.SpringApplication;
+             import org.springframework.boot.autoconfigure.SpringBootApplication;
+             
+             @SpringBootApplication
+             public class AppApplication {
+              	public static void main(String[] args) {
+                       SpringApplication.run(AppApplication.class, args);
+               	}
+             }
+             """,
+        """
+             package com.todo.app;
+             
+             import io.quarkus.runtime.annotations.QuarkusMain;
+             
+             @QuarkusMain
+             public class AppApplication {
+               public static void main(String[] args) {
+                      Quarkus.run(args);
+               }
+             }
+             """
+            )
+        );
+    }
+    /*
+     Replace the @SpringBootApplication annotation with @QuarkusMain
+     using a rewrite yaml file having as definition:
+     preconditions:
+       - org.openrewrite.maven.search.ParentPomInsight:
+           groupIdPattern: org.springframework.boot
+           artifactIdPattern: spring-boot-starter-parent
+           version: 3.x
+     recipeList:
+       - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
+    */
+    @Test
+    void shouldReplaceClassAnnotationUsingYamlRecipe() {
         rewriteRun(
+            spec -> spec.recipeFromResource("/META-INF/rewrite/spring-boot-to-quarkus.yml", "dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation")
+                .parser((Parser.Builder) JavaParser.fromJavaVersion()
+                    .classpath(  "spring-context","spring-boot")
+                    .logCompilationWarningsAndErrors(true)),
             java(
                 // The Java source file before the recipe is run:
                 """
-                package com.todo.app;
-                
-                import org.springframework.boot.SpringApplication;
-                import org.springframework.boot.autoconfigure.SpringBootApplication;
-                
-                @SpringBootApplication
-                 public class AppApplication {
-                 	public static void main(String[] args) {
-                         SpringApplication.run(AppApplication.class, args);
-                 	}
-                }
-                """,
+                    package com.todo.app;
+                    
+                    import org.springframework.boot.SpringApplication;
+                    import org.springframework.boot.autoconfigure.SpringBootApplication;
+                    
+                    @SpringBootApplication
+                     public class AppApplication {
+                     	public static void main(String[] args) {
+                             SpringApplication.run(AppApplication.class, args);
+                     	}
+                    }
+                    """,
                 // The expected Java source file after the recipe is run:
                 """
-                package com.todo.app;
-                
-                import io.quarkus.runtime.annotations.QuarkusMain;
-                import org.springframework.boot.SpringApplication;
-                
-                @QuarkusMain
-                 public class AppApplication {
-                 	public static void main(String[] args) {
-                         SpringApplication.run(AppApplication.class, args);
-                 	}
-                }
-                """
+                    package com.todo.app;
+                    
+                    import io.quarkus.runtime.annotations.QuarkusMain;
+                    import org.springframework.boot.SpringApplication;
+                    
+                    @QuarkusMain
+                     public class AppApplication {
+                     	public static void main(String[] args) {
+                             SpringApplication.run(AppApplication.class, args);
+                     	}
+                    }
+                    """
             )
         );
     }
