@@ -61,8 +61,8 @@ public class AppApplication {
     java.referenced:
       location: ANNOTATION
       pattern: org.springframework.boot.autoconfigure.SpringBootApplication
-  order: 1
-  instructions:
+  order: 1 # New field to allow to sort the instructions to be executed
+  instructions: # New section containing the provider's instructions
     ai:
       - promptMessage: "SpringBoot to Quarkus"
     manual:
