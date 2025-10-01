@@ -19,6 +19,7 @@ public record Rule(
     String lsCmd,
     When when,
     @Deprecated @JsonProperty("actions") List<String> actions,
+    int order,
     Instruction instructions
 ) {
 

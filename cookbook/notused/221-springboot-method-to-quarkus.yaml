@@ -1,0 +1,35 @@
+- category: mandatory
+  customVariables: []
+  description: Remove the statement SpringApplication.run() from the main void method
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "Remove the statement SpringApplication.run() from the main void method."
+  ruleID: springboot-method-to-quarkus-00000
+  when:
+    java.referenced:
+      location: ANNOTATION
+      pattern: org.springframework.boot.autoconfigure.SpringBootApplication
+  order: 2
+  instructions:
+    ai:
+      - promptMessage: "Remove the statement org.springframework.boot.SpringApplication.SpringApplication.run(); from the main void method"
+    manual:
+      - todo: "Remove the statement org.springframework.boot.SpringApplication.SpringApplication.run(); from the main void method."
+    openrewrite:
+      - name: Remove the statement SpringApplication.run()
+        description: Remove the statement SpringApplication.run()
+        preconditions:
+          - name: org.openrewrite.java.dependencies.search.ModuleHasDependency
+            groupIdPattern: org.springframework.boot
+            artifactIdPattern: spring-boot
+            version: '[3.5,)'
+        recipeList:
+          #- dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
+          - org.openrewrite.java.RemoveMethodInvocations:
+              methodPattern: "org.springframework.boot.SpringApplication run(..)"
+          #- dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
+        gav:
+          - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT

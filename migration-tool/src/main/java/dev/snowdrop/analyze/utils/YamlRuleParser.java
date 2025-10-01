@@ -11,6 +11,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class YamlRuleParser {
@@ -49,15 +50,18 @@ public class YamlRuleParser {
         }
 
         List<Rule> rules = new ArrayList<>();
-
         if (recursive) {
             parseRulesRecursively(folderPath, rules);
         } else {
             parseRulesFromDirectFolder(folderPath, rules);
         }
 
-        logger.debugf("Parsed {} rules from folder: {}", rules.size(), folderPath);
-        return rules;
+        List<Rule> sortedRules = rules.stream()
+            .sorted(Comparator.comparingInt(Rule::order))
+            .toList();
+
+        logger.debugf("Parsed {} rules from folder: {}", sortedRules.size(), folderPath);
+        return sortedRules;
     }
 
     private static void parseRulesRecursively(Path folderPath, List<Rule> rules) throws IOException {

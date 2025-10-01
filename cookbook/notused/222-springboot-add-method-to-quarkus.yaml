@@ -1,0 +1,35 @@
+- category: mandatory
+  customVariables: []
+  description: Add the Quarkus.run() method within the main void method
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "Add the Quarkus.run() method within the main void method."
+  ruleID: springboot-add-method-to-quarkus-00000
+  when:
+    java.referenced:
+      location: ANNOTATION
+      pattern: org.springframework.boot.autoconfigure.SpringBootApplication
+  order: 3
+  instructions:
+    ai:
+      - promptMessage: "Add the io.quarkus.runtime.Quarkus.run() method within the main void method and pass the String[] args as parameter"
+    manual:
+      - todo: "Add the io.quarkus.runtime.Quarkus.run() method within the main void method and pass the String[] args as parameter."
+    openrewrite:
+      - name: Add the io.quarkus.runtime.Quarkus.run() method within the main void method and pass the String[] args as parameter
+        description: Add the io.quarkus.runtime.Quarkus.run() method within the main void method and pass the String[] args as parameter
+        preconditions:
+          - name: org.openrewrite.java.dependencies.search.ModuleHasDependency
+            groupIdPattern: org.springframework.boot
+            artifactIdPattern: spring-boot
+            version: '[3.5,)'
+        recipeList:
+          #- dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
+          #- org.openrewrite.java.RemoveMethodInvocations:
+          #    methodPattern: "org.springframework.boot.SpringApplication run(..)"
+          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
+        gav:
+          - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT

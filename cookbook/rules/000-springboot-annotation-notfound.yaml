@@ -1,4 +1,4 @@
-- category: mandatory
+- category: optional
   customVariables: []
   description: Remove the SpringBoot @SpringBootApplication annotation
   effort: 1

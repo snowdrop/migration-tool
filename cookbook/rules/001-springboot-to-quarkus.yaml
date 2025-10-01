@@ -1,25 +1,26 @@
 - category: mandatory
   customVariables: []
-  description: Replace the Spring Boot Application Annotation with QuarkusMain
+  description: SpringBoot to Quarkus
   effort: 1
   labels:
-  - konveyor.io/source=springboot
-  - konveyor.io/target=quarkus
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
   links: []
-  message: "Replace the Spring Boot Application Annotation with QuarkusMain."
-  ruleID: springboot-annotations-to-quarkus-00000
+  message: "SpringBoot to Quarkus."
+  ruleID: springboot-to-quarkus-00000
   when:
     java.referenced:
       location: ANNOTATION
       pattern: org.springframework.boot.autoconfigure.SpringBootApplication
+  order: 1
   instructions:
     ai:
-      - promptMessage: "Remove the org.springframework.boot.autoconfigure.SpringBootApplication annotation from the main Spring Boot Application class"
+      - promptMessage: "SpringBoot to Quarkus"
     manual:
-      - todo: "Remove the org.springframework.boot.autoconfigure.SpringBootApplication annotation from the main Spring Boot Application class"
+      - todo: "See openrewrite instructions"
     openrewrite:
-      - name: Migrate Spring Boot to Quarkus
-        description: Migrate Spring Boot to Quarkus
+      - name: SpringBoot to Quarkus
+        description: Move the SpringBootApplication annotation to QuarkusMain, Remove the statement SpringApplication.run(), Add the io.quarkus.runtime.Quarkus.run() method within the main void method and pass the String[] args as parameter"
         preconditions:
           - name: org.openrewrite.java.dependencies.search.ModuleHasDependency
             groupIdPattern: org.springframework.boot

@@ -21,6 +21,7 @@ import java.nio.file.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
@@ -95,7 +96,16 @@ public class TransformCommand implements Runnable {
             ObjectMapper objectMapper = new ObjectMapper();
             MigrationTasksExport export = objectMapper.readValue(jsonFile.toFile(), MigrationTasksExport.class);
 
-            return export.migrationTasks();
+            LinkedHashMap<String, MigrationTask> sortedMigrationTasks = export.migrationTasks.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.comparingInt(task -> task.getRule().order())))
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    Map.Entry::getValue,
+                    (oldValue, newValue) -> oldValue,
+                    LinkedHashMap::new
+                ));
+
+            return sortedMigrationTasks;
 
         } catch (IOException e) {
             logger.errorf("❌ Failed to load migration tasks: %s", e.getMessage());
@@ -183,7 +193,7 @@ public class TransformCommand implements Runnable {
                             }
                         }
                     }
-                    // Check if the recipe object is a String when we process a parameter-less recipes)
+                    // Check if the recipe object is a String when we process a parameter-less recipes
                     else if (recipe instanceof String) {
                         String recipeName = (String) recipe;
                         buf.append("  - ").append(recipeName).append("\n");
@@ -193,10 +203,12 @@ public class TransformCommand implements Runnable {
                 throw new IllegalStateException("No recipes defined in OpenRewrite instruction, skipping");
             }
             logger.debug(buf.toString());
+
+            String rewriteYamlName = "";
             try {
-                // TODO : Review and improve how we write the file
+                rewriteYamlName = String.format("rewrite-%d.yml",rule.order());
                 Files.write(
-                    Path.of(projectPath.toString(), "rewrite.yml"),
+                    Path.of(projectPath.toString(), rewriteYamlName),
                     buf.toString().getBytes(),
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING);
@@ -204,10 +216,9 @@ public class TransformCommand implements Runnable {
                 e.printStackTrace();
             }
 
-            // String recipes = String.join(",", openrewrite.recipeList().toString());
             String gavs = String.join(",", openrewrite.gav());
 
-            boolean success = execMvnCmd(projectPath, compositeRecipeName, gavs);
+            boolean success = execMvnCmd(projectPath, compositeRecipeName, gavs, rewriteYamlName);
 
             if (success) {
                 logger.infof("   ✅ OpenRewrite execution completed successfully");
@@ -225,9 +236,13 @@ public class TransformCommand implements Runnable {
      * @param gavs Comma-separated list of maven GAV dependencies
      * @return true if the command executed successfully, false otherwise
      */
-    private boolean execMvnCmd(Path projectPath, String compositeRecipeName, String gavs) {
+    private boolean execMvnCmd(Path projectPath, String compositeRecipeName, String gavs, String rewriteYamlName) {
         try {
             List<String> command = new ArrayList<>();
+            //String outputDirectoryRewriteName = rewriteYamlName.substring(0, rewriteYamlName.lastIndexOf('.'));
+            String outputDirectoryRewriteName = "rewrite";
+            logger.infof("outputDirectoryRewriteName: %s",outputDirectoryRewriteName);
+
             command.add("mvn");
             command.add("-B");
             command.add("-e");
@@ -236,11 +251,10 @@ public class TransformCommand implements Runnable {
             command.add("-Drewrite.activeRecipes=" + compositeRecipeName);
             command.add("-Drewrite.recipeArtifactCoordinates=" + gavs);
             command.add("-Drewrite.exportDatatables=true");
-            command.add("-Drewrite.configLocation=rewrite.yml");
+            command.add(String.format("-DreportOutputDirectory=target/%s",outputDirectoryRewriteName));
+            command.add(String.format("-Drewrite.configLocation=%s",rewriteYamlName));
 
-            if (verbose) {
-                logger.infof("      Executing command: %s", String.join(" ", command));
-            }
+            logger.infof("      ==== Executing command: %s", String.join(" ", command));
 
             ProcessBuilder processBuilder = new ProcessBuilder(command);
             processBuilder.directory(projectPath.toFile());
