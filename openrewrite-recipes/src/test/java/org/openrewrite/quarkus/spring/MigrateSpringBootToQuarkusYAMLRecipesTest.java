@@ -3,16 +3,14 @@ package org.openrewrite.quarkus.spring;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.Parser;
 import org.openrewrite.java.JavaParser;
-import org.openrewrite.test.RecipeSpec;
 import org.openrewrite.test.RewriteTest;
 
 import static org.openrewrite.java.Assertions.java;
 
 public class MigrateSpringBootToQuarkusYAMLRecipesTest implements RewriteTest {
 
-
     /*
-     Replace the @SpringBootApplication annotation with @QuarkusMain
+     Replace the SpringBoot stuffs with Quarkus
      using a rewrite yaml file having as definition:
      preconditions:
        - org.openrewrite.maven.search.ParentPomInsight:
@@ -20,21 +18,23 @@ public class MigrateSpringBootToQuarkusYAMLRecipesTest implements RewriteTest {
            artifactIdPattern: spring-boot-starter-parent
            version: 3.x
      recipeList:
-       - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
+       - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
+       - org.openrewrite.java.RemoveMethodInvocations:
+           methodPattern: "org.springframework.boot.SpringApplication run(..)"
+       - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
     */
-
-    @Override
-    public void defaults(RecipeSpec spec) {
-        spec.recipeFromResource(
-                "/META-INF/rewrite/spring-boot-to-quarkus.yml",
-                "dev.snowdrop.openrewrite.recipe.spring.SpringBootToQuarkus");
-    }
 
     @Test
     void shouldReplaceClassAnnotationUsingYamlRecipe() {
-        rewriteRun(
+        rewriteRun(s -> s.recipeFromResource(
+                "/META-INF/rewrite/spring-boot-to-quarkus.yml",
+                "dev.snowdrop.openrewrite.recipe.spring.SpringBootToQuarkus")
+                .parser((Parser.Builder) JavaParser.fromJavaVersion()
+                    .classpath(  "spring-context","spring-boot")
+                    .logCompilationWarningsAndErrors(true))
+            ,
             java(
-                // The Java source file before the recipe is run:
+                // Before
                 """
                 package com.todo.app;
                 
@@ -48,17 +48,17 @@ public class MigrateSpringBootToQuarkusYAMLRecipesTest implements RewriteTest {
                  	}
                 }
                 """,
-                // The expected Java source file after the recipe is run:
+                // After
                 """
                 package com.todo.app;
                 
+                import io.quarkus.runtime.Quarkus;
                 import io.quarkus.runtime.annotations.QuarkusMain;
-                import org.springframework.boot.SpringApplication;
                 
                 @QuarkusMain
                 public class AppApplication {
                  	public static void main(String[] args) {
-                         SpringApplication.run(AppApplication.class, args);
+                         Quarkus.run(args);
                  	}
                 }
                 """
