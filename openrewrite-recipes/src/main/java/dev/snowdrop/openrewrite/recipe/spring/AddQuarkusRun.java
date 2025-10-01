@@ -54,9 +54,9 @@ public class AddQuarkusRun extends Recipe {
         return new SpringBootToQuarkusMainVisitor();
     }
 
-    public AnnotationMatcher quarkusMainAnnotationMatcher = new AnnotationMatcher(QUARKUS_MAIN_ANNOTATION);
-
     private class SpringBootToQuarkusMainVisitor extends JavaIsoVisitor<ExecutionContext> {
+
+        public AnnotationMatcher quarkusMainAnnotationMatcher = new AnnotationMatcher(QUARKUS_MAIN_ANNOTATION);
 
         @Override
         public J.CompilationUnit visitCompilationUnit(J.CompilationUnit cu, ExecutionContext ctx) {
@@ -104,21 +104,15 @@ public class AddQuarkusRun extends Recipe {
             return m;
         }
 
-        @Override
-        public J.MethodInvocation visitMethodInvocation(J.MethodInvocation method, ExecutionContext ctx) {
-            J.MethodInvocation m = super.visitMethodInvocation(method, ctx);
-            return m;
-        }
-    }
-
-    private boolean hasAnnotation(List<J.Annotation> annotations, String annotationName) {
-        for (J.Annotation a : annotations) {
-            System.out.println("Class annotation name: " + a.getSimpleName());
-            if (quarkusMainAnnotationMatcher.matches(a)) {
-                return true;
+        private boolean hasAnnotation(List<J.Annotation> annotations, String annotationName) {
+            for (J.Annotation a : annotations) {
+                System.out.println("Class annotation name: " + a.getSimpleName());
+                if (quarkusMainAnnotationMatcher.matches(a)) {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
     }
 
     private Parameter findParameter(List<Statement> parameters, int pos) {
@@ -137,6 +131,5 @@ public class AddQuarkusRun extends Recipe {
     public record Parameter(
         String name,
         String type
-    ) {
-    }
+    ) {}
 }
