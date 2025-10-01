@@ -93,6 +93,9 @@ public class AddQuarkusRun extends Recipe {
 
                     System.out.println("Body: " + m.getBody().print());
 
+                    maybeAddImport("io.quarkus.runtime.Quarkus");
+                    maybeAddImport("io.quarkus.runtime.annotations.QuarkusMain");
+
                     return JavaTemplate
                         .builder("Quarkus.run(#{any(java.lang.String[])});")
                         .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))

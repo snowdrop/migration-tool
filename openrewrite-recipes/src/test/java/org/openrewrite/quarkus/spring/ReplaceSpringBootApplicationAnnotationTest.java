@@ -43,9 +43,9 @@ public class ReplaceSpringBootApplicationAnnotationTest implements RewriteTest {
                     
                     @QuarkusMain
                     public class AppApplication {
-                      public static void main(String[] args) {
-                             Quarkus.run(args);
-                      }
+                       public static void main(String[] args) {
+                              Quarkus.run(args);
+                       }
                     }
                     """
             )
