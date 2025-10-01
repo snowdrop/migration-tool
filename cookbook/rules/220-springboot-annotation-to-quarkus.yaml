@@ -6,7 +6,7 @@
   - konveyor.io/source=springboot
   - konveyor.io/target=quarkus
   links: []
-  message: "Replace the Spring Boot Application Annotation with QuarkusMain.."
+  message: "Replace the Spring Boot Application Annotation with QuarkusMain."
   ruleID: springboot-annotations-to-quarkus-00000
   when:
     java.referenced:
