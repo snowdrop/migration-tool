@@ -1,12 +1,12 @@
 - category: mandatory
   customVariables: []
-  description: Replace the Spring Boot Application Annotation with QuarkusMain and add Quarkus.run
+  description: Replace the Spring Boot Application Annotation with QuarkusMain
   effort: 1
   labels:
   - konveyor.io/source=springboot
   - konveyor.io/target=quarkus
   links: []
-  message: "Replace the Spring Boot Application Annotation with QuarkusMain and add Quarkus.run."
+  message: "Replace the Spring Boot Application Annotation with QuarkusMain.."
   ruleID: springboot-annotations-to-quarkus-00000
   when:
     java.referenced:
@@ -26,10 +26,9 @@
             artifactIdPattern: spring-boot
             version: '[3.5,)'
         recipeList:
-          - org.openrewrite.java.ReplaceAnnotation:
-              annotationPatternToReplace: "@org.springframework.boot.autoconfigure.SpringBootApplication"
-              annotationTemplateToInsert: "@io.quarkus.runtime.annotations.QuarkusMain"
-          #- dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
-          #- dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
+          - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
+          - org.openrewrite.java.RemoveMethodInvocations:
+              methodPattern: "org.springframework.boot.SpringApplication run(..)"
+          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
         gav:
           - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
