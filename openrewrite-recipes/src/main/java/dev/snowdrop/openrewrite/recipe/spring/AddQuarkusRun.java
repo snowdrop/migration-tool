@@ -67,9 +67,8 @@ public class AddQuarkusRun extends Recipe {
         public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration m, ExecutionContext ctx) {
             JavaType.Method mType = m.getMethodType();
 
-            System.out.println("Visit Method declaration processed for: ");
-            System.out.println("Name: " + m.getSimpleName());
-            System.out.println("Method type: " + m.getMethodType().getName());
+            System.out.println("Visit Method declaration: ");
+            System.out.println("Method name: " + m.getMethodType().getName());
             System.out.println("Return type: " + mType.getReturnType());
 
             boolean hasStaticModifier = J.Modifier.hasModifier(m.getModifiers(), J.Modifier.Type.Static);
@@ -91,13 +90,11 @@ public class AddQuarkusRun extends Recipe {
                     J.VariableDeclarations param = (J.VariableDeclarations) m.getParameters().getFirst();
                     J.VariableDeclarations.NamedVariable variable = param.getVariables().getFirst();
 
-                    System.out.println("Body: " + m.getBody().print());
-
                     maybeAddImport("io.quarkus.runtime.Quarkus");
                     maybeAddImport("io.quarkus.runtime.annotations.QuarkusMain");
 
                     return JavaTemplate
-                        .builder("Quarkus.run(#{any(java.lang.String[])});")
+                        .builder("Quarkus.run(#{any()});")
                         .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
                         .imports("io.quarkus.runtime.Quarkus")
                         .build()

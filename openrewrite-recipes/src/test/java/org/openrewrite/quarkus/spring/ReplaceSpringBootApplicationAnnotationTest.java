@@ -30,9 +30,9 @@ public class ReplaceSpringBootApplicationAnnotationTest implements RewriteTest {
                     
                     @SpringBootApplication
                     public class AppApplication {
-                     	public static void main(String[] args) {
-                              SpringApplication.run(AppApplication.class, args);
-                      	}
+                       public static void main(String[] args) {
+                           SpringApplication.run(AppApplication.class, args);
+                       }
                     }
                     """,
                 """
@@ -44,7 +44,7 @@ public class ReplaceSpringBootApplicationAnnotationTest implements RewriteTest {
                     @QuarkusMain
                     public class AppApplication {
                        public static void main(String[] args) {
-                              Quarkus.run(args);
+                           Quarkus.run(args);
                        }
                     }
                     """
