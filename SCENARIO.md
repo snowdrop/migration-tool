@@ -9,7 +9,7 @@ We want to:
 2. - Remove the statement `SpringApplication.run(AppApplication.class, args);`
 3. - Find the Java Class having as Annotation class: `@QuarkusMain`
    - Check if the class includes a `public void static main()` method
-   - Use the main method arguments (String[] args) to pass them to the `Quarkus.run();`
+   - Find the `method` parameters (String[] args) to pass them to the `Quarkus.run();`
    - Add the import package: `io.quarkus.runtime.Quarkus`
 
 ### Code to be changed
