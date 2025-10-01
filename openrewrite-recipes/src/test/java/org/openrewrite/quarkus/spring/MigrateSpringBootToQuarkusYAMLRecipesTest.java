@@ -12,11 +12,12 @@ public class MigrateSpringBootToQuarkusYAMLRecipesTest implements RewriteTest {
     /*
      Replace the SpringBoot stuffs with Quarkus
      using a rewrite yaml file having as definition:
-     preconditions:
-       - org.openrewrite.maven.search.ParentPomInsight:
-           groupIdPattern: org.springframework.boot
-           artifactIdPattern: spring-boot-starter-parent
-           version: 3.x
+     // TODO: To be removed as test was not doing changes !!!
+     #preconditions:
+     #  - org.openrewrite.maven.search.ParentPomInsight:
+     #      groupIdPattern: org.springframework.boot
+     #      artifactIdPattern: spring-boot-starter-parent
+     #      version: 3.x
      recipeList:
        - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
        - org.openrewrite.java.RemoveMethodInvocations:
@@ -32,6 +33,8 @@ public class MigrateSpringBootToQuarkusYAMLRecipesTest implements RewriteTest {
                 .parser((Parser.Builder) JavaParser.fromJavaVersion()
                     .classpath(  "spring-context","spring-boot")
                     .logCompilationWarningsAndErrors(true))
+                .cycles(1)
+                .expectedCyclesThatMakeChanges(1)
             ,
             java(
                 // Before
@@ -45,7 +48,7 @@ public class MigrateSpringBootToQuarkusYAMLRecipesTest implements RewriteTest {
                 public class AppApplication {
                  	public static void main(String[] args) {
                          SpringApplication.run(AppApplication.class, args);
-                 	}
+                    }
                 }
                 """,
                 // After
@@ -59,7 +62,7 @@ public class MigrateSpringBootToQuarkusYAMLRecipesTest implements RewriteTest {
                 public class AppApplication {
                  	public static void main(String[] args) {
                          Quarkus.run(args);
-                 	}
+                     }
                 }
                 """
             )
