@@ -95,7 +95,6 @@ public class AddQuarkusRun extends Recipe {
 
                     return JavaTemplate
                         .builder("Quarkus.run(#{any(java.lang.String[])});")
-                        //.contextSensitive()
                         .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
                         .imports("io.quarkus.runtime.Quarkus")
                         .build()
