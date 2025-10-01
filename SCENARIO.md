@@ -1,6 +1,6 @@
 ## Scenario
 
-## From Spring Boot to QuarkusMain and Run
+## From @SpringBootApplication to @QuarkusMain and QuarkusRun
 
 ### Introduction
 
