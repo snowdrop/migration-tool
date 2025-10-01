@@ -8,8 +8,10 @@ import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.JavaTemplate;
 import org.openrewrite.java.tree.J;
 import org.openrewrite.java.tree.JavaType;
+import org.openrewrite.java.tree.Statement;
 
 import java.util.List;
+
 /*
    The purpose of this recipe is to:
    - Find the Java Class having as Annotation class: @QuarkusMain
@@ -62,8 +64,6 @@ public class AddQuarkusRun extends Recipe {
 
         @Override
         public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration m, ExecutionContext ctx) {
-            //J.MethodDeclaration m = super.visitMethodDeclaration(methodDeclaration, ctx);
-
             JavaType.Method mType = m.getMethodType();
 
             System.out.println("Visit Method declaration processed for: ");
@@ -77,20 +77,32 @@ public class AddQuarkusRun extends Recipe {
             if ("main".equals(m.getSimpleName()) &&
                 "void".equals(mType.getReturnType().toString()) &&
                 hasStaticModifier) {
-
                 J.ClassDeclaration parentClass = getCursor().firstEnclosing(J.ClassDeclaration.class);
                 System.out.println("Processing the main method of the class: " + parentClass.getSimpleName());
 
                 if (hasAnnotation(parentClass.getLeadingAnnotations(), "QuarkusMain")) {
                     System.out.println("Processing the Java Class including the static main method and having as Class annotation: @QuarkusMain");
+                    J.MethodDeclaration n = getCursor().firstEnclosing(J.MethodDeclaration.class);
+
+                    Parameter p = findParameter(m.getParameters(), 0);
+                    System.out.println("Method parameter: " + p);
+
+                    J.VariableDeclarations param = (J.VariableDeclarations) m.getParameters().getFirst();
+                    J.VariableDeclarations.NamedVariable variable = param.getVariables().getFirst();
 
                     return JavaTemplate
-                        .builder("Quarkus.run();") // java.lang.String[]
+                        .builder("Quarkus.run(#{any(java.lang.String[])});")
                         .contextSensitive()
                         .build()
-                        .apply(getCursor(),m.getCoordinates().replaceBody(),"args");
+                        .apply(getCursor(), m.getCoordinates().replace(), variable);
                 }
             }
+            return m;
+        }
+
+        @Override
+        public J.MethodInvocation visitMethodInvocation(J.MethodInvocation method, ExecutionContext ctx) {
+            J.MethodInvocation m = super.visitMethodInvocation(method, ctx);
             return m;
         }
     }
@@ -103,5 +115,24 @@ public class AddQuarkusRun extends Recipe {
             }
         }
         return false;
+    }
+
+    private Parameter findParameter(List<Statement> parameters, int pos) {
+        Parameter parameter = null;
+        J.VariableDeclarations var = (J.VariableDeclarations) parameters.get(pos);
+
+        // Extract the type and name
+        String paramType = var.getType().toString();
+        // A parameter declaration usually has only one variable, so we get it from index 0
+        String paramName = var.getVariables().get(0).getSimpleName();
+
+        // Create and return the new Parameter record in one step
+        return new Parameter(paramName, paramType);
+    }
+
+    public record Parameter(
+        String name,
+        String type
+    ) {
     }
 }

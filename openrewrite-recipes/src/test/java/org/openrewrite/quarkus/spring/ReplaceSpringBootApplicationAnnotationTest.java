@@ -15,38 +15,42 @@ public class ReplaceSpringBootApplicationAnnotationTest implements RewriteTest {
     @Test
     void ShouldReplaceAnnotationAndMain() {
         rewriteRun(spec -> spec.recipes(
-            new ReplaceSpringBootApplicationWithQuarkusMainAnnotation(),
-            new RemoveMethodInvocations("org.springframework.boot.SpringApplication run(..)"),
-            new AddQuarkusRun()),
+                new ReplaceSpringBootApplicationWithQuarkusMainAnnotation(),
+                new RemoveMethodInvocations("org.springframework.boot.SpringApplication run(..)"),
+                new AddQuarkusRun()
+            )
+            .cycles(1)
+            .expectedCyclesThatMakeChanges(1),
             java(
-      """
-             package com.todo.app;
-             
-             import org.springframework.boot.SpringApplication;
-             import org.springframework.boot.autoconfigure.SpringBootApplication;
-             
-             @SpringBootApplication
-             public class AppApplication {
-              	public static void main(String[] args) {
-                       SpringApplication.run(AppApplication.class, args);
-               	}
-             }
-             """,
-        """
-             package com.todo.app;
-             
-             import io.quarkus.runtime.annotations.QuarkusMain;
-             
-             @QuarkusMain
-             public class AppApplication {
-               public static void main(String[] args) {
-                      Quarkus.run(args);
-               }
-             }
-             """
+                """
+                    package com.todo.app;
+                    
+                    import org.springframework.boot.SpringApplication;
+                    import org.springframework.boot.autoconfigure.SpringBootApplication;
+                    
+                    @SpringBootApplication
+                    public class AppApplication {
+                     	public static void main(String[] args) {
+                              SpringApplication.run(AppApplication.class, args);
+                      	}
+                    }
+                    """,
+                """
+                    package com.todo.app;
+                    
+                    import io.quarkus.runtime.annotations.QuarkusMain;
+                    
+                    @QuarkusMain
+                    public class AppApplication {
+                      public static void main(String[] args) {
+                             Quarkus.run(args);
+                      }
+                    }
+                    """
             )
         );
     }
+
     /*
      Replace the @SpringBootApplication annotation with @QuarkusMain
      using a rewrite yaml file having as definition:
@@ -63,7 +67,7 @@ public class ReplaceSpringBootApplicationAnnotationTest implements RewriteTest {
         rewriteRun(
             spec -> spec.recipeFromResource("/META-INF/rewrite/spring-boot-to-quarkus.yml", "dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation")
                 .parser((Parser.Builder) JavaParser.fromJavaVersion()
-                    .classpath(  "spring-context","spring-boot")
+                    .classpath("spring-context", "spring-boot")
                     .logCompilationWarningsAndErrors(true)),
             java(
                 // The Java source file before the recipe is run:
