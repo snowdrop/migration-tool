@@ -38,6 +38,7 @@ public class ReplaceSpringBootApplicationAnnotationTest implements RewriteTest {
                 """
                     package com.todo.app;
                     
+                    import io.quarkus.runtime.Quarkus;
                     import io.quarkus.runtime.annotations.QuarkusMain;
                     
                     @QuarkusMain

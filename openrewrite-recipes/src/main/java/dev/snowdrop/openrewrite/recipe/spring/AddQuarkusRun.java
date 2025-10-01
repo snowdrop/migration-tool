@@ -5,6 +5,7 @@ import org.openrewrite.Recipe;
 import org.openrewrite.TreeVisitor;
 import org.openrewrite.java.AnnotationMatcher;
 import org.openrewrite.java.JavaIsoVisitor;
+import org.openrewrite.java.JavaParser;
 import org.openrewrite.java.JavaTemplate;
 import org.openrewrite.java.tree.J;
 import org.openrewrite.java.tree.JavaType;
@@ -90,11 +91,15 @@ public class AddQuarkusRun extends Recipe {
                     J.VariableDeclarations param = (J.VariableDeclarations) m.getParameters().getFirst();
                     J.VariableDeclarations.NamedVariable variable = param.getVariables().getFirst();
 
+                    System.out.println("Body: " + m.getBody().print());
+
                     return JavaTemplate
                         .builder("Quarkus.run(#{any(java.lang.String[])});")
-                        .contextSensitive()
+                        //.contextSensitive()
+                        .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
+                        .imports("io.quarkus.runtime.Quarkus")
                         .build()
-                        .apply(getCursor(), m.getCoordinates().replace(), variable);
+                        .apply(getCursor(), m.getCoordinates().replaceBody(), variable.getName());
                 }
             }
             return m;
