@@ -21,7 +21,7 @@ public class CreateJavaClassTest implements RewriteTest {
                 classTemplate,
                 "src/main/java",
                 "org.openrewrite.example",
-                "package-private",
+                "public",
                 "TodoApplication",
                 null,
                 "foo/bar"
@@ -30,8 +30,8 @@ public class CreateJavaClassTest implements RewriteTest {
                 doesNotExist(),
                 """
                   package org.openrewrite.example;
-    
-                  class TodoApplication {
+                  
+                  public class TodoApplication {
                   }
                   """,
                 spec -> spec.path("foo/bar/src/main/java/org/openrewrite/example/TodoApplication.java")

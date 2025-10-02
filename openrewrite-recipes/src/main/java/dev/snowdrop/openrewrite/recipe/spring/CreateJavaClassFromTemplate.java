@@ -15,7 +15,6 @@
  */
 package dev.snowdrop.openrewrite.recipe.spring;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.jspecify.annotations.Nullable;
