@@ -39,7 +39,7 @@ import io.quarkus.runtime.annotations.QuarkusMain;
 @QuarkusMain // 1
 public class AppApplication {
     public static void main(String[] args) {
-         Quarkus.run(args); // 3
+         Quarkus.run(TodoApplication.class, args); // 3
      }
 }
 ```

@@ -17,8 +17,7 @@ public class CreateJavaClassTest implements RewriteTest {
 
     @Test
     void shouldCreateTodoApplicationClass() {
-        rewriteRun(
-            spec -> spec.recipe(new CreateJavaClassFromTemplate(
+        rewriteRun(spec -> spec.recipe(new CreateJavaClassFromTemplate(
                 classTemplate,
                 "src/main/java",
                 "org.openrewrite.example",
