@@ -1,7 +1,14 @@
 package dev.snowdrop.commands;
 
-import dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import dev.snowdrop.analyze.model.MigrationTask;
+import dev.snowdrop.analyze.model.Rule;
+import dev.snowdrop.model.CompositeRecipe;
+import dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.openrewrite.ExecutionContext;
@@ -10,14 +17,14 @@ import org.openrewrite.Recipe;
 import org.openrewrite.java.JavaParser;
 import org.openrewrite.java.tree.J;
 import picocli.CommandLine;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -47,7 +54,7 @@ public class TransformCommand implements Runnable {
     private boolean verbose;
 
     @CommandLine.Option(
-        names = {"-d","--dry-run"},
+        names = {"-d", "--dry-run"},
         description = "Execute OpenRewrite in dry-run mode (preview changes without applying them)"
     )
     private boolean dryRun;
@@ -55,6 +62,8 @@ public class TransformCommand implements Runnable {
     public static final String MAVEN_REWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
     public static final String MAVEN_REWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
     public static final String MAVEN_REWRITE_PLUGIN_VERSION = "6.19.0";
+
+    private static String compositeRecipeName = "dev.snowdrop.openrewrite.java.SpringToQuarkus";
 
     @Override
     public void run() {
@@ -145,7 +154,7 @@ public class TransformCommand implements Runnable {
      * Executes OpenRewrite maven goal for a specific migration task
      *
      * @param projectPath The path to the project directory
-     * @param task The migration task containing OpenRewrite instructions
+     * @param task        The migration task containing OpenRewrite instructions
      */
     private void executeOpenRewriteForTask(Path projectPath, MigrationTask task) {
         var rule = task.getRule();
@@ -161,55 +170,15 @@ public class TransformCommand implements Runnable {
                 continue;
             }
 
-            String compositeRecipeName = "dev.snowdrop.openrewrite.java.SpringToQuarkus";
-            StringBuffer buf = new StringBuffer();
-            var recipes = openrewrite.recipeList();
-
-            if (! recipes.isEmpty()) {
-                String header = """
-                    type: specs.openrewrite.org/v1beta/recipe
-                    name: %s
-                    displayName: %s
-                    description: %s
-                    """.formatted(compositeRecipeName,openrewrite.name(),openrewrite.description());
-                buf.append(header);
-                buf.append("recipeList: ").append("\n");
-
-                recipes.forEach(recipe -> {
-                    if (recipe instanceof Map) {
-                        HashMap<String, Map<String, String>> recipeType = (HashMap<String, Map<String, String>>) recipe;
-                        for (var recipeEntry : recipeType.entrySet()) {
-                            String recipeName = recipeEntry.getKey();
-                            Map<String, String> parameters = recipeEntry.getValue();
-
-                            buf.append("  - ").append(recipeName).append(": ").append("\n");
-
-                            // 2. Iterate over the inner map (Parameter Name -> Parameter Value)
-                            for (var paramEntry : parameters.entrySet()) {
-                                String paramName = paramEntry.getKey();
-                                String paramValue = paramEntry.getValue();
-
-                                buf.append("      ").append(paramName).append(": ").append("\"").append(paramValue).append("\"").append("\n");
-                            }
-                        }
-                    }
-                    // Check if the recipe object is a String when we process a parameter-less recipes
-                    else if (recipe instanceof String) {
-                        String recipeName = (String) recipe;
-                        buf.append("  - ").append(recipeName).append("\n");
-                    }
-                });
-            } else {
-                throw new IllegalStateException("No recipes defined in OpenRewrite instruction, skipping");
-            }
-            logger.debug(buf.toString());
+            var yamlRecipesStr = populateYAMLRecipes(openrewrite);
+            logger.debug(yamlRecipesStr);
 
             String rewriteYamlName = "";
             try {
-                rewriteYamlName = String.format("rewrite-%d.yml",rule.order());
+                rewriteYamlName = String.format("rewrite-%d.yml", rule.order());
                 Files.write(
                     Path.of(projectPath.toString(), rewriteYamlName),
-                    buf.toString().getBytes(),
+                    yamlRecipesStr.getBytes(),
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING);
             } catch (IOException e) {
@@ -231,17 +200,17 @@ public class TransformCommand implements Runnable {
     /**
      * Executes a maven command with the specified goal and recipes
      *
-     * @param projectPath The path to the project directory
+     * @param projectPath         The path to the project directory
      * @param compositeRecipeName Name of the composite recipe
-     * @param gavs Comma-separated list of maven GAV dependencies
+     * @param gavs                Comma-separated list of maven GAV dependencies
      * @return true if the command executed successfully, false otherwise
      */
     private boolean execMvnCmd(Path projectPath, String compositeRecipeName, String gavs, String rewriteYamlName) {
         try {
             List<String> command = new ArrayList<>();
-            //String outputDirectoryRewriteName = rewriteYamlName.substring(0, rewriteYamlName.lastIndexOf('.'));
-            String outputDirectoryRewriteName = "rewrite";
-            logger.infof("outputDirectoryRewriteName: %s",outputDirectoryRewriteName);
+            String outputDirectoryRewriteName = rewriteYamlName.substring(0, rewriteYamlName.lastIndexOf('.'));
+            // String outputDirectoryRewriteName = "rewrite";
+            logger.infof("outputDirectoryRewriteName: %s", outputDirectoryRewriteName);
 
             command.add("mvn");
             command.add("-B");
@@ -251,8 +220,8 @@ public class TransformCommand implements Runnable {
             command.add("-Drewrite.activeRecipes=" + compositeRecipeName);
             command.add("-Drewrite.recipeArtifactCoordinates=" + gavs);
             command.add("-Drewrite.exportDatatables=true");
-            command.add(String.format("-DreportOutputDirectory=target/%s",outputDirectoryRewriteName));
-            command.add(String.format("-Drewrite.configLocation=%s",rewriteYamlName));
+            command.add(String.format("-DreportOutputDirectory=target/%s", outputDirectoryRewriteName));
+            command.add(String.format("-Drewrite.configLocation=%s", rewriteYamlName));
 
             logger.infof("      ==== Executing command: %s", String.join(" ", command));
 
@@ -281,6 +250,72 @@ public class TransformCommand implements Runnable {
                 e.printStackTrace();
             }
             return false;
+        }
+    }
+
+    private static String newPopulateYAMLRecipes(Rule.Openrewrite openrewrite) {
+        StringBuffer buf = new StringBuffer();
+        List<Object> recipes = openrewrite.recipeList();
+
+        if (!recipes.isEmpty()) {
+            String header = """
+                type: specs.openrewrite.org/v1beta/recipe
+                name: %s
+                displayName: %s
+                description: %s
+                """.formatted(compositeRecipeName, openrewrite.name(), openrewrite.description());
+            buf.append(header);
+            buf.append("recipeList: ").append("\n");
+
+            recipes.forEach(recipe -> {
+                if (recipe instanceof Map) {
+                    HashMap<String, Map<String, String>> recipeType = (HashMap<String, Map<String, String>>) recipe;
+                    for (var recipeEntry : recipeType.entrySet()) {
+                        String recipeName = recipeEntry.getKey();
+                        Map<String, String> parameters = recipeEntry.getValue();
+
+                        buf.append("  - ").append(recipeName).append(": ").append("\n");
+
+                        // 2. Iterate over the inner map (Parameter Name -> Parameter Value)
+                        for (var paramEntry : parameters.entrySet()) {
+                            String paramName = paramEntry.getKey();
+                            String paramValue = paramEntry.getValue();
+
+                            buf.append("      ").append(paramName).append(": ").append("\"").append(paramValue).append("\"").append("\n");
+                        }
+                    }
+                }
+                // Check if the recipe object is a String when we process a parameter-less recipes
+                else if (recipe instanceof String) {
+                    String recipeName = (String) recipe;
+                    buf.append("  - ").append(recipeName).append("\n");
+                }
+            });
+        } else {
+            throw new IllegalStateException("No recipes defined in OpenRewrite instruction, skipping");
+        }
+        return "";
+    }
+
+    private static String populateYAMLRecipes(Rule.Openrewrite openrewrite)  {
+        StringBuffer buf = new StringBuffer();
+        List<Object> recipes = openrewrite.recipeList();
+        String yamlString = "";
+
+        if (!recipes.isEmpty()) {
+            CompositeRecipe compositeRecipe = new CompositeRecipe(compositeRecipeName,openrewrite.name(),openrewrite.description(),recipes);
+            try {
+                ObjectMapper mapper = new ObjectMapper(
+                    new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+                );
+                yamlString = mapper.writeValueAsString(compositeRecipe);
+                logger.debug(yamlString);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            return yamlString;
+        } else {
+            throw new IllegalStateException("No recipes defined in OpenRewrite instruction, skipping");
         }
     }
 
@@ -360,7 +395,7 @@ public class TransformCommand implements Runnable {
             .parse(javaFiles, null, ctx)
             .filter(sourceFile -> sourceFile instanceof J.CompilationUnit)
             .map(sourceFile -> (J.CompilationUnit) sourceFile)
-        .toList();
+            .toList();
 
         logger.infof("✅ Successfully parsed %d Java source files into LSTs.", lsts.size());
 
@@ -376,7 +411,7 @@ public class TransformCommand implements Runnable {
         Recipe recipe = new ReplaceSpringBootApplicationAnnotationWithQuarkusMain();
         J.CompilationUnit transformedCu;
 
-        for  (J.CompilationUnit cu : lsts) {
+        for (J.CompilationUnit cu : lsts) {
             try {
                 transformedCu = (J.CompilationUnit) recipe.getVisitor().visit(cu, ctx);
             } catch (Exception e) {
@@ -415,14 +450,14 @@ public class TransformCommand implements Runnable {
 
             Stream<Path> mainJavaFiles = Files.exists(mainJavaDir)
                 ? Files.walk(mainJavaDir)
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".java"))
+                .filter(Files::isRegularFile)
+                .filter(path -> path.toString().endsWith(".java"))
                 : Stream.empty();
 
             Stream<Path> testJavaFiles = Files.exists(testJavaDir)
                 ? Files.walk(testJavaDir)
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".java"))
+                .filter(Files::isRegularFile)
+                .filter(path -> path.toString().endsWith(".java"))
                 : Stream.empty();
 
             return Stream.concat(mainJavaFiles, testJavaFiles).toList();
@@ -439,5 +474,6 @@ public class TransformCommand implements Runnable {
         String projectPath,
         String timestamp,
         Map<String, MigrationTask> migrationTasks
-    ) {}
+    ) {
+    }
 }

@@ -38,7 +38,7 @@ import static java.util.stream.Collectors.toList;
 public class CreateJavaClassFromTemplate extends ScanningRecipe<AtomicBoolean> {
 
     @Option(displayName = "Template of the java class to be created",
-        description = "The template of the java class to be created.")
+            description = "The template of the java class to be created.")
     String classTemplate;
 
     @Option(displayName = "Source root",

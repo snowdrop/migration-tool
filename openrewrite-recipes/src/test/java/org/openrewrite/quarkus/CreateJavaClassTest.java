@@ -8,10 +8,15 @@ import static org.openrewrite.java.Assertions.java;
 
 public class CreateJavaClassTest implements RewriteTest {
 
-    private String classTemplate = """
+    private final String classTemplate = """
       package %s;
       
-      %sclass %s {
+      %sclass %s implements QuarkusApplication {
+          @Override
+          public int run(String... args) throws Exception {
+            System.out.println("Hello Todo user " + args[0]);
+            return 0;
+          }
       }
       """;
 
@@ -31,7 +36,12 @@ public class CreateJavaClassTest implements RewriteTest {
                 """
                   package org.openrewrite.example;
                   
-                  public class TodoApplication {
+                  public class TodoApplication implements QuarkusApplication {
+                      @Override
+                      public int run(String... args) throws Exception {
+                        System.out.println("Hello Todo user " + args[0]);
+                        return 0;
+                      }
                   }
                   """,
                 spec -> spec.path("foo/bar/src/main/java/org/openrewrite/example/TodoApplication.java")

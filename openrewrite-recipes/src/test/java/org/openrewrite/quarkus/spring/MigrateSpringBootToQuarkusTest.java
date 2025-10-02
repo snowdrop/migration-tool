@@ -1,6 +1,7 @@
 package org.openrewrite.quarkus.spring;
 
 import dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun;
+import dev.snowdrop.openrewrite.recipe.spring.CreateJavaClassFromTemplate;
 import dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.java.RemoveMethodInvocations;
@@ -15,6 +16,7 @@ public class MigrateSpringBootToQuarkusTest implements RewriteTest {
         rewriteRun(spec -> spec.recipes(
                 new ReplaceSpringBootApplicationWithQuarkusMainAnnotation(),
                 new RemoveMethodInvocations("org.springframework.boot.SpringApplication run(..)"),
+                new CreateJavaClassFromTemplate("package %s;\\n\\n%sclass %s {\\n}","src/main/java","com.todo.app","public","TodoApplication", false,""),
                 new AddQuarkusRun()
             )
             .cycles(1)
@@ -42,7 +44,7 @@ public class MigrateSpringBootToQuarkusTest implements RewriteTest {
                     @QuarkusMain
                     public class AppApplication {
                        public static void main(String[] args) {
-                           Quarkus.run(args);
+                           Quarkus.run(TodoApplication.class, args);
                        }
                     }
                     """
