@@ -44,7 +44,7 @@ public class AppApplication {
 }
 ```
 
-### Agglomerate Rule definition
+### Enhanced Rule definition with instructions
 
 ```yaml
 - category: mandatory
