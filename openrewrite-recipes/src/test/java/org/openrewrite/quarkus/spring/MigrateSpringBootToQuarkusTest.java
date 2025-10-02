@@ -13,14 +13,38 @@ public class MigrateSpringBootToQuarkusTest implements RewriteTest {
 
     @Test
     void ShouldReplaceAnnotationAndMain() {
+        String todoClassTemplate = """
+            package %s;
+            %sclass %s implements QuarkusApplication {
+                @Override
+                public int run(String... args) throws Exception {
+                  System.out.println("Hello user " + args[0]);
+                  return 0;
+                }
+            }
+            """;
         rewriteRun(spec -> spec.recipes(
                 new ReplaceSpringBootApplicationWithQuarkusMainAnnotation(),
                 new RemoveMethodInvocations("org.springframework.boot.SpringApplication run(..)"),
-                new CreateJavaClassFromTemplate("package %s;\\n\\n%sclass %s {\\n}","src/main/java","com.todo.app","public","TodoApplication", false,""),
+                new CreateJavaClassFromTemplate(todoClassTemplate,"src/main/java","com.todo.app","public","TodoApplication", false,""),
                 new AddQuarkusRun()
             )
             .cycles(1)
             .expectedCyclesThatMakeChanges(1),
+            java(
+                doesNotExist(),
+                """
+                package com.todo.app;
+                public class TodoApplication implements QuarkusApplication {
+                    @Override
+                    public int run(String... args) throws Exception {
+                      System.out.println("Hello user " + args[0]);
+                      return 0;
+                    }
+                }
+                """,
+                spec -> spec.path("src/main/java/com/todo/app/TodoApplication.java")
+            ),
             java(
                 """
                     package com.todo.app;
@@ -44,7 +68,7 @@ public class MigrateSpringBootToQuarkusTest implements RewriteTest {
                     @QuarkusMain
                     public class AppApplication {
                        public static void main(String[] args) {
-                           Quarkus.run(TodoApplication.class, args);
+                           Quarkus.run(args);
                        }
                     }
                     """
