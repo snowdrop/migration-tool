@@ -37,14 +37,12 @@ public class ReplaceSpringBootApplicationWithQuarkusMainAnnotation extends Recip
         @Override
         public J.Annotation visitAnnotation(J.Annotation annotation, ExecutionContext ctx) {
             J.Annotation a = super.visitAnnotation(annotation, ctx);
-            String simpleName = a.getSimpleName();
 
             AnnotationMatcher matcher = new AnnotationMatcher("@org.springframework.boot.autoconfigure.SpringBootApplication");
 
             if (!matcher.matches(a)) {
                 return a;
             }
-
 
             maybeRemoveImport(TypeUtils.asFullyQualified(a.getType()));
             maybeAddImport("io.quarkus.runtime.QuarkusMain");
