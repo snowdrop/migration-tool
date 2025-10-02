@@ -12,8 +12,7 @@ This project demonstrates how we could manage end-to-end the migration process o
 
 ```mermaid
 flowchart TD
-    A[Controlled flow] --> B[Scan Code]
-    A1[Rule Definition] --> B[Scan Code]
+    A[Rule Definition] --> B[Scan Code]
     B --> C[Analysis report / Migration plan]
     C --> D[Transform]
 
