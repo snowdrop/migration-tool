@@ -19,21 +19,7 @@ We want to:
 
 ### Code to be changed
 
-**Before** we have the `@SpringBootApplication` application
-```java
-package com.todo.app;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication // Step 1 
-public class AppApplication {
-    public static void main(String[] args) {
-         SpringApplication.run(AppApplication.class, args); // Step 2
-    }
-}
-```
-and its pom.xml file
+**Before** We have the Spring Boot pom.xml file
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -53,6 +39,20 @@ and its pom.xml file
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 ...
+```
+and a `@SpringBootApplication` application class.
+```java
+package com.todo.app;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication // Step 1 
+public class AppApplication {
+    public static void main(String[] args) {
+         SpringApplication.run(AppApplication.class, args); // Step 2
+    }
+}
 ```
 
 **After**
