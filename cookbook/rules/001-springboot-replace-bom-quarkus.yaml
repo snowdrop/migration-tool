@@ -1,0 +1,51 @@
+- category: mandatory
+  customVariables: []
+  description: SpringBoot to Quarkus
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "SpringBoot to Quarkus."
+  ruleID: springboot-replace-bom-quarkus-0000
+  when:
+    java.referenced:
+      location: ANNOTATION
+      pattern: org.springframework.boot.autoconfigure.SpringBootApplication
+  order: 1
+  instructions:
+    ai:
+      - promptMessage: "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file"
+    manual:
+      - todo: "See openrewrite instructions"
+    openrewrite:
+      - name: Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file
+        description: Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.
+        recipeList:
+          - org.openrewrite.maven.AddManagedDependency:
+              groupId: io.quarkus.platform
+              artifactId: quarkus-bom
+              version: 3.26.4
+              type: pom
+              scope: import
+              addToRootPom: false
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-core
+              version: 3.26.4
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-arc
+              version: 3.26.4
+          - org.openrewrite.maven.RemovePlugin:
+              groupId: org.springframework.boot
+              artifactId: spring-boot-maven-plugin
+          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusMavenPlugin
+        gav:
+          - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
+          - org.openrewrite:rewrite-maven:8.62.4
+
+
+
+
+
