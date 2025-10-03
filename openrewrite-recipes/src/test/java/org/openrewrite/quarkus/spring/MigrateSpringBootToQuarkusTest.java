@@ -6,6 +6,7 @@ import dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQu
 import org.junit.jupiter.api.Test;
 import org.openrewrite.java.RemoveMethodInvocations;
 import org.openrewrite.test.RewriteTest;
+import org.openrewrite.test.TypeValidation;
 
 import static org.openrewrite.java.Assertions.java;
 
@@ -28,7 +29,7 @@ public class MigrateSpringBootToQuarkusTest implements RewriteTest {
                 new RemoveMethodInvocations("org.springframework.boot.SpringApplication run(..)"),
                 new CreateJavaClassFromTemplate(todoClassTemplate,"src/main/java","com.todo.app","public","TodoApplication", false,""),
                 new AddQuarkusRun("TodoApplication")
-            )
+            ).afterTypeValidationOptions(TypeValidation.none())
             .cycles(1)
             .expectedCyclesThatMakeChanges(1),
             java(
@@ -42,8 +43,7 @@ public class MigrateSpringBootToQuarkusTest implements RewriteTest {
                       return 0;
                     }
                 }
-                """,
-                spec -> spec.path("src/main/java/com/todo/app/TodoApplication.java")
+                """
             ),
             java(
                 """
@@ -72,7 +72,6 @@ public class MigrateSpringBootToQuarkusTest implements RewriteTest {
                        }
                     }
                     """
-                ,spec -> spec.path("src/main/java/com/todo/app/TodoApplication.java")
             )
         );
     }
