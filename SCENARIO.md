@@ -5,6 +5,7 @@
 ### Introduction
 
 We want to:
+
 0. - Add the Quarkus BOM and dependencies
 
 1. - Replace the `@SpringBootApplication` annotation with `@QuarkusMain`
@@ -18,25 +19,47 @@ We want to:
 
 ### Code to be changed
 
-**Before** we have the `@SpringBootApplication` application 
+**Before** we have the `@SpringBootApplication` application
 ```java
 package com.todo.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication // 1
+@SpringBootApplication // Step 1 
 public class AppApplication {
     public static void main(String[] args) {
-         SpringApplication.run(AppApplication.class, args); // 2
+         SpringApplication.run(AppApplication.class, args); // Step 2
     }
 }
+```
+and its pom.xml file
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.5.3</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+    
+    <!-- // Step 0 -->
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+...
 ```
 
 **After**
 
 Pom.xml updated
 ```xml
+        <!-- // Step 0 -->
         <dependencyManagement>
                 <dependencies>
                         <dependency>
@@ -60,17 +83,17 @@ Pom.xml updated
         </dependencies>
 ```
 
-`Quarkus.run` added to the Application
+`Quarkus.run()` added to the Application
 ```java
 package com.todo.app;
 
 import io.quarkus.runtime.Quarkus;
 import io.quarkus.runtime.annotations.QuarkusMain;
 
-@QuarkusMain // 1
+@QuarkusMain // Step 1
 public class AppApplication {
     public static void main(String[] args) {
-         Quarkus.run(args); // 3
+         Quarkus.run(args); // Step 2 and 3
      }
 }
 ```
@@ -78,7 +101,7 @@ and a new `TodoApplication` class acting as `QuarkusMain` entry point has been c
 ```java
 package com.todo.app;
 
-//4
+// Step 4
 public class TodoApplication implements QuarkusApplication { 
     @Override
     public int run(String... args) throws Exception {
