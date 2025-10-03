@@ -129,8 +129,8 @@ public class TodoApplication implements QuarkusApplication {
     java.referenced:
       location: ANNOTATION
       pattern: org.springframework.boot.autoconfigure.SpringBootApplication
-  order: 1
-  instructions:
+  order: 1 # New field to allow to sort the instructions to be executed
+  instructions: # New section containing the provider's instructions
     ai:
       - promptMessage: "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file"
     manual:
@@ -179,8 +179,8 @@ public class TodoApplication implements QuarkusApplication {
     java.referenced:
       location: ANNOTATION
       pattern: org.springframework.boot.autoconfigure.SpringBootApplication
-  order: 1 # New field to allow to sort the instructions to be executed
-  instructions: # New section containing the provider's instructions
+  order: 2 
+  instructions: 
     ai:
       - promptMessage: "SpringBoot to Quarkus"
     manual:
@@ -217,7 +217,7 @@ public class TodoApplication implements QuarkusApplication {
     java.referenced:
       location: ANNOTATION
       pattern: org.springframework.boot.autoconfigure.SpringBootApplication
-  order: 2
+  order: 3
   instructions:
     ai:
       - promptMessage: "Add a Quarkus class"
