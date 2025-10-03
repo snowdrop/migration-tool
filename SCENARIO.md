@@ -48,7 +48,8 @@ and `TodoApplication`
 ```java
 package com.todo.app;
 
-public class TodoApplication implements QuarkusApplication {
+//4
+public class TodoApplication implements QuarkusApplication { 
     @Override
     public int run(String... args) throws Exception {
       System.out.println("Hello user " + args[0]);
