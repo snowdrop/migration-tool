@@ -18,7 +18,7 @@ We want to:
 
 ### Code to be changed
 
-Before we have the `@SpringBootApplication` application 
+**Before** we have the `@SpringBootApplication` application 
 ```java
 package com.todo.app;
 
@@ -33,7 +33,7 @@ public class AppApplication {
 }
 ```
 
-After
+**After**
 
 Pom.xml updated
 ```xml
