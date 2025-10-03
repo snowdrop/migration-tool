@@ -30,6 +30,7 @@
           - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
           - org.openrewrite.java.RemoveMethodInvocations:
               methodPattern: "org.springframework.boot.SpringApplication run(..)"
-          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
+          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun:
+              quarkusApplicationClass: TodoApplication
         gav:
           - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
