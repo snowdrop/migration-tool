@@ -5,6 +5,7 @@
 ### Introduction
 
 We want to:
+0. - Remove the SpringBoot parent from the pom.xml and add thr Quarkus BOM and dependencies
 1. - Replace the `@SpringBootApplication` annotation with `@QuarkusMain`
 2. - Remove the statement `SpringApplication.run(AppApplication.class, args);`
 3. - Find the Java Class having as Annotation class: `@QuarkusMain`
