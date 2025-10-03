@@ -1,6 +1,9 @@
 package dev.snowdrop.openrewrite.recipe.spring;
 
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 import org.openrewrite.ExecutionContext;
+import org.openrewrite.Option;
 import org.openrewrite.Recipe;
 import org.openrewrite.TreeVisitor;
 import org.openrewrite.java.AnnotationMatcher;
@@ -28,14 +31,20 @@ import java.util.List;
    @QuarkusMain
    public class AppApplication {
      public static void main(String[] args) {
-            Quarkus.run(args);
+            Quarkus.run(TodoApplication.class, args);
      }
    }
 
  */
+@Value
+@EqualsAndHashCode(callSuper=false)
 public class AddQuarkusRun extends Recipe {
 
     private static final String QUARKUS_MAIN_ANNOTATION = "@io.quarkus.runtime.annotations.QuarkusMain";
+
+    @Option(displayName = "Name of the Quarkus Application class",
+        description = "Name of the Quarkus Application class implementing QuarkusApplication")
+    String quarkusApplicationClass;
 
     @Override
     public String getDisplayName() {
@@ -94,7 +103,7 @@ public class AddQuarkusRun extends Recipe {
                     maybeAddImport("io.quarkus.runtime.annotations.QuarkusMain");
 
                     return JavaTemplate
-                        .builder("Quarkus.run(#{any()});")
+                        .builder(String.format("Quarkus.run(%s.class, #{any()});",quarkusApplicationClass))
                         .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
                         .imports("io.quarkus.runtime.Quarkus")
                         .build()
