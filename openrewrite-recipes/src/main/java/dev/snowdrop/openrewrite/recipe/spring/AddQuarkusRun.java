@@ -43,7 +43,8 @@ public class AddQuarkusRun extends Recipe {
     private static final String QUARKUS_MAIN_ANNOTATION = "@io.quarkus.runtime.annotations.QuarkusMain";
 
     @Option(displayName = "Name of the Quarkus Application class",
-        description = "Name of the Quarkus Application class implementing QuarkusApplication")
+        description = "Name of the Quarkus Application class implementing QuarkusApplication",
+    required = false)
     String quarkusApplicationClass;
 
     @Override
@@ -102,8 +103,15 @@ public class AddQuarkusRun extends Recipe {
                     maybeAddImport("io.quarkus.runtime.Quarkus");
                     maybeAddImport("io.quarkus.runtime.annotations.QuarkusMain");
 
+                    String javaTemplate;
+                    if (quarkusApplicationClass != null) {
+                        javaTemplate = String.format("Quarkus.run(%s.class, #{any()});", quarkusApplicationClass)   ;
+                    } else {
+                       javaTemplate = "Quarkus.run(#{any()});";
+                    }
+
                     return JavaTemplate
-                        .builder(String.format("Quarkus.run(%s.class, #{any()});",quarkusApplicationClass))
+                        .builder(javaTemplate)
                         .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
                         .imports("io.quarkus.runtime.Quarkus")
                         .build()
