@@ -5,18 +5,20 @@
 ### Introduction
 
 We want to:
-0. - Remove the SpringBoot parent from the pom.xml and add thr Quarkus BOM and dependencies
+0. - Add the Quarkus BOM and dependencies
+
 1. - Replace the `@SpringBootApplication` annotation with `@QuarkusMain`
 2. - Remove the statement `SpringApplication.run(AppApplication.class, args);`
 3. - Find the Java Class having as Annotation class: `@QuarkusMain`
    - Check if the class includes a `public void static main()` method
    - Find the `method` parameters (String[] args) to pass them to the `Quarkus.run();`
    - Add the import package: `io.quarkus.runtime.Quarkus`
+   
 4. - Add a Java class implementing QuarkusApplication
 
 ### Code to be changed
 
-Before
+Before we have the `@SpringBootApplication` application 
 ```java
 package com.todo.app;
 
@@ -32,6 +34,33 @@ public class AppApplication {
 ```
 
 After
+
+Pom.xml updated
+```xml
+        <dependencyManagement>
+                <dependencies>
+                        <dependency>
+                                <groupId>io.quarkus.platform</groupId>
+                                <artifactId>quarkus-bom</artifactId>
+                                <version>3.26.4</version>
+                                <type>pom</type>
+                                <scope>import</scope>
+                        </dependency>
+                </dependencies>
+        </dependencyManagement>
+        <dependencies>
+                <dependency>
+                        <groupId>io.quarkus</groupId>
+                        <artifactId>quarkus-arc</artifactId>
+                </dependency>
+                <dependency>
+                        <groupId>io.quarkus</groupId>
+                        <artifactId>quarkus-core</artifactId>
+                </dependency>
+        </dependencies>
+```
+
+`Quarkus.run` added to the Application
 ```java
 package com.todo.app;
 
@@ -45,7 +74,7 @@ public class AppApplication {
      }
 }
 ```
-and `TodoApplication`
+and a new `TodoApplication` class acting as `QuarkusMain` entry point has been created
 ```java
 package com.todo.app;
 
@@ -60,6 +89,56 @@ public class TodoApplication implements QuarkusApplication {
 ```
 
 ### Enhanced Rule definition with instructions
+
+**Steps: 0**
+```yaml
+- category: mandatory
+  customVariables: []
+  description: SpringBoot to Quarkus
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "SpringBoot to Quarkus."
+  ruleID: springboot-replace-bom-quarkus-0000
+  when:
+    java.referenced:
+      location: ANNOTATION
+      pattern: org.springframework.boot.autoconfigure.SpringBootApplication
+  order: 1
+  instructions:
+    ai:
+      - promptMessage: "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file"
+    manual:
+      - todo: "See openrewrite instructions"
+    openrewrite:
+      - name: Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file
+        description: Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.
+        recipeList:
+          - org.openrewrite.maven.AddManagedDependency:
+              groupId: io.quarkus.platform
+              artifactId: quarkus-bom
+              version: 3.26.4
+              type: pom
+              scope: import
+              addToRootPom: false
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-core
+              version: 3.26.4
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-arc
+              version: 3.26.4
+          - org.openrewrite.maven.RemovePlugin:
+              groupId: org.springframework.boot
+              artifactId: spring-boot-maven-plugin
+          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusMavenPlugin
+        gav:
+          - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
+          - org.openrewrite:rewrite-maven:8.62.4
+```
 
 **Steps: 1, 2 and 3**
 ```yaml
@@ -132,6 +211,7 @@ public class TodoApplication implements QuarkusApplication {
               sourceRoot: "src/main/java"
               classTemplate: |
                 package %s;
+                import io.quarkus.runtime.QuarkusApplication; 
                 %sclass %s implements QuarkusApplication {
                     @Override
                     public int run(String... args) throws Exception {
