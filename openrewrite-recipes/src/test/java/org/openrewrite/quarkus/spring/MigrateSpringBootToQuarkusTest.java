@@ -27,7 +27,7 @@ public class MigrateSpringBootToQuarkusTest implements RewriteTest {
                 new ReplaceSpringBootApplicationWithQuarkusMainAnnotation(),
                 new RemoveMethodInvocations("org.springframework.boot.SpringApplication run(..)"),
                 new CreateJavaClassFromTemplate(todoClassTemplate,"src/main/java","com.todo.app","public","TodoApplication", false,""),
-                new AddQuarkusRun()
+                new AddQuarkusRun("TodoApplication")
             )
             .cycles(1)
             .expectedCyclesThatMakeChanges(1),
@@ -68,10 +68,11 @@ public class MigrateSpringBootToQuarkusTest implements RewriteTest {
                     @QuarkusMain
                     public class AppApplication {
                        public static void main(String[] args) {
-                           Quarkus.run(args);
+                           Quarkus.run(TodoApplication.class, args);
                        }
                     }
                     """
+                ,spec -> spec.path("src/main/java/com/todo/app/TodoApplication.java")
             )
         );
     }
