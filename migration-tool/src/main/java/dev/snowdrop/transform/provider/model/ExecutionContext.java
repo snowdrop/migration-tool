@@ -8,6 +8,7 @@ import java.nio.file.Path;
 public record ExecutionContext(
     Path projectPath,
     boolean verbose,
-    boolean dryRun
+    boolean dryRun,
+    String provideType
 ) {
 }

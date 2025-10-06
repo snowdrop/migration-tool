@@ -39,13 +39,4 @@ public class ProviderFactory {
     public static Optional<MigrationProvider> getProvider(String providerType) {
         return Optional.ofNullable(providers.get(providerType));
     }
-
-    /**
-     * Gets all available provider types.
-     *
-     * @return set of available provider types
-     */
-    public static Map<String, MigrationProvider> getAllProviders() {
-        return new HashMap<>(providers);
-    }
 }

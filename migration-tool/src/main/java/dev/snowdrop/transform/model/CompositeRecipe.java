@@ -1,4 +1,4 @@
-package dev.snowdrop.model;
+package dev.snowdrop.transform.model;
 
 import java.util.List;
 
