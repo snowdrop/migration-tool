@@ -9,9 +9,11 @@ import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.model.CompositeRecipe;
 import dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain;
+import dev.snowdrop.transform.TransformationService;
+import dev.snowdrop.transform.provider.model.ExecutionContext;
+import dev.snowdrop.transform.provider.model.ExecutionResult;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
-import org.openrewrite.ExecutionContext;
 import org.openrewrite.InMemoryExecutionContext;
 import org.openrewrite.Recipe;
 import org.openrewrite.java.JavaParser;
@@ -59,9 +61,18 @@ public class TransformCommand implements Runnable {
     )
     private boolean dryRun;
 
-    public static final String MAVEN_REWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
-    public static final String MAVEN_REWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
-    public static final String MAVEN_REWRITE_PLUGIN_VERSION = "6.19.0";
+    @CommandLine.Option(
+        names = {"-p", "--provider"},
+        description = "Migration provider to use (ai, openrewrite, manual, all). Default: from migration.provider property"
+    )
+    @ConfigProperty(name = "migration.provider", defaultValue = "openrewrite")
+    private String provider;
+
+    public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
+    public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
+
+    @ConfigProperty(name = "migration.provider.openrewrite.plugin.version", defaultValue = "6.19.0")
+    private String openrewritePluginVersion;
 
     private static String compositeRecipeName = "dev.snowdrop.openrewrite.java.SpringToQuarkus";
 
@@ -215,7 +226,7 @@ public class TransformCommand implements Runnable {
             command.add("mvn");
             command.add("-B");
             command.add("-e");
-            command.add(String.format("%s:%s:%s:%s", MAVEN_REWRITE_PLUGIN_GROUP, MAVEN_REWRITE_PLUGIN_ARTIFACT, MAVEN_REWRITE_PLUGIN_VERSION,
+            command.add(String.format("%s:%s:%s:%s", MAVEN_OPENREWRITE_PLUGIN_GROUP, MAVEN_OPENREWRITE_PLUGIN_ARTIFACT, openrewritePluginVersion,
                 dryRun ? "dryRun" : "run"));
             command.add("-Drewrite.activeRecipes=" + compositeRecipeName);
             command.add("-Drewrite.recipeArtifactCoordinates=" + gavs);
@@ -329,14 +340,14 @@ public class TransformCommand implements Runnable {
     }
 
     /**
-     * Execute the mvn goal to apply the transformation
-     *
+     * Execute the transformation using the provider interface
      */
     private void startNewTransformation() {
         Instant start = Instant.now();
 
         Path projectPath = resolvePath(appPath);
         logger.infof("✅ Starting transformation for project at: %s", projectPath);
+        logger.infof("🔧 Using provider: %s", provider);
 
         Map<String, MigrationTask> migrationTasks = loadLatestAnalysisReport(projectPath);
 
@@ -347,18 +358,21 @@ public class TransformCommand implements Runnable {
 
         logger.infof("📋 Found %d migration tasks to process", migrationTasks.size());
 
+        TransformationService transformationService = new TransformationService();
+        ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun);
+
         for (Map.Entry<String, MigrationTask> entry : migrationTasks.entrySet()) {
             String taskId = entry.getKey();
             MigrationTask task = entry.getValue();
 
-            logger.infof("🔄 Processing migration task: %s", taskId);
-            if (verbose) {
-                logger.infof("   Description: %s", task.getRule().description());
-                logger.infof("   Category: %s", task.getRule().category());
-                logger.infof("   Effort: %d", task.getRule().effort());
+            if ("all".equals(provider)) {
+                // Execute all available providers for this task
+                ExecutionResult result = transformationService.executeTransformation(task, context);
+                logExecutionResult(taskId, result);
+            } else {
+                // Execute specific provider
+                executeTaskWithProvider(taskId, task, context);
             }
-
-            executeOpenRewriteForTask(projectPath, task);
         }
 
         Instant finish = Instant.now();
@@ -366,6 +380,58 @@ public class TransformCommand implements Runnable {
         logger.info("----------------------------------------");
         logger.info("--- Elapsed time: " + timeElapsed + " ms ---");
         logger.info("----------------------------------------");
+    }
+
+    /**
+     * Execute a specific migration task with the configured provider
+     */
+    private void executeTaskWithProvider(String taskId, MigrationTask task, ExecutionContext context) {
+        logger.infof("🔄 Processing migration task: %s", taskId);
+        if (verbose) {
+            logger.infof("   Description: %s", task.getRule().description());
+            logger.infof("   Category: %s", task.getRule().category());
+            logger.infof("   Effort: %d", task.getRule().effort());
+        }
+
+        // Check if the task has instructions for the selected provider
+        var instructions = task.getRule().instructions();
+        boolean hasInstructions = instructions != null && switch (provider) {
+            case "openrewrite" -> instructions.openrewrite() != null;
+            case "ai" -> instructions.ai() != null;
+            case "manual" -> instructions.manual() != null;
+            default -> false;
+        };
+
+        if (!hasInstructions) {
+            logger.warnf("   ⚠️  No %s instructions found for task, skipping", provider);
+            return;
+        }
+
+        TransformationService transformationService = new TransformationService();
+        ExecutionResult result = transformationService.executeTransformation(task, context);
+        logExecutionResult(taskId, result);
+    }
+
+    /**
+     * Log the execution result
+     */
+    private void logExecutionResult(String taskId, ExecutionResult result) {
+        if (result.success()) {
+            logger.infof("✅ Task completed successfully: %s", result.message());
+        } else {
+            logger.errorf("❌ Task failed: %s", result.message());
+            if (result.exception() != null && verbose) {
+                result.exception().printStackTrace();
+            }
+        }
+
+        // Log details if verbose
+        if (verbose && !result.details().isEmpty()) {
+            logger.info("   Details:");
+            for (String detail : result.details()) {
+                logger.infof("     - %s", detail);
+            }
+        }
     }
 
     /**
@@ -378,7 +444,7 @@ public class TransformCommand implements Runnable {
         Path projectPath = resolvePath(appPath);
         logger.infof("✅ Starting OpenRewrite parsing for project at: %s", projectPath);
 
-        ExecutionContext ctx = new InMemoryExecutionContext(Throwable::printStackTrace);
+         var ctx = new InMemoryExecutionContext(Throwable::printStackTrace);
 
         // Discover all .java files in the project
         List<Path> javaFiles = discoverJavaFiles(projectPath);
