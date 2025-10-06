@@ -36,7 +36,9 @@ public class AiProvider implements MigrationProvider {
         for (Rule.Ai aiInstruction : rule.instructions().ai()) {
             String promptMessage = aiInstruction.promptMessage();
 
+            logger.info("------------------------------------------------------------------------------------------");
             logger.infof("AI Instruction: %s", promptMessage);
+            logger.info("------------------------------------------------------------------------------------------");
             details.add("AI prompt: " + promptMessage);
 
             // TODO: Integrate with AI service to process the prompt

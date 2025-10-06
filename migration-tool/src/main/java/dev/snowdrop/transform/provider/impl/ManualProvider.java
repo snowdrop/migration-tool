@@ -38,7 +38,9 @@ public class ManualProvider implements MigrationProvider {
         for (Rule.Manual manualInstruction : rule.instructions().manual()) {
             String todo = manualInstruction.todo();
 
+            logger.info("------------------------------------------------------------------------------------------");
             logger.infof("   ⚠️  TODO: %s", todo);
+            logger.info("------------------------------------------------------------------------------------------");
             details.add("TODO: " + todo);
         }
 
