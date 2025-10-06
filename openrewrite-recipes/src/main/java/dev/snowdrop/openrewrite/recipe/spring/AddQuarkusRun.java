@@ -112,8 +112,8 @@ public class AddQuarkusRun extends Recipe {
 
                     return JavaTemplate
                         .builder(javaTemplate)
-                        .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
                         .imports("io.quarkus.runtime.Quarkus")
+                        .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
                         .build()
                         .apply(getCursor(), m.getCoordinates().replaceBody(), variable.getName());
                 }
