@@ -56,12 +56,6 @@ public class TransformCommand implements Runnable {
     @ConfigProperty(name = "migration.provider", defaultValue = "openrewrite")
     private String provider;
 
-    public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
-    public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
-
-    @ConfigProperty(name = "migration.provider.openrewrite.plugin.version", defaultValue = "6.19.0")
-    private String openrewritePluginVersion;
-
     private static String compositeRecipeName = "dev.snowdrop.openrewrite.java.SpringToQuarkus";
 
     @Override

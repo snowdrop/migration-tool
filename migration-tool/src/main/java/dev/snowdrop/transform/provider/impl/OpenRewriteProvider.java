@@ -10,6 +10,7 @@ import dev.snowdrop.transform.model.CompositeRecipe;
 import dev.snowdrop.transform.provider.MigrationProvider;
 import dev.snowdrop.transform.provider.model.ExecutionContext;
 import dev.snowdrop.transform.provider.model.ExecutionResult;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import java.io.BufferedReader;
@@ -30,6 +31,9 @@ public class OpenRewriteProvider implements MigrationProvider {
 
     public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
     public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
+
+    @ConfigProperty(name = "migration.provider.openrewrite.plugin.version", defaultValue = "6.19.0")
+    public String MAVEN_OPENREWRITE_PLUGIN_VERSION;
 
     private static final String COMPOSITE_RECIPE_NAME = "dev.snowdrop.openrewrite.java.SpringToQuarkus";
 
@@ -145,12 +149,10 @@ public class OpenRewriteProvider implements MigrationProvider {
             command.add("mvn");
             command.add("-B");
             command.add("-e");
-            // Note: Version should be injected from configuration
-            String pluginVersion = "6.19.0"; // Default fallback
             command.add(String.format("%s:%s:%s:%s",
                 MAVEN_OPENREWRITE_PLUGIN_GROUP,
                 MAVEN_OPENREWRITE_PLUGIN_ARTIFACT,
-                pluginVersion,
+                MAVEN_OPENREWRITE_PLUGIN_VERSION,
                 context.dryRun() ? "dryRun" : "run"));
             command.add("-Drewrite.activeRecipes=" + COMPOSITE_RECIPE_NAME);
             command.add("-Drewrite.recipeArtifactCoordinates=" + gavs);

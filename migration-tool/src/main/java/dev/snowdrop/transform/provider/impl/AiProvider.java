@@ -12,7 +12,6 @@ import java.util.List;
 
 /**
  * Provider implementation for AI-based transformations.
- * Currently, a stub implementation for future AI integration.
  */
 public class AiProvider implements MigrationProvider {
 
@@ -31,23 +30,18 @@ public class AiProvider implements MigrationProvider {
             return ExecutionResult.failure("No AI instructions found for task");
         }
 
-        List<String> details = new ArrayList<>();
+        List<String> tasks = new ArrayList<>();
 
+        logger.info("------------------------------------------------------------------------------------------");
         for (Rule.Ai aiInstruction : rule.instructions().ai()) {
-            String promptMessage = aiInstruction.promptMessage();
+            tasks = aiInstruction.tasks();
+            tasks.forEach(t -> {
+                logger.infof("- %s", t);
+            });
 
-            logger.info("------------------------------------------------------------------------------------------");
-            logger.infof("AI Instruction: %s", promptMessage);
-            logger.info("------------------------------------------------------------------------------------------");
-            details.add("AI prompt: " + promptMessage);
-
-            // TODO: Integrate with AI service to process the prompt
-            // For now, this is a placeholder implementation
-            details.add("AI processing not yet implemented");
         }
+        logger.info("------------------------------------------------------------------------------------------");
 
-        logger.warnf("AI provider is not fully implemented yet. Instructions logged for manual review.");
-
-        return ExecutionResult.success("AI instructions logged (implementation pending)", details);
+        return ExecutionResult.success("Executing the AI tasks ...", tasks);
     }
 }

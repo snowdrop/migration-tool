@@ -31,7 +31,9 @@ public record Rule(
     ) {}
 
     public record Ai(
-       String promptMessage
+       @Deprecated
+       String promptMessage,
+       List<String> tasks
     ) {}
 
     public record Manual(
