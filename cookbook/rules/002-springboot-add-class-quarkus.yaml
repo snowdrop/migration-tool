@@ -15,7 +15,7 @@
   order: 2
   instructions:
     ai:
-      - promptMessage: "Add a Quarkus class"
+      - promptMessage: "Add a new class com.todo.app.TodoApplication which implements QuarkusApplication. Use stdout to send a message: Hello user using args[0]. Next Pass as first argument: TodoApplication.class to Quarkus.run()"
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:

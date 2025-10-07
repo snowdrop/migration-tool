@@ -15,7 +15,7 @@
   order: 3
   instructions:
     ai:
-      - promptMessage: "SpringBoot to Quarkus"
+      - promptMessage: "Can you now remove the @SpringBootApplication from the java file which contains it. Next add to the same java class the @QuarkusMain annotation. The AppApplication should not implement QuarkusApplication."
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:
