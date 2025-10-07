@@ -202,12 +202,12 @@ mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/sprin
 
 ## Transform your application
 
-Now that we have a migration plan (aka list of instructions to be executed by a provider like openrewrite), we can now execute the command transform
-with or without the `dryRun` mode.
+Now that we have a migration plan (aka list of instructions to be executed by a provider like openrewrite, user or AI), we can now perform the transformation using the command `transform` with or without the `dryRun` mode.
 
 ```shell
 mvn -pl migration-tool quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app --dry-run"
 ```
+**Remark**: The default provider is `openwrite` but you can for demo purpose switch to `-p manual` or `-p ai`
 
 Log of the command executed 
 ```text

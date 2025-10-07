@@ -17,7 +17,7 @@
     ai:
       - promptMessage: "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file"
     manual:
-      - todo: "See openrewrite instructions"
+      - todo: "Add the Quarkus BOM and quarkus-arc, quarkus-core dependencies within the pom.xml file"
     openrewrite:
       - name: Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file
         description: Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.

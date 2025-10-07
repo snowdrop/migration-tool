@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * Provider implementation for AI-based transformations.
- * Currently a stub implementation for future AI integration.
+ * Currently, a stub implementation for future AI integration.
  */
 public class AiProvider implements MigrationProvider {
 
