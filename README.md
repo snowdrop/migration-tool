@@ -10,7 +10,7 @@ This project demonstrates how we could manage end-to-end the migration process o
 
 **Today**
 
-Many tools, like the [konveyor kantra client](https://github.com/konveyor/kantra/) supports today the following flow. 
+Many tools, like the [konveyor kantra client](https://github.com/konveyor/kantra/) supports today the following flow. They generate an analysis repport that users can use to review the issues reported, their criticality and what they should do to transform the code.  
 ```mermaid
 flowchart TD
     A[Tool] --> |use rules|B[Scan Code]
