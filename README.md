@@ -13,9 +13,9 @@ This project demonstrates how we could manage end-to-end the migration process o
 Many tools, like the [konveyor kantra client](https://github.com/konveyor/kantra/) supports today the following flow. 
 ```mermaid
 flowchart TD
-    A[Rule Definition] --> B[Scan Code]
-    B --> C[Analysis report]
-    C -..-> D[Transform]
+    A[Tool] --> |use rules|B[Scan Code]
+    B --> |Generate|C[Analysis report]
+    C -..-> |Execute|D[Transform]
 
     style A fill:#e1f5fe
     style C fill:#fff3e0
@@ -24,25 +24,23 @@ flowchart TD
 
 **Improved**
 
-While the flow, including also the transformation step, works pretty well, it suffers froms 2 limitations: lack of clear instruxtions to be executed during a transformation step like also the order.
+While the flow, including also the transformation step, works pretty well, it suffers froms 2 limitations: lack of clear instructions to be executed during a transformation step like also the order.
 
 This is why we need to support a more robust flow as depicted hereafter:
 
 ```mermaid
 flowchart TD
-    A[Controlled flow] --> B[Scan Code]
-    A1[Rule Definition] --> B[Scan Code]
-    B --> C[Analysis report = Migration plan]
-    C --> D{Instructions?}
+    A[Tool with controlled flow] --> |Use rules|B[Scan Code]
+    B --> |Generate|C[Analysis report => Migration plan with tasks]
+    C --> D{Do we have instructions?}
     D -->|Empty| E[No Action]
-    D -->|Matches| F[Select the provider]
-    F --> G{Provider?}
-    G -->|User| H[Execute manual Tasks]
-    G -->|AI| I[Prompt AI augmented messages]
-    G -->|OpenRewrite| J[Apply Recipe]
-    H --> K[Migrated Code]
-    I --> K
-    J --> K
+    D -->|if results|E{Select provider ?}
+    E -->|User| F[Execute manual Tasks]
+    E -->|AI| G[Prompt AI augmented messages]
+    E -->|OpenRewrite| H[Apply Recipe]
+    F --> I[Migrated Code]
+    G --> I
+    H --> I
 
     style A fill:#e1f5fe
     style C fill:#fff3e0
