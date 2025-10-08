@@ -231,7 +231,7 @@ Log of the command executed
 
 ### AI
 
-**Important**: Until now, the client only supports to use Anthropic and Claude Sonnet 4 model
+**Important**: Until now, this Quarkus client only supports to use Anthropic and Claude Sonnet 4 model
 
 To be able to perform the transformation of the code, using AI, it is needed to set part of the env file some new properties:
 ```properties
