@@ -119,7 +119,6 @@ podman cp $ID:/jdtls ./jdt/konveyor-jdtls
 
 **optional**: Copy the `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/java-analyzer-bundle.core-1.0.0-SNAPSHOT.jarjava-analyzer-bundle.core-1.0.0-SNAPSHOT.jar` to the `./lib/` folder of this project to use it as dependency (to access the code) as it is not published on a maven repository server !
 
-
 ## Scan and analyze
 
 To execute the command using the Quarkus Picocli CLI able to scan, analyze and generate the migration plan report (optional), execute this command 
@@ -202,12 +201,17 @@ mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/sprin
 
 ## Transform your application
 
-Now that we have a migration plan (aka list of instructions to be executed by a provider like openrewrite, user or AI), we can now perform the transformation using the command `transform` with or without the `dryRun` mode.
+Now that we have a migration plan (aka list of instructions to be executed by a provider like openrewrite, user or AI), we can perform the transformation using the command `transform` where we pass as parameter the provider to be used.
+
+**Remark**: The default provider is `openwrite` but you can use too: `manual` or `ai`
+
+### Openrewrite
+
+To use openrewrite, execute the following command with or without the `dryRun` mode. If you use the `--dry-run` parameter, then openrewrite will generate `rewrite.patch` file(s) under the folder: `target/rewrite` of the analyzed project instead of changing the code directly !
 
 ```shell
-mvn -pl migration-tool quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app --dry-run"
+mvn -pl migration-tool quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app -p openrewrite --dry-run"
 ```
-**Remark**: The default provider is `openwrite` but you can for demo purpose switch to `-p manual` or `-p ai`
 
 Log of the command executed 
 ```text
@@ -225,10 +229,39 @@ Log of the command executed
 2025-09-29 13:03:28,096 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) ----------------------------------------
 ```
 
-**Remark**: If you use the `--dry-run` parameter, then openrewrite will generate a `rewrite.patch` file under the scanned project: `target/rewrite` instead of changing the code directly !
+### AI
 
+**Important**: Until now, the client only supports to use Anthropic and Claude Sonnet 4 model
 
-**Remark**: The commands can also be executed using the jar file. Create in this case, an `.env` file, to configure properly the jdt, rules and workspace properties
+To be able to perform the transformation of the code, using AI, it is needed to set part of the env file some new properties:
+```properties
+QUARKUS_LANGCHAIN4J_ANTHROPIC_CHAT_MODEL_MODEL_NAME=premium
+QUARKUS_LANGCHAIN4J_ANTHROPIC_BASE_URL=<THE_ANTHROPIC_API_SERVER>
+QUARKUS_LANGCHAIN4J_ANTHROPIC_API_KEY=<YOUR_ANTHROPIC_API_KEY>
+QUARKUS_LANGCHAIN4J_ANTHROPIC_TIMEOUT=60
+MIGRATION_TOOL /PATH/TO/migration-tool/target/quarkus-app/quarkus-run.jar
+```
+
+Don't forget to generate the `analyze/migration plan` report before to perform the transformation
+```shell
+mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -o json"
+```
+
+As it is needed to interact with AI, then we cannot use the command `mvn quarkus:dev` but instead:
+
+```shell
+// Execute the command within a Spring Boot project to be analyzed and migrated
+pushd applications/demo-spring-boot-todo-app
+
+export ANALYZER_APP_PATH=/PATH/TO/demo-spring-boot-todo-app
+
+java -jar $MIGRATION_TOOL transform . -p ai
+popd
+```
+
+## Tips
+
+The `analyze` or `transform` commands can be executed using the quarkus uber jar file. Create in this case, an `.env` file, to configure properly the different properties needed:
 
 ```properties
 # .env file content
@@ -240,12 +273,10 @@ Next source it and execute the following java commands:
 
 ```shell
 java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze $(pwd)/applications/spring-boot-todo-app
-java -jar migration-tool/target/quarkus-app/quarkus-run.jar transform $(pwd)/applications/spring-boot-todo-app
+java -jar migration-tool/target/quarkus-app/quarkus-run.jar transform $(pwd)/applications/spring-boot-todo-app -p openrewrite --dry-run
 ```
 
-## Tips
-
-Here are the [openrewrite maven plugin command](https://docs.openrewrite.org/reference/rewrite-maven-plugin) to be used to apply recipe(s) top of a spring boot project. Take care that your project is under git control as code will be transformed !
+If you want to test separately the openrewrite recipes, then use the [openrewrite maven plugin command](https://docs.openrewrite.org/reference/rewrite-maven-plugin) top of a spring boot project. Take care that your project is under git control as code will be transformed !
 
 ```shell
 cd applications/spring-boot-todo-app
@@ -254,7 +285,7 @@ mvn -U org.openrewrite.maven:rewrite-maven-plugin:run \
    -Dorg.openrewrite.quarkus.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
 ```
 
-Instead of changing the code, you can use the dryrun mode to get a patch
+Instead of changing the code, you can use the dryrun goal to get a patch
 ```shell
 cd applications/spring-boot-todo-app
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
@@ -289,19 +320,10 @@ mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
   -Drewrite.configLocation=my-rewrite-2.yml
 ```
 
-Example where we set the parameters of the recipe using the `options`. Until now, it is only possible to pass the options of a recipe and not a list !!
-```shell
-mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
-  -Drewrite.activeRecipes=org.openrewrite.java.ReplaceAnnotation \
-  -Drewrite.option=ReplaceAnnotation.annotationPatternToReplace="@org.springframework.boot.autoconfigure.SpringBootApplication",annotationTemplateToInsert="@io.quarkus.runtime.annotations.QuarkusMain" \
-  -Drewrite.recipeArtifactCoordinates=org.openrewrite:rewrite-java:8.62.4,org.openrewrite.recipe:rewrite-java-dependencies:1.42.0
-```
-
-
 ## TODO
 
 | Task   | Status | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Comment |
-|--------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+|--------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
 | MT-001 |        | Check what [spring-migrator-tool](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-support-boot/src/main/resources/recipes/initialize-spring-boot-migration.yaml) did to reuse some ideas to configure the instructions using `Actions` able to configure the recipe. The [action](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-core/src/main/java/org/springframework/sbm/build/migration/actions/AddMavenDependencyManagementAction.java)'s definition is used as input to apply the corresponding openrewrite's [recipe](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-core/src/main/java/org/springframework/sbm/build/impl/OpenRewriteMavenBuildFile.java#L376). |         |
 | MT-002 |        | Investigate if the language server could be replaced using Openrewrite concepts such as: [searchResult](https://docs.openrewrite.org/concepts-and-explanations/markers#searchresult)'s marker, [DataTable](https://docs.openrewrite.org/authoring-recipes/data-tables#writing-a-recipe-that-produces-a-data-table) or [Scanning recipe](https://docs.openrewrite.org/concepts-and-explanations/recipes#scanning-recipes)                                                                                                                                                                                                                                                                                                                                                                                            |         |
 | MT-003 |        | Discuss and define the level of granularity between what the rule targets to do and the steps/actions that the provider will support. Such a granularity can start with a `1` to `1` relation to a `1` to `many` but where the `many` is executed as a composite component or pipeline: https://docs.openrewrite.org/concepts-and-explanations/recipes#recipe-execution-pipeline, https://docs.openrewrite.org/concepts-and-explanations/recipes#scanning-recipes                                                                                                                                                                                                                                                                                                                                                   |         |
