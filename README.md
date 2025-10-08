@@ -29,20 +29,19 @@ flowchart TD
     A[Tool with controlled flow] --> |Use rules|B[Scan Code]
     B --> |Generate|C[Analysis report => Migration plan with tasks]
     C --> D{Do we have instructions?}
-    D -->|Empty| E[No Action]
-    D -->|if results|E{Select provider ?}
-    E -->|User| F[Execute manual Tasks]
-    E -->|AI| G[Prompt AI augmented messages]
-    E -->|OpenRewrite| H[Apply Recipe]
-    F --> I[Migrated Code]
-    G --> I
-    H --> I
+    D -->|Empty|E[No Action]
+    D -->|if results|F{Select provider ?}
+    F -->|User|G[Execute manual Tasks]
+    F -->|AI|H[Prompt AI augmented messages]
+    F -->|OpenRewrite|I[Apply Recipe]
+    G --> J[Migrated Code]
+    H --> J
+    I --> J
 
     style A fill:#e1f5fe
     style C fill:#fff3e0
     style E fill:#f3e5f5
-    style K fill:#e8f5e8
-    style F fill:#fff8e1
+    style F fill:#fff8e1 
 ```
 
 The rule represents per se the contract definition between what we would like to discover within the code source scanned: java, properties, xml, json, maven or gradle files and what a provider should do to properly transform the code. Ideally we should provide a list of instructions as presented hereafter and tight to the provider able to execute them manually or using a well established technology as [openrewrite](https://docs.openrewrite.org/) or AI, etc ...
