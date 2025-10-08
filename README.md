@@ -316,7 +316,7 @@ Execute the following command within a Spring Boot project to be analyzed and mi
 pushd applications/demo-spring-boot-todo-app
 
 export ANALYZER_APP_PATH=/PATH/TO/demo-spring-boot-todo-app
-java -jar $MIGRATION_TOOL transform . -p ai
+java -jar $MIGRATION_TOOL transform $ANALYZER_APP_PATH -p ai
 popd
 ```
 Check the console to see the tasks executed and AI's reponses:
@@ -347,7 +347,7 @@ ANALYZER_RULES_PATH=cookbook/rules
 Next source it and execute the following java commands:
 
 ```shell
-java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze $(pwd)/applications/spring-boot-todo-app
+java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze $(pwd)/applications/spring-boot-todo-app -o json
 java -jar migration-tool/target/quarkus-app/quarkus-run.jar transform $(pwd)/applications/spring-boot-todo-app -p openrewrite --dry-run
 ```
 

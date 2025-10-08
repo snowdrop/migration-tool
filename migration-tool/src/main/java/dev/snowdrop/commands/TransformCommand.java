@@ -55,7 +55,7 @@ public class TransformCommand implements Runnable {
         names = {"-p", "--provider"},
         description = "Migration provider to use (ai, openrewrite, manual). Default: from migration.provider property"
     )
-    @ConfigProperty(name = "migration.provider", defaultValue = "openrewrite")
+    @ConfigProperty(name = "migration.provider")
     private String provider;
 
     @ConfigProperty(name = "migration.provider.openrewrite.composite-recipe-name")
