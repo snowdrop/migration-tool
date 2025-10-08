@@ -8,8 +8,6 @@ This project demonstrates how we could manage end-to-end the migration process o
 
 ## Migration Flow
 
-**Today**
-
 Many tools, like the [konveyor kantra client](https://github.com/konveyor/kantra/) supports today the following flow. It generates an analysis report that users can use to review the issues reported, their criticality and what they should do to transform the code part of the message and/or links to websites. 
 ```mermaid
 flowchart TD
@@ -22,11 +20,9 @@ flowchart TD
 ```
 **Remark**: The kantra client can be used to transform the code using openrewrite recipes.
 
-**Improved**
+While this flow, including also the transformation step, works pretty well, it suffers froms 2 limitations: lack of clear instructions to be executed during a transformation step and no order to play the instructions.
 
-While the flow, including also the transformation step, works pretty well, it suffers froms 2 limitations: lack of clear instructions to be executed during a transformation step like also the order.
-
-This is why we need to support a more robust flow as depicted hereafter:
+This is why we should support a more robust flow as depicted hereafter:
 
 ```mermaid
 flowchart TD
