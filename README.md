@@ -24,7 +24,8 @@ flowchart LR
     style A fill:#e1f5fe
     style C fill:#fff3e0
 ```
-**Remark**: The kantra client can be used to transform the code using openrewrite recipes.
+> [!NOTE]
+> The kantra client can be used to transform the code using openrewrite recipes.
 
 While this flow, including also the transformation step, works pretty well, it suffers froms 2 limitations: 
 
@@ -118,7 +119,8 @@ The poc has been designed using the following technology:
 - [Openrewrite recipe](https://docs.openrewrite.org/concepts-and-explanations/recipes) to execute using the `maven rewrite` goal the transformation as defined part of the rule's instructions
 - The different applications: `jdt-ls server`, `mvn command` are executed as OS processes using Java `ProcessBuilder`.
 
-**Remark**: The rule engine of this PoC is pretty basic and only translate the YAML `java.referenced` value to the corresponding `json request` needed to execute the JSON-RPC call with the command [io.konveyor.tackle.RuleEntry](https://github.com/konveyor/java-analyzer-bundle/blob/b387834212adb6271a233efe310e6c3e0b113029/java-analyzer-bundle.core/src/main/java/io/konveyor/tackle/core/internal/SampleDelegateCommandHandler.java#L47-L53).
+> [!IMPORTANT]
+> The rule engine of this PoC is pretty basic and only translate the YAML `java.referenced` value to the corresponding `json request` needed to execute the JSON-RPC call with the command [io.konveyor.tackle.RuleEntry](https://github.com/konveyor/java-analyzer-bundle/blob/b387834212adb6271a233efe310e6c3e0b113029/java-analyzer-bundle.core/src/main/java/io/konveyor/tackle/core/internal/SampleDelegateCommandHandler.java#L47-L53).
 
 ## Requirements
 
@@ -142,7 +144,8 @@ set ID $(podman create --name kantra-download quay.io/konveyor/kantra:$VERSION)
 podman cp $ID:/jdtls ./jdt/konveyor-jdtls
 ```
 
-**optional**: Copy the `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/java-analyzer-bundle.core-1.0.0-SNAPSHOT.jarjava-analyzer-bundle.core-1.0.0-SNAPSHOT.jar` to the `./lib/` folder of this project to use it as dependency (to access the code) as it is not published on a maven repository server !
+> [!NOTE]
+> Copy the `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/java-analyzer-bundle.core-1.0.0-SNAPSHOT.jarjava-analyzer-bundle.core-1.0.0-SNAPSHOT.jar` to the `./lib/` folder of this project to use it as dependency (to access the code) as it is not published on a maven repository server !
 
 ## Client's commands
 
@@ -236,7 +239,8 @@ mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/sprin
 
 Now that we have a migration plan (aka list of instructions to be executed by a provider like openrewrite, user or AI), we can perform the transformation using the command `transform` where we pass as parameter the provider to be used.
 
-**Remark**: The default provider is `openwrite` but you can use too: `manual` or `ai`
+> [!NOTE]
+> The default provider is `openwrite` but you can use too: `manual` or `ai`
 
 ### Openrewrite
 
@@ -264,7 +268,8 @@ Log of the command executed
 
 ### AI
 
-**Important**: Until now, this Quarkus client only supports to use Anthropic and Claude Sonnet 4 model
+> [!IMPORTNAT]
+> Until now, this Quarkus client only supports to use Anthropic and Claude Sonnet 4 model
 
 To be able to perform the transformation of the code, using AI, it is needed to set part of the `.env` file some new properties:
 ```properties
