@@ -18,13 +18,9 @@ import java.util.List;
 /**
  * Provider implementation for AI-based transformations.
  */
-@ApplicationScoped
 public class AiProvider implements MigrationProvider {
 
     private static final Logger logger = Logger.getLogger(AiProvider.class);
-
-    @Inject
-    Assistant assistant;
 
     @Override
     public String getProviderType() {
@@ -92,7 +88,7 @@ public class AiProvider implements MigrationProvider {
         }
     }
 
-    private boolean execAiCmd(ExecutionContext context, List<String> tasks, List<String> details) {
+    private boolean execAiCmd(ExecutionContext ctx, List<String> tasks, List<String> details) {
         logger.info("Hello! I'm your AI migration assistant.");
 
         Console console = System.console();
@@ -105,13 +101,8 @@ public class AiProvider implements MigrationProvider {
 
         tasks.forEach(t -> {
             // Send to the model the task to be executed within the project to migrate
-            String response = assistant.chat(t);
-            logger.infof("Claude: %s", response);
-
-            String userAction = console.readLine("> ");
-            if ("next".equalsIgnoreCase(userAction)) {
-                logger.infof("Processing next task ...");
-            }
+            String response = ctx.assistant().chat(t);
+            logger.infof("============= Claude response: %s", response);
         });
 
         return true;

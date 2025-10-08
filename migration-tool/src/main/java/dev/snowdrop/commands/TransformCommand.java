@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.transform.TransformationService;
 import dev.snowdrop.transform.model.MigrationTasksExport;
+import dev.snowdrop.transform.provider.ai.Assistant;
 import dev.snowdrop.transform.provider.model.ExecutionContext;
 import dev.snowdrop.transform.provider.model.ExecutionResult;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import picocli.CommandLine;
@@ -55,6 +57,9 @@ public class TransformCommand implements Runnable {
     )
     @ConfigProperty(name = "migration.provider", defaultValue = "openrewrite")
     private String provider;
+
+    @Inject
+    Assistant aiAssistant;
 
     private static String compositeRecipeName = "dev.snowdrop.openrewrite.java.SpringToQuarkus";
 
@@ -162,7 +167,7 @@ public class TransformCommand implements Runnable {
         logger.infof("📋 Found %d migration tasks to process", migrationTasks.size());
 
         // Configure the Context with the information used by the Provider
-        ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider);
+        ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider, aiAssistant);
 
         // Iterate over the list of the migration and tasks
         for (Map.Entry<String, MigrationTask> entry : migrationTasks.entrySet()) {
@@ -205,30 +210,8 @@ public class TransformCommand implements Runnable {
             return;
         }
 
-        TransformationService transformationService = new TransformationService();
-        ExecutionResult result = transformationService.executeTransformation(task, context);
-        logExecutionResult(taskId, result);
-    }
-
-    /**
-     * Log the execution result
-     */
-    private void logExecutionResult(String taskId, ExecutionResult result) {
-        if (result.success()) {
-            logger.infof("✅ Task completed successfully: %s", result.message());
-        } else {
-            logger.errorf("❌ Task failed: %s", result.message());
-            if (result.exception() != null && verbose) {
-                result.exception().printStackTrace();
-            }
-        }
-
-        // Log details if verbose
-        if (verbose && !result.details().isEmpty()) {
-            logger.info("   Details:");
-            for (String detail : result.details()) {
-                logger.infof("     - %s", detail);
-            }
-        }
+        TransformationService ts = new TransformationService();
+        ExecutionResult result = ts.execute(task, context);
+        ts.logExecutionResult(result,verbose);
     }
 }

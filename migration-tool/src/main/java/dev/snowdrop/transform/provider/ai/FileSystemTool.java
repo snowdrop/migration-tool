@@ -4,7 +4,7 @@ import dev.langchain4j.agent.tool.Tool;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.jboss.logging.Logger;
 
-import java.io.Console;
+// import java.io.Console;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +34,7 @@ public class FileSystemTool {
             return "Error: File path and content cannot be null or empty. Please provide both.";
         }
 
-        Console console = System.console();
+/*        Console console = System.console();
         if (console == null) {
             return "Confirmation failed: Console not available.";
         }
@@ -48,7 +48,7 @@ public class FileSystemTool {
 
         if (!"y".equalsIgnoreCase(confirmation)) {
             return "Write operation cancelled by user.";
-        }
+        }*/
 
         try {
             Path filePath = Paths.get(path);

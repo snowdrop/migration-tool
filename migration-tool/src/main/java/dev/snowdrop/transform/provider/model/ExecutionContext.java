@@ -1,5 +1,7 @@
 package dev.snowdrop.transform.provider.model;
 
+import dev.snowdrop.transform.provider.ai.Assistant;
+
 import java.nio.file.Path;
 
 /**
@@ -9,6 +11,7 @@ public record ExecutionContext(
     Path projectPath,
     boolean verbose,
     boolean dryRun,
-    String provideType
+    String provideType,
+    Assistant assistant
 ) {
 }
