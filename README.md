@@ -246,16 +246,28 @@ Source the `.env` file and don't forget to generate the `analyze/migration plan`
 mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -o json"
 ```
 
-As it is needed to interact with AI, then we cannot use the command `mvn quarkus:dev` but instead:
+As it is needed to interact with AI, then we cannot use the command `mvn quarkus:dev` but instead the uber jar file.
+Execute the following command within a Spring Boot project to be analyzed and migrated
 
 ```shell
-// Execute the command within a Spring Boot project to be analyzed and migrated
 pushd applications/demo-spring-boot-todo-app
 
 export ANALYZER_APP_PATH=/PATH/TO/demo-spring-boot-todo-app
-
 java -jar $MIGRATION_TOOL transform . -p ai
 popd
+```
+Check the console to see the tasks executed and AI's reponses:
+```shell
+2025-10-08 13:28:56,037 INFO  [dev.sno.com.TransformCommand] (main) 🔄 Processing migration task: springboot-replace-bom-quarkus-0000
+2025-10-08 13:28:56,039 INFO  [dev.sno.tra.pro.imp.AiProvider] (main) Task: Add to the pom.xml file the Quarkus BOM dependency within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core
+2025-10-08 13:28:56,039 INFO  [dev.sno.tra.pro.imp.AiProvider] (main) Task: The version of quarkus to be used and to included within the pom.xml properties is 3.26.4.
+2025-10-08 13:28:56,039 INFO  [dev.sno.tra.pro.imp.AiProvider] (main) Hello! I'm your AI migration assistant.
+2025-10-08 13:28:58,981 INFO  [dev.sno.tra.pro.ai.FileSystemTool] (main) Reading file: pom.xml
+2025-10-08 13:29:15,541 INFO  [dev.sno.tra.pro.imp.AiProvider] (main) ============= Claude response: Successfully added the Quarkus BOM dependency to the dependencyManagement section and included the quarkus-arc and quarkus-core dependencies. The Quarkus version property has also been added for version management.
+2025-10-08 13:29:18,549 INFO  [dev.sno.tra.pro.ai.FileSystemTool] (main) Reading file: pom.xml
+2025-10-08 13:29:33,810 INFO  [dev.sno.tra.pro.imp.AiProvider] (main) ============= Claude response: Successfully updated the Quarkus version to 3.26.4 in the properties section of the pom.xml file.
+2025-10-08 13:29:33,811 INFO  [dev.sno.tra.TransformationService] (main) ✅ Task completed successfully:    ✅ ai execution completed successfully
+...
 ```
 
 ## Tips
