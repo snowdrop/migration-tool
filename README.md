@@ -10,24 +10,30 @@ This project demonstrates how we could manage end-to-end the migration process o
 
 **Today**
 
+Many tools, like the [konveyor kantra client](https://github.com/konveyor/kantra/) supports today the following flow. 
 ```mermaid
 flowchart TD
     A[Rule Definition] --> B[Scan Code]
-    B --> C[Analysis report / Migration plan]
-    C --> D[Transform]
+    B --> C[Analysis report]
+    C -..-> D[Transform]
 
     style A fill:#e1f5fe
     style C fill:#fff3e0
 ```
+**Remark**: The kantra client can nevertheless be used to transform the code using openrewrite recipes.
 
 **Improved**
+
+While the flow, including also the transformation step, works pretty well, it suffers froms 2 limitations: lack of clear instruxtions to be executed during a transformation step like also the order.
+
+This is why we need to support a more robust flow as depicted hereafter:
 
 ```mermaid
 flowchart TD
     A[Controlled flow] --> B[Scan Code]
     A1[Rule Definition] --> B[Scan Code]
-    B --> C[Analysis report / Migration plan]
-    C --> D{Results?}
+    B --> C[Analysis report = Migration plan]
+    C --> D{Instructions?}
     D -->|Empty| E[No Action]
     D -->|Matches| F[Select the provider]
     F --> G{Provider?}
