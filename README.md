@@ -176,7 +176,8 @@ Analyze a project for migration
 mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
 ```
 
-To avoid to pass all the parameters to the command, you can use the "defaults" [application.properties](src/main/resources/application.properties) and just pass the path of the application to be analyzed
+> [!TIP]
+> To avoid to pass all the parameters to the command, you can use the "defaults" [application.properties](src/main/resources/application.properties) and just pass the path of the application to be analyzed
 
 ```shell
 mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app"
@@ -268,7 +269,7 @@ Log of the command executed
 
 ### AI
 
-> [!IMPORTNAT]
+> [!IMPORTANT]
 > Until now, this Quarkus client only supports to use Anthropic and Claude Sonnet 4 model
 
 To be able to perform the transformation of the code, using AI, it is needed to set part of the `.env` file some new properties:
