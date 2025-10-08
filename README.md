@@ -1,6 +1,6 @@
 # Migration Tool project
 
-This project and proof of concept demonstrates how we could better manage end-to-end the migration process of a Java application, from by example Spring Boot to Quarkus, using new concepts able to perform the process with ordered instructions managed by different providers. A special attention has been "" to improve how users can debug or test the transformation like the matching condition and the response returned.
+This project and proof of concept demonstrates how we could better manage end-to-end the migration process of a Java application, from by example Spring Boot to Quarkus, using new concepts able to perform the process with ordered instructions managed by different providers. A special attention has been paid improving how users can debug or test the transformation, particularly the matching condition and the resulting response.
 
 ## Dictionary
 
