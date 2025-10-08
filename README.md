@@ -20,7 +20,7 @@ flowchart TD
     style A fill:#e1f5fe
     style C fill:#fff3e0
 ```
-**Remark**: The kantra client can nevertheless be used to transform the code using openrewrite recipes.
+**Remark**: The kantra client can be used to transform the code using openrewrite recipes.
 
 **Improved**
 
