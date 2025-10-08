@@ -233,16 +233,15 @@ Log of the command executed
 
 **Important**: Until now, this Quarkus client only supports to use Anthropic and Claude Sonnet 4 model
 
-To be able to perform the transformation of the code, using AI, it is needed to set part of the env file some new properties:
+To be able to perform the transformation of the code, using AI, it is needed to set part of the `.env` file some new properties:
 ```properties
 QUARKUS_LANGCHAIN4J_ANTHROPIC_CHAT_MODEL_MODEL_NAME=premium
 QUARKUS_LANGCHAIN4J_ANTHROPIC_BASE_URL=<THE_ANTHROPIC_API_SERVER>
 QUARKUS_LANGCHAIN4J_ANTHROPIC_API_KEY=<YOUR_ANTHROPIC_API_KEY>
 QUARKUS_LANGCHAIN4J_ANTHROPIC_TIMEOUT=60
-MIGRATION_TOOL /PATH/TO/migration-tool/target/quarkus-app/quarkus-run.jar
+MIGRATION_TOOL=/PATH/TO/migration-tool/target/quarkus-app/quarkus-run.jar
 ```
-
-Don't forget to generate the `analyze/migration plan` report before to perform the transformation
+Source the `.env` file and don't forget to generate the `analyze/migration plan` report before to perform the transformation
 ```shell
 mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -o json"
 ```
