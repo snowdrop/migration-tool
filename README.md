@@ -186,7 +186,7 @@ mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/sprin
 > [!CAUTION]
 > If you experiment issues with the language server, you can check its log from this folder: `jdt/.jdt_workspace/.metadata/.log` !
 
-During the execution of the command, you will be able to see within the terminal the log reporting the JSON responses like also a summary table
+During the execution of the command, you will be able to see within the terminal the log reporting the JSON responses when condition(s) matches like also a summary table.
 ```text
 2025-09-29 12:52:43,605 INFO  [dev.sno.ana.ser.LsSearchService] (ForkJoinPool.commonPool-worker-5) ==== CLIENT: --- Search Results found for rule: springboot-import-to-quarkus-00000.
 2025-09-29 12:52:43,606 INFO  [dev.sno.ana.ser.LsSearchService] (ForkJoinPool.commonPool-worker-5) ==== CLIENT: --- JSON response: [
@@ -229,8 +229,7 @@ During the execution of the command, you will be able to see within the terminal
 
 ```
 
-If you want to populate an analysis report (kind of migration plan) then pass the parameter `-o json` top the command. A json file having as
-name: `analysing-report_yyyy-mm-dd_hh:mm.json` will be generated within the project scanned
+If you want to populate an analysis report (aka migration plan) then pass the parameter `-o json` to the command. A json file having as name: `analysing-report_yyyy-mm-dd_hh:mm.json` will be generated within the project scanned !
 
 ```shell
 mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -o json"
