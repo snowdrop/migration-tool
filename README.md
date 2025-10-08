@@ -147,9 +147,9 @@ podman cp $ID:/jdtls ./jdt/konveyor-jdtls
 > [!NOTE]
 > Copy the `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/java-analyzer-bundle.core-1.0.0-SNAPSHOT.jarjava-analyzer-bundle.core-1.0.0-SNAPSHOT.jar` to the `./lib/` folder of this project to use it as dependency (to access the code) as it is not published on a maven repository server !
 
-## Client's commands
+## Hal client's commands
 
-This client supports 2 commands: 
+The client proposes 2 commands: 
 
 - **[analyze](#scan-and-analyze)**: Scan the code source using the rules matching conditions and generate a JSON report augmented with the provider's instructions.
 - **[transform](#transform-your-application)**: Apply the transformation's instructions using as input the JSON report by using the chosen provider
