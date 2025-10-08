@@ -5,3 +5,4 @@ jdt/
 /.env
 applications/**/*.json
 /applications/demo-spring-boot-todo-app/
+/my-rewrite.yml
