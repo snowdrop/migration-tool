@@ -183,7 +183,7 @@ mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/T
 mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app"
 ```
 
-> [!TIP]
+> [!CAUTION]
 > If you experiment issues with the language server, you can check its log from this folder: `jdt/.jdt_workspace/.metadata/.log` !
 
 During the execution of the command, you will be able to see within the terminal the log reporting the JSON responses like also a summary table
