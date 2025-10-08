@@ -3,18 +3,28 @@ package dev.snowdrop.transform.provider.impl;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.transform.provider.MigrationProvider;
+import dev.snowdrop.transform.provider.ai.Assistant;
 import dev.snowdrop.transform.provider.model.ExecutionContext;
 import dev.snowdrop.transform.provider.model.ExecutionResult;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 
+import java.io.Console;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Provider implementation for AI-based transformations.
  */
+@ApplicationScoped
 public class AiProvider implements MigrationProvider {
 
     private static final Logger logger = Logger.getLogger(AiProvider.class);
+
+    @Inject
+    Assistant assistant;
 
     @Override
     public String getProviderType() {
@@ -55,6 +65,55 @@ public class AiProvider implements MigrationProvider {
     }
 
     private ExecutionResult executeAiInstruction(Rule.Ai ai, Rule rule, ExecutionContext context) {
-        return null;
+        List<String> details = new ArrayList<>();
+
+        details.add("Processing rule : " +
+            "" + rule.ruleID());
+
+        var tasks = ai.tasks();
+
+        if (tasks == null || tasks.isEmpty()) {
+            return ExecutionResult.failure(String.format("No tasks defined in AI instruction for rule %s, skipping",rule.ruleID()), null);
+        }
+
+        // Get the list of instructions / rule
+        ai.tasks().forEach(task -> {
+            logger.infof("Task: %s", task);
+            details.add("- " + task);
+        });
+
+        boolean success = execAiCmd(context, tasks, details);
+        details.add("Ai cmd executed successfully");
+
+        if (success) {
+            return ExecutionResult.success("AI instruction executed successfully", details);
+        } else {
+            return ExecutionResult.failure("AI's chat command execution failed", details, null);
+        }
+    }
+
+    private boolean execAiCmd(ExecutionContext context, List<String> tasks, List<String> details) {
+        logger.info("Hello! I'm your AI migration assistant.");
+
+        Console console = System.console();
+
+        // TODO: To be improved
+        if (console == null) {
+            details.add("Java console not available.");
+            return false;
+        }
+
+        tasks.forEach(t -> {
+            // Send to the model the task to be executed within the project to migrate
+            String response = assistant.chat(t);
+            logger.infof("Claude: %s", response);
+
+            String userAction = console.readLine("> ");
+            if ("next".equalsIgnoreCase(userAction)) {
+                logger.infof("Processing next task ...");
+            }
+        });
+
+        return true;
     }
 }
