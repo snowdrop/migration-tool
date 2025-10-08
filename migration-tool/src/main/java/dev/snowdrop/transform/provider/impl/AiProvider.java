@@ -100,7 +100,7 @@ public class AiProvider implements MigrationProvider {
         }
 
         tasks.forEach(t -> {
-            // Send to the model the task to be executed within the project to migrate
+            logger.infof("============= Sending user message");
             String response = ctx.assistant().chat(t);
             logger.infof("============= Claude response: %s", response);
         });

@@ -17,9 +17,10 @@
     ai:
       #- promptMessage: "Add a new class com.todo.app.TodoApplication which implements QuarkusApplication. Use stdout to send a message: Hello user using args[0]. Next Pass as first argument: TodoApplication.class to Quarkus.run()"
       - tasks:
-          - "Add a new class com.todo.app.TodoApplication which implements QuarkusApplication"
-          - "Use stdout to send a message: Hello user using args[0]."
-          - "Next Pass as first argument: TodoApplication.class to Quarkus.run()"
+          - "Add a new class com.todo.app.TodoApplication which implements QuarkusApplication."
+          - "Don't add the annotation @QuarkusMain to this class."
+          - "Use stdout to send a message: Hello user using args[0] within the method which override run()."
+
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:
