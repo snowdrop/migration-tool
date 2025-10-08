@@ -173,13 +173,14 @@ Analyze a project for migration
 mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
 ```
 
-To avoid to pass the parameters to the command, you can use the "defaults" [application.properties](src/main/resources/application.properties) and just pass the path of the application to be analyzed
+To avoid to pass all the parameters to the command, you can use the "defaults" [application.properties](src/main/resources/application.properties) and just pass the path of the application to be analyzed
 
 ```shell
 mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app"
 ```
 
-You can check the log of the language server from this folder: `jdt/.jdt_workspace/.metadata/.log` !
+> [!TIP]
+> If you experiment issues with the language server, you can check its log from this folder: `jdt/.jdt_workspace/.metadata/.log` !
 
 During the execution of the command, you will be able to see within the terminal the log reporting the JSON responses like also a summary table
 ```text
