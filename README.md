@@ -269,6 +269,7 @@ Check the console to see the tasks executed and AI's reponses:
 2025-10-08 13:29:33,811 INFO  [dev.sno.tra.TransformationService] (main) ✅ Task completed successfully:    ✅ ai execution completed successfully
 ...
 ```
+If the AI responses are not accurate, then you will have to adapt the instructions as described part of the different Rules YAML files available here: `cookbook/rules/ddd-springboot-****.yaml` !
 
 ## Tips
 
