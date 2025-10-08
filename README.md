@@ -28,12 +28,12 @@ flowchart LR
 
 While this flow, including also the transformation step, works pretty well, it suffers froms 2 limitations: 
 
-- lack of clear instructions to be executed during a transformation step 
+- Lack of clear instructions to be executed during a transformation step 
 - No order to play or execute the instructions.
 
-While such limitations are not problematic for the users doing manually the transformation, that will become a real challenge when it is needed to apply recipes or delegate to AI the responsibility to propose solutions. Ai will generate hallucinating results and this lack of predictability will discourage many users to rely on it. On the other site, as openrewrite during the execution of a recipe will compile the code, then the user will be faced to compilation errors, etc.
+While such limitations are not problematic for the users doing manually the transformation, that will become a real challenge when it is needed to apply recipes or delegate to AI the responsibility to propose solutions. AI will generate hallucinating results and this lack of predictability will discourage many users to rely on it. On the other site, as openrewrite during the execution of a recipe will compile the code, then the user will be faced to compilation errors, etc.
 
-This is why it is important that we improve the existing flow to propose a more robust one as depicted hereafter:
+This is why it is important that we improve the existing flow to propose a more "controlled" flow as depicted hereafter:
 
 ```mermaid
 ---
