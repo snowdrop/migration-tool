@@ -12,6 +12,8 @@ public record ExecutionContext(
     boolean verbose,
     boolean dryRun,
     String provideType,
-    Assistant assistant
+    Assistant assistant,
+    String openRewriteMavenPluginVersion,
+    String compositeRecipeName
 ) {
 }

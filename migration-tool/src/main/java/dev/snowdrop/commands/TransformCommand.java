@@ -34,7 +34,7 @@ public class TransformCommand implements Runnable {
 
     @CommandLine.Parameters(
         index = "0",
-        description = "Path to the Java project to analyze"
+        description = "Path to the Java project to transform"
     )
     @ConfigProperty(name = "analyzer.app.path", defaultValue = "./applications/spring-boot-todo-app")
     public String appPath;
@@ -53,15 +53,19 @@ public class TransformCommand implements Runnable {
 
     @CommandLine.Option(
         names = {"-p", "--provider"},
-        description = "Migration provider to use (ai, openrewrite, manual, all). Default: from migration.provider property"
+        description = "Migration provider to use (ai, openrewrite, manual). Default: from migration.provider property"
     )
     @ConfigProperty(name = "migration.provider", defaultValue = "openrewrite")
     private String provider;
 
+    @ConfigProperty(name = "migration.provider.openrewrite.composite-recipe-name")
+    private String compositeRecipeName;
+
+    @ConfigProperty(name = "migration.provider.openrewrite.plugin.version")
+    private String openRewriteMavenPluginVersion;
+
     @Inject
     Assistant aiAssistant;
-
-    private static String compositeRecipeName = "dev.snowdrop.openrewrite.java.SpringToQuarkus";
 
     @Override
     public void run() {
@@ -167,7 +171,7 @@ public class TransformCommand implements Runnable {
         logger.infof("📋 Found %d migration tasks to process", migrationTasks.size());
 
         // Configure the Context with the information used by the Provider
-        ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider, aiAssistant);
+        ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider, aiAssistant,openRewriteMavenPluginVersion, compositeRecipeName);
 
         // Iterate over the list of the migration and tasks
         for (Map.Entry<String, MigrationTask> entry : migrationTasks.entrySet()) {

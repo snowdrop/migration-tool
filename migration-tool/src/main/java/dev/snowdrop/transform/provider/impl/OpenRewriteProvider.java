@@ -33,18 +33,13 @@ public class OpenRewriteProvider implements MigrationProvider {
     public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
     public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
 
-    @ConfigProperty(name = "migration.provider.openrewrite.plugin.version", defaultValue = "6.19.0")
-    public String MAVEN_OPENREWRITE_PLUGIN_VERSION;
-
-    private static final String COMPOSITE_RECIPE_NAME = "dev.snowdrop.openrewrite.java.SpringToQuarkus";
-
     @Override
     public String getProviderType() {
         return "openrewrite";
     }
 
     @Override
-    public ExecutionResult execute(MigrationTask task, ExecutionContext context) {
+    public ExecutionResult execute(MigrationTask task, ExecutionContext ctx) {
         var rule = task.getRule();
 
         if (rule.instructions() == null || rule.instructions().openrewrite() == null) {
@@ -59,7 +54,7 @@ public class OpenRewriteProvider implements MigrationProvider {
         }
 
         try {
-            ExecutionResult result = executeOpenRewriteInstruction(openrewrite, rule, context);
+            ExecutionResult result = executeOpenRewriteInstruction(ctx, openrewrite, rule);
 
             if (!result.success()) {
                 return ExecutionResult.failure(result.message(), result.details(), null);
@@ -68,20 +63,20 @@ public class OpenRewriteProvider implements MigrationProvider {
             return ExecutionResult.success("OpenRewrite execution completed successfully", result.details());
         } catch (Exception e) {
             logger.errorf("Error executing OpenRewrite instruction: %s", e.getMessage());
-            if (context.verbose()) {
+            if (ctx.verbose()) {
                 e.printStackTrace();
             }
             return ExecutionResult.failure("Error executing OpenRewrite instruction !",e);
         }
     }
 
-    private ExecutionResult executeOpenRewriteInstruction(Rule.Openrewrite openrewrite, Rule rule, ExecutionContext context) {
+    private ExecutionResult executeOpenRewriteInstruction(ExecutionContext ctx, Rule.Openrewrite openrewrite, Rule rule) {
         List<String> details = new ArrayList<>();
 
         // Generate YAML recipes
         String yamlRecipesStr;
         try {
-            yamlRecipesStr = populateYAMLRecipes(openrewrite);
+            yamlRecipesStr = populateYAMLRecipes(ctx, openrewrite);
             details.add("Generated YAML recipes");
         } catch (Exception e) {
             return ExecutionResult.failure("Failed to generate YAML recipes", e);
@@ -89,7 +84,7 @@ public class OpenRewriteProvider implements MigrationProvider {
 
         // Write YAML file
         String rewriteYamlName = String.format("rewrite-%d.yml", rule.order());
-        Path yamlFilePath = context.projectPath().resolve(rewriteYamlName);
+        Path yamlFilePath = ctx.projectPath().resolve(rewriteYamlName);
 
         try {
             Files.write(yamlFilePath, yamlRecipesStr.getBytes(),
@@ -101,7 +96,7 @@ public class OpenRewriteProvider implements MigrationProvider {
 
         // Execute Maven command
         String gavs = String.join(",", openrewrite.gav());
-        boolean success = execMvnCmd(context, gavs, rewriteYamlName, details);
+        boolean success = execMvnCmd(ctx, gavs, rewriteYamlName, details);
         details.add("Maven cmd executed successfully");
 
         if (success) {
@@ -111,7 +106,7 @@ public class OpenRewriteProvider implements MigrationProvider {
         }
     }
 
-    private String populateYAMLRecipes(Rule.Openrewrite openrewrite) throws JsonProcessingException {
+    private String populateYAMLRecipes(ExecutionContext ctx, Rule.Openrewrite openrewrite) throws JsonProcessingException {
         List<Object> recipes = openrewrite.recipeList();
 
         if (recipes.isEmpty()) {
@@ -119,7 +114,7 @@ public class OpenRewriteProvider implements MigrationProvider {
         }
 
         CompositeRecipe compositeRecipe = new CompositeRecipe(
-            COMPOSITE_RECIPE_NAME,
+            ctx.compositeRecipeName(),
             openrewrite.name(),
             openrewrite.description(),
             recipes
@@ -132,7 +127,7 @@ public class OpenRewriteProvider implements MigrationProvider {
         return mapper.writeValueAsString(compositeRecipe);
     }
 
-    private boolean execMvnCmd(ExecutionContext context, String gavs, String rewriteYamlName, List<String> details) {
+    private boolean execMvnCmd(ExecutionContext ctx, String gavs, String rewriteYamlName, List<String> details) {
         try {
             List<String> command = new ArrayList<>();
             String outputDirectoryRewriteName = rewriteYamlName.substring(0, rewriteYamlName.lastIndexOf('.'));
@@ -143,10 +138,9 @@ public class OpenRewriteProvider implements MigrationProvider {
             command.add(String.format("%s:%s:%s:%s",
                 MAVEN_OPENREWRITE_PLUGIN_GROUP,
                 MAVEN_OPENREWRITE_PLUGIN_ARTIFACT,
-                "6.19.0",
-                context.dryRun() ? "dryRun" : "run"));
-            //MAVEN_OPENREWRITE_PLUGIN_VERSION
-            command.add("-Drewrite.activeRecipes=" + COMPOSITE_RECIPE_NAME);
+                ctx.openRewriteMavenPluginVersion(),
+                ctx.dryRun() ? "dryRun" : "run"));
+            command.add(String.format("-Drewrite.activeRecipes=%s",ctx.compositeRecipeName()));
             command.add("-Drewrite.recipeArtifactCoordinates=" + gavs);
             command.add("-Drewrite.exportDatatables=true");
             command.add(String.format("-DreportOutputDirectory=target/%s", outputDirectoryRewriteName));
@@ -157,7 +151,7 @@ public class OpenRewriteProvider implements MigrationProvider {
             details.add("Executing: " + commandStr);
 
             ProcessBuilder processBuilder = new ProcessBuilder(command);
-            processBuilder.directory(context.projectPath().toFile());
+            processBuilder.directory(ctx.projectPath().toFile());
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
@@ -166,7 +160,7 @@ public class OpenRewriteProvider implements MigrationProvider {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    if (context.verbose()) {
+                    if (ctx.verbose()) {
                         logger.infof("      %s", line);
                     }
                     details.add("Maven: " + line);
@@ -181,7 +175,7 @@ public class OpenRewriteProvider implements MigrationProvider {
         } catch (IOException | InterruptedException e) {
             logger.errorf("Failed to execute maven command: %s", e.getMessage());
             details.add("Error executing Maven: " + e.getMessage());
-            if (context.verbose()) {
+            if (ctx.verbose()) {
                 e.printStackTrace();
             }
             return false;

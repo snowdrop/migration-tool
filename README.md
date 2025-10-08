@@ -154,11 +154,14 @@ This client supports 2 commands:
 - **[analyze](#scan-and-analyze)**: Scan the code source using the rules matching conditions and generate a JSON report augmented with the provider's instructions.
 - **[transform](#transform-your-application)**: Apply the transformation's instructions using as input the JSON report by using the chosen provider
 
+> [!NOTE]
+> The name of the tool hal - Heuristically Programmed Algorithmic Computer is coming from the AI that control the systems of the spacecraft of the movie`s Space Odyssey of Stanley Kubrick - https://en.wikipedia.org/wiki/HAL_9000.
+
 ### Scan and analyze
 
 To execute the command using the Quarkus Picocli CLI able to scan, analyze and generate the migration plan report (optional), execute this command 
 ```shell
-Usage: java-analyzer analyze [-v] [--jdt-ls-path=<jdtLsPath>]
+Usage: hal analyze [-v] [--jdt-ls-path=<jdtLsPath>]
                              [--jdt-workspace=<jdtWorkspace>] [-r=<rulesPath>]
                              <appPath>
 Analyze a project for migration
@@ -237,7 +240,19 @@ mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/sprin
 
 ## Transform your application
 
-Now that we have a migration plan (aka list of instructions to be executed by a provider like openrewrite, user or AI), we can perform the transformation using the command `transform` where we pass as parameter the provider to be used.
+Now that we have a migration plan containing the of the instructions to be executed by a provider, we can perform the transformation using the command `transform` where we pass as parameter the provider to be used.
+
+```shell
+Usage: hal transform [-dv] [-p=<provider>] <appPath>
+Transform a java application
+      <appPath>   Path to the Java project to transform
+  -d, --dry-run   Execute OpenRewrite in dry-run mode (preview changes without
+                    applying them)
+  -p, --provider=<provider>
+                  Migration provider to use (ai, openrewrite, manual). Default:
+                    from migration.provider property
+  -v, --verbose   Enable verbose output
+```
 
 > [!NOTE]
 > The default provider is `openwrite` but you can use too: `manual` or `ai`
