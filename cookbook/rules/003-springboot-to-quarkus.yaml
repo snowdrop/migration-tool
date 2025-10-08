@@ -17,7 +17,7 @@
     ai:
       #- promptMessage: "Can you now remove the @SpringBootApplication from the java file which contains it. Next add to the same java class the @QuarkusMain annotation. The AppApplication should not implement QuarkusApplication."
       - tasks:
-          - "Can you now remove the @SpringBootApplication from the java file which contains it."
+          - "Can you remove the @SpringBootApplication from the java file com.todo.app.AppApplication.java."
           - "Next add to the same java class the @QuarkusMain annotation."
           - "The AppApplication should not implement QuarkusApplication."
     manual:
