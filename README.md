@@ -10,7 +10,10 @@ This project demonstrates how we could manage end-to-end the migration process o
 
 Many tools, like the [konveyor kantra client](https://github.com/konveyor/kantra/) supports today the following flow. It generates an analysis report that users can use to review the issues reported, their criticality and what they should do to transform the code part of the message and/or links to websites. 
 ```mermaid
-flowchart TD
+---
+title: Analysis and migration flow
+---
+flowchart LR
     A[Tool] --> |use rules|B[Scan Code]
     B --> |Generate|C[Analysis report]
     C -..-> |Execute|D[Transform]
@@ -25,7 +28,10 @@ While this flow, including also the transformation step, works pretty well, it s
 This is why we should support a more robust flow as depicted hereafter:
 
 ```mermaid
-flowchart TD
+---
+title: Enhanced analysis and migration flow with instructions
+---
+flowchart LR
     A[Tool with controlled flow] --> |Use rules|B[Scan Code]
     B --> |Generate|C[Analysis report => Migration plan with tasks]
     C --> D{Do we have instructions?}
