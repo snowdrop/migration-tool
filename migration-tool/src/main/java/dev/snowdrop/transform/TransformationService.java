@@ -40,7 +40,6 @@ public class TransformationService {
     private ExecutionResult executeProvider(String providerType, MigrationTask task, ExecutionContext context) {
         return ProviderFactory.getProvider(providerType)
             .map(provider -> {
-                logger.infof("   Executing %s provider...", providerType);
                 return provider.execute(task, context);
             }).orElse(ExecutionResult.failure("Provider not found: " + providerType));
     }

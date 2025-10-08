@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -47,41 +48,30 @@ public class OpenRewriteProvider implements MigrationProvider {
         var rule = task.getRule();
 
         if (rule.instructions() == null || rule.instructions().openrewrite() == null) {
-            return ExecutionResult.failure("No OpenRewrite instructions found for task");
+            return ExecutionResult.failure(String.format("No OpenRewrite instructions found for the rule: %s", rule.ruleID()));
         }
 
-        List<String> executionDetails = new ArrayList<>();
-        boolean allSuccessful = true;
+        // We only process until now only one openrewrite object/rule !!
+        var openrewrite = Arrays.stream(rule.instructions().openrewrite()).findFirst().orElse(null);
 
-        for (var openrewrite : rule.instructions().openrewrite()) {
-            if (openrewrite.recipeList() == null || openrewrite.recipeList().isEmpty()) {
-                logger.warnf("No recipes defined in OpenRewrite instruction, skipping");
-                executionDetails.add("Skipped instruction with no recipes");
-                continue;
-            }
-
-            try {
-                var result = executeOpenRewriteInstruction(openrewrite, rule, context);
-                executionDetails.addAll(result.details());
-
-                if (!result.success()) {
-                    allSuccessful = false;
-                    executionDetails.add("Failed: " + result.message());
-                }
-            } catch (Exception e) {
-                allSuccessful = false;
-                executionDetails.add("Exception during execution: " + e.getMessage());
-                logger.errorf("Error executing OpenRewrite instruction: %s", e.getMessage());
-                if (context.verbose()) {
-                    e.printStackTrace();
-                }
-            }
+        if (openrewrite.recipeList() == null || openrewrite.recipeList().isEmpty()) {
+            return ExecutionResult.failure("No recipes defined in OpenRewrite instruction, skipping", null);
         }
 
-        if (allSuccessful) {
-            return ExecutionResult.success("OpenRewrite execution completed successfully", executionDetails);
-        } else {
-            return ExecutionResult.failure("Some OpenRewrite executions failed", executionDetails, null);
+        try {
+            ExecutionResult result = executeOpenRewriteInstruction(openrewrite, rule, context);
+
+            if (!result.success()) {
+                return ExecutionResult.failure(result.message(), result.details(), null);
+            }
+
+            return ExecutionResult.success("OpenRewrite execution completed successfully", result.details());
+        } catch (Exception e) {
+            logger.errorf("Error executing OpenRewrite instruction: %s", e.getMessage());
+            if (context.verbose()) {
+                e.printStackTrace();
+            }
+            return ExecutionResult.failure("Error executing OpenRewrite instruction !",e);
         }
     }
 
@@ -112,11 +102,12 @@ public class OpenRewriteProvider implements MigrationProvider {
         // Execute Maven command
         String gavs = String.join(",", openrewrite.gav());
         boolean success = execMvnCmd(context, gavs, rewriteYamlName, details);
+        details.add("Maven cmd executed successfully");
 
         if (success) {
             return ExecutionResult.success("OpenRewrite instruction executed successfully", details);
         } else {
-            return ExecutionResult.failure("Maven command execution failed", details, null);
+            return ExecutionResult.failure("Openrewrite's maven command execution failed", details, null);
         }
     }
 
@@ -152,8 +143,9 @@ public class OpenRewriteProvider implements MigrationProvider {
             command.add(String.format("%s:%s:%s:%s",
                 MAVEN_OPENREWRITE_PLUGIN_GROUP,
                 MAVEN_OPENREWRITE_PLUGIN_ARTIFACT,
-                MAVEN_OPENREWRITE_PLUGIN_VERSION,
+                "6.19.0",
                 context.dryRun() ? "dryRun" : "run"));
+            //MAVEN_OPENREWRITE_PLUGIN_VERSION
             command.add("-Drewrite.activeRecipes=" + COMPOSITE_RECIPE_NAME);
             command.add("-Drewrite.recipeArtifactCoordinates=" + gavs);
             command.add("-Drewrite.exportDatatables=true");
