@@ -7,8 +7,7 @@ import picocli.CommandLine;
 @TopCommand
 @CommandLine.Command(
     name = "hal",
-    description = "Quarkus client " +
-        "tool able to scan, analyze and migrate a java application using instructions",
+    description = "Quarkus Hal client able to scan, analyze and migrate a java application using instructions",
     subcommands = {
         AnalyzeCommand.class,
         TransformCommand.class,

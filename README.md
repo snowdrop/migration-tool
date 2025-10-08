@@ -154,6 +154,16 @@ This client supports 2 commands:
 - **[analyze](#scan-and-analyze)**: Scan the code source using the rules matching conditions and generate a JSON report augmented with the provider's instructions.
 - **[transform](#transform-your-application)**: Apply the transformation's instructions using as input the JSON report by using the chosen provider
 
+```shell
+Usage: hal [COMMAND]
+Quarkus Hal client able to scan, analyze and migrate a java application using
+instructions
+Commands:
+  analyze    Analyze a project for migration
+  transform  Transform a java application
+  help       Display help information about the specified command.
+```
+
 > [!NOTE]
 > The name of the tool hal - Heuristically Programmed Algorithmic Computer is coming from the AI that control the systems of the spacecraft of the movie`s Space Odyssey of Stanley Kubrick - https://en.wikipedia.org/wiki/HAL_9000.
 
