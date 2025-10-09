@@ -16,9 +16,10 @@ import java.util.List;
 
 public class YamlRuleParser {
     private static final Logger logger = Logger.getLogger(YamlRuleParser.class);
+
     private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
 
     public YamlRuleParser() {
     }
@@ -34,11 +35,29 @@ public class YamlRuleParser {
         }
     }
 
+    public static List<Rule> filterRules(List<Rule> rules, String source, String target) {
+        List<Rule> filteredRules = new ArrayList<>();
+        String sourceLabel = "konveyor.io/source=" + source;
+        String targetLabel = "konveyor.io/target=" + target;
+
+        // The two labels we need to search about
+        List<String> requiredLabels = List.of(sourceLabel, targetLabel);
+
+        rules.forEach(rule -> {
+            if (rule.labels().containsAll(requiredLabels)) {
+                filteredRules.add(rule);
+            } else {
+                logger.warnf("RuleID %s with labels %s is missing one or both label: from %s -> %s", rule.ruleID(), rule.labels(), sourceLabel, targetLabel);
+            }
+        });
+        return filteredRules;
+    }
+
     public static List<Rule> parseRulesFromFolder(Path folderPath) throws IOException {
         return parseRulesFromFolder(folderPath, true);
     }
 
-    public static  List<Rule> parseRulesFromFolder(Path folderPath, boolean recursive) throws IOException {
+    public static List<Rule> parseRulesFromFolder(Path folderPath, boolean recursive) throws IOException {
         logger.debugf("Parsing YAML rules from folder: {} (recursive: {})", folderPath, recursive);
 
         if (!Files.exists(folderPath)) {

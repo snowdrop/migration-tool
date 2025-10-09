@@ -2,6 +2,7 @@ package dev.snowdrop.commands;
 
 import dev.snowdrop.analyze.JdtLsFactory;
 import dev.snowdrop.analyze.model.MigrationTask;
+import dev.snowdrop.analyze.model.Rule;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
@@ -15,10 +16,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import static dev.snowdrop.analyze.services.LsSearchService.analyzeCodeFromRule;
+import static dev.snowdrop.analyze.utils.YamlRuleParser.filterRules;
+import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
 
 @CommandLine.Command(
     name = "analyze",
@@ -73,6 +77,20 @@ public class AnalyzeCommand implements Runnable {
     )
     private String output;
 
+    @CommandLine.Option(
+        names = {"-s","--source"},
+        description = "Source technology to consider for analysis"
+    )
+    @ConfigProperty(name = "analyzer.technology.source")
+    public String source;
+
+    @CommandLine.Option(
+        names = {"-t","--target"},
+        description = "Target technology to consider for analysis"
+    )
+    @ConfigProperty(name = "analyzer.technology.target")
+    public String target;
+
     @Override
     public void run() {
         Path path = Paths.get(appPath);
@@ -98,25 +116,26 @@ public class AnalyzeCommand implements Runnable {
     }
 
     private void startAnalyse(JdtLsFactory factory) throws Exception {
-        logger.infof("\n🚀 Starting jdt ls analysis...");
-
-        // Log resolved paths for debugging
-        logger.infof("📋 jdt ls path: %s", factory.jdtLsPath);
-        logger.infof("📋 workspace: %s", factory.jdtWks);
-        logger.infof("📋 project path: %s", factory.appPath);
-        logger.infof("📋 rules path: %s", factory.rulesPath);
-        logger.infof("📋 LS_CMD set to: %s", factory.lsCmd);
+        logger.infof("\n🚀 Starting analysis...");
 
         try {
-            Map<String, MigrationTask> analyzeReport = analyzeCodeFromRule(factory);
+            List<Rule> rules = parseRulesFromFolder(factory.rulesPath);
 
-            // Export migration tasks as JSON if requested
-            if (output != null && output.equals("json")) {
-                exportAsJson(analyzeReport);
+            // Filter the rules according to the source and target technology
+            List<Rule> filteredRules = filterRules(rules,factory.sourceTechnology,factory.targetTechnology);
+            if (filteredRules.isEmpty()) {
+                logger.warnf("No rules found !!");
+            } else {
+                Map<String, MigrationTask> analyzeReport = analyzeCodeFromRule(factory, filteredRules);
+
+                // Export rules, results and migration instructions as JSON if requested
+                if (output != null && output.equals("json")) {
+                    exportAsJson(analyzeReport);
+                }
+
+                logger.infof("⏳ Waiting for commands to complete...");
+                Thread.sleep(5000);
             }
-
-            logger.infof("⏳ Waiting for commands to complete...");
-            Thread.sleep(5000);
 
         } finally {
             if (factory.process != null && factory.process.isAlive()) {

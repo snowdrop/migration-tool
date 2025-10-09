@@ -192,8 +192,7 @@ public class LsSearchService {
         return symbolInformationList;
     }
 
-    public static Map<String, MigrationTask> analyzeCodeFromRule(JdtLsFactory factory) throws IOException {
-        List<Rule> rules = parseRulesFromFolder(factory.rulesPath);
+    public static Map<String, MigrationTask> analyzeCodeFromRule(JdtLsFactory factory, List<Rule> rules) throws IOException {
         Map<String, MigrationTask> ruleMigrationTasks = new HashMap<>();
 
         // Collect all results from all the rule's queries executed and add the instructions
@@ -209,53 +208,58 @@ public class LsSearchService {
         }
 
         // Display the rule queries results
-        displayResultsTable(ruleMigrationTasks);
+        displayResultsTable(ruleMigrationTasks, factory.sourceTechnology, factory.targetTechnology);
 
         return ruleMigrationTasks;
     }
 
-    private static void displayResultsTable(Map<String, MigrationTask> results) {
+    private static void displayResultsTable(Map<String, MigrationTask> results, String source, String target) {
         // TODO: Test https://github.com/freva/ascii-table to see if the url to the file is not truncated
         AsciiTable at = new AsciiTable();
-        at.getContext().setWidth(180); // Set overall table width
+        at.getContext().setWidth(220); // Set overall table width
         at.addRule();
 
         AT_Row row;
-        row = at.addRow("Rule ID", "Found", "Information Details");
-        row.getCells().get(0).getContext().setTextAlignment(TextAlignment.CENTER);
-        row.getCells().get(1).getContext().setTextAlignment(TextAlignment.CENTER);
+        row = at.addRow("Rule ID", "Source to Target", "Found", "Information Details");
+        row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
+        row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
         row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
+        row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
 
         at.addRule();
-        at.getRenderer().setCWC(new CWC_FixedWidth().add(45).add(5).add(130));
+        at.getRenderer().setCWC(new CWC_FixedWidth().add(40).add(25).add(5).add(130));
 
         for (Map.Entry<String, MigrationTask> entry : results.entrySet()) {
             String ruleId = entry.getKey();
             MigrationTask aTask = entry.getValue();
             List<SymbolInformation> queryResults = aTask.getResults();
             String hasQueryResults = queryResults.isEmpty() ? "No" : "Yes";
+            String sourceToTarget = String.format("%s -> %s", source, target);
 
             if (queryResults.isEmpty()) {
-                row = at.addRow(ruleId, hasQueryResults, "No symbols found");
+                row = at.addRow(ruleId, sourceToTarget, hasQueryResults, "No symbols found");
                 row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
-                row.getCells().get(1).getContext().setTextAlignment(TextAlignment.CENTER);
-                row.getCells().get(2).getContext().setTextAlignment(TextAlignment.LEFT);
+                row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
+                row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
+                row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
             } else {
                 // Add first symbol
                 SymbolInformation firstSymbol = queryResults.get(0);
                 String firstSymbolDetails = formatSymbolInformation(firstSymbol);
-                row = at.addRow(ruleId, hasQueryResults, firstSymbolDetails + "\n" + queryResults.get(0).getLocation().getUri());
+                row = at.addRow(ruleId, sourceToTarget, hasQueryResults, firstSymbolDetails + "\n" + queryResults.get(0).getLocation().getUri());
                 row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
-                row.getCells().get(1).getContext().setTextAlignment(TextAlignment.CENTER);
-                row.getCells().get(2).getContext().setTextAlignment(TextAlignment.LEFT);
+                row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
+                row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
+                row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
 
                 // Add additional symbols in subsequent rows with empty rule id and found columns
                 for (int i = 1; i < queryResults.size(); i++) {
                     String symbolDetails = formatSymbolInformation(queryResults.get(i));
-                    row = at.addRow("", "", symbolDetails + "\n" + queryResults.get(0).getLocation().getUri());
+                    row = at.addRow("", "", 33, symbolDetails + "\n" + queryResults.get(0).getLocation().getUri());
                     row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
-                    row.getCells().get(1).getContext().setTextAlignment(TextAlignment.CENTER);
-                    row.getCells().get(2).getContext().setTextAlignment(TextAlignment.LEFT);
+                    row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
+                    row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
+                    row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
                 }
             }
             at.addRule();

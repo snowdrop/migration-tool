@@ -2,6 +2,7 @@ package dev.snowdrop.analyze;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.commands.AnalyzeCommand;
 import dev.snowdrop.analyze.utils.LSClient;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import static dev.snowdrop.analyze.services.LsSearchService.analyzeCodeFromRule;
 import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
+import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
 
 @ApplicationScoped
 public class JdtLsFactory {
@@ -44,6 +47,8 @@ public class JdtLsFactory {
     public String appPath;
     public Path rulesPath;
     public String lsCmd;
+    public String sourceTechnology;
+    public String targetTechnology;
 
     public CompletableFuture<InitializeResult> future;
 
@@ -91,11 +96,25 @@ public class JdtLsFactory {
             .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.jdt-ls-command", String.class)))
             .orElseThrow(() -> new RuntimeException("Command to be executed against the LS server is missing !"));
 
-        logger.infof("APP_PATH: %s", appPath);
-        logger.infof("JDT_LS_PATH: %s", jdtLsPath);
-        logger.infof("JDT_WKS: %s", jdtWks);
-        logger.infof("RULES_PATH: %s", rulesPath);
-        logger.infof("LS_CMD: %s", lsCmd);
+        sourceTechnology = Optional
+            .ofNullable(System.getProperty("SOURCE_TECHNOLOGY"))
+            .or(() -> Optional.ofNullable(analyzeCommand).map(cmd -> cmd.source))
+            .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.technology.source", String.class)))
+            .orElseThrow(() -> new RuntimeException("Source technology to analyse is missing !"));
+
+        targetTechnology = Optional
+            .ofNullable(System.getProperty("TARGET_TECHNOLOGY"))
+            .or(() -> Optional.ofNullable(analyzeCommand).map(cmd -> cmd.target))
+            .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.technology.target", String.class)))
+            .orElseThrow(() -> new RuntimeException("Target technology to analyse is missing !"));
+
+        // Log resolved paths for debugging
+        logger.infof("📋 Jdt-ls path: %s", jdtLsPath);
+        logger.infof("📋 Jdt-ls workspace: %s", jdtWks);
+        logger.infof("📋 Language server command: %s", lsCmd);
+        logger.infof("📋 Application path: %s", appPath);
+        logger.infof("📋 Source technology: %s", sourceTechnology);
+        logger.infof("📋 Target technology: %s", targetTechnology);
     }
 
     public void initLanguageServer() throws Exception {
@@ -198,6 +217,7 @@ public class JdtLsFactory {
     }
 
     private void analyze() throws IOException {
-        analyzeCodeFromRule(this);
+        List<Rule> rules = parseRulesFromFolder(this.rulesPath);
+        analyzeCodeFromRule(this, rules);
     }
 }
