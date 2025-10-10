@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
         query: "FIND DEPENDENCY IN POM WHERE artifactId='quarkus-core'"
         query: "FIND DEPENDENCY IN POM WHERE (groupId=io.quarkus, artifactId='quarkus-core')"
         query: "FIND DEPENDENCY IN POM WHERE (artifactId='quarkus-core', version='3.16.2') OR (artifactId='quarkus-rest', version='3.16.2')"
+        query: "FIND DEPENDENCY IN POM WHERE (artifactId='quarkus-core', version='3.16.2') AND (artifactId='quarkus-rest', version='3.16.2')"
  */
 @Value
 @EqualsAndHashCode(callSuper = false)
