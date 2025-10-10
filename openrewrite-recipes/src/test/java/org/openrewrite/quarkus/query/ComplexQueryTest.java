@@ -33,7 +33,7 @@ class ComplexQueryTest implements RewriteTest {
     void findMultipleDependenciesUsingOrOperator() {
         rewriteRun(
             spec -> spec.recipe(new QueryRecipe(
-                "FIND DEPENDENCY IN POM WHERE (artifactId='quarkus-core' AND version='3.16.2') OR (artifactId='quarkus-rest' AND version='3.16.2')"
+                "FIND DEPENDENCY IN POM WHERE (artifactId='quarkus-core', version='3.16.2') OR (artifactId='quarkus-rest' AND version='3.16.2')"
             )),
             pomXml(
                 """

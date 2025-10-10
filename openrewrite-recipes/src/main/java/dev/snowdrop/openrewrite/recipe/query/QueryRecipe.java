@@ -25,7 +25,8 @@ import java.util.stream.Collectors;
     - dev.snowdrop.openrewrite.recipe.query.QueryRecipe:
         query: "FIND CLASS IN JAVA WHERE name='TodoList'"
         query: "FIND DEPENDENCY IN POM WHERE artifactId='quarkus-core'"
-        query: "FIND DEPENDENCY IN POM WHERE (artifactId='quarkus-core' AND version='3.16.2') OR (artifactId='quarkus-rest' AND version='3.16.2')"
+        query: "FIND DEPENDENCY IN POM WHERE (groupId=io.quarkus, artifactId='quarkus-core')"
+        query: "FIND DEPENDENCY IN POM WHERE (artifactId='quarkus-core', version='3.16.2') OR (artifactId='quarkus-rest', version='3.16.2')"
  */
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -58,6 +59,8 @@ public class QueryRecipe extends Recipe {
         String elementType = matcher.group(1).toUpperCase();
         String fileType = matcher.group(2).toUpperCase();
         Condition condition = QueryParser.parse(matcher.group(3));
+
+        QueryValidator.validate(elementType, condition);
 
         switch (fileType) {
             case "POM":

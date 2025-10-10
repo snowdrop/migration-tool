@@ -29,7 +29,7 @@ public class QueryParser {
 
     private Condition parseAnd() {
         Condition left = parsePrimary();
-        while (pos < tokens.size() && "AND".equalsIgnoreCase(tokens.get(pos))) {
+        while (pos < tokens.size() && ("AND".equalsIgnoreCase(tokens.get(pos)) || ",".equals(tokens.get(pos)))) {
             pos++;
             Condition right = parsePrimary();
             left = new AndCondition(left, right);
@@ -53,8 +53,8 @@ public class QueryParser {
 
     private List<String> tokenize(String text) {
         List<String> tokens = new ArrayList<>();
-        // --- FIX: A more precise regex to correctly separate all language parts ---
-        Pattern pattern = Pattern.compile("'[^']*'|\\w+|[()=]");
+        // This regex now handles: 'quoted values', unquoted-values-with-dots, operators, parens, and commas
+        Pattern pattern = Pattern.compile("'[^']*'|[\\w.-]+|[()=,]");
         Matcher matcher = pattern.matcher(text);
         while (matcher.find()) {
             tokens.add(matcher.group());
