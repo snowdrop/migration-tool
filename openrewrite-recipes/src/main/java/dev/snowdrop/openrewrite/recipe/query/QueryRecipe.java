@@ -24,12 +24,8 @@ import java.util.stream.Collectors;
   recipeList:
     - dev.snowdrop.openrewrite.recipe.query.QueryRecipe:
         query: "FIND CLASS IN JAVA WHERE name='TodoList'"
-
-  type: specs.openrewrite.org/v1beta/recipe
-  name: com.myorg.FindQuarkusCoreDependency
-  recipeList:
-    - dev.snowdrop.openrewrite.recipe.query.QueryRecipe:
-      query: "FIND DEPENDENCY IN POM WHERE artifactId='quarkus-core'"
+        query: "FIND DEPENDENCY IN POM WHERE artifactId='quarkus-core'"
+        query: "FIND DEPENDENCY IN POM WHERE (artifactId='quarkus-core' AND version='3.16.2') OR (artifactId='quarkus-rest' AND version='3.16.2')"
  */
 @Value
 @EqualsAndHashCode(callSuper = false)
