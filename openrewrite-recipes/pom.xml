@@ -38,6 +38,10 @@
         </dependency>
         <dependency>
             <groupId>org.openrewrite</groupId>
+            <artifactId>rewrite-maven</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-java-21</artifactId>
         </dependency>
         <dependency>
@@ -49,5 +53,52 @@
             <artifactId>rewrite-templating</artifactId>
         </dependency>
     </dependencies>
-
+    <profiles>
+        <profile>
+            <id>jackson-2.17</id>
+            <dependencies>
+                <!-- Override jackson version -->
+                <dependency>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                    <version>2.17.2</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                    <version>2.17.2</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                    <version>2.17.2</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.module</groupId>
+                    <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+                    <version>2.17.2</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.module</groupId>
+                    <artifactId>jackson-module-parameter-names</artifactId>
+                    <version>2.17.2</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.dataformat</groupId>
+                    <artifactId>jackson-dataformat-xml</artifactId>
+                    <version>2.17.2</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.dataformat</groupId>
+                    <artifactId>jackson-dataformat-yaml</artifactId>
+                    <version>2.17.2</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.dataformat</groupId>
+                    <artifactId>jackson-dataformat-csv</artifactId>
+                    <version>2.17.2</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
