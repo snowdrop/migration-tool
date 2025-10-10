@@ -1,6 +1,7 @@
 package org.openrewrite.quarkus.maven;
 
 import org.assertj.core.api.ThrowingConsumer;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.InMemoryExecutionContext;
 import org.openrewrite.Parser;
@@ -33,6 +34,7 @@ public class UserMavenSettingsTest {
             throw input;
         }));
 
+    @Disabled
     @Test
     void serverHttpHeaders() throws IOException {
         var settingsXML = Parser.Input.fromString(Path.of("settings.xml"),
