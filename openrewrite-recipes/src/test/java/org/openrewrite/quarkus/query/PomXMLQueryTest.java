@@ -33,7 +33,7 @@ public class PomXMLQueryTest implements RewriteTest {
         rewriteRun(
             // 1. Configure the recipe using a YAML string
             spec -> spec.recipe(new QueryRecipe(
-                "FIND DEPENDENCY IN POM.XML WHERE artifactId='quarkus-core'"
+                "FIND DEPENDENCY IN POM WHERE artifactId='quarkus-core'"
             )),
             pomXml(
                 pomXML,

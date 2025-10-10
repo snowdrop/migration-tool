@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /*
   type: specs.openrewrite.org/v1beta/recipe
@@ -29,7 +30,7 @@ import java.util.regex.Pattern;
   name: com.myorg.FindQuarkusCoreDependency
   recipeList:
     - dev.snowdrop.openrewrite.recipe.query.QueryRecipe:
-      query: "FIND DEPENDENCY IN POM.XML WHERE artifactId='quarkus-core'"
+      query: "FIND DEPENDENCY IN POM WHERE artifactId='quarkus-core'"
  */
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -49,20 +50,9 @@ public class QueryRecipe extends Recipe {
         return "A single recipe to query different file types using a simple language.";
     }
 
-    // A simple parser for the "key='value'" conditions
-    private static Map<String, String> parseConditions(String conditionsStr) {
-        Map<String, String> conditions = new HashMap<>();
-        Pattern pattern = Pattern.compile("(\\w+)\\s*=\\s*'([^']*)'");
-        Matcher matcher = pattern.matcher(conditionsStr);
-        while (matcher.find()) {
-            conditions.put(matcher.group(1), matcher.group(2));
-        }
-        return conditions;
-    }
-
     @Override
     public TreeVisitor<?, ExecutionContext> getVisitor() {
-        // Regex to parse the query string
+
         Pattern queryPattern = Pattern.compile("FIND\\s+(\\w+)\\s+IN\\s+([\\w.]+)\\s+WHERE\\s+(.*)");
         Matcher matcher = queryPattern.matcher(query);
 
@@ -72,15 +62,13 @@ public class QueryRecipe extends Recipe {
 
         String elementType = matcher.group(1).toUpperCase();
         String fileType = matcher.group(2).toUpperCase();
-        String conditionsStr = matcher.group(3);
-        Map<String, String> conditions = parseConditions(conditionsStr);
+        Condition condition = QueryParser.parse(matcher.group(3));
 
-        // The "dispatcher" logic
         switch (fileType) {
+            case "POM":
+                return new XmlQueryVisitor(elementType, condition);
             case "JAVA":
-                return new JavaQueryVisitor(elementType, conditions);
-            case "POM.XML":
-                return new XmlQueryVisitor(elementType, conditions);
+                return new JavaQueryVisitor(elementType, condition);
             default:
                 return TreeVisitor.noop();
         }
@@ -89,41 +77,71 @@ public class QueryRecipe extends Recipe {
     // --- Inner Visitor for Java ---
     private static class JavaQueryVisitor extends JavaIsoVisitor<ExecutionContext> {
         private final String elementType;
-        private final Map<String, String> conditions;
+        private final Condition rootCondition;
 
-        public JavaQueryVisitor(String elementType, Map<String, String> conditions) {
+        public JavaQueryVisitor(String elementType, Condition rootCondition) {
             this.elementType = elementType;
-            this.conditions = conditions;
+            this.rootCondition = rootCondition;
         }
 
         @Override
         public J.ClassDeclaration visitClassDeclaration(J.ClassDeclaration classDecl, ExecutionContext ctx) {
-            if ("CLASS".equals(elementType) && classDecl.getSimpleName().equals(conditions.get("name"))) {
-                return SearchResult.found(classDecl, "found class by query");
+            J.ClassDeclaration c = super.visitClassDeclaration(classDecl, ctx);
+            if ("CLASS".equals(elementType)) {
+                Map<String, String> properties = new HashMap<>();
+                properties.put("name", c.getSimpleName());
+                // You could add more properties like "package", "modifiers", etc.
+
+                if (rootCondition.evaluate(properties)) {
+                    return SearchResult.found(c, "found class by query");
+                }
             }
-            return super.visitClassDeclaration(classDecl, ctx);
+            return c;
+        }
+
+        @Override
+        public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext ctx) {
+            J.MethodDeclaration m = super.visitMethodDeclaration(method, ctx);
+            if ("METHOD".equals(elementType)) {
+                Map<String, String> properties = new HashMap<>();
+                properties.put("name", m.getSimpleName());
+                properties.put("modifiers", m.getModifiers().stream()
+                    .map(mod -> mod.getType().name().toLowerCase())
+                    .collect(Collectors.joining(" ")));
+                // You could add "returnType", "parameterCount", etc.
+
+                if (rootCondition.evaluate(properties)) {
+                    return SearchResult.found(m, "found method by query");
+                }
+            }
+            return m;
         }
     }
 
     // --- Inner Visitor for XML ---
     private static class XmlQueryVisitor extends XmlIsoVisitor<ExecutionContext> {
         private final String elementType;
-        private final Map<String, String> conditions;
+        private final Condition rootCondition;
 
-        public XmlQueryVisitor(String elementType, Map<String, String> conditions) {
+        public XmlQueryVisitor(String elementType, Condition rootCondition) {
             this.elementType = elementType;
-            this.conditions = conditions;
+            this.rootCondition = rootCondition;
         }
 
         @Override
         public Xml.Tag visitTag(Xml.Tag tag, ExecutionContext ctx) {
-            if ("DEPENDENCY".equals(elementType) && "dependency".equals(tag.getName())) {
-                Optional<String> artifactId = tag.getChildValue("artifactId");
-                if (artifactId.isPresent() && artifactId.get().equals(conditions.get("artifactId"))) {
-                    return SearchResult.found(tag, "found dependency by query");
+            Xml.Tag t = super.visitTag(tag, ctx);
+            if ("DEPENDENCY".equals(elementType) && "dependency".equals(t.getName())) {
+                Map<String, String> properties = new HashMap<>();
+                t.getChildValue("groupId").ifPresent(v -> properties.put("groupId", v));
+                t.getChildValue("artifactId").ifPresent(v -> properties.put("artifactId", v));
+                t.getChildValue("version").ifPresent(v -> properties.put("version", v));
+
+                if (rootCondition.evaluate(properties)) {
+                    return SearchResult.found(t, "found dependency by query");
                 }
             }
-            return super.visitTag(tag, ctx);
+            return t;
         }
     }
 }
