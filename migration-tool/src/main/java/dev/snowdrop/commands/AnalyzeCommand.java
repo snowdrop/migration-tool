@@ -73,7 +73,7 @@ public class AnalyzeCommand implements Runnable {
 
     @CommandLine.Option(
         names = {"-o","--output"},
-        description = "Export the analysing result as json format"
+        description = "Export the analysing result using the format. Values: json"
     )
     private String output;
 
