@@ -147,11 +147,13 @@ mvn clean install
 
 Download the [konveyor language server](https://github.com/konveyor/java-analyzer-bundle) using the image packaging it:
 ```shell
-export VERSION=latest
+set VERSION latest
 
-export ID=$(podman create --name kantra-download quay.io/konveyor/kantra:$VERSION)
+set ID $(podman create --name kantra-download quay.io/konveyor/kantra:$VERSION)
 podman cp $ID:/jdtls ./jdt/konveyor-jdtls
 ```
+
+If you're using bash, remember to use export when setting environment variables
 
 > [!NOTE]
 > Copy the `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/java-analyzer-bundle.core-1.0.0-SNAPSHOT.jarjava-analyzer-bundle.core-1.0.0-SNAPSHOT.jar` to the `./lib/` folder of this project to use it as dependency (to access the code) as it is not published on a maven repository server !
