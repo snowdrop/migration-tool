@@ -1,7 +1,6 @@
 # Migration Tool project
 
-This project and proof of concept demonstrates how we could better manage end-to-end the migration process of a Java application, from by example Spring Boot to Quarkus, using new concepts able to perform the process with ordered instructions managed by different providers. A special attention has been paid improving how users can debug or test the transformation, particularly the matching condition and the resulting response.
-
+This project and proof of concept show how to better handle the end-to-end migration of a Java application — for example, from Spring Boot to Quarkus — using new concepts that organize the process into ordered instructions managed by different providers. We’ve focused especially on making it easier for users to debug and test the transformation, particularly the matching conditions and resulting output.
 ## Dictionary
 
 - **Rule**: A rule defines the information about what the tool will search within the code source of the project scanned like the instructions to be executed by a provider
@@ -127,20 +126,30 @@ The poc has been designed using the following technology:
 - Java 21 installed and Maven 3.9
 
 ## Setup
+Get the project with git clone and compile it.
 
-First git clone this project and compile it.
+First, compile the openrewrite module:
 
 ```shell
-./mvnw clean install
+cd openrewrite-recipes
+mvn clean install -DskipTests
+
+```
+
+Then, the migration-tool project
+
+```shell
+cd ..
+mvn clean install
 ```
 
 ## Konveyor jdt-ls
 
 Download the [konveyor language server](https://github.com/konveyor/java-analyzer-bundle) using the image packaging it:
 ```shell
-set VERSION latest
+export VERSION=latest
 
-set ID $(podman create --name kantra-download quay.io/konveyor/kantra:$VERSION)
+export ID=$(podman create --name kantra-download quay.io/konveyor/kantra:$VERSION)
 podman cp $ID:/jdtls ./jdt/konveyor-jdtls
 ```
 
