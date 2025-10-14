@@ -31,8 +31,8 @@
     </properties>
 
     <modules>
-        <module>migration-tool</module>
         <module>openrewrite-recipes</module>
+        <module>migration-tool</module>
     </modules>
 
     <dependencyManagement>
