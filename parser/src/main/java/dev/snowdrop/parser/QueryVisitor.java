@@ -1,0 +1,69 @@
+package dev.snowdrop.parser;
+
+import dev.snowdrop.parser.antlr.QueryBaseVisitor;
+import dev.snowdrop.parser.antlr.QueryParser;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
+    Set<Query> simpleQueries = new LinkedHashSet<>();
+    Set<Query> andQueries = new LinkedHashSet<>();
+    Set<Query> orQueries = new LinkedHashSet<>();
+
+    @Override
+    public Set<Query> visitOrOperation(QueryParser.OrOperationContext ctx) {
+        // System.out.println("!!! visitOrOperation called !!!");
+        List<QueryParser.OperationContext> OrOps = ctx.operation();
+        OrOps.forEach(orOp -> {
+            // Recursively visit each operand - it might be SimpleClause or another Operation
+            Set<Query> childQueries = visit(orOp);
+            if (childQueries != null) {
+                orQueries.addAll(childQueries);
+            }
+        });
+        return orQueries;
+    }
+
+    @Override
+    public Set<Query> visitAndOperation(QueryParser.AndOperationContext ctx) {
+        // System.out.println("!!! visitAndOperation called !!!");
+        List<QueryParser.OperationContext> AndOps = ctx.operation();
+        AndOps.forEach(andOp -> {
+            // Recursively visit each operand - it might be SimpleClause or another Operation
+            Set<Query> childQueries = visit(andOp);
+            if (childQueries != null) {
+                andQueries.addAll(childQueries);
+            }
+        });
+        return andQueries;
+    }
+
+    @Override
+    public Set<Query> visitSimpleClause(QueryParser.SimpleClauseContext ctx) {
+        // System.out.println("!!! visitSimpleClause called !!!");
+        Query qr = new Query();
+        QueryParser.ClauseContext cctx = ctx.clause();
+        qr.setFileType(cctx.fileType().getText());
+        qr.setSymbol(cctx.symbol().getText());
+        qr.setKeyValues(cctx.keyValuePair().stream()
+            .collect(Collectors.toMap(
+                kvp -> kvp.key().getText(),
+                kvp -> kvp.value().getText()
+            )));
+        simpleQueries.add(qr);
+        return simpleQueries;
+    }
+
+    public Set<Query> getSimpleQueries() {
+        return simpleQueries;
+    }
+
+    public Set<Query> getAndQueries() {
+        return andQueries;
+    }
+
+    public Set<Query> getOrQueries() {
+        return orQueries;
+    }
+}

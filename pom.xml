@@ -33,6 +33,7 @@
     <modules>
         <module>migration-tool</module>
         <module>openrewrite-recipes</module>
+        <module>parser</module>
     </modules>
 
     <dependencyManagement>

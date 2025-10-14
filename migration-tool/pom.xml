@@ -57,6 +57,7 @@
         </dependency>
     </dependencies>
 
+<!-- DEPRECATED
     <build>
         <plugins>
             <plugin>
@@ -74,4 +75,5 @@
             </plugin>
         </plugins>
     </build>
+-->
 </project>
