@@ -32,6 +32,7 @@
 
     <modules>
         <module>openrewrite-recipes</module>
+        <module>parser</module>
         <module>migration-tool</module>
     </modules>
 
