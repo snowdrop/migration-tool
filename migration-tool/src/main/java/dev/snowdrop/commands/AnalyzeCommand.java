@@ -36,14 +36,12 @@ public class AnalyzeCommand implements Runnable {
         index = "0",
         description = "Path to the Java project to analyze"
     )
-    @ConfigProperty(name = "analyzer.app.path", defaultValue = "./applications/spring-boot-todo-app")
     public String appPath;
 
     @CommandLine.Option(
         names = {"-r", "--rules"},
         description = "Path to rules directory (default: from config)"
     )
-    @ConfigProperty(name = "analyzer.rules.path", defaultValue = "./rules")
     public String rulesPath;
 
     @CommandLine.Option(
@@ -51,7 +49,6 @@ public class AnalyzeCommand implements Runnable {
         description = "Path to JDT-LS installation (default: from config)",
         required = false
     )
-    @ConfigProperty(name = "analyzer.jdt.ls.path", defaultValue = "./jdt/konveyor-jdtls")
     public String jdtLsPath;
 
     @CommandLine.Option(
@@ -59,11 +56,7 @@ public class AnalyzeCommand implements Runnable {
         description = "Path to JDT workspace directory (default: from config)",
         required = false
     )
-    @ConfigProperty(name = "analyzer.jdt.workspace.path", defaultValue = "./jdt")
     public String jdtWorkspace;
-
-    @ConfigProperty(name = "analyzer.jdt.ls.command", defaultValue = "java.project.getAll")
-    public String lsCommand;
 
     @CommandLine.Option(
         names = {"-v", "--verbose"},
@@ -81,14 +74,12 @@ public class AnalyzeCommand implements Runnable {
         names = {"-s","--source"},
         description = "Source technology to consider for analysis"
     )
-    @ConfigProperty(name = "analyzer.technology.source")
     public String source;
 
     @CommandLine.Option(
         names = {"-t","--target"},
         description = "Target technology to consider for analysis"
     )
-    @ConfigProperty(name = "analyzer.technology.target")
     public String target;
 
     @Override
