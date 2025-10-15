@@ -14,9 +14,21 @@ public class MatchingReport extends DataTable<MatchingReport.Row> {
 
     @Value
     public static class Row {
+        @Column(displayName = "Match ID",
+            description = "ID of the matching tool used to reconcile the information.")
+        String matchId;
+
         @Column(displayName = "File's type",
             description = "Type of the file where we look for.")
         Type type;
+
+        @Column(displayName = "Symbol searched",
+            description = "Symbol about what we search about: annotation, import, method, filed, etc.")
+        Symbol symbol;
+
+        @Column(displayName = "A symbol pattern",
+            description = "A symbol pattern, expressed as a \"method\" pattern.")
+        String pattern;
 
         @Column(displayName = "Source file path",
             description = "Path of the source file where a match found")
@@ -25,14 +37,6 @@ public class MatchingReport extends DataTable<MatchingReport.Row> {
         @Column(displayName = "FQName of the Class",
             description = "FQName of the Class containing the symbol we search.")
         String className;
-
-        @Column(displayName = "Symbol searched",
-            description = "Symbol about what we search about: annotation, import, method, filed, etc.")
-        String symbol;
-
-        @Column(displayName = "Match ID",
-            description = "ID of the matching tool used to reconcile the information.")
-        String matchId;
     }
 
     public enum Type {
@@ -42,5 +46,12 @@ public class MatchingReport extends DataTable<MatchingReport.Row> {
         JSON,
         YAML,
         PROPERTIES
+    }
+
+    public enum Symbol {
+        ANNOTATION,
+        METHOD,
+        FIELD,
+        CLASS
     }
 }
