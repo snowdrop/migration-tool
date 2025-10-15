@@ -41,17 +41,20 @@ public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
 
     @Override
     public Set<Query> visitSimpleClause(QueryParser.SimpleClauseContext ctx) {
-        // System.out.println("!!! visitSimpleClause called !!!");
-        Query qr = new Query();
         QueryParser.ClauseContext cctx = ctx.clause();
-        qr.setFileType(cctx.fileType().getText());
-        qr.setSymbol(cctx.symbol().getText());
-        qr.setKeyValues(cctx.keyValuePair().stream()
+
+        Map<String, String> keyValuePairs = cctx.keyValuePair().stream()
             .collect(Collectors.toMap(
                 kvp -> kvp.key().getText(),
-                kvp -> kvp.value().getText()
-            )));
+                kvp -> kvp.value().getText().replaceAll("'", "") // Remove quotes from value
+            ));
+
+        Query qr = new Query(
+            cctx.fileType().getText(),
+            cctx.symbol().getText(),
+            keyValuePairs);
         simpleQueries.add(qr);
+
         return simpleQueries;
     }
 

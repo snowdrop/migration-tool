@@ -41,9 +41,9 @@ public class QueryApp {
 
     private void logQueryResult(Query qr) {
         System.out.println("=== Query parsed ===");
-        System.out.println(String.format("=== Type: %s", qr.getFileType()));
-        System.out.println(String.format("=== Symbol: %s", qr.getSymbol()));
-        qr.getKeyValues().forEach((k, v) -> {
+        System.out.println(String.format("=== Type: %s", qr.fileType()));
+        System.out.println(String.format("=== Symbol: %s", qr.symbol()));
+        qr.keyValues().forEach((k, v) -> {
             System.out.println(String.format("Key: %s, value: %s.", k, v));
         });
     }
