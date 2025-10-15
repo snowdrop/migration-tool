@@ -62,51 +62,34 @@ public class JdtLsFactory {
     }
 
     public void initProperties(AnalyzeCommand analyzeCommand) {
-        String appPathString = Optional
-            .ofNullable(System.getProperty("APP_PATH"))
-            .or(() -> Optional.ofNullable(analyzeCommand).map(cmd -> cmd.appPath))
-            .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.app-path", String.class)))
-            .orElseThrow(() -> new RuntimeException("Path to the project to scan is missing !"));
+        String appPathString = analyzeCommand.appPath;
         appPath = resolvePath(appPathString).toString();
 
-        String jdtLsPathString = Optional
-            .ofNullable(System.getProperty("JDT_LS_PATH"))
-            .or(() -> Optional.ofNullable(analyzeCommand).map(cmd -> cmd.jdtLsPath))
-            .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.jdt-ls-path", String.class)))
-            .orElseThrow(() -> new RuntimeException("JDT_LS_PATH system property is missing !"));
+        String jdtLsPathString = Optional.ofNullable(analyzeCommand.jdtLsPath)
+                .or(()->Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.jdt-ls-path", String.class)))
+                .orElseThrow(() -> new RuntimeException("JDT LS path is required but not configured"));
         jdtLsPath = resolvePath(jdtLsPathString).toString();
 
-        String jdtWksString = Optional
-            .ofNullable(System.getProperty("JDT_WKS"))
-            .or(() -> Optional.ofNullable(analyzeCommand).map(cmd -> cmd.jdtWorkspace))
+        String jdtWksString = Optional.ofNullable(analyzeCommand).map(cmd -> cmd.jdtWorkspace)
             .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.jdt-workspace-path", String.class)))
-            .orElseThrow(() -> new RuntimeException("JDT_WKS system property is missing !"));
+            .orElseThrow(() -> new RuntimeException("Jdt workspace is required but not configured"));
         jdtWks = resolvePath(jdtWksString).toString();
 
-        String rulesPathString = Optional
-            .ofNullable(System.getProperty("RULES_PATH"))
-            .or(() -> Optional.ofNullable(analyzeCommand).map(cmd -> cmd.rulesPath))
-            .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.rules-path", String.class)))
-            .orElseThrow(() -> new RuntimeException("Path of the rules folder is missing !"));
+        lsCmd = Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.jdt-ls-command", String.class))
+                .orElseThrow(() -> new RuntimeException("Command to be executed against the LS server is required but not configured"));
+
+        String rulesPathString = Optional.ofNullable(analyzeCommand.rulesPath)
+                .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.rules-path", String.class)))
+                .orElseThrow(() -> new RuntimeException("Rules path is required but not configured"));
         rulesPath = resolvePath(rulesPathString);
 
-        lsCmd = Optional
-            .ofNullable(System.getProperty("LS_CMD"))
-            .or(() -> Optional.ofNullable(analyzeCommand).map(cmd -> cmd.lsCommand))
-            .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.jdt-ls-command", String.class)))
-            .orElseThrow(() -> new RuntimeException("Command to be executed against the LS server is missing !"));
+        sourceTechnology = Optional.ofNullable(analyzeCommand.source)
+            .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.technology-source", String.class)))
+            .orElseThrow(() -> new RuntimeException("Source technology to analyse required but not configured"));
 
-        sourceTechnology = Optional
-            .ofNullable(System.getProperty("SOURCE_TECHNOLOGY"))
-            .or(() -> Optional.ofNullable(analyzeCommand).map(cmd -> cmd.source))
-            .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.technology.source", String.class)))
-            .orElseThrow(() -> new RuntimeException("Source technology to analyse is missing !"));
-
-        targetTechnology = Optional
-            .ofNullable(System.getProperty("TARGET_TECHNOLOGY"))
-            .or(() -> Optional.ofNullable(analyzeCommand).map(cmd -> cmd.target))
-            .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.technology.target", String.class)))
-            .orElseThrow(() -> new RuntimeException("Target technology to analyse is missing !"));
+        targetTechnology = Optional.ofNullable(analyzeCommand.target)
+            .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.technology-target", String.class)))
+            .orElseThrow(() -> new RuntimeException("Target technology for migration is requiered but not configured"));
 
         // Log resolved paths for debugging
         logger.infof("📋 Jdt-ls path: %s", jdtLsPath);

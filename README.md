@@ -126,21 +126,12 @@ The poc has been designed using the following technology:
 - Java 21 installed and Maven 3.9
 
 ## Setup
-Get the project with git clone and compile it.
 
-First, compile the openrewrite module:
+First git clone this project and compile it.
 
 ```shell
-cd openrewrite-recipes
 mvn clean install -DskipTests
 
-```
-
-Then, the migration-tool project
-
-```shell
-cd ..
-mvn clean install
 ```
 
 ## Konveyor jdt-ls
