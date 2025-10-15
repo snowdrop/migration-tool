@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import dev.snowdrop.openrewrite.model.Result;
-import dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain;
+import dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation;
 import org.eclipse.lsp4j.SymbolKind;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.InMemoryExecutionContext;
@@ -98,7 +98,7 @@ public class ApplyOpenRewriteRecipe {
         System.out.println(sourceCode);
         System.out.println("-----------------------------------------\n");
 
-        Recipe recipe = new ReplaceSpringBootApplicationAnnotationWithQuarkusMain();
+        Recipe recipe = new ReplaceSpringBootApplicationWithQuarkusMainAnnotation();
         ExecutionContext ctx = new InMemoryExecutionContext(Throwable::printStackTrace);
 
         // Parse the source file into OpenRewrite's format (LST)
