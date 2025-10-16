@@ -1,6 +1,5 @@
-package dev.snowdrop.parser;
+package dev.snowdrop.model;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public record Query(
