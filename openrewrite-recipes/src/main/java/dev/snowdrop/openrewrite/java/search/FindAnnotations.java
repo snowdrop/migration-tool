@@ -65,6 +65,7 @@ public class FindAnnotations extends FindRecipe {
                     for (JavaType type : cu.getTypesInUse().getTypesInUse()) {
                         if (annotationMatcher.matchesAnnotationOrMetaAnnotation(TypeUtils.asFullyQualified(type))) {
                             J.CompilationUnit aCu = getCursor().getValue();
+                            J.ClassDeclaration aClass = aCu.getClasses().getFirst();
                             report.insertRow(ctx, new MatchingReport.Row(
                                 matchId,
                                 MatchingReport.Type.JAVA,
@@ -72,7 +73,7 @@ public class FindAnnotations extends FindRecipe {
                                 pattern,
                                 sourcePath.toString(),
                                 // FQName of the class containing the Annotation
-                                aCu.toString()
+                                aClass.getName().getSimpleName()
                             ));
                             return SearchResult.found(cu);
                         }
@@ -96,14 +97,9 @@ public class FindAnnotations extends FindRecipe {
                 public J.Annotation visitAnnotation(J.Annotation annotation, ExecutionContext ctx) {
                     J.Annotation a = super.visitAnnotation(annotation, ctx);
                     if (annotationMatcher.matches(annotation)) {
-                        J.ClassDeclaration aClass = null;
-                        var type = getCursor().getParent().getValue();
+                        J.ClassDeclaration aClass = getCursor().firstEnclosing(J.ClassDeclaration.class);
+                        System.out.printf("Class name: %s%n", aClass.getName());
 
-                        if (type instanceof J.ClassDeclaration) {
-                            aClass = getCursor().getParent().getValue();
-                        } else if (type instanceof J.MethodDeclaration) {
-                            aClass = getCursor().getParent().firstEnclosing(J.ClassDeclaration.class);
-                        }
                         report.insertRow(ctx, new MatchingReport.Row(
                             matchId,
                             MatchingReport.Type.JAVA,
@@ -111,7 +107,7 @@ public class FindAnnotations extends FindRecipe {
                             pattern,
                             sourcePath.toString(),
                             // FQName of the class containing the Annotation
-                            aClass.getType().getFullyQualifiedName()
+                            aClass.getName().getSimpleName()
                         ));
                         return SearchResult.found(a);
                     }
