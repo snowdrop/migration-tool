@@ -61,6 +61,6 @@ public class QueryToRecipeMapper {
             parameters.add(new Parameter(key, value))
         );
 
-        return new RecipeDTO(recipeName, parameters);
+        return new RecipeDTO(null, recipeName, parameters);
     }
 }

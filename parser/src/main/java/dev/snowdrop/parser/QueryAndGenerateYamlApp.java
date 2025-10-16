@@ -10,16 +10,22 @@ import dev.snowdrop.model.RecipeDTO;
 import dev.snowdrop.model.RecipeDTOSerializer;
 import dev.snowdrop.parser.antlr.QueryLexer;
 import dev.snowdrop.parser.antlr.QueryParser;
+import dev.snowdrop.reconciler.KeyGenerator;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class QueryAndGenerateYamlApp {
+
+    public static AtomicInteger counter = new AtomicInteger(0);
 
     public static void main(String[] args) {
         QueryAndGenerateYamlApp app = new QueryAndGenerateYamlApp();
         String query;
         QueryVisitor visitor;
+
 
         System.out.println("=== Simple query with one clause ");
         System.out.println("=== FIND java.annotation WHERE (name='@SpringBootApplication')");
@@ -77,6 +83,8 @@ public class QueryAndGenerateYamlApp {
                 // Create for each Query the corresponding RecipeDTO
                 RecipeDTO dto = QueryToRecipeMapper.map(q);
                 System.out.println(dto);
+                System.out.printf("Generated key: %s%n", KeyGenerator.generate(dto.name()));
+                System.out.println();
             }
         );
     }
