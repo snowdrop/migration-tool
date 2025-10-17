@@ -4,6 +4,7 @@ import dev.snowdrop.model.Parameter;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.model.RecipeDTO;
 import dev.snowdrop.model.RecipeMappingConfig;
+import dev.snowdrop.reconciler.KeyGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ public class QueryToRecipeMapper {
         "JAVA.ANNOTATION", new RecipeMappingConfig(
             "dev.snowdrop.openrewrite.java.search.FindAnnotations",
             Map.of(
-                "name", "annotationPattern" // Translate query 'name' to recipe 'annotationPattern'
+                "name", "pattern" // Translate query 'name' to recipe 'pattern'
             ),
             // Additional parameters
             Map.of(
@@ -56,11 +57,16 @@ public class QueryToRecipeMapper {
             // TODO:  You could add a warning here for untranslatable keys
         }
 
+        String matchId = KeyGenerator.generate("rule-001");
+        parameters.add(new Parameter("matchId", matchId));
+
         // Add any additional/default parameters from the config
         config.additionalParameters().forEach((key, value) ->
             parameters.add(new Parameter(key, value))
         );
 
+
         return new RecipeDTO(null, recipeName, parameters);
     }
 }
+t status
