@@ -1,4 +1,4 @@
-package dev.snowdrop.parser;
+package dev.snowdrop.tool;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -8,6 +8,7 @@ import dev.snowdrop.mapper.QueryToRecipeMapper;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.model.RecipeDTO;
 import dev.snowdrop.model.RecipeDTOSerializer;
+import dev.snowdrop.parser.QueryVisitor;
 import dev.snowdrop.parser.antlr.QueryLexer;
 import dev.snowdrop.parser.antlr.QueryParser;
 import dev.snowdrop.reconciler.KeyGenerator;
@@ -17,15 +18,14 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class QueryAndGenerateYamlApp {
+public class QueryToRecipeApp {
 
     public static AtomicInteger counter = new AtomicInteger(0);
 
     public static void main(String[] args) {
-        QueryAndGenerateYamlApp app = new QueryAndGenerateYamlApp();
+        QueryToRecipeApp app = new QueryToRecipeApp();
         String query;
         QueryVisitor visitor;
-
 
         System.out.println("=== Simple query with one clause ");
         System.out.println("=== FIND java.annotation WHERE (name='@SpringBootApplication')");
