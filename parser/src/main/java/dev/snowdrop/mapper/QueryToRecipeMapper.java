@@ -69,4 +69,3 @@ public class QueryToRecipeMapper {
         return new RecipeDTO(null, recipeName, parameters);
     }
 }
-t status
