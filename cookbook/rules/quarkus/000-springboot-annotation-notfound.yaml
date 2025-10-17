@@ -9,6 +9,7 @@
   message: "The dummy.SpringApplication annotation do not exist"
   ruleID: springboot-annotation-notfound-00000
   when:
-    java.referenced:
-      location: ANNOTATION
-      pattern: dummy.SpringApplication
+    #java.referenced:
+    #  location: ANNOTATION
+    #  pattern: dummy.SpringApplication
+    condition: FIND java.annotation WHERE (name='dummy.SpringApplication')
