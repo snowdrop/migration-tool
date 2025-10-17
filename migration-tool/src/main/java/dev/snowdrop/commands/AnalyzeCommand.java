@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static dev.snowdrop.analyze.services.LsSearchService.analyzeCodeFromRule;it commit -as
+import static dev.snowdrop.analyze.services.LsSearchService.analyzeCodeFromRule;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.filterRules;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
 
