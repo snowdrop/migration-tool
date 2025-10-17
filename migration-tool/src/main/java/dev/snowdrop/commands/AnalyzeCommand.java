@@ -3,8 +3,8 @@ package dev.snowdrop.commands;
 import dev.snowdrop.analyze.JdtLsFactory;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;
+import dev.snowdrop.analyze.services.ResultsService;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import picocli.CommandLine;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -118,6 +118,10 @@ public class AnalyzeCommand implements Runnable {
                 logger.warnf("No rules found !!");
             } else {
                 Map<String, MigrationTask> analyzeReport = analyzeCodeFromRule(factory, filteredRules);
+
+                if (!analyzeReport.isEmpty()) {
+                    ResultsService.showCsvTable(analyzeReport, factory.sourceTechnology, factory.targetTechnology);
+                }
 
                 // Export rules, results and migration instructions as JSON if requested
                 if (output != null && output.equals("json")) {

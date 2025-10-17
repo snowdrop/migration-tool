@@ -8,15 +8,10 @@ import dev.snowdrop.mapper.QueryToRecipeMapper;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.model.RecipeDTO;
 import dev.snowdrop.model.RecipeDTOSerializer;
+import dev.snowdrop.parser.QueryUtils;
 import dev.snowdrop.parser.QueryVisitor;
-import dev.snowdrop.parser.antlr.QueryLexer;
-import dev.snowdrop.parser.antlr.QueryParser;
 import dev.snowdrop.reconciler.KeyGenerator;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueryToRecipeApp {
@@ -31,7 +26,7 @@ public class QueryToRecipeApp {
         System.out.println("=== Simple query with one clause ");
         System.out.println("=== FIND java.annotation WHERE (name='@SpringBootApplication')");
         query = "FIND java.annotation WHERE (name='@SpringBootApplication')";
-        visitor = app.parseQuery(query);
+        visitor = QueryUtils.parseAndVisit(query);
         visitor.getSimpleQueries().forEach(q -> {
                 app.logQueryResult(q);
                 // Create for each Query the corresponding RecipeDTO
@@ -53,7 +48,7 @@ public class QueryToRecipeApp {
         System.out.println("=== Query with clause AND clause ");
         System.out.println("=== FIND java.annotation WHERE (name='@SpringBootApplication') AND pom.dependency WHERE (artifactId='quarkus-core', version='3.16.2')");
         query = "FIND java.annotation WHERE (name='@SpringBootApplication') AND pom.dependency WHERE (artifactId='quarkus-core', version='3.16.2')";
-        visitor = app.parseQuery(query);
+        visitor = QueryUtils.parseAndVisit(query);
         visitor.getAndQueries().forEach(q -> {
                 app.logQueryResult(q);
                 // Create for each Query the corresponding RecipeDTO
@@ -79,7 +74,7 @@ public class QueryToRecipeApp {
             java.annotation WHERE (name='@SpringBootApplication2') OR
             java.annotation WHERE (name='@SpringBootApplication3')
             """;
-        visitor = app.parseQuery(query);
+        visitor = QueryUtils.parseAndVisit(query);
         visitor.getOrQueries().forEach(q -> {
                 app.logQueryResult(q);
                 // Create for each Query the corresponding RecipeDTO
@@ -117,26 +112,5 @@ public class QueryToRecipeApp {
         yamlMapper.registerModule(module);
 
         return yamlMapper;
-    }
-
-    private QueryVisitor parseQuery(String query) {
-        try {
-            ANTLRInputStream input = new ANTLRInputStream(query);
-            QueryLexer lexer = new QueryLexer(input);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-
-            QueryParser parser = new QueryParser(tokens);
-            ParseTree tree = parser.searchQuery();
-
-            // Create and use the visitor
-            QueryVisitor visitor = new QueryVisitor();
-            visitor.visit(tree);
-
-            return visitor;
-        } catch (Exception e) {
-            System.err.println("Error parsing query: " + query);
-            e.printStackTrace();
-            return new QueryVisitor();
-        }
     }
 }

@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>parser</artifactId>
+    <name>Migration Tool :: Query parser</name>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

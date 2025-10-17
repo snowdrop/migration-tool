@@ -9,9 +9,10 @@
   message: "SpringBoot to Quarkus."
   ruleID: springboot-add-class-quarkus-00000
   when:
-    java.referenced:
-      location: ANNOTATION
-      pattern: org.springframework.boot.autoconfigure.SpringBootApplication
+    #java.referenced:
+    #  location: ANNOTATION
+    #  pattern: org.springframework.boot.autoconfigure.SpringBootApplication
+    condition: FIND java.annotation WHERE (name='org.springframework.boot.autoconfigure.SpringBootApplication')
   order: 2
   instructions:
     ai:

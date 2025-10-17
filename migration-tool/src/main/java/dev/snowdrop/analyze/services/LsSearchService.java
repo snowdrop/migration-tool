@@ -5,11 +5,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import de.vandermeer.asciitable.AT_Row;
+import de.vandermeer.asciitable.AsciiTable;
 import de.vandermeer.asciitable.CWC_FixedWidth;
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
 import dev.snowdrop.analyze.JdtLsFactory;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;
+import dev.snowdrop.model.Query;
+import dev.snowdrop.parser.QueryUtils;
+import dev.snowdrop.parser.QueryVisitor;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.SymbolInformation;
@@ -18,19 +22,12 @@ import org.jboss.logging.Logger;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static dev.snowdrop.analyze.utils.RuleUtils.getLocationCode;
 import static dev.snowdrop.analyze.utils.RuleUtils.getLocationName;
-import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
-
-import de.vandermeer.asciitable.AsciiTable;
 
 public class LsSearchService {
 
@@ -42,31 +39,104 @@ public class LsSearchService {
         // Log the LS Query command to be executed on the LS server
         logger.infof("==== CLIENT: Sending the command '%s' ...", factory.lsCmd);
 
-        // Handle three cases: single java.referenced, OR conditions, AND conditions
-        if (rule.when().or() != null && !rule.when().or().isEmpty()) {
-            logger.infof("Rule When includes: %s between java.referenced", "OR");
-            rule.when().or().forEach(condition -> {
-                List<SymbolInformation> results = executeCommandForCondition(factory, rule, condition.javaReferenced());
-                ruleResults.putAll(Map.of(rule.ruleID(),results));
+        // Parse first the Rule condition to populate the Query object using the YAML Condition query
+        // See the parser maven project for examples, unit tests
+        QueryVisitor visitor = QueryUtils.parseAndVisit(rule.when().Condition());
+
+        /*
+           Handle the 3 supported cases where the query contains:
+
+           - One clause: FIND java.annotation WHERE (name='@SpringBootApplication')
+
+           - Clauses separated with the OR operator:
+
+             FIND java.annotation WHERE (name='@SpringBootApplication') OR
+                  java.annotation WHERE (name='@Deprecated')
+
+           - Clauses separated with the AND operator:
+
+             FIND java.annotation WHERE (name='@SpringBootApplication') AND
+                  pom.dependency WHERE (groupId='org.springframework.boot', artifactId='spring-boot', version='3.4.2')
+
+         */
+        if (visitor.getSimpleQueries().size() == 1) {
+            visitor.getSimpleQueries().stream().findFirst().ifPresent(q -> {
+                List<SymbolInformation> results = executeQueryCommand(factory, rule, q);
+                ruleResults.putAll(Map.of(rule.ruleID(), results));
             });
-        } else if (rule.when().and() != null && !rule.when().and().isEmpty()) {
-            logger.infof("Rule When includes: %s between java.referenced", "AND");
-            rule.when().and().forEach(condition -> {
-                List<SymbolInformation> results = executeCommandForCondition(factory, rule, condition.javaReferenced());
-                ruleResults.putAll(Map.of(rule.ruleID(),results));
+        } else if (visitor.getOrQueries().size() > 1) {
+            visitor.getOrQueries().stream().forEach(q -> {
+                List<SymbolInformation> results = executeQueryCommand(factory, rule, q);
+                ruleResults.putAll(Map.of(rule.ruleID(), results));
             });
-        } else if (rule.when().javaReferenced() != null) {
-            logger.infof("Rule When includes: single java.referenced");
-            List<SymbolInformation> results = executeCommandForCondition(factory, rule, rule.when().javaReferenced());
-            ruleResults.putAll(Map.of(rule.ruleID(),results));
+        } else if (visitor.getAndQueries().size() > 1) {
+            visitor.getAndQueries().stream().forEach(q -> {
+                List<SymbolInformation> results = executeQueryCommand(factory, rule, q);
+                ruleResults.putAll(Map.of(rule.ruleID(), results));
+            });
         } else {
-            logger.warnf("Rule %s has no valid java.referenced conditions", rule.ruleID());
+            logger.warnf("Rule %s has no valid condition(s)", rule.ruleID());
             ruleResults.put(rule.ruleID(), new ArrayList<>());
         }
+
+
+        /*
+          Old code deprecated in favor of the Antlr parser !
+          // Handle three cases: single java.referenced, OR conditions, AND conditions
+          if (rule.when().or() != null && !rule.when().or().isEmpty()) {
+              logger.infof("Rule When includes: %s between java.referenced", "OR");
+              rule.when().or().forEach(condition -> {
+                  List<SymbolInformation> results = executeCommandForCondition(factory, rule, condition.javaReferenced());
+                  ruleResults.putAll(Map.of(rule.ruleID(),results));
+              });
+          } else if (rule.when().and() != null && !rule.when().and().isEmpty()) {
+              logger.infof("Rule When includes: %s between java.referenced", "AND");
+              rule.when().and().forEach(condition -> {
+                  List<SymbolInformation> results = executeCommandForCondition(factory, rule, condition.javaReferenced());
+                  ruleResults.putAll(Map.of(rule.ruleID(),results));
+              });
+          } else if (rule.when().javaReferenced() != null) {
+              logger.infof("Rule When includes: single java.referenced");
+              List<SymbolInformation> results = executeCommandForCondition(factory, rule, rule.when().javaReferenced());
+              ruleResults.putAll(Map.of(rule.ruleID(),results));
+          } else {
+              logger.warnf("Rule %s has no valid java.referenced conditions", rule.ruleID());
+              ruleResults.put(rule.ruleID(), new ArrayList<>());
+          }
+        */
 
         return ruleResults;
     }
 
+
+    private static List<SymbolInformation> executeQueryCommand(JdtLsFactory factory, Rule rule, Query q) {
+
+        // Map the Query object with the RuleEntry parameters to be sent to the Language Server
+        var paramsMap = Map.of(
+            "project", q.fileType().toLowerCase(),  // This value should be java
+            "location", getLocationCode(q.symbol()),    // The symbol should correspond to one of the value that LS supports: annotation, etc
+            "query", q.keyValues().get("name"),         // TODO: To be improved as we need a mapper able to extract the k=v and convert them to the pattern
+            "analysisMode", "source-only"               // 2 modes are supported: source-only and full
+        );
+
+        List<Object> cmdArguments = List.of(paramsMap);
+
+        try {
+            CompletableFuture<List<SymbolInformation>> symbolsFuture = factory.future
+                .thenApplyAsync(ignored -> executeCmd(factory, rule, cmdArguments))
+                .exceptionally(throwable -> {
+                    logger.errorf("Error executing LS command for rule %s: %s", rule.ruleID(), throwable.getMessage(), throwable);
+                    return new ArrayList<SymbolInformation>();
+                });
+
+            return symbolsFuture.get(); // Wait for completion
+        } catch (InterruptedException | ExecutionException e) {
+            logger.errorf("Failed to execute command for rule %s: %s", rule.ruleID(), e.getMessage());
+            return null;
+        }
+    }
+
+    @Deprecated
     private static List<SymbolInformation> executeCommandForCondition(JdtLsFactory factory, Rule rule, Rule.JavaReferenced javaReferenced) {
         var paramsMap = Map.of(
             "project", "java", // hard coded value to java within the analyzer java external-provider
@@ -104,10 +174,10 @@ public class LsSearchService {
 
         CompletableFuture<Object> commandResult = factory.remoteProxy.getWorkspaceService()
             .executeCommand(commandParams)
-            .exceptionally( t -> {
-                    t.printStackTrace();
-                    return null;
-                });
+            .exceptionally(t -> {
+                t.printStackTrace();
+                return null;
+            });
 
         Object result = commandResult.join();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -116,7 +186,7 @@ public class LsSearchService {
         if (result != null) {
             logger.infof("==== CLIENT: --- Command params: %s.", commandParams);
             logger.infof("==== CLIENT: --- Search Results found for rule: %s.", rule.ruleID());
-            logger.infof("==== CLIENT: --- JSON response: %s",gson.toJson(result));
+            logger.infof("==== CLIENT: --- JSON response: %s", gson.toJson(result));
 
             try {
                 if (result instanceof List) {
@@ -155,14 +225,16 @@ public class LsSearchService {
                     }
                 } else {
                     // Fallback to direct GSON conversion if result is not a List
-                    Type SymbolInformationListType = new TypeToken<List<SymbolInformation>>() {}.getType();
+                    Type SymbolInformationListType = new TypeToken<List<SymbolInformation>>() {
+                    }.getType();
                     symbolInformationList = gson.fromJson(gson.toJson(result), SymbolInformationListType);
                 }
             } catch (Exception e) {
                 logger.warnf("==== CLIENT: Failed to create SymbolInformation objects: %s", e.getMessage());
                 // Fallback to GSON conversion
                 try {
-                    Type SymbolInformationListType = new TypeToken<List<SymbolInformation>>() {}.getType();
+                    Type SymbolInformationListType = new TypeToken<List<SymbolInformation>>() {
+                    }.getType();
                     symbolInformationList = gson.fromJson(gson.toJson(result), SymbolInformationListType);
                 } catch (JsonSyntaxException | ClassCastException ex) {
                     logger.warnf("==== CLIENT: Failed fallback GSON conversion: %s", ex.getMessage());
@@ -173,7 +245,7 @@ public class LsSearchService {
                 logger.infof("==== CLIENT: SymbolInformation List is empty.");
             } else {
                 Map<String, Object> args = (Map<String, Object>) arguments.get(0);
-                logger.infof("==== CLIENT: Found %s usage(s) of symbol: %s, name: %s", symbolInformationList.size(), getLocationName(args.get("location").toString()),args.get("query"));
+                logger.infof("==== CLIENT: Found %s usage(s) of symbol: %s, name: %s", symbolInformationList.size(), getLocationName(args.get("location").toString()), args.get("query"));
                 for (SymbolInformation si : symbolInformationList) {
                     logger.debugf("==== CLIENT: Found %s at line %s, char: %s - %s within the file: %s)",
                         si.getName(),
@@ -204,79 +276,8 @@ public class LsSearchService {
                     .withRule(rule)
                     .withResults(ruleResults.get(rule.ruleID()))
                     .withInstruction(rule.instructions())
-                    ));
+            ));
         }
-
-        // Display the rule queries results
-        displayResultsTable(ruleMigrationTasks, factory.sourceTechnology, factory.targetTechnology);
-
         return ruleMigrationTasks;
     }
-
-    private static void displayResultsTable(Map<String, MigrationTask> results, String source, String target) {
-        // TODO: Test https://github.com/freva/ascii-table to see if the url to the file is not truncated
-        AsciiTable at = new AsciiTable();
-        at.getContext().setWidth(220); // Set overall table width
-        at.addRule();
-
-        AT_Row row;
-        row = at.addRow("Rule ID", "Source to Target", "Found", "Information Details");
-        row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
-        row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
-        row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
-        row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
-
-        at.addRule();
-        at.getRenderer().setCWC(new CWC_FixedWidth().add(40).add(25).add(5).add(130));
-
-        for (Map.Entry<String, MigrationTask> entry : results.entrySet()) {
-            String ruleId = entry.getKey();
-            MigrationTask aTask = entry.getValue();
-            List<SymbolInformation> queryResults = aTask.getResults();
-            String hasQueryResults = queryResults.isEmpty() ? "No" : "Yes";
-            String sourceToTarget = String.format("%s -> %s", source, target);
-
-            if (queryResults.isEmpty()) {
-                row = at.addRow(ruleId, sourceToTarget, hasQueryResults, "No symbols found");
-                row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
-                row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
-                row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
-                row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
-            } else {
-                // Add first symbol
-                SymbolInformation firstSymbol = queryResults.get(0);
-                String firstSymbolDetails = formatSymbolInformation(firstSymbol);
-                row = at.addRow(ruleId, sourceToTarget, hasQueryResults, firstSymbolDetails + "\n" + queryResults.get(0).getLocation().getUri());
-                row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
-                row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
-                row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
-                row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
-
-                // Add additional symbols in subsequent rows with empty rule id and found columns
-                for (int i = 1; i < queryResults.size(); i++) {
-                    String symbolDetails = formatSymbolInformation(queryResults.get(i));
-                    row = at.addRow("", "", 33, symbolDetails + "\n" + queryResults.get(0).getLocation().getUri());
-                    row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
-                    row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
-                    row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
-                    row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
-                }
-            }
-            at.addRule();
-        }
-
-        // Use System.out.println instead of logger to avoid log formatting
-        System.out.println("\n=== Code Analysis Results ===");
-        System.out.println(at.render());
-    }
-
-    private static String formatSymbolInformation(SymbolInformation si) {
-        return String.format("Found %s at line %s, char: %s - %s",
-            si.getName(),
-            si.getLocation().getRange().getStart().getLine() + 1,
-            si.getLocation().getRange().getStart().getCharacter(),
-            si.getLocation().getRange().getEnd().getCharacter()
-        );
-    }
-
 }

@@ -63,7 +63,11 @@ public record Rule(
         @JsonProperty("or")
         List<Condition> or,
         @JsonProperty("and")
-        List<Condition> and
+        List<Condition> and,
+
+        // New field added to allow to use the new query language which can be defined as one string line
+        @JsonProperty("condition")
+        String Condition
     ) {}
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
