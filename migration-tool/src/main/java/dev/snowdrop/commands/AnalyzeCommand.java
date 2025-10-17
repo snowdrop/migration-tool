@@ -5,7 +5,6 @@ import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.analyze.services.ResultsService;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import picocli.CommandLine;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,8 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static dev.snowdrop.analyze.services.LsSearchService.analyzeCodeFromRule;
-import static dev.snowdrop.analyze.services.LsSearchService.displayResultsTable;
+import static dev.snowdrop.analyze.services.LsSearchService.analyzeCodeFromRule;it commit -as
 import static dev.snowdrop.analyze.utils.YamlRuleParser.filterRules;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
 
