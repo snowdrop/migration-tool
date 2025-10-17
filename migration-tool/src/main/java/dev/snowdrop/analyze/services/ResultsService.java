@@ -5,8 +5,10 @@ import de.vandermeer.asciitable.AsciiTable;
 import de.vandermeer.asciitable.CWC_FixedWidth;
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
 import dev.snowdrop.analyze.model.MigrationTask;
+import dev.snowdrop.analyze.model.Rewrite;
 import org.eclipse.lsp4j.SymbolInformation;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,27 +33,51 @@ public class ResultsService {
         for (Map.Entry<String, MigrationTask> entry : results.entrySet()) {
             String ruleId = entry.getKey();
             MigrationTask aTask = entry.getValue();
-            List<SymbolInformation> queryResults = aTask.getResults();
+
+            List<?> queryResults = new ArrayList<>();
+
+            if (aTask.getLsResults() != null && !aTask.getLsResults().isEmpty()) {
+                queryResults = aTask.getLsResults();
+            }
+
+            if (aTask.getRewriteResults() != null && !aTask.getRewriteResults().isEmpty()) {
+                queryResults = aTask.getRewriteResults();
+            }
+
             String hasQueryResults = queryResults.isEmpty() ? "No" : "Yes";
             String sourceToTarget = String.format("%s -> %s", source, target);
 
             if (queryResults.isEmpty()) {
-                row = at.addRow(ruleId, sourceToTarget, hasQueryResults, "No symbols found");
+                row = at.addRow(ruleId, sourceToTarget, hasQueryResults, "No match found");
                 row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
                 row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
                 row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
                 row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
             } else {
-                // Add first symbol
-                SymbolInformation firstSymbol = queryResults.get(0);
-                String firstSymbolDetails = formatSymbolInformation(firstSymbol);
-                row = at.addRow(ruleId, sourceToTarget, hasQueryResults, firstSymbolDetails + "\n" + queryResults.get(0).getLocation().getUri());
+                // Check the type of the first element to determine how to handle the results
+                Object firstResult = queryResults.get(0);
+
+                if (firstResult instanceof SymbolInformation) {
+                    SymbolInformation symbolInfo = (SymbolInformation) firstResult;
+                    String symbolDetails = formatSymbolInformation(symbolInfo);
+                    row = at.addRow(ruleId, sourceToTarget, hasQueryResults, symbolDetails + "\n" + symbolInfo.getLocation().getUri());
+                } else if (firstResult instanceof Rewrite) {
+                    Rewrite rewrite = (Rewrite) firstResult;
+                    String rewriteDetails = formatRewrite(rewrite);
+                    row = at.addRow(ruleId, sourceToTarget, hasQueryResults, rewriteDetails);
+                } else {
+                    // Fallback for unknown types
+                    row = at.addRow(ruleId, sourceToTarget, hasQueryResults, "Unknown result type: " + firstResult.getClass().getSimpleName());
+                }
+
+                // Set cell alignment for the row
                 row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
                 row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
                 row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
                 row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
+            }
 
-                // Add additional symbols in subsequent rows with empty rule id and found columns
+                /* Add additional symbols in subsequent rows with empty rule id and found columns
                 for (int i = 1; i < queryResults.size(); i++) {
                     String symbolDetails = formatSymbolInformation(queryResults.get(i));
                     row = at.addRow("", "", 33, symbolDetails + "\n" + queryResults.get(0).getLocation().getUri());
@@ -59,15 +85,14 @@ public class ResultsService {
                     row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
                     row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
                     row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
-                }
-            }
+                }*/
             at.addRule();
         }
-
         // Use System.out.println instead of logger to avoid log formatting
         System.out.println("\n=== Code Analysis Results ===");
         System.out.println(at.render());
     }
+
 
     private static String formatSymbolInformation(SymbolInformation si) {
         return String.format("Found %s at line %s, char: %s - %s",
@@ -75,6 +100,13 @@ public class ResultsService {
             si.getLocation().getRange().getStart().getLine() + 1,
             si.getLocation().getRange().getStart().getCharacter(),
             si.getLocation().getRange().getEnd().getCharacter()
+        );
+    }
+
+    private static String formatRewrite(Rewrite rewrite) {
+        return String.format("Rewrite match: %s (ID: %s)",
+            rewrite.name(),
+            rewrite.matchId()
         );
     }
 

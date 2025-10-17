@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static dev.snowdrop.analyze.services.LsSearchService.analyzeCodeFromRule;
+import static dev.snowdrop.analyze.services.AnalyzeService.analyzeCodeFromRule;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.filterRules;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
 
@@ -82,6 +82,13 @@ public class AnalyzeCommand implements Runnable {
     )
     public String target;
 
+    @CommandLine.Option(
+        names = {"--scanner"},
+        description = "Scanner tool to be used to analyse the code: jdtls, openrewrite",
+        defaultValue = "jdtls"
+    )
+    public String scanner;
+
     @Override
     public void run() {
         Path path = Paths.get(appPath);
@@ -117,7 +124,7 @@ public class AnalyzeCommand implements Runnable {
             if (filteredRules.isEmpty()) {
                 logger.warnf("No rules found !!");
             } else {
-                Map<String, MigrationTask> analyzeReport = analyzeCodeFromRule(factory, filteredRules);
+                Map<String, MigrationTask> analyzeReport = analyzeCodeFromRule(factory, scanner, filteredRules);
 
                 if (!analyzeReport.isEmpty()) {
                     ResultsService.showCsvTable(analyzeReport, factory.sourceTechnology, factory.targetTechnology);

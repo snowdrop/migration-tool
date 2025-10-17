@@ -4,12 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import de.vandermeer.asciitable.AT_Row;
-import de.vandermeer.asciitable.AsciiTable;
-import de.vandermeer.asciitable.CWC_FixedWidth;
-import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
 import dev.snowdrop.analyze.JdtLsFactory;
 import dev.snowdrop.analyze.model.MigrationTask;
+import dev.snowdrop.analyze.model.Rewrite;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.parser.QueryUtils;
@@ -20,7 +17,6 @@ import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.SymbolKind;
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -264,20 +260,4 @@ public class LsSearchService {
         return symbolInformationList;
     }
 
-    public static Map<String, MigrationTask> analyzeCodeFromRule(JdtLsFactory factory, List<Rule> rules) throws IOException {
-        Map<String, MigrationTask> ruleMigrationTasks = new HashMap<>();
-
-        // Collect all results from all the rule's queries executed and add the instructions
-        for (Rule rule : rules) {
-            Map<String, List<SymbolInformation>> ruleResults = executeLsCmd(factory, rule);
-            ruleMigrationTasks.putAll(Map.of(
-                rule.ruleID(),
-                new MigrationTask()
-                    .withRule(rule)
-                    .withResults(ruleResults.get(rule.ruleID()))
-                    .withInstruction(rule.instructions())
-            ));
-        }
-        return ruleMigrationTasks;
-    }
 }

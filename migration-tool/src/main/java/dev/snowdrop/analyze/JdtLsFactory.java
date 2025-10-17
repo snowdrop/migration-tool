@@ -29,12 +29,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static dev.snowdrop.analyze.services.LsSearchService.analyzeCodeFromRule;
+import static dev.snowdrop.analyze.services.AnalyzeService.analyzeCodeFromRule;
 import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
 
 @ApplicationScoped
-public class JdtLsFactory {
+public class JdtLsFactory extends ParentFactory {
     private static final Logger logger = Logger.getLogger(JdtLsFactory.class);
     private static final long TIMEOUT = 30000;
 
@@ -44,11 +44,7 @@ public class JdtLsFactory {
 
     public String jdtLsPath;
     public String jdtWks;
-    public String appPath;
-    public Path rulesPath;
     public String lsCmd;
-    public String sourceTechnology;
-    public String targetTechnology;
 
     public CompletableFuture<InitializeResult> future;
 
@@ -201,6 +197,6 @@ public class JdtLsFactory {
 
     private void analyze() throws IOException {
         List<Rule> rules = parseRulesFromFolder(this.rulesPath);
-        analyzeCodeFromRule(this, rules);
+        analyzeCodeFromRule(this, "jdtls", rules);
     }
 }
