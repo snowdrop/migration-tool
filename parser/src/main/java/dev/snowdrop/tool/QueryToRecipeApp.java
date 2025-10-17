@@ -16,6 +16,7 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueryToRecipeApp {
@@ -35,7 +36,16 @@ public class QueryToRecipeApp {
                 app.logQueryResult(q);
                 // Create for each Query the corresponding RecipeDTO
                 RecipeDTO dto = QueryToRecipeMapper.map(q);
+                dto = dto.withId(KeyGenerator.generate(dto.name()));
                 System.out.println(dto);
+
+                try {
+                    // convert the DTO to the YAML
+                    String yaml = yamlRecipeMapper().writeValueAsString(dto);
+                    System.out.println(yaml);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         );
 
@@ -48,20 +58,12 @@ public class QueryToRecipeApp {
                 app.logQueryResult(q);
                 // Create for each Query the corresponding RecipeDTO
                 RecipeDTO dto = QueryToRecipeMapper.map(q);
+                dto = dto.withId(KeyGenerator.generate(dto.name()));
                 System.out.println(dto);
 
-                // Generate the YAML from the RecipeDTO
-                YAMLFactory factory = new YAMLFactory()
-                    .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
-                ObjectMapper yamlMapper = new ObjectMapper(factory);
-                //.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                //.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
-                SimpleModule module = new SimpleModule();
-                module.addSerializer(RecipeDTO.class, new RecipeDTOSerializer());
-                yamlMapper.registerModule(module);
-
                 try {
-                    String yaml = yamlMapper.writeValueAsString(dto);
+                    // convert the DTO to the YAML
+                    String yaml = yamlRecipeMapper().writeValueAsString(dto);
                     System.out.println(yaml);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -82,9 +84,16 @@ public class QueryToRecipeApp {
                 app.logQueryResult(q);
                 // Create for each Query the corresponding RecipeDTO
                 RecipeDTO dto = QueryToRecipeMapper.map(q);
+                dto = dto.withId(KeyGenerator.generate(dto.name()));
                 System.out.println(dto);
-                System.out.printf("Generated key: %s%n", KeyGenerator.generate(dto.name()));
-                System.out.println();
+
+                try {
+                    // convert the DTO to the YAML
+                    String yaml = yamlRecipeMapper().writeValueAsString(dto);
+                    System.out.println(yaml);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         );
     }
@@ -96,6 +105,18 @@ public class QueryToRecipeApp {
         qr.keyValues().forEach((k, v) -> {
             System.out.println(String.format("Key: %s, value: %s.", k, v));
         });
+    }
+
+    private static ObjectMapper yamlRecipeMapper() {
+        YAMLFactory factory = new YAMLFactory()
+            .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
+        ObjectMapper yamlMapper = new ObjectMapper(factory);
+
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(RecipeDTO.class, new RecipeDTOSerializer());
+        yamlMapper.registerModule(module);
+
+        return yamlMapper;
     }
 
     private QueryVisitor parseQuery(String query) {
