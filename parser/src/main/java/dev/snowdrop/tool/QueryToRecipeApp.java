@@ -102,7 +102,7 @@ public class QueryToRecipeApp {
         });
     }
 
-    private static ObjectMapper yamlRecipeMapper() {
+    public static ObjectMapper yamlRecipeMapper() {
         YAMLFactory factory = new YAMLFactory()
             .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
         ObjectMapper yamlMapper = new ObjectMapper(factory);
