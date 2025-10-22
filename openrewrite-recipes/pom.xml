@@ -15,7 +15,7 @@
     <name>Migration Tool :: Openrewrite recipes</name>
 
     <properties>
-        <openrewrite-recipe-bom.version>3.15.0</openrewrite-recipe-bom.version>
+        <openrewrite-recipe-bom.version>3.16.0</openrewrite-recipe-bom.version>
     </properties>
 
     <!-- TODO: Investigate why the version diverges from parent: 8.61.1 vs 8.62.4 if we don't declare again the following dependencyManagement section -->
