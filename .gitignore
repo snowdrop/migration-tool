@@ -6,3 +6,12 @@ jdt/
 applications/**/*.json
 /applications/demo-spring-boot-todo-app/
 /my-rewrite.yml
+
+.idea
+*.iml
+.vscode
+.project
+.settings
+.classpath
+target
+
