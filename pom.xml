@@ -16,7 +16,7 @@
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.28.4</quarkus.platform.version>
 
-        <openrewrite-recipe-bom.version>3.15.0</openrewrite-recipe-bom.version>
+        <openrewrite-recipe-bom.version>3.17.0</openrewrite-recipe-bom.version>
 
         <spring-boot.version>3.5.6</spring-boot.version>
         <org.eclipse.lsp4j.version>0.24.0</org.eclipse.lsp4j.version>
