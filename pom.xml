@@ -23,8 +23,8 @@
 
         <skipITs>true</skipITs>
 
-        <maven.compiler.release>21</maven.compiler.release>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>23</maven.compiler.release>
+        <maven.compiler.target>23</maven.compiler.target>
 
         <compiler-plugin.version>3.14.1</compiler-plugin.version>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
@@ -202,7 +202,7 @@
                     <execution>
                         <id>default</id>
                         <configuration>
-                            <mainClass>dev.snowdrop.analyze.JdtLsFactory</mainClass>
+                            <mainClass>dev.snowdrop.analyze.JdtLsClient</mainClass>
                         </configuration>
                     </execution>
                     <execution>
