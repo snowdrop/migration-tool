@@ -129,7 +129,7 @@ public class RewriteService {
 
         try {
             Files.write(yamlFilePath, yamlRecipe.getBytes(),
-                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                StandardOpenOption.CREATE);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -176,7 +176,7 @@ public class RewriteService {
             command.add(String.format("%s:%s:%s:%s",
                 MAVEN_OPENREWRITE_PLUGIN_GROUP,
                 MAVEN_OPENREWRITE_PLUGIN_ARTIFACT,
-                "6.19.0", // Remove hard coded value of the version => use config property
+                "6.22.1", // TODO: Remove hard coded value of the version => use config property
                 "dryRun"));
             // TODO: Remove the hard coded activeRecipes value
             command.add(String.format("-Drewrite.activeRecipes=%s", "dev.snowdrop.openrewrite.MatchConditions"));
