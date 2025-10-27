@@ -1,8 +1,8 @@
-import dev.snowdrop.openrewrite.maven.search.FindDependencies;
-import dev.snowdrop.openrewrite.maven.search.FindDependency;
+import dev.snowdrop.openrewrite.maven.search.scanner.FindDependencies;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.test.RewriteTest;
+import org.openrewrite.test.TypeValidation;
 
 import static org.openrewrite.maven.Assertions.pomXml;
 
@@ -11,7 +11,8 @@ public class FindDependenciesTest implements RewriteTest {
     @Disabled
     @Test
     void simple() {
-        rewriteRun(spec -> spec.recipe(new FindDependencies("match-001","io.jsonwebtoken:jjwt:0.9.1")),
+        rewriteRun(spec -> spec.recipe(new FindDependencies("match-001","io.jsonwebtoken:jjwt:0.9.1"))
+                .typeValidationOptions(TypeValidation.all().immutableExecutionContext(false)),
             pomXml(
                 """
                     <project>

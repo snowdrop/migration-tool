@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.snowdrop.openrewrite.maven.search;
+package dev.snowdrop.openrewrite.maven.search.scanner;
 
+import dev.snowdrop.openrewrite.maven.search.MatchingReport;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.jspecify.annotations.Nullable;
@@ -35,6 +36,7 @@ import static java.util.Collections.emptyList;
 
 @EqualsAndHashCode(callSuper = false)
 @Value
+@Deprecated
 public class FindDependencies extends ScanningRecipe<Set<Dependency>> {
 
     /**
@@ -60,7 +62,7 @@ public class FindDependencies extends ScanningRecipe<Set<Dependency>> {
         return "Finds first-order dependency uses, i.e. dependencies that are defined directly in a project.";
     }
 
-    private final MatchingReport report = new MatchingReport(this);
+    private transient MatchingReport report = new MatchingReport(this);
 
     @Override
     public Set<Dependency> getInitialValue(ExecutionContext ctx) {
@@ -76,11 +78,11 @@ public class FindDependencies extends ScanningRecipe<Set<Dependency>> {
                 .collect(Collectors.toList());
 
 
-            @Override
+/*            @Override
             public Xml.Document visitDocument(Xml.Document d, ExecutionContext ctx) {
                 System.out.printf("XML document visited: %s",d);
                 return d;
-            }
+            }*/
 
             @Override
             public Xml.Tag visitTag(Xml.Tag tag, ExecutionContext ctx) {

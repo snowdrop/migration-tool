@@ -1,15 +1,14 @@
 import dev.snowdrop.openrewrite.maven.search.FindDependency;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.test.RewriteTest;
 
 import static org.openrewrite.maven.Assertions.pomXml;
 
 public class FindDependencyTest implements RewriteTest {
-    @Disabled
+
     @Test
     void simple() {
-        rewriteRun(spec -> spec.recipe(new FindDependency("match-001","io.jsonwebtoken", "jjwt", "0.9.1", null)),
+        rewriteRun(spec -> spec.recipe(new FindDependency("match-001","io.jsonwebtoken:jjwt:0.9.1")),
             pomXml(
                 """
                     <project>
