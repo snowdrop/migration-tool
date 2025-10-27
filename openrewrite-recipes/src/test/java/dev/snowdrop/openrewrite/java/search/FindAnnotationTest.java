@@ -12,12 +12,11 @@ public class FindAnnotationTest implements RewriteTest {
         FindAnnotations findAnnotation = new FindAnnotations(false);
         findAnnotation.matchId = "match-deprecated-001";
         findAnnotation.pattern = "@java.lang.Deprecated";
-        // TODO: Check with openrewrite why we got 2 results in the datatable !!
+
         rewriteRun(
             spec -> spec.dataTableAsCsv(MatchingReport.class,
                         """
                         matchId,type,symbol,pattern,sourceFilePath,className
-                        match-deprecated-001,JAVA,ANNOTATION,@java.lang.Deprecated,HomeCinema.java,HomeCinema
                         match-deprecated-001,JAVA,ANNOTATION,@java.lang.Deprecated,HomeCinema.java,HomeCinema
                         """
                     ).recipe(findAnnotation),
