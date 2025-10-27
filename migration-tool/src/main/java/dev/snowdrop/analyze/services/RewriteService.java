@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import dev.snowdrop.analyze.ParentFactory;
+import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Rewrite;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.mapper.QueryToRecipeMapper;
@@ -14,10 +14,7 @@ import dev.snowdrop.model.RecipeDTO;
 import dev.snowdrop.model.RecipeDTOSerializer;
 import dev.snowdrop.parser.QueryUtils;
 import dev.snowdrop.parser.QueryVisitor;
-import dev.snowdrop.reconciler.KeyGenerator;
 import dev.snowdrop.transform.model.CompositeRecipe;
-import dev.snowdrop.transform.provider.model.ExecutionContext;
-import dev.snowdrop.transform.provider.model.ExecutionResult;
 import org.jboss.logging.Logger;
 
 import java.io.BufferedReader;
@@ -35,7 +32,7 @@ public class RewriteService {
     public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
     public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
 
-    public static Map<String, List<Rewrite>> executeRewriteCmd(ParentFactory factory, Rule rule) {
+    public static Map<String, List<Rewrite>> executeRewriteCmd(Config config, Rule rule) {
         Map<String, List<Rewrite>> ruleResults = new HashMap<>();
 
         // Parse first the Rule condition to populate the Query object using the YAML Condition query
@@ -60,17 +57,17 @@ public class RewriteService {
          */
         if (visitor.getSimpleQueries().size() == 1) {
             visitor.getSimpleQueries().stream().findFirst().ifPresent(q -> {
-                List<Rewrite> results = executeQueryCommand(factory, rule, q);
+                List<Rewrite> results = executeQueryCommand(config, rule, q);
                 ruleResults.putAll(Map.of(rule.ruleID(), results));
             });
         } else if (visitor.getOrQueries().size() > 1) {
             visitor.getOrQueries().stream().forEach(q -> {
-                List<Rewrite> results = executeQueryCommand(factory, rule, q);
+                List<Rewrite> results = executeQueryCommand(config, rule, q);
                 ruleResults.putAll(Map.of(rule.ruleID(), results));
             });
         } else if (visitor.getAndQueries().size() > 1) {
             visitor.getAndQueries().stream().forEach(q -> {
-                List<Rewrite> results = executeQueryCommand(factory, rule, q);
+                List<Rewrite> results = executeQueryCommand(config, rule, q);
                 ruleResults.putAll(Map.of(rule.ruleID(), results));
             });
         } else {
@@ -81,7 +78,7 @@ public class RewriteService {
         return ruleResults;
     }
 
-    private static List<Rewrite> executeQueryCommand(ParentFactory factory, Rule rule, Query q) {
+    private static List<Rewrite> executeQueryCommand(Config config, Rule rule, Query q) {
         // Map the Query to the RecipeDTO
         RecipeDTO dto = QueryToRecipeMapper.map(q);
         logger.infof("Recipe dto: %s", dto);
@@ -128,7 +125,7 @@ public class RewriteService {
 
         // Copy the rewrite yaml file under the project to scan
         String rewriteYamlName = "rewrite.yml";
-        Path yamlFilePath = Paths.get(factory.appPath).resolve(rewriteYamlName);
+        Path yamlFilePath = Paths.get(config.appPath()).resolve(rewriteYamlName);
 
         try {
             Files.write(yamlFilePath, yamlRecipe.getBytes(),
@@ -141,7 +138,7 @@ public class RewriteService {
         String gavs = "org.openrewrite:rewrite-java:8.62.4,org.openrewrite.recipe:rewrite-java-dependencies:1.43.0,dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT";
 
         // Execute the maven rewrite goal command
-        boolean succeed = execMvnCmd(factory.appPath,true,gavs,rewriteYamlName);
+        boolean succeed = execMvnCmd(config.appPath(),true,gavs,rewriteYamlName);
 
         // Populate the result's array
         List<Rewrite> results = new ArrayList<>();
