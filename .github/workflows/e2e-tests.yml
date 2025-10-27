@@ -82,8 +82,7 @@ jobs:
           # Create jdt workspace directory if it doesn't exist
           mkdir -p ./jdt
 
-          # Run analysis with jdt-ls using the uber jar approach (more reliable in CI)
-          cd migration-tool
+          # Run analysis with jdt-ls using the uber jar approach
           
           timeout 300 java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze ./applications/demo-spring-boot-todo-app -o json || {
             echo "❌ jdt-ls analysis failed or timed out"
