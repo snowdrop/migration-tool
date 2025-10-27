@@ -1,0 +1,164 @@
+name: "e2e tests"
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '.github/project.yml'
+      - 'README.md'
+      - 'docs/**'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    name: "e2e test using as scanner: jdt-ls or openrewrite"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install konveyor jdt-ls
+        run: |
+          export VERSION=latest
+          ID=$(docker create --name kantra-download quay.io/konveyor/kantra:$VERSION)
+          mkdir -p ./jdt
+          docker cp $ID:/jdtls ./jdt/konveyor-jdtls
+          docker rm $ID
+
+      - name: Build project with Maven
+        run: |
+          mvn clean install
+          echo "Maven build exit code: $?"
+
+      - name: Clone the spring-boot-todo-app to demo-spring-boot-todo-app
+        run: |
+          if [ $? -eq 0 ]; then
+            if [ ! -d "./applications/demo-spring-boot-todo-app" ]; then
+              cp -r ./applications/spring-boot-todo-app ./applications/demo-spring-boot-todo-app
+              echo "✅ Successfully duplicated spring-boot-todo-app to demo-spring-boot-todo-app"
+            else
+              echo "✅ demo-spring-boot-todo-app already exists"
+            fi
+          else
+            echo "❌ Maven build failed, skipping duplication"
+            exit 1
+          fi
+
+      - name: Initialize git and create transform branch in demo app
+        run: |
+          cd ./applications/demo-spring-boot-todo-app
+          if [ ! -d ".git" ]; then
+            git init
+            git config user.name "GitHub Actions e2e"
+            git config user.email "e2e-actions@github.com"
+            git add .
+            git commit -m "Initial commit for e2e testing"
+            echo "✅ Initialized git repository"
+          else
+            echo "✅ Git repository already exists"
+          fi
+
+          # Create transform branch
+          git checkout -b transform 2>/dev/null || git checkout transform
+          echo "✅ Created/switched to transform branch"
+
+      - name: Test with jdt-ls scanner - Generate analysis report
+        run: |
+          echo "🔍 Starting jdt-ls scanner analysis..."
+
+          # Set environment variables for the analysis
+          export ANALYZER_JDT_LS_PATH="$(pwd)/jdt/konveyor-jdtls"
+          export ANALYZER_JDT_WORKSPACE_PATH="$(pwd)/jdt"
+          export ANALYZER_RULES_PATH="$(pwd)/cookbook/rules"
+
+          # Create jdt workspace directory if it doesn't exist
+          mkdir -p ./jdt
+
+          # Run analysis with jdt-ls using the uber jar approach (more reliable in CI)
+          cd migration-tool
+          
+          timeout 300 java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze ./applications/demo-spring-boot-todo-app -o json || {
+            echo "❌ jdt-ls analysis failed or timed out"
+            echo "Checking for any generated files..."
+            find ./applications/demo-spring-boot-todo-app -name "*analysis*" -o -name "*report*" -type f 2>/dev/null || true
+            exit 1
+          }
+
+      - name: Check jdt-ls result file
+        run: |
+          cd ./applications/demo-spring-boot-todo-app
+          echo "🔍 Looking for jdt-ls analysis result files..."
+
+          # Look for analysis report files
+          RESULT_FILES=$(find . -name "analysing-report_*.json" -type f 2>/dev/null)
+
+          if [ -n "$RESULT_FILES" ]; then
+            for RESULT_FILE in $RESULT_FILES; do
+              echo "✅ jdt-ls analysis result file found: $RESULT_FILE"
+              echo "File size: $(stat -c%s "$RESULT_FILE") bytes"
+              if [ -s "$RESULT_FILE" ]; then
+                echo "📄 File content preview (first 20 lines):"
+                head -20 "$RESULT_FILE"
+                echo "✅ jdt-ls result file is populated with content"
+              else
+                echo "❌ jdt-ls result file is empty"
+                exit 1
+              fi
+            done
+          else
+            echo "❌ jdt-ls analysis result file not found"
+            echo "📂 Current directory contents:"
+            ls -la .
+            echo "🔍 Searching for any JSON files:"
+            find . -name "*.json" -type f 2>/dev/null || echo "No JSON files found"
+            exit 1
+          fi
+
+      - name: Test with openrewrite scanner
+        run: |
+          echo "🔍 Starting openrewrite scanner analysis..."
+
+          # TODO
+
+      - name: Check openrewrite result files
+        run: |
+          cd ./applications/demo-spring-boot-todo-app
+          echo "🔍 Looking for analysis result files..."
+
+          # TODO
+
+      - name: Summary of E2E test results
+        run: |
+          echo "📊 E2E Test Results Summary:"
+          echo "=================================="
+
+          cd ./applications/demo-spring-boot-todo-app
+
+          # Check jdt-ls results
+          JDT_RESULTS=$(find . -name "analysing-report_*.json" -type f 2>/dev/null)
+          if [ -n "$JDT_RESULTS" ]; then
+            echo "✅ jdt-ls scanner: PASSED - Analysis report generated"
+          else
+            echo "❌ jdt-ls scanner: FAILED - No analysis report found"
+          fi
+          
+          # TODO
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results
+          path: |
+            ./applications/demo-spring-boot-todo-app/analysing-report_*.json
+            ./applications/demo-spring-boot-todo-app/target/rewrite/
+            ./applications/demo-spring-boot-todo-app/target/**/*.json
+          retention-days: 7
