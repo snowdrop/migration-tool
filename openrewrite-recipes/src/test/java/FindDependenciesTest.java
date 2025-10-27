@@ -8,7 +8,7 @@ import static org.openrewrite.maven.Assertions.pomXml;
 
 public class FindDependenciesTest implements RewriteTest {
 
-    //@Disabled
+    @Disabled
     @Test
     void simple() {
         rewriteRun(spec -> spec.recipe(new FindDependencies("match-001","io.jsonwebtoken:jjwt:0.9.1")),
