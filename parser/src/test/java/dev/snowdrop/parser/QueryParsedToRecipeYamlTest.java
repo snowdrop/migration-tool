@@ -19,7 +19,7 @@ import java.util.Set;
 public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
     @Test
     public void queryToYamlRecipe() {
-        String simpleQuery = "FIND java.annotation WHERE (name='@SpringBootApplication')";
+        String simpleQuery = "java.annotation is (name='@SpringBootApplication')";
         QueryVisitor visitor = parseQuery(simpleQuery);
 
         // Don't include simple quotes around the key or value
@@ -60,7 +60,7 @@ public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
 
     @Test
     public void queryWithAnd() {
-        String queryWithAnd = "FIND java.annotation WHERE (name='@SpringBootApplication') AND pom.dependency WHERE (artifactId='quarkus-core', version='3.16.2')";
+        String queryWithAnd = "java.annotation is (name='@SpringBootApplication') AND pom.dependency is (artifactId='quarkus-core', version='3.16.2')";
         QueryVisitor visitor = parseQuery(queryWithAnd);
 
         // Don't include simple quotes around the key or value
