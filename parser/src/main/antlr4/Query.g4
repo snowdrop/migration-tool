@@ -5,18 +5,19 @@ package dev.snowdrop.parser.antlr;
 }
 
 // Structure of the language
-// FIND pom.dependency WHERE (artifactId='quarkus-core', version='3.16.2')
-// FIND pom.dependency WHERE (artifactId='quarkus-core', version='3.16.2') OR pom.dependency WHERE (artifactId='quarkus-rest', version='3.16.2')
-// FIND pom.dependency WHERE (artifactId='spring-boot', version='3.5.6') AND java.annotation WHERE (name='@SpringBootApplication')
+// pom.dependency is (artifactId='quarkus-core', version='3.16.2')
+// java.annotation is '@java.lang.SuppressWarnings("deprecation")'
+// pom.dependency is (artifactId='quarkus-core', version='3.16.2') OR pom.dependency is (artifactId='quarkus-rest', version='3.16.2')
+// pom.dependency is (groupId='io.quarkus', artifactId='quarkus-rest', version='3.16.2') AND java.annotation is '@SpringBootApplication'
 
-searchQuery: 'FIND' operation;
+searchQuery: operation;
 operation
     : operation AND operation #AndOperation
     | operation OR operation #OrOperation
     | clause #SimpleClause
     ;
 
-clause: fileType ('.' symbol)? 'WHERE' '(' keyValuePair (',' keyValuePair)* ')'*;
+clause: fileType ('.' symbol)? ('is' | '=') (value | '(' keyValuePair (',' keyValuePair)* ')');
 fileType: 'JAVA' | 'java' | 'POM' | 'pom' | 'TEXT' | 'text' | 'PROPERTY' | 'property' | 'YAML' | 'yaml' | 'JSON' | 'json';
 symbol: ID;
 keyValuePair: key '=' value;
@@ -25,13 +26,13 @@ value: QUOTED_STRING | ID;
 logicalOp: AND | OR;
 
 // LEXER vocabulary of the language
-FIND:  'FIND';
-WHERE: 'WHERE';
+IS:    'is';
 AND:   'AND';
 OR:    'OR';
 
 ID:            [a-zA-Z][a-zA-Z0-9-]*; // Identifier, allows dots for package names
-QUOTED_STRING: '\'' ( ~('\''|'\\') | '\\' . )* '\''; // Single-quoted string
+QUOTED_STRING: '\'' ( ~('\''|'\\') | '\\' . )* '\''   // Single-quoted string
+             | '"' ( ~('"'|'\\') | '\\' . )* '"';     // Double-quoted string
 EQUALS:        '=';
 DOT:           '.';
 COMMA:         ',';
