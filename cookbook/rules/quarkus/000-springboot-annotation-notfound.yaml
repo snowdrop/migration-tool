@@ -12,4 +12,4 @@
     #java.referenced:
     #  location: ANNOTATION
     #  pattern: dummy.SpringApplication
-    condition: FIND java.annotation WHERE (name='dummy.SpringApplication')
+    condition: java.annotation is 'dummy.SpringApplication'
