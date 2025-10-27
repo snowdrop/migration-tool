@@ -44,7 +44,8 @@ public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
 
             String expectedYaml = """
                 dev.snowdrop.openrewrite.java.search.FindAnnotations:
-                  annotationPattern: "@SpringBootApplication"
+                  pattern: "@SpringBootApplication"
+                  matchId: "rule-001-003"
                   matchOnMetaAnnotations: "false"
                 """;
             String generatedYaml = null;
@@ -88,7 +89,8 @@ public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
             // Check Query 1 => RecipeDTO => Yaml
             String expectedYaml = """
             dev.snowdrop.openrewrite.java.search.FindAnnotations:
-              annotationPattern: "@SpringBootApplication"
+              pattern: "@SpringBootApplication"
+              matchId: "rule-001-001"
               matchOnMetaAnnotations: "false"
             """;
             Assertions.assertEquals(expectedYaml, generatedYaml);
@@ -98,6 +100,7 @@ public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
             org.openrewrite.maven.search.FindDependency:
               artifactId: "quarkus-core"
               version: "3.16.2"
+              matchId: "rule-001-002"
             """;
             dto = QueryToRecipeMapper.map(queryList.get(1));
             generatedYaml = yamlMapper.writeValueAsString(dto);
