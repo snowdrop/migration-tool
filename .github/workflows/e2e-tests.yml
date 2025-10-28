@@ -130,7 +130,7 @@ jobs:
 
           export ANALYZER_RULES_PATH="$(pwd)/cookbook/rules"
           
-          timeout 300 java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app -o json || {
+          timeout 300 java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app -o json --scanner openrewrite || {
             echo "❌ openrewrite analysis failed or timed out"
             echo "Checking for any generated files..."
             find ./applications/spring-boot-todo-app -name "*analysing-openrewrite-report*" -type f 2>/dev/null || true
