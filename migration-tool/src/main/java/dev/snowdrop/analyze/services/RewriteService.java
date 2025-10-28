@@ -148,7 +148,7 @@ public class RewriteService {
 
         // TODO: Add logic to scan the csv files generated ...
         // Create a dummy response
-        results.add(new Rewrite(dto.id(),dto.name()));
+        results.add(new Rewrite(dto.id().toString(),dto.name()));
         return results;
     }
 
