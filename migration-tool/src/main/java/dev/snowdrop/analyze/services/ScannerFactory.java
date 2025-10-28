@@ -20,17 +20,7 @@ public class ScannerFactory {
         return switch (scannerType) {
             case Scanner.JDTLS -> {
                 JdtLsClient client = new JdtLsClientBuilder().withConfig(config).build();
-                try {
-                    client.launchLsProcess();
-                    client.createLaunchLsClient();
-                    client.initLanguageServer();
-                    yield new JdtLsScanner(config,client);
-                } catch (Exception e) {
-                    logger.errorf("❌ Error: %s", e.getMessage());
-                    throw e;
-                } finally {
-                    client.stop();
-                }
+                yield new JdtLsScanner(config,client);
             }
             case Scanner.OPENREWRITE -> new OpenRewriteScanner(config);
             default -> throw new IllegalArgumentException("Unknown scanner: " + scannerType);
