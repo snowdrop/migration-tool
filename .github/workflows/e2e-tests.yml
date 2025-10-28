@@ -25,14 +25,6 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Install konveyor jdt-ls
-        run: |
-          export VERSION=latest
-          ID=$(docker create --name kantra-download quay.io/konveyor/kantra:$VERSION)
-          mkdir -p ./jdt
-          docker cp $ID:/jdtls ./jdt/konveyor-jdtls
-          docker rm $ID
-
       - name: Build project with Maven
         run: |
           mvn clean install -ntp -DskipTests
@@ -61,8 +53,21 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
+      - name: Install konveyor jdt-ls
+        run: |
+          export VERSION=latest
+          ID=$(docker create --name kantra-download quay.io/konveyor/kantra:$VERSION)
+          mkdir -p ./jdt
+          docker cp $ID:/jdtls ./jdt/konveyor-jdtls
+          docker rm $ID
+
       - run: |
           echo "🔍 Starting jdt-ls scanner analysis..."
+          
+          pwd
+          ls -la
+          ls -la migration-tool/
+          ls -la migration-tool/target
 
           # Set environment variables for the analysis
           export ANALYZER_JDT_LS_PATH="$(pwd)/jdt/konveyor-jdtls"
