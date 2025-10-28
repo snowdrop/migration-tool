@@ -35,7 +35,7 @@ jobs:
 
       - name: Build project with Maven
         run: |
-          mvn clean install -DskipTests
+          mvn clean install -ntp -DskipTests
           echo "Maven build exit code: $?"
 
       - name: Clone the spring-boot-todo-app to demo-spring-boot-todo-app
