@@ -193,7 +193,7 @@ public class AnalyzeCommand implements Runnable {
 
     private void exportAsJson(Map<String, MigrationTask> analyzeReport, Config config) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm").withLocale(Locale.getDefault());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm").withLocale(Locale.getDefault());
             String dateTimeformated = LocalDateTime.now().format(formatter);
 
             MigrationTasksExport exportData = new MigrationTasksExport(
@@ -206,7 +206,7 @@ public class AnalyzeCommand implements Runnable {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-            File outputFile = new File(String.format("%s/%s_%s.json", config.appPath(), "analysing-report",dateTimeformated));
+            File outputFile = new File(String.format("%s/analysing-%s-report_%s.json", config.appPath(),config.scanner(),dateTimeformated));
 
             // Ensure parent directory exists
             if (outputFile.getParentFile() != null) {

@@ -1,0 +1,201 @@
+name: "e2e tests"
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '.github/project.yml'
+      - 'README.md'
+      - 'docs/**'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  setup:
+    name: "Setup, build the migration tool and install the spring todo application"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build project with Maven
+        run: |
+          mvn clean install -ntp -DskipTests
+          echo "Maven build exit code: $?"
+
+      - name: Initialize git under the TODO application to revert changes
+        run: |
+          cd ./applications/spring-boot-todo-app
+          if [ ! -d ".git" ]; then
+            git init
+            git config user.name "GitHub Actions e2e"
+            git config user.email "e2e-actions@github.com"
+            git add .
+            git commit -m "Initial commit for e2e testing"
+            echo "✅ Initialized git repository"
+          else
+            echo "✅ Git repository already exists"
+          fi
+
+          # Create transform branch
+          git checkout -b transform 2>/dev/null || git checkout transform
+          echo "✅ Created/switched to transform branch"
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-migration-tool
+          path: |
+            migration-tool/target/quarkus-app/
+            applications/
+            cookbook/rules/
+          retention-days: 1
+
+  jdtls-analyse:
+    name: "Generate analysis report: jdt-ls"
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: built-migration-tool
+
+      - name: Install konveyor jdt-ls
+        run: |
+          export VERSION=latest
+          ID=$(docker create --name kantra-download quay.io/konveyor/kantra:$VERSION)
+          mkdir -p ./jdt
+          docker cp $ID:/jdtls ./jdt/konveyor-jdtls
+          docker rm $ID
+
+      - run: |
+          echo "🔍 Starting jdt-ls scanner analysis..."
+
+          # Set environment variables for the analysis
+          export ANALYZER_JDT_LS_PATH="$(pwd)/jdt/konveyor-jdtls"
+          export ANALYZER_JDT_WORKSPACE_PATH="$(pwd)/jdt"
+          export ANALYZER_RULES_PATH="$(pwd)/cookbook/rules"
+
+          # Create jdt workspace directory if it doesn't exist
+          mkdir -p ./jdt
+
+          # Run analysis with jdt-ls using the uber jar approach
+          timeout 300 java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app -o json || {
+            echo "❌ jdt-ls analysis failed or timed out"
+            echo "Checking for any generated files..."
+            find ./applications/spring-boot-todo-app -name "*analysing-jdtls-report*" -type f 2>/dev/null || true
+            exit 1
+          }
+
+      - name: Upload jdtls analysis results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jdtls-analysis-results
+          path: ./applications/spring-boot-todo-app/analysing-jdtls-report_*.json
+          retention-days: 1
+
+  openrewrite-analyse:
+    name: "Generate analysis report: openrewrite"
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: built-migration-tool
+
+      - run: |
+          echo "🔍 Starting openrewrite scanner analysis..."
+
+          export ANALYZER_RULES_PATH="$(pwd)/cookbook/rules"
+          
+          timeout 300 java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app -o json --scanner openrewrite || {
+            echo "❌ openrewrite analysis failed or timed out"
+            echo "Checking for any generated files..."
+            find ./applications/spring-boot-todo-app -name "*analysing-openrewrite-report*" -type f 2>/dev/null || true
+            exit 1
+          }
+
+      - name: Upload openrewrite analysis results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: openrewrite-analysis-results
+          path: ./applications/spring-boot-todo-app/analysing-openrewrite-report_*.json
+          retention-days: 1
+
+  reporting:
+    name: "Tests result summary"
+    needs: [jdtls-analyse, openrewrite-analyse]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: built-migration-tool
+
+      - name: Download jdtls analysis results
+        uses: actions/download-artifact@v4
+        with:
+          name: jdtls-analysis-results
+        continue-on-error: true
+
+      - name: Download openrewrite analysis results
+        uses: actions/download-artifact@v4
+        with:
+          name: openrewrite-analysis-results
+        continue-on-error: true
+
+      - name: Summary of E2E test results
+        run: |
+          echo "📊 E2E Test Results Summary:"
+          echo "=================================="
+
+          # Define scanners and their file patterns
+          declare -A scanners=(
+            ["jdt-ls"]="analysing-jdtls-report_*.json"
+            ["openrewrite"]="analysing-openrewrite-report_*.json"
+          )
+
+          # Check results for each scanner
+          for scanner in "${!scanners[@]}"; do
+            pattern="${scanners[$scanner]}"
+            # Look for files in both current directory (downloaded artifacts) and applications directory
+            RESULTS=$(find . -name "$pattern" -type f 2>/dev/null)
+            if [ -n "$RESULTS" ]; then
+              echo "✅ $scanner scanner: PASSED - Analysis report generated"
+              echo "   Found: $RESULTS"
+            else
+              echo "❌ $scanner scanner: FAILED - No analysis report found (pattern: $pattern)"
+            fi
+          done
+
+      - name: Upload analysis reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-analysis-results
+          path: |
+            analysing-*-report_*.json
+            ./applications/spring-boot-todo-app/analysing-*-report_*.json
+          retention-days: 7

@@ -13,8 +13,7 @@ import org.jboss.logging.Logger;
 import picocli.CommandLine;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
@@ -22,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
 
@@ -133,11 +133,13 @@ public class TransformCommand implements Runnable {
      * @return Optional containing the latest JSON file path, or empty if none found
      */
     private Optional<Path> findLatestAnalysingReportJson(Path projectPath) {
-        try {
-            return Files.list(projectPath)
+            FileSystem fs = FileSystems.getDefault();
+            PathMatcher matcher = fs.getPathMatcher("glob:analysing-*-report_*");
+
+            try(Stream<Path> stream = Files.list(projectPath)) {
+                return stream
                 .filter(Files::isRegularFile)
-                .filter(path -> path.getFileName().toString().startsWith("analysing-report_"))
-                .filter(path -> path.getFileName().toString().endsWith(".json"))
+                .filter(path -> matcher.matches(path.getFileName()))
                 .max((path1, path2) -> {
                     try {
                         return Files.getLastModifiedTime(path1).compareTo(Files.getLastModifiedTime(path2));
