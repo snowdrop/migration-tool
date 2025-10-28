@@ -151,13 +151,11 @@ jobs:
           
           # TODO
 
-      - name: Upload test artifacts
+      - name: Upload analysis reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: e2e-test-results
+          name: e2e-analysis-results
           path: |
             ./applications/demo-spring-boot-todo-app/analysing-report_*.json
-            ./applications/demo-spring-boot-todo-app/target/rewrite/
-            ./applications/demo-spring-boot-todo-app/target/**/*.json
           retention-days: 7
