@@ -1,3 +1,6 @@
+[![GitHub Actions Status](<https://img.shields.io/github/actions/workflow/status/snowdrop/migration-tool/test.yml?branch=main&logo=GitHub&style=for-the-badge>)](https://github.com/snowdrop/migration-tool/actions/workflows/test.yml)
+[![License](https://img.shields.io/github/license/snowdrop/migration-tool?style=for-the-badge&logo=apache)](https://www.apache.org/licenses/LICENSE-2.0)
+
 # Migration Tool project
 
 This project and proof of concept show how to better handle the end-to-end migration of a Java application — for example, from Spring Boot to Quarkus — using new concepts that organize the process into ordered instructions managed by different providers. We’ve focused especially on making it easier for users to debug and test the transformation, particularly the matching conditions and resulting output.
