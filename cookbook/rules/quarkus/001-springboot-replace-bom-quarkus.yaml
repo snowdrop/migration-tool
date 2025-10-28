@@ -12,7 +12,7 @@
     #java.referenced:
     #  location: ANNOTATION
     #  pattern: org.springframework.boot.autoconfigure.SpringBootApplication
-    condition: java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication1'
+    condition: java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
   order: 1
   instructions:
     ai:
