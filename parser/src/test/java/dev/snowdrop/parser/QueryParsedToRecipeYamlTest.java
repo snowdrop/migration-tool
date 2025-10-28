@@ -42,12 +42,19 @@ public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
             module.addSerializer(RecipeDTO.class, new RecipeDTOSerializer());
             yamlMapper.registerModule(module);
 
-            String expectedYaml = """
+            // Get the UUID created as dto parameter
+            String matchId = dto.parameters().stream()
+                .filter(p -> p.parameter().equals("matchId"))
+                .map(p -> p.value())                      // Get its value (transform stream to String)
+                .findAny()                                // Get an Optional<String>
+                .orElse(null);
+
+            String expectedYaml = String.format("""
                 dev.snowdrop.openrewrite.java.search.FindAnnotations:
                   pattern: "@SpringBootApplication"
-                  matchId: "rule-001-003"
+                  matchId: "%s"
                   matchOnMetaAnnotations: "false"
-                """;
+                """, matchId);
             String generatedYaml = null;
             try {
                 generatedYaml = yamlMapper.writeValueAsString(dto);
@@ -86,23 +93,38 @@ public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
             RecipeDTO dto = QueryToRecipeMapper.map(queryList.getFirst());
             generatedYaml = yamlMapper.writeValueAsString(dto);
 
+            // Get the UUID created as dto parameter
+            String matchId = dto.parameters().stream()
+                .filter(p -> p.parameter().equals("matchId"))
+                .map(p -> p.value())                      // Get its value (transform stream to String)
+                .findAny()                                // Get an Optional<String>
+                .orElse(null);
+
             // Check Query 1 => RecipeDTO => Yaml
-            String expectedYaml = """
-            dev.snowdrop.openrewrite.java.search.FindAnnotations:
-              pattern: "@SpringBootApplication"
-              matchId: "rule-001-001"
-              matchOnMetaAnnotations: "false"
-            """;
+            String expectedYaml = String.format("""
+                dev.snowdrop.openrewrite.java.search.FindAnnotations:
+                  pattern: "@SpringBootApplication"
+                  matchId: "%s"
+                  matchOnMetaAnnotations: "false"
+                """,  matchId);
             Assertions.assertEquals(expectedYaml, generatedYaml);
 
             // Check Query 2 => RecipeDTO => Yaml
-            expectedYaml = """
-            org.openrewrite.maven.search.FindDependency:
-              artifactId: "quarkus-core"
-              version: "3.16.2"
-              matchId: "rule-001-002"
-            """;
             dto = QueryToRecipeMapper.map(queryList.get(1));
+
+            matchId = dto.parameters().stream()
+                .filter(p -> p.parameter().equals("matchId"))
+                .map(p -> p.value())                      // Get its value (transform stream to String)
+                .findAny()                                // Get an Optional<String>
+                .orElse(null);
+
+            expectedYaml = String.format("""
+                org.openrewrite.maven.search.FindDependency:
+                  artifactId: "quarkus-core"
+                  version: "3.16.2"
+                  matchId: "%s"
+                """,  matchId);
+
             generatedYaml = yamlMapper.writeValueAsString(dto);
             Assertions.assertEquals(expectedYaml, generatedYaml);
         } catch (JsonProcessingException e) {
