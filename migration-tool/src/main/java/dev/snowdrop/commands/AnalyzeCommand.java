@@ -193,7 +193,7 @@ public class AnalyzeCommand implements Runnable {
 
     private void exportAsJson(Map<String, MigrationTask> analyzeReport, Config config) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm").withLocale(Locale.getDefault());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm").withLocale(Locale.getDefault());
             String dateTimeformated = LocalDateTime.now().format(formatter);
 
             MigrationTasksExport exportData = new MigrationTasksExport(
