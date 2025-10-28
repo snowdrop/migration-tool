@@ -3,7 +3,7 @@ package dev.snowdrop.mapper;
 import dev.snowdrop.model.Parameter;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.model.RecipeDTO;
-import dev.snowdrop.model.RecipeMappingConfig;git
+import dev.snowdrop.model.RecipeMappingConfig;
 import dev.snowdrop.reconciler.MatchingUtils;
 
 import java.util.ArrayList;
