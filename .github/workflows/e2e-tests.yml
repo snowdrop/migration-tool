@@ -55,7 +55,7 @@ jobs:
           path: |
             migration-tool/target/quarkus-app/
             applications/
-            cookbook/
+            cookbook/rules/
           retention-days: 1
 
   jdtls-analyse:
