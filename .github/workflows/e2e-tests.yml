@@ -58,6 +58,7 @@ jobs:
 
   jdtls-analyse:
     name: "Generate the analysis report using as scanner: jdt-ls"
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - run: |
@@ -81,6 +82,7 @@ jobs:
 
   openrewrite-analyse:
     name: "Generate the analysis report using as scanner: openrewrite"
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - run: |
