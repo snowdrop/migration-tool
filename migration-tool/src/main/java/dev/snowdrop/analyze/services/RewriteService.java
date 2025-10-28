@@ -5,8 +5,11 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import dev.snowdrop.analyze.Config;
+import dev.snowdrop.analyze.model.CsvRecord;
 import dev.snowdrop.analyze.model.Rewrite;
 import dev.snowdrop.analyze.model.Rule;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.CSVReader;
 import dev.snowdrop.mapper.QueryToRecipeMapper;
 import dev.snowdrop.model.Parameter;
 import dev.snowdrop.model.Query;
@@ -18,6 +21,7 @@ import dev.snowdrop.transform.model.CompositeRecipe;
 import org.jboss.logging.Logger;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.*;
@@ -231,7 +235,7 @@ public class RewriteService {
     }
 
     /**
-     * Finds csv records with the matchId of the query
+     * Finds csv records with the matchId of the query using OpenCSV
      *
      * @param projectPath The path to search for CSV files
      * @param matchIdToSearch The match ID to search for in CSV files
@@ -266,34 +270,39 @@ public class RewriteService {
                             csvFiles.forEach(csvFile -> {
                                 String csvFileName = csvFile.getFileName().toString();
 
-                                try {
-                                    // Read each CSV file and search for the matchId
-                                    List<String> lines = Files.readAllLines(csvFile);
+                                try (CSVReader csvReader = new CSVReader(new FileReader(csvFile.toFile()))) {
+                                    // Parse CSV using OpenCSV
+                                    List<CsvRecord> records = new CsvToBeanBuilder<CsvRecord>(csvReader)
+                                            .withType(CsvRecord.class)
+                                            .withSkipLines(2) // Skip header and description rows
+                                            .build()
+                                            .parse();
 
-                                    for (int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
-                                        String line = lines.get(lineIndex);
+                                    // Search through records for matching matchId
+                                    for (int i = 0; i < records.size(); i++) {
+                                        CsvRecord record = records.get(i);
 
-                                        // Skip header and description rows (first two rows)
-                                        if (lineIndex < 2) {
-                                            continue;
-                                        }
+                                        if (record.getMatchId() != null && record.getMatchId().equals(matchIdToSearch)) {
+                                            // Extract type and symbol from CSV name and content
+                                            String fileType = record.getType();
+                                            String symbolType = record.getSymbol();
+                                            String pattern = record.getPattern() != null ? record.getPattern() : "N/A";
 
-                                        // Parse CSV line and check if matchId matches
-                                        if (line.contains(matchIdToSearch)) {
-                                            // Parse the CSV to extract the actual Match ID field
-                                            String[] fields = parseCsvLine(line);
-                                            if (fields.length > 0 && fields[0].equals(matchIdToSearch)) {
-                                                // Create name field with parent folder name, CSV file name, and line number
-                                                String name = String.format("%s/%s:line_%d",
-                                                    parentFolderName, csvFileName, lineIndex + 1);
+                                            // Build name in the new format: parentFolderName/csvFileName:line_number|pattern.symbol|type
+                                            String name = String.format("%s/%s:%d|%s.%s|%s",
+                                                    parentFolderName,
+                                                    csvFileName,
+                                                    i + 3, // Add 3 to account for skipped header rows (0-based index + 2 skipped + 1 for 1-based line numbering)
+                                                    pattern,
+                                                    symbolType,
+                                                    fileType);
 
-                                                results.add(new Rewrite(matchIdToSearch, name));
-                                                logger.infof("Found match in %s at line %d", csvFile, lineIndex + 1);
-                                            }
+                                            results.add(new Rewrite(matchIdToSearch, name));
+                                            logger.infof("Found match in %s at record %d: %s", csvFile, i + 1, name);
                                         }
                                     }
                                 } catch (IOException e) {
-                                    logger.errorf("Error reading CSV file %s: %s", csvFile, e.getMessage());
+                                    logger.errorf("Error parsing CSV file %s with OpenCSV: %s", csvFile, e.getMessage());
                                 }
                             });
                         }
@@ -308,43 +317,6 @@ public class RewriteService {
         }
 
         return results;
-    }
-
-    /**
-     * Simple CSV line parser that handles quoted fields
-     * @param line CSV line to parse
-     * @return Array of field values
-     */
-    private static String[] parseCsvLine(String line) {
-        List<String> fields = new ArrayList<>();
-        boolean inQuotes = false;
-        StringBuilder currentField = new StringBuilder();
-
-        for (int i = 0; i < line.length(); i++) {
-            char c = line.charAt(i);
-
-            if (c == '"') {
-                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
-                    // Escaped quote
-                    currentField.append('"');
-                    i++; // Skip next quote
-                } else {
-                    // Toggle quote state
-                    inQuotes = !inQuotes;
-                }
-            } else if (c == ',' && !inQuotes) {
-                // Field separator
-                fields.add(currentField.toString());
-                currentField = new StringBuilder();
-            } else {
-                currentField.append(c);
-            }
-        }
-
-        // Add the last field
-        fields.add(currentField.toString());
-
-        return fields.toArray(new String[0]);
     }
 
 }

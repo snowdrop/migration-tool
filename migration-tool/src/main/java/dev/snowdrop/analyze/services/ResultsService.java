@@ -1,34 +1,23 @@
 package dev.snowdrop.analyze.services;
 
-import de.vandermeer.asciitable.AT_Row;
-import de.vandermeer.asciitable.AsciiTable;
-import de.vandermeer.asciitable.CWC_FixedWidth;
-import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
+import com.github.freva.asciitable.AsciiTable;
+import com.github.freva.asciitable.Column;
+import com.github.freva.asciitable.ColumnData;
+import com.github.freva.asciitable.HorizontalAlign;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rewrite;
 import org.eclipse.lsp4j.SymbolInformation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class ResultsService {
 
     public static void showCsvTable(Map<String, MigrationTask> results, String source, String target) {
-        // TODO: Test https://github.com/freva/ascii-table to see if the url to the file is not truncated
-        AsciiTable at = new AsciiTable();
-        at.getContext().setWidth(220); // Set overall table width
-        at.addRule();
-
-        AT_Row row;
-        row = at.addRow("Rule ID", "Source to Target", "Found", "Information Details");
-        row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
-        row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
-        row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
-        row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
-
-        at.addRule();
-        at.getRenderer().setCWC(new CWC_FixedWidth().add(40).add(25).add(5).add(130));
+        // Prepare data for the table
+        List<String[]> tableData = new ArrayList<>();
 
         for (Map.Entry<String, MigrationTask> entry : results.entrySet()) {
             String ruleId = entry.getKey();
@@ -48,51 +37,100 @@ public class ResultsService {
             String sourceToTarget = String.format("%s -> %s", source, target);
 
             if (queryResults.isEmpty()) {
-                row = at.addRow(ruleId, sourceToTarget, hasQueryResults, "No match found");
-                row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
-                row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
-                row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
-                row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
+                tableData.add(new String[]{ruleId, sourceToTarget, hasQueryResults, "No match found"});
             } else {
-                // Check the type of the first element to determine how to handle the results
-                Object firstResult = queryResults.get(0);
+                // Process ALL results, not just the first one
+                StringBuilder allResultsDetails = new StringBuilder();
 
-                if (firstResult instanceof SymbolInformation) {
-                    SymbolInformation symbolInfo = (SymbolInformation) firstResult;
-                    String symbolDetails = formatSymbolInformation(symbolInfo);
-                    row = at.addRow(ruleId, sourceToTarget, hasQueryResults, symbolDetails + "\n" + symbolInfo.getLocation().getUri());
-                } else if (firstResult instanceof Rewrite) {
-                    Rewrite rewrite = (Rewrite) firstResult;
-                    String rewriteDetails = formatRewrite(rewrite);
-                    row = at.addRow(ruleId, sourceToTarget, hasQueryResults, rewriteDetails);
-                } else {
-                    // Fallback for unknown types
-                    row = at.addRow(ruleId, sourceToTarget, hasQueryResults, "Unknown result type: " + firstResult.getClass().getSimpleName());
+                for (int i = 0; i < queryResults.size(); i++) {
+                    Object result = queryResults.get(i);
+
+                    if (result instanceof SymbolInformation symbolInfo) {
+                        String symbolDetails = formatSymbolInformation(symbolInfo);
+                        allResultsDetails.append(symbolDetails).append("\n").append(symbolInfo.getLocation().getUri());
+                    } else if (result instanceof Rewrite rewrite) {
+                        String rewriteDetails = formatRewriteImproved(rewrite);
+                        allResultsDetails.append(rewriteDetails);
+                    } else {
+                        // Fallback for unknown types
+                        allResultsDetails.append("Unknown result type: ").append(result.getClass().getSimpleName());
+                    }
+
+                    // Add separator between multiple results (except for the last one)
+                    if (i < queryResults.size() - 1) {
+                        allResultsDetails.append("\n--- rewrite ---\n");
+                    }
                 }
 
-                // Set cell alignment for the row
-                row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
-                row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
-                row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
-                row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
+                tableData.add(new String[]{ruleId, sourceToTarget, hasQueryResults, allResultsDetails.toString()});
             }
-
-                /* Add additional symbols in subsequent rows with empty rule id and found columns
-                for (int i = 1; i < queryResults.size(); i++) {
-                    String symbolDetails = formatSymbolInformation(queryResults.get(i));
-                    row = at.addRow("", "", 33, symbolDetails + "\n" + queryResults.get(0).getLocation().getUri());
-                    row.getCells().get(0).getContext().setTextAlignment(TextAlignment.LEFT);
-                    row.getCells().get(1).getContext().setTextAlignment(TextAlignment.LEFT);
-                    row.getCells().get(2).getContext().setTextAlignment(TextAlignment.CENTER);
-                    row.getCells().get(3).getContext().setTextAlignment(TextAlignment.LEFT);
-                }*/
-            at.addRule();
         }
+
+        List<ColumnData<String[]>> columns = Arrays.asList(
+            new Column()
+                .header("Rule ID")
+                .headerAlign(HorizontalAlign.LEFT)
+                .dataAlign(HorizontalAlign.LEFT)
+                .with(row -> row[0]),
+            new Column()
+                .header("Source to Target")
+                .headerAlign(HorizontalAlign.LEFT)
+                .dataAlign(HorizontalAlign.LEFT)
+                .with(row -> row[1]),
+            new Column()
+                .header("Found")
+                .headerAlign(HorizontalAlign.CENTER)
+                .dataAlign(HorizontalAlign.CENTER)
+                .with(row -> row[2]),
+            new Column()
+                .header("Information Details")
+                .headerAlign(HorizontalAlign.LEFT)
+                .dataAlign(HorizontalAlign.LEFT)
+                .maxWidth(100)
+                .with(row -> row[3])
+        );
+
+
         // Use System.out.println instead of logger to avoid log formatting
-        System.out.println("\n=== Code Analysis Results ===");
-        System.out.println(at.render());
+        System.out.println("\n=== Code Analysis Results (Improved Formatting) ===");
+        System.out.println(AsciiTable.getTable(tableData,columns));
     }
 
+    private static String formatRewriteImproved(Rewrite rewrite) {
+        String name = rewrite.name();
+
+        // Parse the name format: parentFolderName/csvFileName:line_number|pattern.symbol|type
+        if (name.contains("/") && name.contains(":") && name.contains("|")) {
+            try {
+                String[] pathAndRest = name.split(":", 2);
+                String path = pathAndRest[0];
+                String[] lineAndDetails = pathAndRest[1].split("\\|", 3);
+                String lineNumber = lineAndDetails[0];
+                String patternSymbol = lineAndDetails.length > 1 ? lineAndDetails[1] : "N/A";
+                String type = lineAndDetails.length > 2 ? lineAndDetails[2] : "N/A";
+
+                return String.format("File: %s\nLine: %s\nPattern: %s\nType: %s\nMatch ID: %s",
+                    path,
+                    lineNumber,
+                    patternSymbol,
+                    type,
+                    rewrite.matchId()
+                );
+            } catch (Exception e) {
+                // Fallback if parsing fails
+                return String.format("Rewrite match: %s (ID: %s)",
+                    rewrite.name(),
+                    rewrite.matchId()
+                );
+            }
+        } else {
+            // Fallback for unexpected format
+            return String.format("Rewrite match: %s (ID: %s)",
+                rewrite.name(),
+                rewrite.matchId()
+            );
+        }
+    }
 
     private static String formatSymbolInformation(SymbolInformation si) {
         return String.format("Found %s at line %s, char: %s - %s",
@@ -103,11 +141,5 @@ public class ResultsService {
         );
     }
 
-    private static String formatRewrite(Rewrite rewrite) {
-        return String.format("Rewrite match: %s (ID: %s)",
-            rewrite.name(),
-            rewrite.matchId()
-        );
-    }
 
 }
