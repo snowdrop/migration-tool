@@ -46,13 +46,34 @@ jobs:
 
           # Create transform branch
           git checkout -b transform 2>/dev/null || git checkout transform
-          echo "✅ Created/switched to transform branch"    
+          echo "✅ Created/switched to transform branch"
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-migration-tool
+          path: |
+            migration-tool/target/quarkus-app/
+            applications/
+            cookbook/
+          retention-days: 1
 
   jdtls-analyse:
     name: "Generate the analysis report using as scanner: jdt-ls"
     needs: setup
     runs-on: ubuntu-latest
     steps:
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: built-migration-tool
+
       - name: Install konveyor jdt-ls
         run: |
           export VERSION=latest
@@ -63,11 +84,6 @@ jobs:
 
       - run: |
           echo "🔍 Starting jdt-ls scanner analysis..."
-          
-          pwd
-          ls -la
-          ls -la migration-tool/
-          ls -la migration-tool/target
 
           # Set environment variables for the analysis
           export ANALYZER_JDT_LS_PATH="$(pwd)/jdt/konveyor-jdtls"
@@ -85,11 +101,30 @@ jobs:
             exit 1
           }
 
+      - name: Upload jdtls analysis results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jdtls-analysis-results
+          path: ./applications/spring-boot-todo-app/analysing-jdtls-report_*.json
+          retention-days: 1
+
   openrewrite-analyse:
     name: "Generate the analysis report using as scanner: openrewrite"
     needs: setup
     runs-on: ubuntu-latest
     steps:
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: built-migration-tool
+
       - run: |
           echo "🔍 Starting openrewrite scanner analysis..."
 
@@ -102,17 +137,40 @@ jobs:
             exit 1
           }
 
+      - name: Upload openrewrite analysis results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: openrewrite-analysis-results
+          path: ./applications/spring-boot-todo-app/analysing-openrewrite-report_*.json
+          retention-days: 1
+
   reporting:
     name: "Tests result summary"
     needs: [jdtls-analyse, openrewrite-analyse]
     runs-on: ubuntu-latest
     steps:
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: built-migration-tool
+
+      - name: Download jdtls analysis results
+        uses: actions/download-artifact@v4
+        with:
+          name: jdtls-analysis-results
+        continue-on-error: true
+
+      - name: Download openrewrite analysis results
+        uses: actions/download-artifact@v4
+        with:
+          name: openrewrite-analysis-results
+        continue-on-error: true
+
       - name: Summary of E2E test results
         run: |
           echo "📊 E2E Test Results Summary:"
           echo "=================================="
-
-          cd ./applications/spring-boot-todo-app
 
           # Define scanners and their file patterns
           declare -A scanners=(
@@ -123,6 +181,7 @@ jobs:
           # Check results for each scanner
           for scanner in "${!scanners[@]}"; do
             pattern="${scanners[$scanner]}"
+            # Look for files in both current directory (downloaded artifacts) and applications directory
             RESULTS=$(find . -name "$pattern" -type f 2>/dev/null)
             if [ -n "$RESULTS" ]; then
               echo "✅ $scanner scanner: PASSED - Analysis report generated"
@@ -137,5 +196,6 @@ jobs:
         with:
           name: e2e-analysis-results
           path: |
+            analysing-*-report_*.json
             ./applications/spring-boot-todo-app/analysing-*-report_*.json
           retention-days: 7
