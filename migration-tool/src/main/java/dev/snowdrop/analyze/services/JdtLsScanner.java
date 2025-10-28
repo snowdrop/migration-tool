@@ -14,6 +14,7 @@ import java.util.Map;
 public class JdtLsScanner implements CodeScanner {
     private final Config config;
     private final JdtLsClient jdtLsClient;
+    private boolean started = false;
 
     public JdtLsScanner(Config config, JdtLsClient jdtLsClient) {
         this.config = config;
@@ -22,6 +23,18 @@ public class JdtLsScanner implements CodeScanner {
 
     @Override
     public Map<String, MigrationTask> analyze(List<Rule> rules) throws IOException {
+        // Lazy initialization
+        if (!started) {
+            try {
+                jdtLsClient.launchLsProcess();
+                jdtLsClient.createLaunchLsClient();
+                jdtLsClient.initLanguageServer();
+                started = true;
+            } catch (Exception e) {
+                throw new IOException("Failed to start JDT-LS client", e);
+            }
+        }
+
         Map<String, MigrationTask> tasks = new HashMap<>();
 
         for (Rule rule : rules) {
@@ -34,7 +47,14 @@ public class JdtLsScanner implements CodeScanner {
                             .withInstruction(rule.instructions())
             );
         }
-
+        close();
         return tasks;
+    }
+
+    public void close() {
+        if (jdtLsClient != null && started) {
+            jdtLsClient.stop();
+            started = false;
+        }
     }
 }

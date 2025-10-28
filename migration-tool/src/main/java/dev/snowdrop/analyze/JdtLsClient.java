@@ -70,90 +70,6 @@ public class JdtLsClient {
         initLanguageServer();
     }
 
-//    public static void main(String[] args) throws Exception {
-//        JdtLsClient jdtlsClient = new JdtLsClient();
-//        jdtlsClient.initProperties(null);
-//        jdtlsClient.launchLsProcess();
-//        jdtlsClient.createLaunchLsClient();
-//        jdtlsClient.initLanguageServer();
-//        jdtlsClient.analyze();
-//    }
-
-//    public void startAnalyse() throws Exception {
-//        logger.infof("\n🚀 Starting analysis...");
-//
-//        try {
-//            List<Rule> rules = parseRulesFromFolder(config.rulesPath());
-//
-//            // Filter the rules according to the source and target technology
-//            List<Rule> filteredRules = filterRules(rules,config.sourceTechnology(),config.targetTechnology());
-//            if (filteredRules.isEmpty()) {
-//                logger.warnf("No rules found !!");
-//            } else {
-//                Map<String, MigrationTask> analyzeReport = analyzeCodeFromRule(config, config.scanner(), filteredRules);
-//
-//                if (!analyzeReport.isEmpty()) {
-//                    ResultsService.showCsvTable(analyzeReport, config.sourceTechnology(), config.targetTechnology());
-//                }
-//
-//                // Export rules, results and migration instructions as JSON if requested
-//                if (config.output() != null && config.output().equals("json")) {
-//                    exportAsJson(analyzeReport);
-//                }
-//
-//                logger.infof("⏳ Waiting for commands to complete...");
-//                Thread.sleep(5000);
-//            }
-//
-//        } finally {
-//            if (process != null && process.isAlive()) {
-//                logger.infof("🛑 Shutting down JDT Language Server...");
-//                process.destroyForcibly();
-//            }
-//        }
-//    }
-//
-//    private void exportAsJson(Map<String, MigrationTask> analyzeReport) {
-//        try {
-//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm").withLocale(Locale.getDefault());
-//            String dateTimeformated = LocalDateTime.now().format(formatter);
-//
-//            MigrationTasksExport exportData = new MigrationTasksExport(
-//                    "Migration Analysis Results",
-//                    config.appPath(),
-//                    dateTimeformated,
-//                    analyzeReport
-//            );
-//
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-//            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-//            File outputFile = new File(String.format("%s/%s_%s.json", config.appPath(), "analysing-report",dateTimeformated));
-//
-//            // Ensure parent directory exists
-//            if (outputFile.getParentFile() != null) {
-//                outputFile.getParentFile().mkdirs();
-//            }
-//
-//            objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, exportData);
-//            logger.infof("📄 Migration tasks exported to: %s", outputFile);
-//
-//        } catch (IOException e) {
-//            logger.errorf("❌ Failed to export migration tasks to JSON: %s", e.getMessage());
-//            if (config.verbose()) {
-//                logger.error("Export error details:", e);
-//            }
-//        }
-//    }
-//
-//    // Data structure for JSON export
-//    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-//    public record MigrationTasksExport(
-//            String title,
-//            String projectPath,
-//            String timestamp,
-//            Map<String, MigrationTask> migrationTasks
-//    ) {}
 
     public void stop() {
             if (process != null && process.isAlive()) {
@@ -263,12 +179,6 @@ public class JdtLsClient {
         launcher.startListening();
     }
 
-//    private void analyze() throws IOException {
-//        List<Rule> rules = parseRulesFromFolder(config.rulesPath());
-//        analyzeCodeFromRule(config, "jdtls", rules);
-//    }
-
-
     public static class JdtLsClientBuilder {
         private Config config;
 
@@ -285,13 +195,16 @@ public class JdtLsClient {
         }
     }
 
-    // from LsSearchService
 
     public Map<String, List<SymbolInformation>> executeLsCmd(Rule rule) {
         Map<String, List<SymbolInformation>> ruleResults = new HashMap<>();
 
         // Log the LS Query command to be executed on the LS server
         logger.infof("==== CLIENT: Sending the command '%s' ...", config.lsCmd());
+
+        if (process == null || !process.isAlive()) {
+            throw new IllegalStateException("JDT-LS process is not running");
+        }
 
         // Parse first the Rule condition to populate the Query object using the YAML Condition query
         // See the parser maven project for examples, unit tests
@@ -374,6 +287,10 @@ public class JdtLsClient {
         );
 
         List<Object> cmdArguments = List.of(paramsMap);
+
+        if (process == null || !process.isAlive()) {
+            throw new IllegalStateException("JDT-LS process is not running");
+        }
 
         try {
             CompletableFuture<List<SymbolInformation>> symbolsFuture = future
