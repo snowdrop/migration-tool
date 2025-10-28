@@ -100,8 +100,8 @@ public class AnalyzeCommand implements Runnable {
         Config config = fromCommandOrElseProperties();
         try{
             List<Rule> rules = loadRules(config.rulesPath(), config.sourceTechnology(), config.targetTechnology());
-            AnalyzeService analyzeService = new AnalyzeService(config, new ScannerFactory());
 
+            AnalyzeService analyzeService = new AnalyzeService(config, new ScannerFactory());
             Map<String, MigrationTask> tasks = analyzeService.analyzeCodeFromRule(scanner, rules);
 
             displayResults(tasks, config);

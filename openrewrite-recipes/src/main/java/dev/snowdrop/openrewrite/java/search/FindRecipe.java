@@ -22,7 +22,4 @@ public abstract class FindRecipe extends Recipe {
         description = "ID of the matching tool needed to reconcile the records where a match took place",
         required = true)
     public String matchId;
-
-    @Deprecated
-    public String dummy;
 }
