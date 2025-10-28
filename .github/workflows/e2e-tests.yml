@@ -12,8 +12,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  e2e:
-    name: "e2e test using as scanner: jdt-ls or openrewrite"
+  setup:
+    name: "setup, build and install the spring todo application"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -38,23 +38,9 @@ jobs:
           mvn clean install -ntp -DskipTests
           echo "Maven build exit code: $?"
 
-      - name: Clone the spring-boot-todo-app to demo-spring-boot-todo-app
+      - name: Initialize git under the TODO application to revert changes
         run: |
-          if [ $? -eq 0 ]; then
-            if [ ! -d "./applications/demo-spring-boot-todo-app" ]; then
-              cp -r ./applications/spring-boot-todo-app ./applications/demo-spring-boot-todo-app
-              echo "✅ Successfully duplicated spring-boot-todo-app to demo-spring-boot-todo-app"
-            else
-              echo "✅ demo-spring-boot-todo-app already exists"
-            fi
-          else
-            echo "❌ Maven build failed, skipping duplication"
-            exit 1
-          fi
-
-      - name: Initialize git and create transform branch in demo app
-        run: |
-          cd ./applications/demo-spring-boot-todo-app
+          cd ./applications/spring-boot-todo-app
           if [ ! -d ".git" ]; then
             git init
             git config user.name "GitHub Actions e2e"
@@ -68,10 +54,13 @@ jobs:
 
           # Create transform branch
           git checkout -b transform 2>/dev/null || git checkout transform
-          echo "✅ Created/switched to transform branch"
+          echo "✅ Created/switched to transform branch"    
 
-      - name: Test with jdt-ls scanner - Generate analysis report
-        run: |
+  jdtls-analyse:
+    name: "Generate the analysis report using as scanner: jdt-ls"
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
           echo "🔍 Starting jdt-ls scanner analysis..."
 
           # Set environment variables for the analysis
@@ -83,79 +72,63 @@ jobs:
           mkdir -p ./jdt
 
           # Run analysis with jdt-ls using the uber jar approach
-          
-          timeout 300 java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze ./applications/demo-spring-boot-todo-app -o json || {
+          timeout 300 java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app -o json || {
             echo "❌ jdt-ls analysis failed or timed out"
             echo "Checking for any generated files..."
-            find ./applications/demo-spring-boot-todo-app -name "*analysis*" -o -name "*report*" -type f 2>/dev/null || true
+            find ./applications/spring-boot-todo-app -name "*analysing-jdtls-report*" -type f 2>/dev/null || true
             exit 1
           }
 
-      - name: Check jdt-ls result file
-        run: |
-          cd ./applications/demo-spring-boot-todo-app
-          echo "🔍 Looking for jdt-ls analysis result files..."
-
-          # Look for analysis report files
-          RESULT_FILES=$(find . -name "analysing-report_*.json" -type f 2>/dev/null)
-
-          if [ -n "$RESULT_FILES" ]; then
-            for RESULT_FILE in $RESULT_FILES; do
-              echo "✅ jdt-ls analysis result file found: $RESULT_FILE"
-              echo "File size: $(stat -c%s "$RESULT_FILE") bytes"
-              if [ -s "$RESULT_FILE" ]; then
-                echo "📄 File content preview (first 20 lines):"
-                head -20 "$RESULT_FILE"
-                echo "✅ jdt-ls result file is populated with content"
-              else
-                echo "❌ jdt-ls result file is empty"
-                exit 1
-              fi
-            done
-          else
-            echo "❌ jdt-ls analysis result file not found"
-            echo "📂 Current directory contents:"
-            ls -la .
-            echo "🔍 Searching for any JSON files:"
-            find . -name "*.json" -type f 2>/dev/null || echo "No JSON files found"
-            exit 1
-          fi
-
-      - name: Test with openrewrite scanner
-        run: |
+  openrewrite-analyse:
+    name: "Generate the analysis report using as scanner: openrewrite"
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
           echo "🔍 Starting openrewrite scanner analysis..."
 
-          # TODO
+          export ANALYZER_RULES_PATH="$(pwd)/cookbook/rules"
+          
+          timeout 300 java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app -o json || {
+            echo "❌ openrewrite analysis failed or timed out"
+            echo "Checking for any generated files..."
+            find ./applications/spring-boot-todo-app -name "*analysing-openrewrite-report*" -type f 2>/dev/null || true
+            exit 1
+          }
 
-      - name: Check openrewrite result files
-        run: |
-          cd ./applications/demo-spring-boot-todo-app
-          echo "🔍 Looking for analysis result files..."
-
-          # TODO
-
+  reporting:
+    name: "Tests result summary"
+    needs: [jdtls-analyse, openrewrite-analyse]
+    runs-on: ubuntu-latest
+    steps:
       - name: Summary of E2E test results
         run: |
           echo "📊 E2E Test Results Summary:"
           echo "=================================="
 
-          cd ./applications/demo-spring-boot-todo-app
+          cd ./applications/spring-boot-todo-app
 
-          # Check jdt-ls results
-          JDT_RESULTS=$(find . -name "analysing-report_*.json" -type f 2>/dev/null)
-          if [ -n "$JDT_RESULTS" ]; then
-            echo "✅ jdt-ls scanner: PASSED - Analysis report generated"
-          else
-            echo "❌ jdt-ls scanner: FAILED - No analysis report found"
-          fi
-          
-          # TODO
+          # Define scanners and their file patterns
+          declare -A scanners=(
+            ["jdt-ls"]="analysing-jdtls-report_*.json"
+            ["openrewrite"]="analysing-openrewrite-report_*.json"
+          )
+
+          # Check results for each scanner
+          for scanner in "${!scanners[@]}"; do
+            pattern="${scanners[$scanner]}"
+            RESULTS=$(find . -name "$pattern" -type f 2>/dev/null)
+            if [ -n "$RESULTS" ]; then
+              echo "✅ $scanner scanner: PASSED - Analysis report generated"
+              echo "   Found: $RESULTS"
+            else
+              echo "❌ $scanner scanner: FAILED - No analysis report found (pattern: $pattern)"
+            fi
+          done
 
       - name: Upload analysis reports
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: e2e-analysis-results
           path: |
-            ./applications/demo-spring-boot-todo-app/analysing-report_*.json
+            ./applications/spring-boot-todo-app/analysing-*-report_*.json
           retention-days: 7
