@@ -59,7 +59,7 @@ jobs:
           retention-days: 1
 
   jdtls-analyse:
-    name: "Generate the analysis report using as scanner: jdt-ls"
+    name: "Generate analysis report: jdt-ls"
     needs: setup
     runs-on: ubuntu-latest
     steps:
@@ -110,7 +110,7 @@ jobs:
           retention-days: 1
 
   openrewrite-analyse:
-    name: "Generate the analysis report using as scanner: openrewrite"
+    name: "Generate analysis report: openrewrite"
     needs: setup
     runs-on: ubuntu-latest
     steps:
