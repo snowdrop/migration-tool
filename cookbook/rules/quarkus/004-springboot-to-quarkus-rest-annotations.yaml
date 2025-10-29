@@ -7,7 +7,7 @@
     - konveyor.io/target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
-  ruleID: springboot-to-quarkus-rest-annotations-00000
+  ruleID: 004-springboot-to-quarkus-rest-annotations
   when:
     condition: |
       java.annotation is 'org.springframework.stereotype.Controller' OR

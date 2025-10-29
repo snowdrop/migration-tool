@@ -7,7 +7,7 @@
     - konveyor.io/target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
-  ruleID: springboot-replace-bom-quarkus-0000
+  ruleID: 001-springboot-replace-bom-quarkus
   when:
     #java.referenced:
     #  location: ANNOTATION
