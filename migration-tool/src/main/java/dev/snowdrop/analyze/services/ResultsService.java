@@ -66,19 +66,27 @@ public class ResultsService {
             }
         }
 
+        // TODO: Move the RULE_REPO to a quarkus property
+        String RULE_REPO_URL = "https://github.com/snowdrop/migration-tool/blob/main/cookbook/rules/quarkus/%s.yaml";
+
         List<ColumnData<String[]>> columns = Arrays.asList(
             new Column()
                 .header("Rule ID")
                 .headerAlign(HorizontalAlign.LEFT)
                 .dataAlign(HorizontalAlign.LEFT)
-                .with(row -> row[0]),
+                .with(row -> {
+                    // TODO: To be investigated as that don't work even using a string send to system.out without AsciiDatable
+                    // String url = String.format(RULE_REPO_URL,row[0]);
+                    //String hyperlink = createLink(row[0], url);
+                    return row[0];
+                }),
             new Column()
                 .header("Source to Target")
                 .headerAlign(HorizontalAlign.LEFT)
                 .dataAlign(HorizontalAlign.LEFT)
                 .with(row -> row[1]),
             new Column()
-                .header("Found")
+                .header("Match")
                 .headerAlign(HorizontalAlign.CENTER)
                 .dataAlign(HorizontalAlign.CENTER)
                 .with(row -> row[2]),
@@ -94,6 +102,22 @@ public class ResultsService {
         // Use System.out.println instead of logger to avoid log formatting
         System.out.println("\n=== Code Analysis Results (Improved Formatting) ===");
         System.out.println(AsciiTable.getTable(tableData,columns));
+    }
+
+    /**
+     * Helper function to create an OSC 8 terminal hyperlink.
+     * \u001B is the ESCAPE character => \e.
+     * \u001B\\ is the String Terminator (ST).
+     *
+     * https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
+     *
+     * printf '\e]8;;http://example.com\e\\This is a link\e]8;;\e\\\n'
+     */
+    public static String createLink(String text, String url) {
+        String ST = "\u001B\\"; // String Terminator
+        String OSC8_START = "\u001B]8;;" + url + ST;
+        String OSC8_END = "\u001B]8;;" + ST;
+        return OSC8_START + text + OSC8_END;
     }
 
     private static String formatRewriteImproved(Rewrite rewrite) {
