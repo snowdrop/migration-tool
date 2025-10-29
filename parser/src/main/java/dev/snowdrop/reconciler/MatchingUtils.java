@@ -1,6 +1,5 @@
 package dev.snowdrop.reconciler;
 
-
 import java.util.UUID;
 
 public class MatchingUtils {
@@ -10,6 +9,6 @@ public class MatchingUtils {
     }
 
     public static void main(String[] args) {
-        System.out.printf("UUID: %s \n", generateUID() );
+        System.out.printf("UUID: %s \n", generateUID());
     }
 }

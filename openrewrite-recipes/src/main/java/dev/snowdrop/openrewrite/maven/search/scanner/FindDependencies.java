@@ -42,14 +42,10 @@ public class FindDependencies extends ScanningRecipe<Set<Dependency>> {
     /**
      * ID of the matching tool needed to reconcile the records where a match took place
      */
-    @Option(displayName = "Match id",
-        description = "ID of the matching tool needed to reconcile the records where a match took place",
-        required = true)
+    @Option(displayName = "Match id", description = "ID of the matching tool needed to reconcile the records where a match took place", required = true)
     public String matchId;
 
-    @Option(displayName = "Coma separated list of GAV",
-        description = "List of Group, Artifact and Version dependencies (g:a:v) separated by coma",
-        example = "org.springframework.boot:spring-boot-starter-web,io.jsonwebtoken:jjwt:0.9.1")
+    @Option(displayName = "Coma separated list of GAV", description = "List of Group, Artifact and Version dependencies (g:a:v) separated by coma", example = "org.springframework.boot:spring-boot-starter-web,io.jsonwebtoken:jjwt:0.9.1")
     String gavs;
 
     @Override
@@ -73,23 +69,20 @@ public class FindDependencies extends ScanningRecipe<Set<Dependency>> {
     public TreeVisitor<?, ExecutionContext> getScanner(Set<Dependency> dependencies) {
         return new MavenIsoVisitor<ExecutionContext>() {
 
-            List<GAV> gavList = Arrays.stream(gavs.split(","))
-                .map(GAV::fromString) // Use the factory method
-                .collect(Collectors.toList());
+            List<GAV> gavList = Arrays.stream(gavs.split(",")).map(GAV::fromString) // Use the factory method
+                    .collect(Collectors.toList());
 
-
-/*            @Override
-            public Xml.Document visitDocument(Xml.Document d, ExecutionContext ctx) {
-                System.out.printf("XML document visited: %s",d);
-                return d;
-            }*/
+            /*
+             * @Override public Xml.Document visitDocument(Xml.Document d, ExecutionContext ctx) {
+             * System.out.printf("XML document visited: %s",d); return d; }
+             */
 
             @Override
             public Xml.Tag visitTag(Xml.Tag tag, ExecutionContext ctx) {
                 for (GAV gav : gavList) {
                     System.out.println("Processing GAV: " + gav);
-                    if (isDependencyTag(gav.groupId, gav.artifactId) &&
-                        versionIsValid(gav.version, null, () -> findDependency(tag))) {
+                    if (isDependencyTag(gav.groupId, gav.artifactId)
+                            && versionIsValid(gav.version, null, () -> findDependency(tag))) {
                         ResolvedDependency rDep = findDependency(tag);
                         System.out.printf("Dependency found: %s%n", rDep.getRequested());
                         dependencies.add(rDep.getRequested());
@@ -105,13 +98,11 @@ public class FindDependencies extends ScanningRecipe<Set<Dependency>> {
     public Collection<SourceFile> generate(Set<Dependency> dependencies, ExecutionContext ctx) {
         System.out.printf("Dependencies set size: %s%n", dependencies.size());
         for (Dependency dep : dependencies) {
-            report.insertRow(ctx,new MatchingReport.Row(
-                matchId,
-                MatchingReport.Type.POM,
-                MatchingReport.Symbol.DEPENDENCY,
-                String.format("%s:%s:%s",dep.getGroupId(),dep.getArtifactId(),dep.getVersion()),
-                "pom.xml" // TODO : How can we get the sourceFile ?
-            ));
+            report.insertRow(ctx,
+                    new MatchingReport.Row(matchId, MatchingReport.Type.POM, MatchingReport.Symbol.DEPENDENCY,
+                            String.format("%s:%s:%s", dep.getGroupId(), dep.getArtifactId(), dep.getVersion()),
+                            "pom.xml" // TODO : How can we get the sourceFile ?
+                    ));
 
         }
 
@@ -119,7 +110,7 @@ public class FindDependencies extends ScanningRecipe<Set<Dependency>> {
     }
 
     private static boolean versionIsValid(@Nullable String desiredVersion, @Nullable String versionPattern,
-                                          Supplier<@Nullable ResolvedDependency> resolvedDependencySupplier) {
+            Supplier<@Nullable ResolvedDependency> resolvedDependencySupplier) {
         if (desiredVersion == null) {
             return true;
         }
@@ -133,7 +124,7 @@ public class FindDependencies extends ScanningRecipe<Set<Dependency>> {
         if (validate.isInvalid()) {
             return false;
         }
-        assert(validate.getValue() != null);
+        assert (validate.getValue() != null);
         return validate.getValue().isValid(actualVersion, actualVersion);
     }
 

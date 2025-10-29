@@ -37,14 +37,12 @@ import java.util.List;
 
  */
 @Value
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 public class AddQuarkusRun extends Recipe {
 
     private static final String QUARKUS_MAIN_ANNOTATION = "@io.quarkus.runtime.annotations.QuarkusMain";
 
-    @Option(displayName = "Name of the Quarkus Application class",
-        description = "Name of the Quarkus Application class implementing QuarkusApplication",
-    required = false)
+    @Option(displayName = "Name of the Quarkus Application class", description = "Name of the Quarkus Application class implementing QuarkusApplication", required = false)
     String quarkusApplicationClass;
 
     @Override
@@ -84,14 +82,14 @@ public class AddQuarkusRun extends Recipe {
             boolean hasStaticModifier = J.Modifier.hasModifier(m.getModifiers(), J.Modifier.Type.Static);
             System.out.println("Has static modifier: " + hasStaticModifier);
 
-            if ("main".equals(m.getSimpleName()) &&
-                "void".equals(mType.getReturnType().toString()) &&
-                hasStaticModifier) {
+            if ("main".equals(m.getSimpleName()) && "void".equals(mType.getReturnType().toString())
+                    && hasStaticModifier) {
                 J.ClassDeclaration parentClass = getCursor().firstEnclosing(J.ClassDeclaration.class);
                 System.out.println("Processing the main method of the class: " + parentClass.getSimpleName());
 
                 if (hasAnnotation(parentClass.getLeadingAnnotations(), "QuarkusMain")) {
-                    System.out.println("Processing the Java Class including the static main method and having as Class annotation: @QuarkusMain");
+                    System.out.println(
+                            "Processing the Java Class including the static main method and having as Class annotation: @QuarkusMain");
                     J.MethodDeclaration n = getCursor().firstEnclosing(J.MethodDeclaration.class);
 
                     Parameter p = findParameter(m.getParameters(), 0);
@@ -105,17 +103,14 @@ public class AddQuarkusRun extends Recipe {
 
                     String javaTemplate;
                     if (quarkusApplicationClass != null) {
-                        javaTemplate = String.format("Quarkus.run(%s.class, #{any()});", quarkusApplicationClass)   ;
+                        javaTemplate = String.format("Quarkus.run(%s.class, #{any()});", quarkusApplicationClass);
                     } else {
-                       javaTemplate = "Quarkus.run(#{any()});";
+                        javaTemplate = "Quarkus.run(#{any()});";
                     }
 
-                    return JavaTemplate
-                        .builder(javaTemplate)
-                        .imports("io.quarkus.runtime.Quarkus")
-                        .javaParser(JavaParser.fromJavaVersion().classpath(JavaParser.runtimeClasspath()))
-                        .build()
-                        .apply(getCursor(), m.getCoordinates().replaceBody(), variable.getName());
+                    return JavaTemplate.builder(javaTemplate).imports("io.quarkus.runtime.Quarkus")
+                            .javaParser(JavaParser.fromJavaVersion().classpath(JavaParser.runtimeClasspath())).build()
+                            .apply(getCursor(), m.getCoordinates().replaceBody(), variable.getName());
                 }
             }
             return m;
@@ -145,8 +140,6 @@ public class AddQuarkusRun extends Recipe {
         return new Parameter(paramName, paramType);
     }
 
-    public record Parameter(
-        String name,
-        String type
-    ) {}
+    public record Parameter(String name, String type) {
+    }
 }

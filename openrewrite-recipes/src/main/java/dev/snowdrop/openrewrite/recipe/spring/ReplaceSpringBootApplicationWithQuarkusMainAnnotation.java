@@ -38,7 +38,8 @@ public class ReplaceSpringBootApplicationWithQuarkusMainAnnotation extends Recip
         public J.Annotation visitAnnotation(J.Annotation annotation, ExecutionContext ctx) {
             J.Annotation a = super.visitAnnotation(annotation, ctx);
 
-            AnnotationMatcher matcher = new AnnotationMatcher("@org.springframework.boot.autoconfigure.SpringBootApplication");
+            AnnotationMatcher matcher = new AnnotationMatcher(
+                    "@org.springframework.boot.autoconfigure.SpringBootApplication");
 
             if (!matcher.matches(a)) {
                 return a;
@@ -49,10 +50,9 @@ public class ReplaceSpringBootApplicationWithQuarkusMainAnnotation extends Recip
 
             // Replace with QuarkusMain annotation
             return JavaTemplate.builder("@QuarkusMain")
-                .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
-                .imports("io.quarkus.runtime.annotations.QuarkusMain")
-                .build()
-                .apply(getCursor(), a.getCoordinates().replace());
+                    .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
+                    .imports("io.quarkus.runtime.annotations.QuarkusMain").build()
+                    .apply(getCursor(), a.getCoordinates().replace());
 
         }
     }

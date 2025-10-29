@@ -34,8 +34,7 @@ public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
             RecipeDTO dto = QueryToRecipeMapper.map(q);
 
             // Generate the YAML from the RecipeDTO
-            YAMLFactory factory = new YAMLFactory()
-                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
+            YAMLFactory factory = new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
             ObjectMapper yamlMapper = new ObjectMapper(factory);
 
             SimpleModule module = new SimpleModule();
@@ -43,18 +42,22 @@ public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
             yamlMapper.registerModule(module);
 
             // Get the UUID created as dto parameter
-            String matchId = dto.parameters().stream()
-                .filter(p -> p.parameter().equals("matchId"))
-                .map(p -> p.value())                      // Get its value (transform stream to String)
-                .findAny()                                // Get an Optional<String>
-                .orElse(null);
+            String matchId = dto.parameters().stream().filter(p -> p.parameter().equals("matchId")).map(p -> p.value()) // Get
+                                                                                                                        // its
+                                                                                                                        // value
+                                                                                                                        // (transform
+                                                                                                                        // stream
+                                                                                                                        // to
+                                                                                                                        // String)
+                    .findAny() // Get an Optional<String>
+                    .orElse(null);
 
             String expectedYaml = String.format("""
-                dev.snowdrop.openrewrite.java.search.FindAnnotations:
-                  pattern: "@SpringBootApplication"
-                  matchId: "%s"
-                  matchOnMetaAnnotations: "false"
-                """, matchId);
+                    dev.snowdrop.openrewrite.java.search.FindAnnotations:
+                      pattern: "@SpringBootApplication"
+                      matchId: "%s"
+                      matchOnMetaAnnotations: "false"
+                    """, matchId);
             String generatedYaml = null;
             try {
                 generatedYaml = yamlMapper.writeValueAsString(dto);
@@ -80,8 +83,7 @@ public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
         Assertions.assertEquals(queryList.get(0), queryA);
         Assertions.assertEquals(queryList.get(1), queryB);
 
-        YAMLFactory factory = new YAMLFactory()
-            .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
+        YAMLFactory factory = new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
         ObjectMapper yamlMapper = new ObjectMapper(factory);
 
         SimpleModule module = new SimpleModule();
@@ -94,36 +96,44 @@ public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
             generatedYaml = yamlMapper.writeValueAsString(dto);
 
             // Get the UUID created as dto parameter
-            String matchId = dto.parameters().stream()
-                .filter(p -> p.parameter().equals("matchId"))
-                .map(p -> p.value())                      // Get its value (transform stream to String)
-                .findAny()                                // Get an Optional<String>
-                .orElse(null);
+            String matchId = dto.parameters().stream().filter(p -> p.parameter().equals("matchId")).map(p -> p.value()) // Get
+                                                                                                                        // its
+                                                                                                                        // value
+                                                                                                                        // (transform
+                                                                                                                        // stream
+                                                                                                                        // to
+                                                                                                                        // String)
+                    .findAny() // Get an Optional<String>
+                    .orElse(null);
 
             // Check Query 1 => RecipeDTO => Yaml
             String expectedYaml = String.format("""
-                dev.snowdrop.openrewrite.java.search.FindAnnotations:
-                  pattern: "@SpringBootApplication"
-                  matchId: "%s"
-                  matchOnMetaAnnotations: "false"
-                """,  matchId);
+                    dev.snowdrop.openrewrite.java.search.FindAnnotations:
+                      pattern: "@SpringBootApplication"
+                      matchId: "%s"
+                      matchOnMetaAnnotations: "false"
+                    """, matchId);
             Assertions.assertEquals(expectedYaml, generatedYaml);
 
             // Check Query 2 => RecipeDTO => Yaml
             dto = QueryToRecipeMapper.map(queryList.get(1));
 
-            matchId = dto.parameters().stream()
-                .filter(p -> p.parameter().equals("matchId"))
-                .map(p -> p.value())                      // Get its value (transform stream to String)
-                .findAny()                                // Get an Optional<String>
-                .orElse(null);
+            matchId = dto.parameters().stream().filter(p -> p.parameter().equals("matchId")).map(p -> p.value()) // Get
+                                                                                                                 // its
+                                                                                                                 // value
+                                                                                                                 // (transform
+                                                                                                                 // stream
+                                                                                                                 // to
+                                                                                                                 // String)
+                    .findAny() // Get an Optional<String>
+                    .orElse(null);
 
             expectedYaml = String.format("""
-                org.openrewrite.maven.search.FindDependency:
-                  artifactId: "quarkus-core"
-                  version: "3.16.2"
-                  matchId: "%s"
-                """,  matchId);
+                    org.openrewrite.maven.search.FindDependency:
+                      artifactId: "quarkus-core"
+                      version: "3.16.2"
+                      matchId: "%s"
+                    """, matchId);
 
             generatedYaml = yamlMapper.writeValueAsString(dto);
             Assertions.assertEquals(expectedYaml, generatedYaml);

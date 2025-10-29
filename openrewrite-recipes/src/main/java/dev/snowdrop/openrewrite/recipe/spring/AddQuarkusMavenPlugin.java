@@ -31,24 +31,17 @@ public class AddQuarkusMavenPlugin extends Recipe {
         return new MavenIsoVisitor<ExecutionContext>() {
             @Override
             public Xml.Document visitDocument(Xml.Document document, ExecutionContext ctx) {
-                Optional<String> quarkusVersion = getResolutionResult().getPom().getRequested().getDependencyManagement().stream()
-                    .filter(dep -> "io.quarkus.platform".equals(dep.getGroupId()) && "quarkus-bom".equals(dep.getArtifactId()))
-                    .map(ManagedDependency::getVersion)
-                    .findFirst();
-                //noinspection OptionalIsPresent
+                Optional<String> quarkusVersion = getResolutionResult().getPom().getRequested()
+                        .getDependencyManagement().stream()
+                        .filter(dep -> "io.quarkus.platform".equals(dep.getGroupId())
+                                && "quarkus-bom".equals(dep.getArtifactId()))
+                        .map(ManagedDependency::getVersion).findFirst();
+                // noinspection OptionalIsPresent
                 if (!quarkusVersion.isPresent()) {
                     return document;
                 }
-                return (Xml.Document) new AddPlugin(
-                    "io.quarkus.platform",
-                    "quarkus-maven-plugin",
-                    quarkusVersion.get(),
-                    null,
-                    null,
-                    null,
-                    null)
-                    .getVisitor()
-                    .visitNonNull(document, ctx);
+                return (Xml.Document) new AddPlugin("io.quarkus.platform", "quarkus-maven-plugin", quarkusVersion.get(),
+                        null, null, null, null).getVisitor().visitNonNull(document, ctx);
             }
         };
     }

@@ -85,12 +85,10 @@ public class MavenSecuritySettings {
 
     public static @Nullable MavenSecuritySettings readMavenSecuritySettingsFromDisk(ExecutionContext ctx) {
         Optional<MavenSecuritySettings> userSettings = Optional.of(userSecuritySettingsPath())
-                .filter(MavenSecuritySettings::exists)
-                .map(path -> parse(path, ctx));
+                .filter(MavenSecuritySettings::exists).map(path -> parse(path, ctx));
         MavenSecuritySettings installSettings = findMavenHomeSettings().map(path -> parse(path, ctx)).orElse(null);
         MavenSecuritySettings mergedSettings = userSettings
-                .map(mavenSecuritySettings -> mavenSecuritySettings.merge(installSettings))
-                .orElse(installSettings);
+                .map(mavenSecuritySettings -> mavenSecuritySettings.merge(installSettings)).orElse(installSettings);
         if (mergedSettings != null && mergedSettings.relocation != null) {
             return mergedSettings.merge(parse(Paths.get(mergedSettings.relocation), ctx));
         }
@@ -122,19 +120,17 @@ public class MavenSecuritySettings {
     }
 
     private MavenSecuritySettings merge(@Nullable MavenSecuritySettings installSettings) {
-        return installSettings == null ? this : new MavenSecuritySettings(
-                master == null ? installSettings.master : master,
-                relocation == null ? installSettings.relocation : relocation
-        );
+        return installSettings == null ? this
+                : new MavenSecuritySettings(master == null ? installSettings.master : master,
+                        relocation == null ? installSettings.relocation : relocation);
     }
 
     /**
-     * Resolve all properties EXCEPT in the profiles section, which can be affected by
-     * the POM using the settings.
+     * Resolve all properties EXCEPT in the profiles section, which can be affected by the POM using the settings.
      */
     private static class Interpolator {
-        private static final PropertyPlaceholderHelper propertyPlaceholders = new PropertyPlaceholderHelper(
-                "${", "}", null);
+        private static final PropertyPlaceholderHelper propertyPlaceholders = new PropertyPlaceholderHelper("${", "}",
+                null);
 
         private static final UnaryOperator<String> propertyResolver = key -> {
             String property = System.getProperty(key);
@@ -148,10 +144,8 @@ public class MavenSecuritySettings {
         };
 
         public MavenSecuritySettings interpolate(MavenSecuritySettings mavenSecuritySettings) {
-            return new MavenSecuritySettings(
-                    interpolate(mavenSecuritySettings.master),
-                    interpolate(mavenSecuritySettings.relocation)
-            );
+            return new MavenSecuritySettings(interpolate(mavenSecuritySettings.master),
+                    interpolate(mavenSecuritySettings.relocation));
         }
 
         private @Nullable String interpolate(@Nullable String s) {
@@ -200,9 +194,9 @@ public class MavenSecuritySettings {
             byte[] decryptedBytes = new byte[clearBytes.length - paddingLength];
             System.arraycopy(clearBytes, 0, decryptedBytes, 0, decryptedBytes.length);
             return new String(decryptedBytes, StandardCharsets.UTF_8);
-        } catch (NoSuchPaddingException | NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException |
-                 InvalidKeyException | InvalidAlgorithmParameterException | NegativeArraySizeException |
-                 ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException
+                | InvalidKeyException | InvalidAlgorithmParameterException | NegativeArraySizeException
+                | ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
             return null;
         }
     }

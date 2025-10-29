@@ -12,27 +12,27 @@ import java.util.Map;
 
 public class QueryToRecipeMapper {
 
-    private static final Map<String, RecipeMappingConfig> MAPPINGS = Map.of(
-        "JAVA.ANNOTATION", new RecipeMappingConfig(
-            "dev.snowdrop.openrewrite.java.search.FindAnnotations",
-            Map.of(
-                "name", "pattern" // Translate query 'name' to recipe 'pattern'
+    private static final Map<String, RecipeMappingConfig> MAPPINGS = Map.of("JAVA.ANNOTATION",
+            new RecipeMappingConfig("dev.snowdrop.openrewrite.java.search.FindAnnotations", Map.of("name", "pattern" // Translate
+                                                                                                                     // query
+                                                                                                                     // 'name'
+                                                                                                                     // to
+                                                                                                                     // recipe
+                                                                                                                     // 'pattern'
             ),
-            // Additional parameters
-            Map.of(
-                "matchOnMetaAnnotations", "false" // key and value
-            )),
+                    // Additional parameters
+                    Map.of("matchOnMetaAnnotations", "false" // key and value
+                    )),
 
-            "POM.DEPENDENCY", new RecipeMappingConfig(
-            "org.openrewrite.maven.search.FindDependency",
-            Map.of(
-                "groupId", "groupId", // 1 to 1 translation
-                "artifactId", "artifactId", // 1 to 1 translation
-                "version", "version" // 1 to 1 translation
+            "POM.DEPENDENCY",
+            new RecipeMappingConfig("org.openrewrite.maven.search.FindDependency", Map.of("groupId", "groupId", // 1 to
+                                                                                                                // 1
+                                                                                                                // translation
+                    "artifactId", "artifactId", // 1 to 1 translation
+                    "version", "version" // 1 to 1 translation
             ),
-            // No additional parameters
-            Map.of())
-    );
+                    // No additional parameters
+                    Map.of()));
 
     public static RecipeDTO map(Query query) {
         String mappingKey = (query.fileType() + "." + query.symbol()).toUpperCase();
@@ -54,16 +54,13 @@ public class QueryToRecipeMapper {
             if (translatedKey != null) {
                 parameters.add(new Parameter(translatedKey, entry.getValue()));
             }
-            // TODO:  You could add a warning here for untranslatable keys
+            // TODO: You could add a warning here for untranslatable keys
         }
 
         parameters.add(new Parameter("matchId", MatchingUtils.generateUID().toString()));
 
         // Add any additional/default parameters from the config
-        config.additionalParameters().forEach((key, value) ->
-            parameters.add(new Parameter(key, value))
-        );
-
+        config.additionalParameters().forEach((key, value) -> parameters.add(new Parameter(key, value)));
 
         return new RecipeDTO(null, recipeName, parameters);
     }
