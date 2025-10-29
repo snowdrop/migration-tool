@@ -108,9 +108,9 @@ public class ResultsService {
      * Helper function to create an OSC 8 terminal hyperlink.
      * \u001B is the ESCAPE character => \e.
      * \u001B\\ is the String Terminator (ST).
-     *
-     * https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
-     *
+     * <p>
+     * <a href="https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda">Terminal Hyperlink - aka OSC8</a>
+     * <p>
      * printf '\e]8;;http://example.com\e\\This is a link\e]8;;\e\\\n'
      */
     public static String createLink(String text, String url) {
