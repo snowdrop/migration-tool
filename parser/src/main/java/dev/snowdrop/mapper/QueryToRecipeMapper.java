@@ -4,7 +4,7 @@ import dev.snowdrop.model.Parameter;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.model.RecipeDTO;
 import dev.snowdrop.model.RecipeMappingConfig;
-import dev.snowdrop.reconciler.KeyGenerator;
+import dev.snowdrop.reconciler.MatchingUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,8 +57,7 @@ public class QueryToRecipeMapper {
             // TODO:  You could add a warning here for untranslatable keys
         }
 
-        String matchId = KeyGenerator.generate("rule-001");
-        parameters.add(new Parameter("matchId", matchId));
+        parameters.add(new Parameter("matchId", MatchingUtils.generateUID().toString()));
 
         // Add any additional/default parameters from the config
         config.additionalParameters().forEach((key, value) ->

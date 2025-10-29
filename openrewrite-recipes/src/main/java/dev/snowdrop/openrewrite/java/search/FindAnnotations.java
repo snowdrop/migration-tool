@@ -1,5 +1,6 @@
 package dev.snowdrop.openrewrite.java.search;
 
+import dev.snowdrop.openrewrite.java.table.AnnotationsReport;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.jspecify.annotations.Nullable;
@@ -39,7 +40,7 @@ public class FindAnnotations extends FindRecipe {
         return "Find all annotations matching the annotation pattern.";
     }
 
-    public transient MatchingReport report = new MatchingReport(this);
+    public transient AnnotationsReport report = new AnnotationsReport(this);
 
     @Override
     public TreeVisitor<?, ExecutionContext> getVisitor() {
@@ -66,10 +67,10 @@ public class FindAnnotations extends FindRecipe {
                         if (annotationMatcher.matchesAnnotationOrMetaAnnotation(TypeUtils.asFullyQualified(type))) {
                             J.CompilationUnit aCu = getCursor().getValue();
                             J.ClassDeclaration aClass = aCu.getClasses().getFirst();
-                            report.insertRow(ctx, new MatchingReport.Row(
+                            report.insertRow(ctx, new AnnotationsReport.Row(
                                 matchId,
-                                MatchingReport.Type.JAVA,
-                                MatchingReport.Symbol.ANNOTATION,
+                                AnnotationsReport.Type.JAVA,
+                                AnnotationsReport.Symbol.ANNOTATION,
                                 pattern,
                                 sourcePath.toString(),
                                 // FQName of the class containing the Annotation
@@ -100,10 +101,10 @@ public class FindAnnotations extends FindRecipe {
                         J.ClassDeclaration aClass = getCursor().firstEnclosing(J.ClassDeclaration.class);
                         System.out.printf("Class name: %s%n", aClass.getName());
 
-                        report.insertRow(ctx, new MatchingReport.Row(
+                        report.insertRow(ctx, new AnnotationsReport.Row(
                             matchId,
-                            MatchingReport.Type.JAVA,
-                            MatchingReport.Symbol.ANNOTATION,
+                            AnnotationsReport.Type.JAVA,
+                            AnnotationsReport.Symbol.ANNOTATION,
                             pattern,
                             sourcePath.toString(),
                             // FQName of the class containing the Annotation

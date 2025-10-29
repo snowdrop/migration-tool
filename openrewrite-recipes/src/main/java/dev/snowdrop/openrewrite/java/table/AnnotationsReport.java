@@ -1,12 +1,12 @@
-package dev.snowdrop.openrewrite.java.search;
+package dev.snowdrop.openrewrite.java.table;
 
 import lombok.Value;
 import org.openrewrite.Column;
 import org.openrewrite.DataTable;
 import org.openrewrite.Recipe;
 
-public class MatchingReport extends DataTable<MatchingReport.Row> {
-    public MatchingReport(Recipe recipe) {
+public class AnnotationsReport extends DataTable<AnnotationsReport.Row> {
+    public AnnotationsReport(Recipe recipe) {
         super(recipe,
             "Matching report",
             "Records file(s) where a matching condition succeeded to find a resource.");

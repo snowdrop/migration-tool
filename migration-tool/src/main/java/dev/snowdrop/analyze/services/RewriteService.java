@@ -5,8 +5,11 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import dev.snowdrop.analyze.Config;
+import dev.snowdrop.analyze.model.CsvRecord;
 import dev.snowdrop.analyze.model.Rewrite;
 import dev.snowdrop.analyze.model.Rule;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.CSVReader;
 import dev.snowdrop.mapper.QueryToRecipeMapper;
 import dev.snowdrop.model.Parameter;
 import dev.snowdrop.model.Query;
@@ -18,14 +21,13 @@ import dev.snowdrop.transform.model.CompositeRecipe;
 import org.jboss.logging.Logger;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RewriteService {
     private static final Logger logger = Logger.getLogger(RewriteService.class);
@@ -58,17 +60,29 @@ public class RewriteService {
         if (visitor.getSimpleQueries().size() == 1) {
             visitor.getSimpleQueries().stream().findFirst().ifPresent(q -> {
                 List<Rewrite> results = executeQueryCommand(config, rule, q);
-                ruleResults.putAll(Map.of(rule.ruleID(), results));
+                ruleResults.merge(rule.ruleID(), results, (existing, newResults) -> {
+                    List<Rewrite> combined = new ArrayList<>(existing);
+                    combined.addAll(newResults);
+                    return combined;
+                });
             });
         } else if (visitor.getOrQueries().size() > 1) {
             visitor.getOrQueries().stream().forEach(q -> {
                 List<Rewrite> results = executeQueryCommand(config, rule, q);
-                ruleResults.putAll(Map.of(rule.ruleID(), results));
+                ruleResults.merge(rule.ruleID(), results, (existing, newResults) -> {
+                    List<Rewrite> combined = new ArrayList<>(existing);
+                    combined.addAll(newResults);
+                    return combined;
+                });
             });
         } else if (visitor.getAndQueries().size() > 1) {
             visitor.getAndQueries().stream().forEach(q -> {
                 List<Rewrite> results = executeQueryCommand(config, rule, q);
-                ruleResults.putAll(Map.of(rule.ruleID(), results));
+                ruleResults.merge(rule.ruleID(), results, (existing, newResults) -> {
+                    List<Rewrite> combined = new ArrayList<>(existing);
+                    combined.addAll(newResults);
+                    return combined;
+                });
             });
         } else {
             logger.warnf("Rule %s has no valid condition(s)", rule.ruleID());
@@ -88,12 +102,12 @@ public class RewriteService {
         recipe.put(
             dto.name(),
             dto.parameters().stream()
-            .collect(Collectors.toMap(
-                Parameter::parameter,
-                Parameter::value,
-                (v1, v2) -> v2,
-                LinkedHashMap::new
-            )));
+                .collect(Collectors.toMap(
+                    Parameter::parameter,
+                    Parameter::value,
+                    (v1, v2) -> v2,
+                    LinkedHashMap::new
+                )));
 
         CompositeRecipe compositeRecipe = new CompositeRecipe(
             "specs.openrewrite.org/v1beta/recipe",
@@ -129,27 +143,31 @@ public class RewriteService {
 
         try {
             Files.write(yamlFilePath, yamlRecipe.getBytes(),
-                StandardOpenOption.CREATE);
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         // Recipe's jar files
-        String gavs = "org.openrewrite:rewrite-java:8.62.4,org.openrewrite.recipe:rewrite-java-dependencies:1.43.0,dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT";
+        String gavs = "org.openrewrite:rewrite-java:8.65.0,org.openrewrite.recipe:rewrite-java-dependencies:1.44.0,dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT";
 
         // Execute the maven rewrite goal command
-        boolean succeed = execMvnCmd(config.appPath(),true,gavs,rewriteYamlName);
-
-        // Populate the result's array
-        List<Rewrite> results = new ArrayList<>();
+        boolean succeed = execMvnCmd(config.appPath(), true, gavs, rewriteYamlName);
         if (!succeed) {
             logger.warnf("Failed to execute the maven command");
         }
 
-        // TODO: Add logic to scan the csv files generated ...
-        // Create a dummy response
-        results.add(new Rewrite(dto.id(),dto.name()));
-        return results;
+        // Get from the DTO the matchId to search about
+        String matchId = dto.parameters().stream()
+            .filter(p -> p.parameter().equals("matchId"))
+            .map(Parameter::value)
+            .findAny()
+            .orElse(null);
+
+        // Populate the results using an array as a symbol can be present several times in files
+        // By example; the GetMapping annotation can be used to define several endpoints
+        // This array will populate for each match found a Rewrite object
+        return findRecordsMatching(config.appPath(), matchId);
     }
 
     private static ObjectMapper yamlRecipeMapper() {
@@ -214,6 +232,91 @@ public class RewriteService {
             }
             return false;
         }
+    }
+
+    /**
+     * Finds csv records with the matchId of the query using OpenCSV
+     *
+     * @param projectPath The path to search for CSV files
+     * @param matchIdToSearch The match ID to search for in CSV files
+     * @return List of Rewrite objects for matching records
+     */
+    private static List<Rewrite> findRecordsMatching(String projectPath, String matchIdToSearch) {
+        List<Rewrite> results = new ArrayList<>();
+
+        // Openrewrite folder where CSV files are generated
+        Path openRewriteCsvPath = Paths.get(projectPath, "target", "rewrite", "datatables");
+
+        try {
+            // Check if the datatables directory exists
+            if (!Files.exists(openRewriteCsvPath)) {
+                logger.warnf("Datatables directory does not exist: %s", openRewriteCsvPath);
+                return results;
+            }
+
+            // List all subdirectories (datetime folders)
+            try (Stream<Path> directories = Files.list(openRewriteCsvPath)
+                    .filter(Files::isDirectory)) {
+
+                directories.forEach(dateTimeDir -> {
+                    String parentFolderName = dateTimeDir.getFileName().toString();
+
+                    try {
+                        // List all CSV files in each datetime directory
+                        try (Stream<Path> csvFiles = Files.list(dateTimeDir)
+                                .filter(Files::isRegularFile)
+                                .filter(path -> path.toString().endsWith(".csv"))) {
+
+                            csvFiles.forEach(csvFile -> {
+                                String csvFileName = csvFile.getFileName().toString();
+
+                                try (CSVReader csvReader = new CSVReader(new FileReader(csvFile.toFile()))) {
+                                    // Parse CSV using OpenCSV
+                                    List<CsvRecord> records = new CsvToBeanBuilder<CsvRecord>(csvReader)
+                                            .withType(CsvRecord.class)
+                                            .withSkipLines(2) // Skip header and description rows
+                                            .build()
+                                            .parse();
+
+                                    // Search through records for matching matchId
+                                    for (int i = 0; i < records.size(); i++) {
+                                        CsvRecord record = records.get(i);
+
+                                        if (record.getMatchId() != null && record.getMatchId().equals(matchIdToSearch)) {
+                                            // Extract type and symbol from CSV name and content
+                                            String fileType = record.getType();
+                                            String symbolType = record.getSymbol();
+                                            String pattern = record.getPattern() != null ? record.getPattern() : "N/A";
+
+                                            // Build name in the new format: parentFolderName/csvFileName:line_number|pattern.symbol|type
+                                            String name = String.format("%s/%s:%d|%s.%s|%s",
+                                                    parentFolderName,
+                                                    csvFileName,
+                                                    i + 3, // Add 3 to account for skipped header rows (0-based index + 2 skipped + 1 for 1-based line numbering)
+                                                    pattern,
+                                                    symbolType,
+                                                    fileType);
+
+                                            results.add(new Rewrite(matchIdToSearch, name));
+                                            logger.infof("Found match in %s at record %d: %s", csvFile, i + 1, name);
+                                        }
+                                    }
+                                } catch (IOException e) {
+                                    logger.errorf("Error parsing CSV file %s with OpenCSV: %s", csvFile, e.getMessage());
+                                }
+                            });
+                        }
+                    } catch (IOException e) {
+                        logger.errorf("Error listing CSV files in directory %s: %s", dateTimeDir, e.getMessage());
+                    }
+                });
+            }
+        } catch (IOException e) {
+            logger.errorf("Error searching for csv files: %s", e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+        return results;
     }
 
 }

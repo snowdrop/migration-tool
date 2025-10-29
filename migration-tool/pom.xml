@@ -69,6 +69,20 @@
             <artifactId>jackson-dataformat-csv</artifactId>
         </dependency>
 
+        <!-- OpenCSV for better CSV parsing and object binding -->
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.9</version>
+        </dependency>
+
+        <!-- ASCII Table for better table formatting -->
+        <dependency>
+            <groupId>com.github.freva</groupId>
+            <artifactId>ascii-table</artifactId>
+            <version>1.8.0</version>
+        </dependency>
+
         <!-- AI -->
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>

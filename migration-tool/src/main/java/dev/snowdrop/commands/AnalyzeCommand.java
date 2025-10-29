@@ -2,7 +2,6 @@ package dev.snowdrop.commands;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.snowdrop.analyze.JdtLsClient;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;
@@ -10,7 +9,6 @@ import dev.snowdrop.analyze.services.AnalyzeService;
 import dev.snowdrop.analyze.services.ResultsService;
 import dev.snowdrop.analyze.services.ScannerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 import picocli.CommandLine;
@@ -100,8 +98,8 @@ public class AnalyzeCommand implements Runnable {
         Config config = fromCommandOrElseProperties();
         try{
             List<Rule> rules = loadRules(config.rulesPath(), config.sourceTechnology(), config.targetTechnology());
-            AnalyzeService analyzeService = new AnalyzeService(config, new ScannerFactory());
 
+            AnalyzeService analyzeService = new AnalyzeService(config, new ScannerFactory());
             Map<String, MigrationTask> tasks = analyzeService.analyzeCodeFromRule(scanner, rules);
 
             displayResults(tasks, config);

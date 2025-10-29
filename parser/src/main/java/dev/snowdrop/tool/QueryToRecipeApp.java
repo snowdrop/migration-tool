@@ -10,7 +10,7 @@ import dev.snowdrop.model.RecipeDTO;
 import dev.snowdrop.model.RecipeDTOSerializer;
 import dev.snowdrop.parser.QueryUtils;
 import dev.snowdrop.parser.QueryVisitor;
-import dev.snowdrop.reconciler.KeyGenerator;
+import dev.snowdrop.reconciler.MatchingUtils;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,7 +31,7 @@ public class QueryToRecipeApp {
                 app.logQueryResult(q);
                 // Create for each Query the corresponding RecipeDTO
                 RecipeDTO dto = QueryToRecipeMapper.map(q);
-                dto = dto.withId(KeyGenerator.generate(dto.name()));
+                dto = dto.withId(MatchingUtils.generateUID());
                 System.out.println(dto);
 
                 try {
@@ -53,7 +53,7 @@ public class QueryToRecipeApp {
                 app.logQueryResult(q);
                 // Create for each Query the corresponding RecipeDTO
                 RecipeDTO dto = QueryToRecipeMapper.map(q);
-                dto = dto.withId(KeyGenerator.generate(dto.name()));
+                dto = dto.withId(MatchingUtils.generateUID());
                 System.out.println(dto);
 
                 try {
@@ -79,7 +79,7 @@ public class QueryToRecipeApp {
                 app.logQueryResult(q);
                 // Create for each Query the corresponding RecipeDTO
                 RecipeDTO dto = QueryToRecipeMapper.map(q);
-                dto = dto.withId(KeyGenerator.generate(dto.name()));
+                dto = dto.withId(MatchingUtils.generateUID());
                 System.out.println(dto);
 
                 try {

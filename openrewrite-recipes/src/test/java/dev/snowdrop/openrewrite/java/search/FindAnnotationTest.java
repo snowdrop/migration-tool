@@ -1,6 +1,6 @@
 package dev.snowdrop.openrewrite.java.search;
 
-import org.junit.jupiter.api.Disabled;
+import dev.snowdrop.openrewrite.java.table.AnnotationsReport;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.test.RewriteTest;
 import static org.openrewrite.java.Assertions.java;
@@ -14,7 +14,7 @@ public class FindAnnotationTest implements RewriteTest {
         findAnnotation.pattern = "@java.lang.Deprecated";
 
         rewriteRun(
-            spec -> spec.dataTableAsCsv(MatchingReport.class,
+            spec -> spec.dataTableAsCsv(AnnotationsReport.class,
                         """
                         matchId,type,symbol,pattern,sourceFilePath,className
                         match-deprecated-001,JAVA,ANNOTATION,@java.lang.Deprecated,HomeCinema.java,HomeCinema
