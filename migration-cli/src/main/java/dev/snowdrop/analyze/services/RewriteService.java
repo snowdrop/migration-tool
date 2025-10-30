@@ -95,7 +95,8 @@ public class RewriteService {
     private static List<Rewrite> executeQueryCommand(Config config, Rule rule, Set<Query> queries) {
 
         // Composite recipe - using Map with List to allow multiple entries with same key
-        List<Map<String, Map<String, String>>> recipes = new ArrayList<>();
+        //List<Map<String, Map<String, String>>> recipes = new ArrayList<>();
+        List<Object> recipes = new ArrayList<>();
         List<RecipeDTO> recipeDTOs = new ArrayList<>();
 
         queries.stream().forEach(q -> {
@@ -116,7 +117,10 @@ public class RewriteService {
                 ));
 
             // Add a new, single-entry map to the list
-            recipes.add(Map.of(dto.name(), parameters));
+            // recipes.add(Map.of(dto.name(), parameters));
+
+            Map<String, Map<String, String>> singleRecipe = Map.of(dto.name(), parameters);
+            recipes.add(singleRecipe);
         }
 
         CompositeRecipe compositeRecipe = new CompositeRecipe(

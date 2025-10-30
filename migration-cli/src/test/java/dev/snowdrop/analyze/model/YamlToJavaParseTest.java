@@ -4,12 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -64,5 +66,10 @@ public class YamlToJavaParseTest {
         assertEquals("org.springframework.boot", precondition.groupIdPattern());
         assertEquals("spring-boot", precondition.artifactIdPattern());
 
+        List<Object> recipes = openrewrites[0].recipeList();
+        Map<String, Map<String, String>> recipe = (Map)recipes.get(0);
+        var recipeDetail = recipe.get("dev.snowdrop.openrewrite.java.search.FindAnnotations");
+        assertEquals("org.springframework.stereotype.Controller", recipeDetail.get("pattern"));
+        assertEquals("rule-001-001", recipeDetail.get("matchId"));
     }
 }

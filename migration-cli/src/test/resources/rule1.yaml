@@ -25,7 +25,11 @@
             artifactIdPattern: spring-boot
             version: '[3.5,)'
         recipeList:
-          - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
-          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
+          - dev.snowdrop.openrewrite.java.search.FindAnnotations:
+              pattern: "org.springframework.stereotype.Controller"
+              matchId: "rule-001-001"
+          - dev.snowdrop.openrewrite.java.search.FindAnnotations:
+              pattern: "org.springframework.beans.factory.annotation.Autowired"
+              matchId: "rule-001-002"
         gav:
           - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
