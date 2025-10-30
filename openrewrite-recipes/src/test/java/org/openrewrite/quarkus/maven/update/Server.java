@@ -17,7 +17,9 @@ public class Server {
     public ServerConfiguration configuration;
 
     @JsonCreator
-    public Server(@JsonProperty("id") String id, @JsonProperty("username") String username, @JsonProperty("password") String password, @JsonProperty("configuration") ServerConfiguration configuration) {
+    public Server(@JsonProperty("id") String id, @JsonProperty("username") String username,
+            @JsonProperty("password") String password,
+            @JsonProperty("configuration") ServerConfiguration configuration) {
         this.id = id;
         this.username = username;
         this.password = password;

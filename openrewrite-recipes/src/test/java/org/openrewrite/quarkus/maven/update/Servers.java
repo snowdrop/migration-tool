@@ -23,7 +23,7 @@ public class Servers {
     @With
     List<Server> servers = emptyList();
 
-    public Servers merge( Servers servers) {
+    public Servers merge(Servers servers) {
         final Map<String, Server> merged = new LinkedHashMap<>();
         for (Server server : this.servers) {
             merged.put(server.id, server);

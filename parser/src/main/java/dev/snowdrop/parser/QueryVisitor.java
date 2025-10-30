@@ -49,10 +49,11 @@ public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
         if (cctx.keyValuePair() != null && !cctx.keyValuePair().isEmpty()) {
             // Handle case with key-value pairs: java.annotation is (name='@SpringBootApplication')
             keyValuePairs = cctx.keyValuePair().stream()
-                .collect(Collectors.toMap(
-                    kvp -> kvp.key().getText(),
-                    kvp -> removeQuotes(kvp.value().getText()) // Remove quotes from value
-                ));
+                    .collect(Collectors.toMap(kvp -> kvp.key().getText(), kvp -> removeQuotes(kvp.value().getText()) // Remove
+                                                                                                                     // quotes
+                                                                                                                     // from
+                                                                                                                     // value
+                    ));
         } else if (cctx.value() != null) {
             // Handle case with single value: java.annotation is '@SpringBootApplication'
             String value = removeQuotes(cctx.value().getText()); // Remove quotes from value
@@ -63,10 +64,8 @@ public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
             keyValuePairs.put(defaultKey, value);
         }
 
-        Query qr = new Query(
-            cctx.fileType().getText(),
-            cctx.symbol() != null ? cctx.symbol().getText() : "",
-            keyValuePairs);
+        Query qr = new Query(cctx.fileType().getText(), cctx.symbol() != null ? cctx.symbol().getText() : "",
+                keyValuePairs);
         simpleQueries.add(qr);
 
         return simpleQueries;
@@ -77,13 +76,13 @@ public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
      */
     private String getDefaultKeyForSymbol(String symbol) {
         return switch (symbol.toLowerCase()) {
-            case "annotation" -> "name";
-            case "dependency" -> "artifactId";
-            case "property" -> "name";
-            case "class" -> "name";
-            case "method" -> "name";
-            case "field" -> "name";
-            default -> "value"; // Generic fallback
+        case "annotation" -> "name";
+        case "dependency" -> "artifactId";
+        case "property" -> "name";
+        case "class" -> "name";
+        case "method" -> "name";
+        case "field" -> "name";
+        default -> "value"; // Generic fallback
         };
     }
 

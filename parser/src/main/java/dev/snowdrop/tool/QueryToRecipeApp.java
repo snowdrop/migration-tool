@@ -28,69 +28,68 @@ public class QueryToRecipeApp {
         query = "FIND java.annotation WHERE (name='@SpringBootApplication')";
         visitor = QueryUtils.parseAndVisit(query);
         visitor.getSimpleQueries().forEach(q -> {
-                app.logQueryResult(q);
-                // Create for each Query the corresponding RecipeDTO
-                RecipeDTO dto = QueryToRecipeMapper.map(q);
-                dto = dto.withId(MatchingUtils.generateUID());
-                System.out.println(dto);
+            app.logQueryResult(q);
+            // Create for each Query the corresponding RecipeDTO
+            RecipeDTO dto = QueryToRecipeMapper.map(q);
+            dto = dto.withId(MatchingUtils.generateUID());
+            System.out.println(dto);
 
-                try {
-                    // convert the DTO to the YAML
-                    String yaml = yamlRecipeMapper().writeValueAsString(dto);
-                    System.out.println(yaml);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            try {
+                // convert the DTO to the YAML
+                String yaml = yamlRecipeMapper().writeValueAsString(dto);
+                System.out.println(yaml);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        );
+        });
 
         System.out.println("=========================");
         System.out.println("=== Query with clause AND clause ");
-        System.out.println("=== FIND java.annotation WHERE (name='@SpringBootApplication') AND pom.dependency WHERE (artifactId='quarkus-core', version='3.16.2')");
+        System.out.println(
+                "=== FIND java.annotation WHERE (name='@SpringBootApplication') AND pom.dependency WHERE (artifactId='quarkus-core', version='3.16.2')");
         query = "FIND java.annotation WHERE (name='@SpringBootApplication') AND pom.dependency WHERE (artifactId='quarkus-core', version='3.16.2')";
         visitor = QueryUtils.parseAndVisit(query);
         visitor.getAndQueries().forEach(q -> {
-                app.logQueryResult(q);
-                // Create for each Query the corresponding RecipeDTO
-                RecipeDTO dto = QueryToRecipeMapper.map(q);
-                dto = dto.withId(MatchingUtils.generateUID());
-                System.out.println(dto);
+            app.logQueryResult(q);
+            // Create for each Query the corresponding RecipeDTO
+            RecipeDTO dto = QueryToRecipeMapper.map(q);
+            dto = dto.withId(MatchingUtils.generateUID());
+            System.out.println(dto);
 
-                try {
-                    // convert the DTO to the YAML
-                    String yaml = yamlRecipeMapper().writeValueAsString(dto);
-                    System.out.println(yaml);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            try {
+                // convert the DTO to the YAML
+                String yaml = yamlRecipeMapper().writeValueAsString(dto);
+                System.out.println(yaml);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        );
+        });
 
         System.out.println("=========================");
         System.out.println("=== Query with clause OR clause OR clause");
-        System.out.println("=== FIND java.annotation WHERE (name='@SpringBootApplication1') OR java.annotation WHERE (name='@SpringBootApplication2') OR java.annotation WHERE (name='@SpringBootApplication3')");
+        System.out.println(
+                "=== FIND java.annotation WHERE (name='@SpringBootApplication1') OR java.annotation WHERE (name='@SpringBootApplication2') OR java.annotation WHERE (name='@SpringBootApplication3')");
         query = """
-            FIND java.annotation WHERE (name='@SpringBootApplication1') OR
-            java.annotation WHERE (name='@SpringBootApplication2') OR
-            java.annotation WHERE (name='@SpringBootApplication3')
-            """;
+                FIND java.annotation WHERE (name='@SpringBootApplication1') OR
+                java.annotation WHERE (name='@SpringBootApplication2') OR
+                java.annotation WHERE (name='@SpringBootApplication3')
+                """;
         visitor = QueryUtils.parseAndVisit(query);
         visitor.getOrQueries().forEach(q -> {
-                app.logQueryResult(q);
-                // Create for each Query the corresponding RecipeDTO
-                RecipeDTO dto = QueryToRecipeMapper.map(q);
-                dto = dto.withId(MatchingUtils.generateUID());
-                System.out.println(dto);
+            app.logQueryResult(q);
+            // Create for each Query the corresponding RecipeDTO
+            RecipeDTO dto = QueryToRecipeMapper.map(q);
+            dto = dto.withId(MatchingUtils.generateUID());
+            System.out.println(dto);
 
-                try {
-                    // convert the DTO to the YAML
-                    String yaml = yamlRecipeMapper().writeValueAsString(dto);
-                    System.out.println(yaml);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            try {
+                // convert the DTO to the YAML
+                String yaml = yamlRecipeMapper().writeValueAsString(dto);
+                System.out.println(yaml);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        );
+        });
     }
 
     private void logQueryResult(Query qr) {
@@ -103,8 +102,7 @@ public class QueryToRecipeApp {
     }
 
     public static ObjectMapper yamlRecipeMapper() {
-        YAMLFactory factory = new YAMLFactory()
-            .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
+        YAMLFactory factory = new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
         ObjectMapper yamlMapper = new ObjectMapper(factory);
 
         SimpleModule module = new SimpleModule();
