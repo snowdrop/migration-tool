@@ -42,23 +42,22 @@ public class RewriteService {
 
         // Parse first the Rule condition to populate the Query object using the YAML Condition query
         // See the parser maven project for examples, unit tests
-        QueryVisitor visitor = QueryUtils.parseAndVisit(rule.when().Condition());
+        QueryVisitor visitor = QueryUtils.parseAndVisit(rule.when().condition());
 
         /*
-           Handle the 3 supported cases where the query contains:
-
-           - One clause: java.annotation is '@SpringBootApplication'
-
-           - Clauses separated with the OR operator:
-
-             FIND java.annotation is '@SpringBootApplication' OR
-                  java.annotation is '@Deprecated'
-
-           - Clauses separated with the AND operator:
-
-             FIND java.annotation is '@SpringBootApplication' AND
-                  pom.dependency is (groupId='org.springframework.boot', artifactId='spring-boot', version='3.4.2')
-
+         * Handle the 3 supported cases where the query contains:
+         *
+         * - One clause: java.annotation is '@SpringBootApplication'
+         *
+         * - Clauses separated with the OR operator:
+         *
+         * FIND java.annotation is '@SpringBootApplication' OR java.annotation is '@Deprecated'
+         *
+         * - Clauses separated with the AND operator:
+         *
+         * FIND java.annotation is '@SpringBootApplication' AND pom.dependency is (groupId='org.springframework.boot',
+         * artifactId='spring-boot', version='3.4.2')
+         *
          */
         if (visitor.getSimpleQueries().size() == 1) {
             visitor.getSimpleQueries().stream().findFirst().ifPresent(q -> {
@@ -95,26 +94,21 @@ public class RewriteService {
     private static List<Rewrite> executeQueryCommand(Config config, Rule rule, Set<Query> queries) {
 
         // Composite recipe - using Map with List to allow multiple entries with same key
-        //List<Map<String, Map<String, String>>> recipes = new ArrayList<>();
+        // List<Map<String, Map<String, String>>> recipes = new ArrayList<>();
         List<Object> recipes = new ArrayList<>();
         List<RecipeDTO> recipeDTOs = new ArrayList<>();
 
         queries.stream().forEach(q -> {
-                // Convert the Query to the RecipeDTO
-                RecipeDTO dto = QueryToRecipeMapper.map(q);
-                recipeDTOs.add(dto);
+            // Convert the Query to the RecipeDTO
+            RecipeDTO dto = QueryToRecipeMapper.map(q);
+            recipeDTOs.add(dto);
 
-                logger.debugf("Recipe dto: %s", dto);
-            });
+            logger.debugf("Recipe dto: %s", dto);
+        });
 
         for (RecipeDTO dto : recipeDTOs) {
-            Map<String, String> parameters = dto.parameters().stream()
-                .collect(Collectors.toMap(
-                    Parameter::parameter,
-                    Parameter::value,
-                    (v1, v2) -> v2,
-                    LinkedHashMap::new
-                ));
+            Map<String, String> parameters = dto.parameters().stream().collect(
+                    Collectors.toMap(Parameter::parameter, Parameter::value, (v1, v2) -> v2, LinkedHashMap::new));
 
             // Add a new, single-entry map to the list
             // recipes.add(Map.of(dto.name(), parameters));
@@ -123,21 +117,13 @@ public class RewriteService {
             recipes.add(singleRecipe);
         }
 
-        CompositeRecipe compositeRecipe = new CompositeRecipe(
-            "specs.openrewrite.org/v1beta/recipe",
-            "dev.snowdrop.openrewrite.MatchConditions",
-            "Try to match a resource",
-            "Try to match a resource.",
-            recipes
-        );
+        CompositeRecipe compositeRecipe = new CompositeRecipe("specs.openrewrite.org/v1beta/recipe",
+                "dev.snowdrop.openrewrite.MatchConditions", "Try to match a resource", "Try to match a resource.",
+                recipes);
 
         /*
-         *  Render the recipe as YAML
-         *      type: specs.openrewrite.org/v1beta/recipe
-         *      name: dev.snowdrop.openrewrite.MatchConditions
-         *      displayName: Try to match a resource
-         *      recipeList:
-         *      - %s
+         * Render the recipe as YAML type: specs.openrewrite.org/v1beta/recipe name:
+         * dev.snowdrop.openrewrite.MatchConditions displayName: Try to match a resource recipeList: - %s
          */
         String yamlRecipe = "";
         try {
@@ -152,8 +138,8 @@ public class RewriteService {
         Path yamlFilePath = Paths.get(config.appPath()).resolve(rewriteYamlName);
 
         try {
-            Files.write(yamlFilePath, yamlRecipe.getBytes(),
-                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.write(yamlFilePath, yamlRecipe.getBytes(), StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -171,11 +157,8 @@ public class RewriteService {
         List<Rewrite> allResults = new ArrayList<>();
         recipeDTOs.stream().forEach(dto -> {
             // Get from the DTO the matchId to search about
-            String matchId = dto.parameters().stream()
-                .filter(p -> p.parameter().equals("matchId"))
-                .map(Parameter::value)
-                .findAny()
-                .orElse(null);
+            String matchId = dto.parameters().stream().filter(p -> p.parameter().equals("matchId"))
+                    .map(Parameter::value).findAny().orElse(null);
 
             // Populate the results using an array as a symbol can be present several times in files
             // By example; the GetMapping annotation can be used to define several endpoints
@@ -186,8 +169,7 @@ public class RewriteService {
     }
 
     private static ObjectMapper yamlRecipeMapper() {
-        YAMLFactory factory = new YAMLFactory()
-            .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
+        YAMLFactory factory = new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
         ObjectMapper yamlMapper = new ObjectMapper(factory);
 
         SimpleModule module = new SimpleModule();
@@ -207,11 +189,9 @@ public class RewriteService {
             command.add("mvn");
             command.add("-B");
             command.add("-e");
-            command.add(String.format("%s:%s:%s:%s",
-                MAVEN_OPENREWRITE_PLUGIN_GROUP,
-                MAVEN_OPENREWRITE_PLUGIN_ARTIFACT,
-                "6.22.1", // TODO: Remove hard coded value of the version => use config property
-                "dryRun"));
+            command.add(String.format("%s:%s:%s:%s", MAVEN_OPENREWRITE_PLUGIN_GROUP, MAVEN_OPENREWRITE_PLUGIN_ARTIFACT,
+                    "6.22.1", // TODO: Remove hard coded value of the version => use config property
+                    "dryRun"));
             // TODO: Remove the hard coded activeRecipes value
             command.add(String.format("-Drewrite.activeRecipes=%s", "dev.snowdrop.openrewrite.MatchConditions"));
             command.add("-Drewrite.recipeArtifactCoordinates=" + gavs);
@@ -253,8 +233,11 @@ public class RewriteService {
     /**
      * Finds csv records with the matchId of the query using OpenCSV
      *
-     * @param projectPath     The path to search for CSV files
-     * @param matchIdToSearch The match ID to search for in CSV files
+     * @param projectPath
+     *            The path to search for CSV files
+     * @param matchIdToSearch
+     *            The match ID to search for in CSV files
+     *
      * @return List of Rewrite objects for matching records
      */
     private static List<Rewrite> findRecordsMatching(String projectPath, String matchIdToSearch) {
@@ -271,17 +254,15 @@ public class RewriteService {
             }
 
             // List all subdirectories (datetime folders)
-            try (Stream<Path> directories = Files.list(openRewriteCsvPath)
-                .filter(Files::isDirectory)) {
+            try (Stream<Path> directories = Files.list(openRewriteCsvPath).filter(Files::isDirectory)) {
 
                 directories.forEach(dateTimeDir -> {
                     String parentFolderName = dateTimeDir.getFileName().toString();
 
                     try {
                         // List all CSV files in each datetime directory
-                        try (Stream<Path> csvFiles = Files.list(dateTimeDir)
-                            .filter(Files::isRegularFile)
-                            .filter(path -> path.toString().endsWith(".csv"))) {
+                        try (Stream<Path> csvFiles = Files.list(dateTimeDir).filter(Files::isRegularFile)
+                                .filter(path -> path.toString().endsWith(".csv"))) {
 
                             csvFiles.forEach(csvFile -> {
                                 String csvFileName = csvFile.getFileName().toString();
@@ -289,36 +270,36 @@ public class RewriteService {
                                 try (CSVReader csvReader = new CSVReader(new FileReader(csvFile.toFile()))) {
                                     // Parse CSV using OpenCSV
                                     List<CsvRecord> records = new CsvToBeanBuilder<CsvRecord>(csvReader)
-                                        .withType(CsvRecord.class)
-                                        .withSkipLines(2) // Skip header and description rows
-                                        .build()
-                                        .parse();
+                                            .withType(CsvRecord.class).withSkipLines(2) // Skip header and description
+                                                                                        // rows
+                                            .build().parse();
 
                                     // Search through records for matching matchId
                                     for (int i = 0; i < records.size(); i++) {
                                         CsvRecord record = records.get(i);
 
-                                        if (record.getMatchId() != null && record.getMatchId().equals(matchIdToSearch)) {
+                                        if (record.getMatchId() != null
+                                                && record.getMatchId().equals(matchIdToSearch)) {
                                             // Extract type and symbol from CSV name and content
                                             String fileType = record.getType();
                                             String symbolType = record.getSymbol();
                                             String pattern = record.getPattern() != null ? record.getPattern() : "N/A";
 
-                                            // Build name in the new format: parentFolderName/csvFileName:line_number|pattern.symbol|type
-                                            String name = String.format("%s/%s:%d|%s.%s|%s",
-                                                parentFolderName,
-                                                csvFileName,
-                                                i + 3, // Add 3 to account for skipped header rows (0-based index + 2 skipped + 1 for 1-based line numbering)
-                                                pattern,
-                                                symbolType,
-                                                fileType);
+                                            // Build name in the new format:
+                                            // parentFolderName/csvFileName:line_number|pattern.symbol|type
+                                            String name = String.format("%s/%s:%d|%s.%s|%s", parentFolderName,
+                                                    csvFileName, i + 3, // Add 3 to account for skipped header rows
+                                                                        // (0-based index + 2 skipped + 1 for 1-based
+                                                                        // line numbering)
+                                                    pattern, symbolType, fileType);
 
                                             results.add(new Rewrite(matchIdToSearch, name));
                                             logger.infof("Found match in %s at record %d: %s", csvFile, i + 1, name);
                                         }
                                     }
                                 } catch (IOException e) {
-                                    logger.errorf("Error parsing CSV file %s with OpenCSV: %s", csvFile, e.getMessage());
+                                    logger.errorf("Error parsing CSV file %s with OpenCSV: %s", csvFile,
+                                            e.getMessage());
                                 }
                             });
                         }

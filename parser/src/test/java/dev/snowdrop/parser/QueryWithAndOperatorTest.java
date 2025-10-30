@@ -8,7 +8,7 @@ import org.wildfly.common.Assert;
 import java.util.Map;
 import java.util.Set;
 
-public class QueryWithAndOperatorTest extends AbstractQueryParser{
+public class QueryWithAndOperatorTest extends AbstractQueryParser {
 
     @Test
     public void queryWithAnd() {
@@ -16,14 +16,14 @@ public class QueryWithAndOperatorTest extends AbstractQueryParser{
         QueryVisitor visitor = parseQuery(queryWithAnd);
 
         // Don't include simple quotes around the key or value
-        Query queryA = new Query("java","annotation", Map.of("name", "@SpringBootApplication"));
-        Query queryB = new Query("pom","dependency", Map.of("artifactId", "quarkus-core","version", "3.16.2"));
+        Query queryA = new Query("java", "annotation", Map.of("name", "@SpringBootApplication"));
+        Query queryB = new Query("pom", "dependency", Map.of("artifactId", "quarkus-core", "version", "3.16.2"));
 
         Set<Query> queries = visitor.getAndQueries();
         var queryList = queries.stream().toList();
         Assert.assertTrue(queryList.size() == 2);
-        Assertions.assertEquals(queryList.get(0),queryA);
-        Assertions.assertEquals(queryList.get(1),queryB);
+        Assertions.assertEquals(queryList.get(0), queryA);
+        Assertions.assertEquals(queryList.get(1), queryB);
     }
 
     @Test
@@ -31,8 +31,8 @@ public class QueryWithAndOperatorTest extends AbstractQueryParser{
         String queryWithMixedQuotes = "java.annotation is '@SpringBootApplication' AND pom.dependency is \"quarkus-core\"";
         QueryVisitor visitor = parseQuery(queryWithMixedQuotes);
 
-        Query queryA = new Query("java","annotation", Map.of("name", "@SpringBootApplication"));
-        Query queryB = new Query("pom","dependency", Map.of("artifactId", "quarkus-core"));
+        Query queryA = new Query("java", "annotation", Map.of("name", "@SpringBootApplication"));
+        Query queryB = new Query("pom", "dependency", Map.of("artifactId", "quarkus-core"));
 
         Set<Query> queries = visitor.getAndQueries();
         var queryList = queries.stream().toList();
@@ -46,8 +46,8 @@ public class QueryWithAndOperatorTest extends AbstractQueryParser{
         String queryWithDoubleQuotes = "java.annotation is (name=\"@SpringBootApplication\") AND pom.dependency is (artifactId=\"quarkus-core\", version=\"3.16.2\")";
         QueryVisitor visitor = parseQuery(queryWithDoubleQuotes);
 
-        Query queryA = new Query("java","annotation", Map.of("name", "@SpringBootApplication"));
-        Query queryB = new Query("pom","dependency", Map.of("artifactId", "quarkus-core","version", "3.16.2"));
+        Query queryA = new Query("java", "annotation", Map.of("name", "@SpringBootApplication"));
+        Query queryB = new Query("pom", "dependency", Map.of("artifactId", "quarkus-core", "version", "3.16.2"));
 
         Set<Query> queries = visitor.getAndQueries();
         var queryList = queries.stream().toList();

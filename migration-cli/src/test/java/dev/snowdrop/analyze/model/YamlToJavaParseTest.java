@@ -67,7 +67,7 @@ public class YamlToJavaParseTest {
         assertEquals("spring-boot", precondition.artifactIdPattern());
 
         List<Object> recipes = openrewrites[0].recipeList();
-        Map<String, Map<String, String>> recipe = (Map)recipes.get(0);
+        Map<String, Map<String, String>> recipe = (Map) recipes.get(0);
         var recipeDetail = recipe.get("dev.snowdrop.openrewrite.java.search.FindAnnotations");
         assertEquals("org.springframework.stereotype.Controller", recipeDetail.get("pattern"));
         assertEquals("rule-001-001", recipeDetail.get("matchId"));
