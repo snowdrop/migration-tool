@@ -1,4 +1,4 @@
-[![GitHub Actions Status](<https://img.shields.io/github/actions/workflow/status/snowdrop/migration-tool/mvn-build.yml?branch=main&logo=GitHub&style=for-the-badge>)](https://github.com/snowdrop/migration-cli/actions/workflows/mvn-build.yml)
+[![GitHub Actions Status](<https://img.shields.io/github/actions/workflow/status/snowdrop/migration-tool/mvn-build.yml?branch=main&logo=GitHub&style=for-the-badge>)](https://github.com/snowdrop/migration-tool/actions/workflows/mvn-build.yml)
 [![License](https://img.shields.io/github/license/snowdrop/migration-tool?style=for-the-badge&logo=apache)](https://www.apache.org/licenses/LICENSE-2.0)
 
 # Migration Tool project
