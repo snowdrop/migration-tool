@@ -50,7 +50,9 @@ public class ReplaceSpringBootApplicationWithQuarkusMainAnnotation extends Recip
 
             // Replace with QuarkusMain annotation
             return JavaTemplate.builder("@QuarkusMain")
-                    .javaParser(JavaParser.fromJavaVersion().classpath("quarkus-core"))
+                    // Load the Quarkus resources using the TypeTable mechanism
+                    // See: https://docs.openrewrite.org/authoring-recipes/multiple-versions#typetable-generation-for-maven-projects
+                    .javaParser(JavaParser.fromJavaVersion().classpathFromResources(ctx, "quarkus-core"))
                     .imports("io.quarkus.runtime.annotations.QuarkusMain").build()
                     .apply(getCursor(), a.getCoordinates().replace());
 
