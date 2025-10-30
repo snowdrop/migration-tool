@@ -5,10 +5,7 @@ import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rewrite;
 import org.eclipse.lsp4j.SymbolInformation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ResultsService {
@@ -71,8 +68,8 @@ public class ResultsService {
             }
         }
 
-        System.out.println("==== Data ====");
-        tableData.forEach(row -> System.out.println(Arrays.toString(row)));
+        // Sorts the List<String[]> by comparing the first element (row[0]) of each array which is the RuleID
+        tableData.sort(Comparator.comparing(row -> row[0]));
 
         System.out.println("\n=== Code Analysis Results ===");
         String asciiTable = AsciiTable.builder().styler(customizeStyle())

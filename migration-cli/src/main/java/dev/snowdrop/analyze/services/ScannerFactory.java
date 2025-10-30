@@ -4,18 +4,13 @@ import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.JdtLsClient;
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
 import static dev.snowdrop.analyze.JdtLsClient.*;
 
 public class ScannerFactory {
 
     private static final Logger logger = Logger.getLogger(ScannerFactory.class);
 
-    public CodeScanner createScanner(Scanner scannerType, Config config)
-            throws IOException, ExecutionException, InterruptedException, TimeoutException {
+    public CodeScanner createScanner(Scanner scannerType, Config config) {
         return switch (scannerType) {
         case Scanner.JDTLS -> {
             JdtLsClient client = new JdtLsClientBuilder().withConfig(config).build();
