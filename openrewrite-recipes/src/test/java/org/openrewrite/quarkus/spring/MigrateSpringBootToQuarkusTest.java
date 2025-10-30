@@ -28,7 +28,7 @@ public class MigrateSpringBootToQuarkusTest implements RewriteTest {
                 .recipes(new ReplaceSpringBootApplicationWithQuarkusMainAnnotation(),
                         new RemoveMethodInvocations("org.springframework.boot.SpringApplication run(..)"),
                         new AddQuarkusRun(null))
-                .parser(JavaParser.fromJavaVersion().classpath("spring-boot")).cycles(1)
+                .parser(JavaParser.fromJavaVersion().classpath("spring-boot", "spring-boot-autoconfigure")).cycles(1)
                 .expectedCyclesThatMakeChanges(1), java("""
                         package com.todo.app;
 

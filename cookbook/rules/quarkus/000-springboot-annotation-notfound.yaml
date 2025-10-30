@@ -7,7 +7,7 @@
   - konveyor.io/target=quarkus
   links: []
   message: "The dummy.SpringApplication annotation do not exist"
-  ruleID: springboot-annotation-notfound-00000
+  ruleID: 000-springboot-annotation-notfound
   when:
     #java.referenced:
     #  location: ANNOTATION

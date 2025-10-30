@@ -52,9 +52,11 @@ public class RewriteService {
          *
          * - Clauses separated with the AND operator:
          *
-         * java.annotation is (name='@SpringBootApplication') AND pom.dependency is (groupId='org.springframework.boot', artifactId='spring-boot', version='3.4.2')
+         * java.annotation is (name='@SpringBootApplication') AND pom.dependency is (groupId='org.springframework.boot',
+         * artifactId='spring-boot', version='3.4.2')
          *
-         * See grammar definition: https://raw.githubusercontent.com/snowdrop/migration-tool/refs/heads/main/parser/src/main/antlr4/Query.g4
+         * See grammar definition:
+         * https://raw.githubusercontent.com/snowdrop/migration-tool/refs/heads/main/parser/src/main/antlr4/Query.g4
          */
         if (visitor.getSimpleQueries().size() == 1) {
             visitor.getSimpleQueries().stream().findFirst().ifPresent(q -> {
