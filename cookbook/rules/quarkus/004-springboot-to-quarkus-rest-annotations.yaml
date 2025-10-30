@@ -25,20 +25,11 @@
           - "TODO"
     manual:
       - todo: "See openrewrite instructions"
-    openrewrite:
-      - name: SpringBoot to Quarkus
-        description: Replace the SpringBootApplication annotation with QuarkusMain, Remove the statement SpringApplication.run(), Add the io.quarkus.runtime.Quarkus.run() method within the main void method and pass the String[] args as parameter"
-        # TODO
-        #preconditions:
-        #  - name: org.openrewrite.java.dependencies.search.ModuleHasDependency
-        #    groupIdPattern: org.springframework.boot
-        #    artifactIdPattern: spring-boot
-        #    version: '[3.5,)'
-        #recipeList:
-        #  - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
-        #  - org.openrewrite.java.RemoveMethodInvocations:
-        #      methodPattern: "org.springframework.boot.SpringApplication run(..)"
-        #  - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun:
-        #      quarkusApplicationClass: TodoApplication
-        #gav:
-        #  - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
+    # TODO
+    # openrewrite:
+    #   - name: SpringBoot to Quarkus
+    #     description: Replace the SpringBootApplication annotation with QuarkusMain, Remove the statement SpringApplication.run(), Add the io.quarkus.runtime.Quarkus.run() method within the main void method and pass the String[] args as parameter"
+    #     recipeList:
+    #     -
+    #     gav:
+    #     - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT

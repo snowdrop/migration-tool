@@ -7,41 +7,30 @@ import org.openrewrite.Recipe;
 
 public class MatchingReport extends DataTable<MatchingReport.Row> {
     public MatchingReport(Recipe recipe) {
-        super(recipe,
-            "Matching report",
-            "Records file(s) where a matching condition succeeded to find a resource using a pattern.");
+        super(recipe, "Matching report",
+                "Records file(s) where a matching condition succeeded to find a resource using a pattern.");
     }
 
     @Value
     public static class Row {
-        @Column(displayName = "Match ID",
-            description = "ID of the matching tool used to reconcile the information.")
+        @Column(displayName = "Match ID", description = "ID of the matching tool used to reconcile the information.")
         String matchId;
 
-        @Column(displayName = "File's type",
-            description = "Type of the file where we look for.")
+        @Column(displayName = "File's type", description = "Type of the file where we look for.")
         Type type;
 
-        @Column(displayName = "Symbol searched",
-            description = "Symbol about what we search about: dependency.")
+        @Column(displayName = "Symbol searched", description = "Symbol about what we search about: dependency.")
         Symbol symbol;
 
-        @Column(displayName = "A pattern",
-            description = "The pattern, expressed as the concatenation of the fields searched.")
+        @Column(displayName = "A pattern", description = "The pattern, expressed as the concatenation of the fields searched.")
         String pattern;
 
-        @Column(displayName = "Source file path",
-            description = "Path of the source file where a match found")
+        @Column(displayName = "Source file path", description = "Path of the source file where a match found")
         String sourceFilePath;
     }
 
     public enum Type {
-        JAVA,
-        POM,
-        XML,
-        JSON,
-        YAML,
-        PROPERTIES
+        JAVA, POM, XML, JSON, YAML, PROPERTIES
     }
 
     public enum Symbol {

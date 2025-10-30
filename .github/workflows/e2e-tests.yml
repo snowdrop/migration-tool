@@ -51,9 +51,9 @@ jobs:
       - name: Upload built artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: built-migration-tool
+          name: built-migration-cli
           path: |
-            migration-tool/target/quarkus-app/
+            migration-cli/target/quarkus-app/
             applications/
             cookbook/rules/
           retention-days: 1
@@ -72,7 +72,7 @@ jobs:
       - name: Download built artifacts
         uses: actions/download-artifact@v4
         with:
-          name: built-migration-tool
+          name: built-migration-cli
 
       - name: Install konveyor jdt-ls
         run: |
@@ -94,7 +94,7 @@ jobs:
           mkdir -p ./jdt
 
           # Run analysis with jdt-ls using the uber jar approach
-          timeout 300 java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app -o json || {
+          timeout 300 java -jar migration-cli/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app -o json || {
             echo "❌ jdt-ls analysis failed or timed out"
             echo "Checking for any generated files..."
             find ./applications/spring-boot-todo-app -name "*analysing-jdtls-report*" -type f 2>/dev/null || true
@@ -123,14 +123,14 @@ jobs:
       - name: Download built artifacts
         uses: actions/download-artifact@v4
         with:
-          name: built-migration-tool
+          name: built-migration-cli
 
       - run: |
           echo "🔍 Starting openrewrite scanner analysis..."
 
           export ANALYZER_RULES_PATH="$(pwd)/cookbook/rules"
           
-          timeout 300 java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app -o json --scanner openrewrite || {
+          timeout 300 java -jar migration-cli/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app -o json --scanner openrewrite || {
             echo "❌ openrewrite analysis failed or timed out"
             echo "Checking for any generated files..."
             find ./applications/spring-boot-todo-app -name "*analysing-openrewrite-report*" -type f 2>/dev/null || true
@@ -153,7 +153,7 @@ jobs:
       - name: Download built artifacts
         uses: actions/download-artifact@v4
         with:
-          name: built-migration-tool
+          name: built-migration-cli
 
       - name: Download jdtls analysis results
         uses: actions/download-artifact@v4

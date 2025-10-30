@@ -28,7 +28,7 @@ public class RemoveSpringBootParent extends Recipe {
         return new MavenIsoVisitor<ExecutionContext>() {
 
             @Override
-            public  Xml.@Nullable Tag visitTag(Xml.Tag tag, ExecutionContext ctx) {
+            public Xml.@Nullable Tag visitTag(Xml.Tag tag, ExecutionContext ctx) {
                 if (isSpringBootParent(tag)) {
                     // Remove the parent tag entirely
                     return null;
@@ -47,9 +47,8 @@ public class RemoveSpringBootParent extends Recipe {
                 String version = tag.getChildValue("version").orElse("");
 
                 // Only process Spring Boot 3.x parent POMs
-                return "org.springframework.boot".equals(groupId) &&
-                    "spring-boot-starter-parent".equals(artifactId) &&
-                    version.startsWith("3.");
+                return "org.springframework.boot".equals(groupId) && "spring-boot-starter-parent".equals(artifactId)
+                        && version.startsWith("3.");
             }
         };
     }

@@ -4,7 +4,7 @@
 
     <parent>
         <groupId>dev.snowdrop</groupId>
-        <artifactId>migration-tool-parent</artifactId>
+        <artifactId>migration-cli-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -13,23 +13,6 @@
     <version>1.0.0-SNAPSHOT</version>
     <description>Openrewrite recipes to migrate Spring Boot to the Quarkus runtime</description>
     <name>Migration Tool :: Openrewrite recipes</name>
-
-    <properties>
-        <openrewrite-recipe-bom.version>3.17.0</openrewrite-recipe-bom.version>
-    </properties>
-
-    <!-- TODO: Investigate why the version diverges from parent: 8.61.1 vs 8.62.4 if we don't declare again the following dependencyManagement section -->
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.openrewrite.recipe</groupId>
-                <artifactId>rewrite-recipe-bom</artifactId>
-                <version>${openrewrite-recipe-bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>

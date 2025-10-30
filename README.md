@@ -1,5 +1,5 @@
-[![GitHub Actions Status](<https://img.shields.io/github/actions/workflow/status/snowdrop/migration-tool/mvn-build.yml?branch=main&logo=GitHub&style=for-the-badge>)](https://github.com/snowdrop/migration-tool/actions/workflows/mvn-build.yml)
-[![License](https://img.shields.io/github/license/snowdrop/migration-tool?style=for-the-badge&logo=apache)](https://www.apache.org/licenses/LICENSE-2.0)
+[![GitHub Actions Status](<https://img.shields.io/github/actions/workflow/status/snowdrop/migration-cli/mvn-build.yml?branch=main&logo=GitHub&style=for-the-badge>)](https://github.com/snowdrop/migration-cli/actions/workflows/mvn-build.yml)
+[![License](https://img.shields.io/github/license/snowdrop/migration-cli?style=for-the-badge&logo=apache)](https://www.apache.org/licenses/LICENSE-2.0)
 
 # Migration Tool project
 
@@ -191,14 +191,14 @@ Analyze a project for migration
   
 ...  
 
-mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
+mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
 ```
 
 > [!TIP]
 > To avoid to pass all the parameters to the command, you can use the "defaults" [application.properties](src/main/resources/application.properties) and just pass the path of the application to be analyzed
 
 ```shell
-mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app"
+mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app"
 ```
 
 > [!CAUTION]
@@ -212,7 +212,7 @@ During the execution of the command, you will be able to see within the terminal
     "name": "org.springframework.boot.autoconfigure.SpringBootApplication",
     "kind": 2.0,
     "location": {
-      "uri": "file:///Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/spring-boot-todo-app/src/main/java/com/todo/app/AppApplication.java",
+      "uri": "file:///Users/cmoullia/code/application-modernisation/migration-cli-parent/applications/spring-boot-todo-app/src/main/java/com/todo/app/AppApplication.java",
       "range": {
         "start": {
           "line": 3.0,
@@ -236,11 +236,11 @@ During the execution of the command, you will be able to see within the terminal
 │springboot-annotations-notfound-00000        │ No  │No symbols found                                                                                                                  │
 ├─────────────────────────────────────────────┼─────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
 │springboot-annotations-to-quarkus-00000      │ Yes │Found SpringBootApplication at line 6, char: 1 - 22                                                                               │
-│                                             │     │file:///Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/spring-boot-todo-app/src/main/java/com/to│
+│                                             │     │file:///Users/cmoullia/code/application-modernisation/migration-cli-parent/applications/spring-boot-todo-app/src/main/java/com/to│
 │                                             │     │do/app/AppApplication.java                                                                                                        │
 ├─────────────────────────────────────────────┼─────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
 │springboot-import-to-quarkus-00000           │ Yes │Found org.springframework.boot.autoconfigure.SpringBootApplication at line 4, char: 7 - 67                                        │
-│                                             │     │file:///Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/spring-boot-todo-app/src/main/java/com/to│
+│                                             │     │file:///Users/cmoullia/code/application-modernisation/migration-cli-parent/applications/spring-boot-todo-app/src/main/java/com/to│
 │                                             │     │do/app/AppApplication.java                                                                                                        │
 └─────────────────────────────────────────────┴─────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -250,7 +250,7 @@ During the execution of the command, you will be able to see within the terminal
 If you want to populate an analysis report (aka migration plan) then pass the parameter `-o json` to the command. A json file having as name: `analysing-report_yyyy-mm-dd_hh:mm.json` will be generated within the project scanned !
 
 ```shell
-mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -o json"
+mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -o json"
 ```
 
 ## Transform your application
@@ -277,12 +277,12 @@ Transform a java application
 To use openrewrite, execute the following command with or without the `dryRun` mode. If you use the `--dry-run` parameter, then openrewrite will generate `rewrite.patch` file(s) under the folder: `target/rewrite` of the analyzed project instead of changing the code directly !
 
 ```shell
-mvn -pl migration-tool quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app -p openrewrite --dry-run"
+mvn -pl migration-cli quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app -p openrewrite --dry-run"
 ```
 
 Log of the command executed 
 ```text
-2025-09-29 13:03:20,735 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) ✅ Starting transformation for project at: /Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/spring-boot-todo-app
+2025-09-29 13:03:20,735 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) ✅ Starting transformation for project at: /Users/cmoullia/code/application-modernisation/migration-cli-parent/applications/spring-boot-todo-app
 2025-09-29 13:03:20,739 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) 📄 Loading migration tasks from: analysing-report_2025-09-26_14:05.json
 2025-09-29 13:03:20,879 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) 📋 Found 3 migration tasks to process
 2025-09-29 13:03:20,880 INFO  [dev.sno.com.TransformCommand] (Quarkus Main Thread) 🔄 Processing migration task: springboot-annotations-notfound-00000
@@ -307,11 +307,11 @@ QUARKUS_LANGCHAIN4J_ANTHROPIC_CHAT_MODEL_MODEL_NAME=premium
 QUARKUS_LANGCHAIN4J_ANTHROPIC_BASE_URL=<THE_ANTHROPIC_API_SERVER>
 QUARKUS_LANGCHAIN4J_ANTHROPIC_API_KEY=<YOUR_ANTHROPIC_API_KEY>
 QUARKUS_LANGCHAIN4J_ANTHROPIC_TIMEOUT=60
-MIGRATION_TOOL=/PATH/TO/migration-tool/target/quarkus-app/quarkus-run.jar
+MIGRATION_TOOL=/PATH/TO/migration-cli/target/quarkus-app/quarkus-run.jar
 ```
 Source the `.env` file and don't forget to generate the `analyze/migration plan` report before to perform the transformation
 ```shell
-mvn -pl migration-tool quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -o json"
+mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -o json"
 ```
 
 As it is needed to interact with AI, then we cannot use the command `mvn quarkus:dev` but instead the uber jar file.
@@ -352,8 +352,8 @@ ANALYZER_RULES_PATH=cookbook/rules
 Next source it and execute the following java commands:
 
 ```shell
-java -jar migration-tool/target/quarkus-app/quarkus-run.jar analyze $(pwd)/applications/spring-boot-todo-app -o json
-java -jar migration-tool/target/quarkus-app/quarkus-run.jar transform $(pwd)/applications/spring-boot-todo-app -p openrewrite --dry-run
+java -jar migration-cli/target/quarkus-app/quarkus-run.jar analyze $(pwd)/applications/spring-boot-todo-app -o json
+java -jar migration-cli/target/quarkus-app/quarkus-run.jar transform $(pwd)/applications/spring-boot-todo-app -p openrewrite --dry-run
 ```
 
 If you want to test separately the openrewrite recipes, then use the [openrewrite maven plugin command](https://docs.openrewrite.org/reference/rewrite-maven-plugin) top of a spring boot project. Take care that your project is under git control as code will be transformed !
@@ -386,7 +386,7 @@ mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
 [WARNING]     dev.snowdrop.text.SearchText
 [WARNING]         org.openrewrite.text.Find: {find=public class TaskController}
 [WARNING] Patch file available:
-[WARNING]     /Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/spring-boot-todo-app/target/rewrite/rewrite.patch
+[WARNING]     /Users/cmoullia/code/application-modernisation/migration-cli-parent/applications/spring-boot-todo-app/target/rewrite/rewrite.patch
 [WARNING] Estimate time saved: 40m
 [WARNING] Run 'mvn rewrite:run' to apply the recipes.  
 ```

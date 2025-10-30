@@ -7,8 +7,7 @@ import org.openrewrite.internal.PropertyPlaceholderHelper;
 import java.util.function.UnaryOperator;
 
 public class Interpolator {
-    public static final PropertyPlaceholderHelper propertyPlaceholders = new PropertyPlaceholderHelper(
-        "${", "}", null);
+    public static final PropertyPlaceholderHelper propertyPlaceholders = new PropertyPlaceholderHelper("${", "}", null);
 
     public static final UnaryOperator<String> propertyResolver = key -> {
         String property = System.getProperty(key);
@@ -22,50 +21,50 @@ public class Interpolator {
     };
 
     public MavenSettings interpolate(MavenSettings mavenSettings) {
-        return new MavenSettings(
-            interpolate(mavenSettings.localRepository),
-            mavenSettings.profiles,
-            interpolate(mavenSettings.activeProfiles),
-            interpolate(mavenSettings.mirrors),
-            interpolate(mavenSettings.servers));
+        return new MavenSettings(interpolate(mavenSettings.localRepository), mavenSettings.profiles,
+                interpolate(mavenSettings.activeProfiles), interpolate(mavenSettings.mirrors),
+                interpolate(mavenSettings.servers));
     }
 
-    public MavenSettings.ActiveProfiles interpolate( MavenSettings.ActiveProfiles activeProfiles) {
-        if (activeProfiles == null) return null;
+    public MavenSettings.ActiveProfiles interpolate(MavenSettings.ActiveProfiles activeProfiles) {
+        if (activeProfiles == null)
+            return null;
         return new MavenSettings.ActiveProfiles(ListUtils.map(activeProfiles.getActiveProfiles(), this::interpolate));
     }
 
     public MavenSettings.Mirrors interpolate(MavenSettings.Mirrors mirrors) {
-        if (mirrors == null) return null;
+        if (mirrors == null)
+            return null;
         return new MavenSettings.Mirrors(ListUtils.map(mirrors.getMirrors(), this::interpolate));
     }
 
     public MavenSettings.Mirror interpolate(MavenSettings.Mirror mirror) {
-        return new MavenSettings.Mirror(interpolate(mirror.id), interpolate(mirror.url), interpolate(mirror.getMirrorOf()), mirror.releases, mirror.snapshots);
+        return new MavenSettings.Mirror(interpolate(mirror.id), interpolate(mirror.url),
+                interpolate(mirror.getMirrorOf()), mirror.releases, mirror.snapshots);
     }
 
-    public MavenSettings.Servers interpolate( MavenSettings.Servers servers) {
-        if (servers == null) return null;
+    public MavenSettings.Servers interpolate(MavenSettings.Servers servers) {
+        if (servers == null)
+            return null;
         return new MavenSettings.Servers(ListUtils.map(servers.getServers(), this::interpolate));
     }
 
-    public  MavenSettings.ServerConfiguration interpolate( MavenSettings.ServerConfiguration configuration) {
+    public MavenSettings.ServerConfiguration interpolate(MavenSettings.ServerConfiguration configuration) {
         if (configuration == null) {
             return null;
         }
-        return new MavenSettings.ServerConfiguration(
-            ListUtils.map(configuration.httpHeaders, this::interpolate),
-            configuration.timeout
-        );
+        return new MavenSettings.ServerConfiguration(ListUtils.map(configuration.httpHeaders, this::interpolate),
+                configuration.timeout);
     }
 
     public MavenSettings.HttpHeader interpolate(MavenSettings.HttpHeader httpHeader) {
-        return new MavenSettings.HttpHeader(interpolate(httpHeader.getName()), interpolate(httpHeader.getValue()), interpolate(httpHeader.getProperty()));
+        return new MavenSettings.HttpHeader(interpolate(httpHeader.getName()), interpolate(httpHeader.getValue()),
+                interpolate(httpHeader.getProperty()));
     }
 
     public MavenSettings.Server interpolate(MavenSettings.Server server) {
-        return new MavenSettings.Server(interpolate(server.id), interpolate(server.username), interpolate(server.password),
-            interpolate(server.configuration));
+        return new MavenSettings.Server(interpolate(server.id), interpolate(server.username),
+                interpolate(server.password), interpolate(server.configuration));
     }
 
     public @Nullable String interpolate(@Nullable String s) {

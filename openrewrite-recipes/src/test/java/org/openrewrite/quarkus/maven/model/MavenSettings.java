@@ -56,8 +56,7 @@ public class MavenSettings {
 
     @JsonCreator
     public MavenSettings(@Nullable String localRepository, MavenSettings.Profiles profiles,
-                         MavenSettings.ActiveProfiles activeProfiles, MavenSettings.Mirrors mirrors,
-                         MavenSettings.Servers servers) {
+            MavenSettings.ActiveProfiles activeProfiles, MavenSettings.Mirrors mirrors, MavenSettings.Servers servers) {
         this.localRepository = localRepository;
         this.profiles = profiles;
         this.activeProfiles = activeProfiles;
@@ -67,8 +66,8 @@ public class MavenSettings {
 
     public static MavenSettings parse(Parser.Input source, ExecutionContext ctx) {
         try {
-            MavenSettings settings = new MavenSettings.Interpolator().interpolate(
-                MavenXmlMapper.readMapper().readValue(source.getSource(ctx), MavenSettings.class));
+            MavenSettings settings = new MavenSettings.Interpolator()
+                    .interpolate(MavenXmlMapper.readMapper().readValue(source.getSource(ctx), MavenSettings.class));
             settings.maybeDecryptPasswords(ctx);
             return settings;
         } catch (IOException e) {
@@ -95,12 +94,11 @@ public class MavenSettings {
     }
 
     public static @Nullable MavenSettings readMavenSettingsFromDisk(ExecutionContext ctx) {
-        final Optional<MavenSettings> userSettings = Optional.of(userSettingsPath())
-            .filter(MavenSettings::exists)
-            .map(path -> parse(path, ctx));
+        final Optional<MavenSettings> userSettings = Optional.of(userSettingsPath()).filter(MavenSettings::exists)
+                .map(path -> parse(path, ctx));
         final MavenSettings installSettings = findMavenHomeSettings().map(path -> parse(path, ctx)).orElse(null);
         MavenSettings settings = userSettings.map(mavenSettings -> mavenSettings.merge(installSettings))
-            .orElse(installSettings);
+                .orElse(installSettings);
 
         if (settings != null) {
             settings.maybeDecryptPasswords(ctx);
@@ -134,6 +132,7 @@ public class MavenSettings {
 
     /**
      * @return True property `org.openrewrite.test.readMavenSettingsFromDisk` is true, false otherwise.
+     *
      * @deprecated The concept of property `org.openrewrite.test.readMavenSettingsFromDisk` is no longer in use.
      */
     @Deprecated
@@ -167,13 +166,13 @@ public class MavenSettings {
     }
 
     public MavenSettings merge(@Nullable MavenSettings installSettings) {
-        return installSettings == null ? this : new MavenSettings(
-            localRepository == null ? installSettings.localRepository : localRepository,
-            profiles == null ? installSettings.profiles : profiles.merge(installSettings.profiles),
-            activeProfiles == null ? installSettings.activeProfiles : activeProfiles.merge(installSettings.activeProfiles),
-            mirrors == null ? installSettings.mirrors : mirrors.merge(installSettings.mirrors),
-            servers == null ? installSettings.servers : servers.merge(installSettings.servers)
-        );
+        return installSettings == null ? this
+                : new MavenSettings(localRepository == null ? installSettings.localRepository : localRepository,
+                        profiles == null ? installSettings.profiles : profiles.merge(installSettings.profiles),
+                        activeProfiles == null ? installSettings.activeProfiles
+                                : activeProfiles.merge(installSettings.activeProfiles),
+                        mirrors == null ? installSettings.mirrors : mirrors.merge(installSettings.mirrors),
+                        servers == null ? installSettings.servers : servers.merge(installSettings.servers));
     }
 
     public List<RawRepositories.Repository> getActiveRepositories(Iterable<String> activeProfiles) {
@@ -181,8 +180,8 @@ public class MavenSettings {
 
         if (profiles != null) {
             for (MavenSettings.Profile profile : profiles.getProfiles()) {
-                if (profile.isActive(activeProfiles) || (this.activeProfiles != null &&
-                    profile.isActive(this.activeProfiles.getActiveProfiles()))) {
+                if (profile.isActive(activeProfiles)
+                        || (this.activeProfiles != null && profile.isActive(this.activeProfiles.getActiveProfiles()))) {
                     if (profile.repositories != null) {
                         for (RawRepositories.Repository repository : profile.repositories.getRepositories()) {
                             activeRepositories.put(repository.getId(), repository);
@@ -200,7 +199,8 @@ public class MavenSettings {
             return MAVEN_LOCAL_DEFAULT;
         }
         if (mavenLocal == null) {
-            mavenLocal = MavenRepository.builder().id("local").uri(asUriString(localRepository)).knownToExist(true).build();
+            mavenLocal = MavenRepository.builder().id("local").uri(asUriString(localRepository)).knownToExist(true)
+                    .build();
         }
         return mavenLocal;
     }
@@ -210,12 +210,11 @@ public class MavenSettings {
     }
 
     /**
-     * Resolve all properties EXCEPT in the profiles section, which can be affected by
-     * the POM using the settings.
+     * Resolve all properties EXCEPT in the profiles section, which can be affected by the POM using the settings.
      */
     private static class Interpolator {
-        private static final PropertyPlaceholderHelper propertyPlaceholders = new PropertyPlaceholderHelper(
-            "${", "}", null);
+        private static final PropertyPlaceholderHelper propertyPlaceholders = new PropertyPlaceholderHelper("${", "}",
+                null);
 
         private static final UnaryOperator<String> propertyResolver = key -> {
             String property = System.getProperty(key);
@@ -229,30 +228,32 @@ public class MavenSettings {
         };
 
         public MavenSettings interpolate(MavenSettings mavenSettings) {
-            return new MavenSettings(
-                interpolate(mavenSettings.localRepository),
-                mavenSettings.profiles,
-                interpolate(mavenSettings.activeProfiles),
-                interpolate(mavenSettings.mirrors),
-                interpolate(mavenSettings.servers));
+            return new MavenSettings(interpolate(mavenSettings.localRepository), mavenSettings.profiles,
+                    interpolate(mavenSettings.activeProfiles), interpolate(mavenSettings.mirrors),
+                    interpolate(mavenSettings.servers));
         }
 
         private MavenSettings.ActiveProfiles interpolate(MavenSettings.ActiveProfiles activeProfiles) {
-            if (activeProfiles == null) return null;
-            return new MavenSettings.ActiveProfiles(ListUtils.map(activeProfiles.getActiveProfiles(), this::interpolate));
+            if (activeProfiles == null)
+                return null;
+            return new MavenSettings.ActiveProfiles(
+                    ListUtils.map(activeProfiles.getActiveProfiles(), this::interpolate));
         }
 
         private MavenSettings.Mirrors interpolate(MavenSettings.Mirrors mirrors) {
-            if (mirrors == null) return null;
+            if (mirrors == null)
+                return null;
             return new MavenSettings.Mirrors(ListUtils.map(mirrors.getMirrors(), this::interpolate));
         }
 
         private MavenSettings.Mirror interpolate(MavenSettings.Mirror mirror) {
-            return new MavenSettings.Mirror(interpolate(mirror.id), interpolate(mirror.url), interpolate(mirror.getMirrorOf()), mirror.releases, mirror.snapshots);
+            return new MavenSettings.Mirror(interpolate(mirror.id), interpolate(mirror.url),
+                    interpolate(mirror.getMirrorOf()), mirror.releases, mirror.snapshots);
         }
 
         private MavenSettings.Servers interpolate(MavenSettings.Servers servers) {
-            if (servers == null) return null;
+            if (servers == null)
+                return null;
             return new MavenSettings.Servers(ListUtils.map(servers.getServers(), this::interpolate));
         }
 
@@ -260,19 +261,18 @@ public class MavenSettings {
             if (configuration == null) {
                 return null;
             }
-            return new MavenSettings.ServerConfiguration(
-                ListUtils.map(configuration.httpHeaders, this::interpolate),
-                configuration.timeout
-            );
+            return new MavenSettings.ServerConfiguration(ListUtils.map(configuration.httpHeaders, this::interpolate),
+                    configuration.timeout);
         }
 
         private MavenSettings.HttpHeader interpolate(MavenSettings.HttpHeader httpHeader) {
-            return new MavenSettings.HttpHeader(interpolate(httpHeader.getName()), interpolate(httpHeader.getValue()), interpolate(httpHeader.getProperty()));
+            return new MavenSettings.HttpHeader(interpolate(httpHeader.getName()), interpolate(httpHeader.getValue()),
+                    interpolate(httpHeader.getProperty()));
         }
 
         private MavenSettings.Server interpolate(MavenSettings.Server server) {
-            return new MavenSettings.Server(interpolate(server.id), interpolate(server.username), interpolate(server.password),
-                interpolate(server.configuration));
+            return new MavenSettings.Server(interpolate(server.id), interpolate(server.username),
+                    interpolate(server.password), interpolate(server.configuration));
         }
 
         private @Nullable String interpolate(@Nullable String s) {
@@ -312,7 +312,7 @@ public class MavenSettings {
         @JacksonXmlElementWrapper(useWrapping = false)
         List<String> activeProfiles = emptyList();
 
-        public MavenSettings.ActiveProfiles merge( MavenSettings.ActiveProfiles activeProfiles) {
+        public MavenSettings.ActiveProfiles merge(MavenSettings.ActiveProfiles activeProfiles) {
             if (activeProfiles == null) {
                 return new MavenSettings.ActiveProfiles(new ArrayList<>(this.activeProfiles));
             }
@@ -359,7 +359,7 @@ public class MavenSettings {
         @JacksonXmlElementWrapper(useWrapping = false)
         List<MavenSettings.Mirror> mirrors = emptyList();
 
-        public MavenSettings.Mirrors merge( MavenSettings.Mirrors mirrors) {
+        public MavenSettings.Mirrors merge(MavenSettings.Mirrors mirrors) {
             final Map<String, MavenSettings.Mirror> merged = new LinkedHashMap<>();
             for (MavenSettings.Mirror mirror : this.mirrors) {
                 merged.put(mirror.id, mirror);
@@ -401,7 +401,7 @@ public class MavenSettings {
         @With
         List<Server> servers = emptyList();
 
-        public Servers merge( Servers servers) {
+        public Servers merge(Servers servers) {
             final Map<String, Server> merged = new LinkedHashMap<>();
             for (Server server : this.servers) {
                 merged.put(server.id, server);
@@ -431,8 +431,8 @@ public class MavenSettings {
     @With
     @JsonIgnoreProperties("httpHeaders")
     public static class ServerConfiguration {
-        //@JacksonXmlProperty(localName = "property")
-        //@JacksonXmlElementWrapper(localName = "httpHeaders", useWrapping = true)
+        // @JacksonXmlProperty(localName = "property")
+        // @JacksonXmlElementWrapper(localName = "httpHeaders", useWrapping = true)
         // wrapping is disabled by default on MavenXmlMapper
 
         @JacksonXmlProperty(localName = "property")
