@@ -42,7 +42,7 @@ public class ResultsService {
             String sourceToTarget = String.format("%s -> %s", source, target);
 
             if (queryResults.isEmpty()) {
-                tableData.add(new String[]{ruleId, sourceToTarget, hasQueryResults, "No match found"});
+                tableData.add(new String[] { ruleId, sourceToTarget, hasQueryResults, "No match found" });
             } else {
                 // Process ALL results, not just the first one
                 StringBuilder allResultsDetails = new StringBuilder();
@@ -67,7 +67,7 @@ public class ResultsService {
                     }
                 }
 
-                tableData.add(new String[]{ruleId, sourceToTarget, hasQueryResults, allResultsDetails.toString()});
+                tableData.add(new String[] { ruleId, sourceToTarget, hasQueryResults, allResultsDetails.toString() });
             }
         }
 
@@ -75,12 +75,18 @@ public class ResultsService {
         tableData.forEach(row -> System.out.println(Arrays.toString(row)));
 
         System.out.println("\n=== Code Analysis Results ===");
-        String asciiTable = AsciiTable.builder().styler(customizeStyle()).data(tableData, Arrays.asList(
-            new Column().header("Rule ID").headerAlign(HorizontalAlign.LEFT).dataAlign(HorizontalAlign.LEFT).with(r -> r[0]),
-            new Column().header("Source to Target").headerAlign(HorizontalAlign.LEFT).dataAlign(HorizontalAlign.LEFT).with(r -> r[1]),
-            new Column().header("Match").headerAlign(HorizontalAlign.CENTER).dataAlign(HorizontalAlign.CENTER).with(r -> r[2]),
-            new Column().header("Information Details").headerAlign(HorizontalAlign.LEFT).maxWidth(120).dataAlign(HorizontalAlign.LEFT).with(r -> r[3])
-        )).asString();
+        String asciiTable = AsciiTable.builder().styler(customizeStyle())
+                .data(tableData,
+                        Arrays.asList(
+                                new Column().header("Rule ID").headerAlign(HorizontalAlign.LEFT)
+                                        .dataAlign(HorizontalAlign.LEFT).with(r -> r[0]),
+                                new Column().header("Source to Target").headerAlign(HorizontalAlign.LEFT)
+                                        .dataAlign(HorizontalAlign.LEFT).with(r -> r[1]),
+                                new Column().header("Match").headerAlign(HorizontalAlign.CENTER)
+                                        .dataAlign(HorizontalAlign.CENTER).with(r -> r[2]),
+                                new Column().header("Information Details").headerAlign(HorizontalAlign.LEFT)
+                                        .maxWidth(120).dataAlign(HorizontalAlign.LEFT).with(r -> r[3])))
+                .asString();
         System.out.println(asciiTable);
     }
 
@@ -89,15 +95,13 @@ public class ResultsService {
      * <p>
      * ESC ]8;\nLINK ST TEXT ESC ]8;\nST
      * <p>
-     * ESC is the ESCAPE character
-     * ST is the String terminator
+     * ESC is the ESCAPE character ST is the String terminator
      * <p>
-     * Example of commands
-     * printf '\u001B]8;;https://google.com\u001B\\Click Me\u001B]8;;\u001B\\ \n'
+     * Example of commands printf '\u001B]8;;https://google.com\u001B\\Click Me\u001B]8;;\u001B\\ \n'
      */
     public static String createLink(String url, String text) {
-        String ESC_CHAR = "\u001B";    // ESCAPE character
-        String ST = "\u001B\\";        // String Terminator
+        String ESC_CHAR = "\u001B"; // ESCAPE character
+        String ST = "\u001B\\"; // String Terminator
         String HYPERLINK_CMD = "]8;;"; // OS command to crate a hyperlink
         String OSC8_START = ESC_CHAR + HYPERLINK_CMD + url + ST;
         String OSC8_END = ESC_CHAR + HYPERLINK_CMD + ST;
@@ -111,14 +115,13 @@ public class ResultsService {
                 if (col != 0) {
                     return data;
                 }
-                return data.stream()
-                    .map(line -> {
-                        if (col == 0) {
-                            return createLink(String.format(RULE_REPO_URL, line.trim()), line);
-                        } else {
-                            return line;
-                        }
-                    }).collect(Collectors.toList());
+                return data.stream().map(line -> {
+                    if (col == 0) {
+                        return createLink(String.format(RULE_REPO_URL, line.trim()), line);
+                    } else {
+                        return line;
+                    }
+                }).collect(Collectors.toList());
             }
 
             @Override
@@ -141,37 +144,23 @@ public class ResultsService {
                 String patternSymbol = lineAndDetails.length > 1 ? lineAndDetails[1] : "N/A";
                 String type = lineAndDetails.length > 2 ? lineAndDetails[2] : "N/A";
 
-                return String.format("File: %s\nLine: %s\nPattern: %s\nType: %s\nMatch ID: %s",
-                    path,
-                    lineNumber,
-                    patternSymbol,
-                    type,
-                    rewrite.matchId()
-                );
+                return String.format("File: %s\nLine: %s\nPattern: %s\nType: %s\nMatch ID: %s", path, lineNumber,
+                        patternSymbol, type, rewrite.matchId());
             } catch (Exception e) {
                 // Fallback if parsing fails
-                return String.format("Rewrite match: %s (ID: %s)",
-                    rewrite.name(),
-                    rewrite.matchId()
-                );
+                return String.format("Rewrite match: %s (ID: %s)", rewrite.name(), rewrite.matchId());
             }
         } else {
             // Fallback for unexpected format
-            return String.format("Rewrite match: %s (ID: %s)",
-                rewrite.name(),
-                rewrite.matchId()
-            );
+            return String.format("Rewrite match: %s (ID: %s)", rewrite.name(), rewrite.matchId());
         }
     }
 
     private static String formatSymbolInformation(SymbolInformation si) {
-        return String.format("Found %s at line %s, char: %s - %s",
-            si.getName(),
-            si.getLocation().getRange().getStart().getLine() + 1,
-            si.getLocation().getRange().getStart().getCharacter(),
-            si.getLocation().getRange().getEnd().getCharacter()
-        );
+        return String.format("Found %s at line %s, char: %s - %s", si.getName(),
+                si.getLocation().getRange().getStart().getLine() + 1,
+                si.getLocation().getRange().getStart().getCharacter(),
+                si.getLocation().getRange().getEnd().getCharacter());
     }
-
 
 }
