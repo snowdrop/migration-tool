@@ -35,6 +35,14 @@
             <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-templating</artifactId>
         </dependency>
+
+        <!-- Spring Boot dependency need by Rewrite test and java parser -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>${spring-boot.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <profiles>
         <profile>

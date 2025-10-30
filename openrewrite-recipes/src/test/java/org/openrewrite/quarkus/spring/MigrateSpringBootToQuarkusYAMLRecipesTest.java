@@ -23,7 +23,8 @@ public class MigrateSpringBootToQuarkusYAMLRecipesTest implements RewriteTest {
         rewriteRun(s -> s
                 .recipeFromResource("/META-INF/rewrite/spring-boot-to-quarkus.yml",
                         "dev.snowdrop.openrewrite.recipe.spring.SpringBootToQuarkus")
-                .parser((Parser.Builder) JavaParser.fromJavaVersion().classpath("spring-context", "spring-boot")
+                .parser((Parser.Builder) JavaParser.fromJavaVersion()
+                        .classpath("spring-context", "spring-boot", "spring-boot-autoconfigure")
                         .logCompilationWarningsAndErrors(true))
                 .cycles(1).expectedCyclesThatMakeChanges(1), java(
                         // Before
