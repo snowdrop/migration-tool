@@ -119,6 +119,7 @@ The poc has been designed using the following technology:
 - [Quarkus and Picocli](https://quarkus.io/guides/picocli) to manage the CLI part and commands 
 - [konveyor jdt language server](https://github.com/konveyor/java-analyzer-bundle) to scan the java files to search about using the rule `when` condition.
 - [Openrewrite recipe](https://docs.openrewrite.org/concepts-and-explanations/recipes) to execute using the `maven rewrite` goal the transformation as defined part of the rule's instructions
+- [Antlr](https://www.antlr.org/) as parser tool to generate the code for the new Query Simpler language to be used to `Match` conditions
 - The different applications: `jdt-ls server`, `mvn command` are executed as OS processes using Java `ProcessBuilder`.
 
 > [!IMPORTANT]
@@ -134,7 +135,6 @@ First git clone this project and compile it.
 
 ```shell
 mvn clean install -DskipTests
-
 ```
 
 ## Konveyor jdt-ls
@@ -177,8 +177,9 @@ Commands:
 To execute the command using the Quarkus Picocli CLI able to scan, analyze and generate the migration plan report (optional), execute this command 
 ```shell
 Usage: hal analyze [-v] [--jdt-ls-path=<jdtLsPath>]
-                             [--jdt-workspace=<jdtWorkspace>] [-r=<rulesPath>]
-                             <appPath>
+                   [--jdt-workspace=<jdtWorkspace>] [-o=<output>]
+                   [-r=<rulesPath>] [-s=<source>] [--scanner=<scanner>]
+                   [-t=<target>] <appPath>
 Analyze a project for migration
       <appPath>             Path to the Java project to analyze
       --jdt-ls-path=<jdtLsPath>
@@ -186,8 +187,15 @@ Analyze a project for migration
       --jdt-workspace=<jdtWorkspace>
                             Path to JDT workspace directory (default: from
                               config)
+  -o, --output=<output>     Export the analysing result using the format.
+                              Values: json
   -r, --rules=<rulesPath>   Path to rules directory (default: from config)
+  -s, --source=<source>     Source technology to consider for analysis
+      --scanner=<scanner>   Scanner tool to be used to analyse the code: jdtls,
+                              openrewrite
+  -t, --target=<target>     Target technology to consider for analysis
   -v, --verbose             Enable verbose output
+
   
 ...  
 
@@ -201,8 +209,15 @@ mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app"
 ```
 
-> [!CAUTION]
-> If you experiment issues with the language server, you can check its log from this folder: `jdt/.jdt_workspace/.metadata/.log` !
+If you want to populate an analysis report (aka migration plan) then pass the parameter `-o json` to the command. A json file having as name: `analysing-report_yyyy-mm-dd_hh:mm.json` will be generated within the project scanned !
+
+```shell
+mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -o json"
+```
+
+#### jdt-ls scanner
+
+By default, the `analyze` client command will use as scanner tool: konveyor jdt-ls sever
 
 During the execution of the command, you will be able to see within the terminal the log reporting the JSON responses when condition(s) matches like also a summary table.
 ```text
@@ -244,13 +259,17 @@ During the execution of the command, you will be able to see within the terminal
 │                                             │     │do/app/AppApplication.java                                                                                                        │
 └─────────────────────────────────────────────┴─────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-
 ```
 
-If you want to populate an analysis report (aka migration plan) then pass the parameter `-o json` to the command. A json file having as name: `analysing-report_yyyy-mm-dd_hh:mm.json` will be generated within the project scanned !
+> [!CAUTION]
+> If you experiment issues with the language server, you can check its log from this folder: `jdt/.jdt_workspace/.metadata/.log` !
+
+#### Openrewrite scanner
+
+Alternatively, you can use [openrewrite](https://docs.openrewrite.org/) as technology to scan the resources: java, pom, xml, json, properties, etc 
 
 ```shell
-mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -o json"
+mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -o json --scanner openrewrite"
 ```
 
 ## Transform your application
@@ -307,7 +326,6 @@ QUARKUS_LANGCHAIN4J_ANTHROPIC_CHAT_MODEL_MODEL_NAME=premium
 QUARKUS_LANGCHAIN4J_ANTHROPIC_BASE_URL=<THE_ANTHROPIC_API_SERVER>
 QUARKUS_LANGCHAIN4J_ANTHROPIC_API_KEY=<YOUR_ANTHROPIC_API_KEY>
 QUARKUS_LANGCHAIN4J_ANTHROPIC_TIMEOUT=60
-MIGRATION_TOOL=/PATH/TO/migration-cli/target/quarkus-app/quarkus-run.jar
 ```
 Source the `.env` file and don't forget to generate the `analyze/migration plan` report before to perform the transformation
 ```shell
@@ -315,13 +333,12 @@ mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-s
 ```
 
 As it is needed to interact with AI, then we cannot use the command `mvn quarkus:dev` but instead the uber jar file.
-Execute the following command within a Spring Boot project to be analyzed and migrated
+Execute the following command within a Spring Boot project to be analyzed and migrated where you pass the path of the uber jar file of the client `/PATH/TO/migration-cli/target/quarkus-app/quarkus-run.jar`
 
 ```shell
 pushd applications/demo-spring-boot-todo-app
 
-export ANALYZER_APP_PATH=/PATH/TO/demo-spring-boot-todo-app
-java -jar $MIGRATION_TOOL transform $ANALYZER_APP_PATH -p ai
+java -jar <MIGRATION_CLI_JAR_PATH> transform . -p ai
 popd
 ```
 Check the console to see the tasks executed and AI's reponses:
@@ -349,11 +366,11 @@ ANALYZER_JDT_LS_PATH=jdt/konveyor-jdtls
 ANALYZER_JDT_WORKSPACE_PATH=jdt
 ANALYZER_RULES_PATH=cookbook/rules
 ```
-Next source it and execute the following java commands:
+Next source it and execute the following java commands within or outside the project to analyze/transform:
 
 ```shell
-java -jar migration-cli/target/quarkus-app/quarkus-run.jar analyze $(pwd)/applications/spring-boot-todo-app -o json
-java -jar migration-cli/target/quarkus-app/quarkus-run.jar transform $(pwd)/applications/spring-boot-todo-app -p openrewrite --dry-run
+java -jar <MIGRATION_CLI_JAR_PATH> analyze $(pwd)/applications/spring-boot-todo-app -o json
+java -jar <MIGRATION_CLI_JAR_PATH> transform $(pwd)/applications/spring-boot-todo-app -p openrewrite --dry-run
 ```
 
 If you want to test separately the openrewrite recipes, then use the [openrewrite maven plugin command](https://docs.openrewrite.org/reference/rewrite-maven-plugin) top of a spring boot project. Take care that your project is under git control as code will be transformed !
