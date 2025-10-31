@@ -15,6 +15,7 @@
  */
 package dev.snowdrop.openrewrite.maven.search;
 
+import dev.snowdrop.openrewrite.maven.table.DependencyReport;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.jspecify.annotations.Nullable;
@@ -53,7 +54,7 @@ public class FindDependency extends Recipe {
         return "Finds first-order dependency uses, i.e. dependencies that are defined directly in a project.";
     }
 
-    private transient MatchingReport report = new MatchingReport(this);
+    private transient DependencyReport report = new DependencyReport(this);
 
     @Override
     public TreeVisitor<?, ExecutionContext> getVisitor() {
@@ -68,8 +69,8 @@ public class FindDependency extends Recipe {
                     if (isDependencyTag(gav.groupId, gav.artifactId)
                             && versionIsValid(gav.version, null, () -> findDependency(tag))) {
                         report.insertRow(ctx,
-                                new MatchingReport.Row(matchId, MatchingReport.Type.POM,
-                                        MatchingReport.Symbol.DEPENDENCY,
+                                new DependencyReport.Row(matchId, DependencyReport.Type.POM,
+                                        DependencyReport.Symbol.DEPENDENCY,
                                         String.format("%s:%s:%s", gav.groupId, gav.artifactId, gav.version), "pom.xml" // TODO
                                                                                                                        // :
                                                                                                                        // How

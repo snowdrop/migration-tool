@@ -25,12 +25,14 @@ public class QueryToRecipeMapper {
                     )),
 
             "POM.DEPENDENCY",
-            new RecipeMappingConfig("org.openrewrite.maven.search.FindDependency", Map.of("groupId", "groupId", // 1 to
-                                                                                                                // 1
-                                                                                                                // translation
-                    "artifactId", "artifactId", // 1 to 1 translation
-                    "version", "version" // 1 to 1 translation
-            ),
+            new RecipeMappingConfig("dev.snowdrop.openrewrite.maven.search.FindDependency",
+                    Map.of("gavs", "gavs", "groupId", "groupId", // 1
+                            // to
+                            // 1
+                            // translation
+                            "artifactId", "artifactId", // 1 to 1 translation
+                            "version", "version" // 1 to 1 translation
+                    ),
                     // No additional parameters
                     Map.of()));
 
