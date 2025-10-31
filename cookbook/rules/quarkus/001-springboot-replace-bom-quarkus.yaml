@@ -9,10 +9,7 @@
   message: "SpringBoot to Quarkus."
   ruleID: 001-springboot-replace-bom-quarkus
   when:
-    #java.referenced:
-    #  location: ANNOTATION
-    #  pattern: org.springframework.boot.autoconfigure.SpringBootApplication
-    condition: java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
+    condition: pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')
   order: 1
   instructions:
     ai:
