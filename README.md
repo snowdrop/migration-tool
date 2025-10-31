@@ -320,8 +320,7 @@ Execute the following command within a Spring Boot project to be analyzed and mi
 ```shell
 pushd applications/demo-spring-boot-todo-app
 
-export ANALYZER_APP_PATH=/PATH/TO/demo-spring-boot-todo-app
-java -jar $MIGRATION_TOOL transform $ANALYZER_APP_PATH -p ai
+java -jar $MIGRATION_TOOL transform . -p ai
 popd
 ```
 Check the console to see the tasks executed and AI's reponses:
