@@ -41,7 +41,7 @@ public class ResultsService {
         String[] headers = { "Rule ID", "Source to Target", "Match", "Information Details" };
         List<Row> tableData = convertToRows(headers, rawTableData);
 
-        TemplateLocator templateLocator = getTemplateLocator();
+        TemplateLocator templateLocator = getTemplateLocator(".html");
         Engine engine = Engine.builder().addLocator(templateLocator).addDefaults()
                 .addValueResolver(new ReflectionValueResolver()).build();
 
@@ -70,8 +70,37 @@ public class ResultsService {
         }
     }
 
-    public static void exportAsCsv(Config config, List<String[]> tableData) {
-        logger.warnf("Not yet implemented");
+    public static void exportAsCsv(Config config, List<String[]> rawTableData) {
+        String[] headers = { "Rule ID", "Source to Target", "Match", "Information Details" };
+        List<Row> tableData = convertToRows(headers, rawTableData);
+
+        TemplateLocator templateLocator = getTemplateLocator(".csv");
+        Engine engine = Engine.builder().addLocator(templateLocator).addDefaults()
+                .addValueResolver(new ReflectionValueResolver()).build();
+
+        try {
+            Template reportTmpl = engine.getTemplate("report");
+            if (reportTmpl == null) {
+                logger.error("Could not load template: report");
+                return;
+            }
+
+            String report = reportTmpl.data("tableData", tableData).data("headers", headers).render();
+            logger.debugf(report);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm")
+                    .withLocale(Locale.getDefault());
+            String dateTimeformated = LocalDateTime.now().format(formatter);
+
+            String reportHtmlFileName = String.format("%s/analysing-%s-report_%s.csv", config.appPath(),
+                    config.scanner(), dateTimeformated);
+            Files.writeString(Paths.get(reportHtmlFileName), report);
+
+            logger.infof("==== CSV Report file exported to: file:///%s", reportHtmlFileName);
+        } catch (Exception e) {
+            logger.error("Error rendering template: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public static void showCsvTable(List<String[]> tableData) {
@@ -184,13 +213,13 @@ public class ResultsService {
         return resultRows;
     }
 
-    private static @NotNull TemplateLocator getTemplateLocator() {
+    private static @NotNull TemplateLocator getTemplateLocator(String suffix) {
         final String templateBasePath = "/templates/";
 
         TemplateLocator templateLocator = new TemplateLocator() {
             @Override
             public Optional<TemplateLocation> locate(String id) {
-                String fullPath = templateBasePath + id + ".html";
+                String fullPath = templateBasePath + id + suffix;
                 InputStream in = ResultsService.class.getResourceAsStream(fullPath);
 
                 if (in == null) {
