@@ -315,12 +315,12 @@ mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-s
 ```
 
 As it is needed to interact with AI, then we cannot use the command `mvn quarkus:dev` but instead the uber jar file.
-Execute the following command within a Spring Boot project to be analyzed and migrated
+Execute the following command within a Spring Boot project to be analyzed and migrated where you pass the path of the uber jar file of the client `/PATH/TO/migration-cli/target/quarkus-app/quarkus-run.jar`
 
 ```shell
 pushd applications/demo-spring-boot-todo-app
 
-java -jar $MIGRATION_TOOL transform . -p ai
+java -jar <MIGRATION_CLI_JAR_PATH> transform . -p ai
 popd
 ```
 Check the console to see the tasks executed and AI's reponses:
