@@ -1,76 +1,80 @@
 package dev.snowdrop.analyze.services;
 
-import com.github.freva.asciitable.*;
-import dev.snowdrop.analyze.model.MigrationTask;
-import dev.snowdrop.analyze.model.Rewrite;
-import org.eclipse.lsp4j.SymbolInformation;
+import com.github.freva.asciitable.AsciiTable;
+import com.github.freva.asciitable.Column;
+import com.github.freva.asciitable.HorizontalAlign;
+import com.github.freva.asciitable.Styler;
+import dev.snowdrop.analyze.Config;
+import dev.snowdrop.analyze.model.html.Cell;
+import dev.snowdrop.analyze.model.html.Row;
+import io.quarkus.qute.*;
+import org.eclipse.microprofile.config.ConfigProvider;
+import org.jboss.logging.Logger;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ResultsService {
+    private static final Logger logger = Logger.getLogger(ResultsService.class);
 
-    final static String RESET = "\u001B[m";
-    final static String GREEN = "\u001B[32m";
-    final static String YELLOW = "\u001B[33m";
+    private static final String RULE_REPO_URL_FORMAT;
 
-    // TODO: Move the RULE_REPO to a quarkus property
-    final static String RULE_REPO_URL = "https://github.com/snowdrop/migration-tool/blob/main/cookbook/rules/quarkus/%s.yaml";
+    static {
+        RULE_REPO_URL_FORMAT = ConfigProvider.getConfig().getValue("analyzer.rules.repo_url", String.class);
+    }
 
-    public static void showCsvTable(Map<String, MigrationTask> results, String source, String target) {
-        // Prepare data for the table
-        List<String[]> tableData = new ArrayList<>();
+    // This regex finds URLs starting with http://, https://, or file:///
+    // and captures them. It stops at whitespace or a '<' (to avoid our <br> tag).
+    private static final Pattern URL_PATTERN = Pattern.compile("(https?://[^\\s<]+|file:///[^\\s<]+)");
 
-        for (Map.Entry<String, MigrationTask> entry : results.entrySet()) {
-            String ruleId = entry.getKey();
-            MigrationTask aTask = entry.getValue();
+    public static void exportAsHtml(Config config, List<String[]> rawTableData) {
+        String[] headers = { "Rule ID", "Source to Target", "Match", "Information Details" };
+        List<Row> tableData = convertToRows(headers, rawTableData);
 
-            List<?> queryResults = new ArrayList<>();
+        TemplateLocator templateLocator = getTemplateLocator();
+        Engine engine = Engine.builder().addLocator(templateLocator).addDefaults()
+                .addValueResolver(new ReflectionValueResolver()).build();
 
-            if (aTask.getLsResults() != null && !aTask.getLsResults().isEmpty()) {
-                queryResults = aTask.getLsResults();
+        try {
+            Template reportTmpl = engine.getTemplate("report");
+            if (reportTmpl == null) {
+                logger.error("Could not load template: report");
+                return;
             }
 
-            if (aTask.getRewriteResults() != null && !aTask.getRewriteResults().isEmpty()) {
-                queryResults = aTask.getRewriteResults();
-            }
+            String report = reportTmpl.data("tableData", tableData).data("headers", headers).render();
+            logger.debugf(report);
 
-            String hasQueryResults = queryResults.isEmpty() ? "No" : "Yes";
-            String sourceToTarget = String.format("%s -> %s", source, target);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm")
+                    .withLocale(Locale.getDefault());
+            String dateTimeformated = LocalDateTime.now().format(formatter);
 
-            if (queryResults.isEmpty()) {
-                tableData.add(new String[] { ruleId, sourceToTarget, hasQueryResults, "No match found" });
-            } else {
-                // Process ALL results, not just the first one
-                StringBuilder allResultsDetails = new StringBuilder();
+            String reportHtmlFileName = String.format("%s/analysing-%s-report_%s.html", config.appPath(),
+                    config.scanner(), dateTimeformated);
+            Files.writeString(Paths.get(reportHtmlFileName), report);
 
-                for (int i = 0; i < queryResults.size(); i++) {
-                    Object result = queryResults.get(i);
-
-                    if (result instanceof SymbolInformation symbolInfo) {
-                        String symbolDetails = formatSymbolInformation(symbolInfo);
-                        allResultsDetails.append(symbolDetails).append("\n").append(symbolInfo.getLocation().getUri());
-                    } else if (result instanceof Rewrite rewrite) {
-                        String rewriteDetails = formatRewriteImproved(rewrite);
-                        allResultsDetails.append(rewriteDetails);
-                    } else {
-                        // Fallback for unknown types
-                        allResultsDetails.append("Unknown result type: ").append(result.getClass().getSimpleName());
-                    }
-
-                    // Add separator between multiple results (except for the last one)
-                    if (i < queryResults.size() - 1) {
-                        allResultsDetails.append("\n--- rewrite ---\n");
-                    }
-                }
-
-                tableData.add(new String[] { ruleId, sourceToTarget, hasQueryResults, allResultsDetails.toString() });
-            }
+            logger.infof("==== HTML Report file exported to: file:///%s", reportHtmlFileName);
+        } catch (Exception e) {
+            logger.error("Error rendering template: " + e.getMessage());
+            e.printStackTrace();
         }
+    }
 
-        // Sorts the List<String[]> by comparing the first element (row[0]) of each array which is the RuleID
-        tableData.sort(Comparator.comparing(row -> row[0]));
+    public static void exportAsCsv(Config config, List<String[]> tableData) {
+        logger.warnf("Not yet implemented");
+    }
 
+    public static void showCsvTable(List<String[]> tableData) {
         System.out.println("\n=== Code Analysis Results ===");
         String asciiTable = AsciiTable.builder().styler(customizeStyle())
                 .data(tableData,
@@ -106,6 +110,10 @@ public class ResultsService {
     }
 
     public static Styler customizeStyle() {
+        var RULE_REPO_URL = ConfigProvider.getConfig().getValue("analyzer.rules.repo_url", String.class);
+        String RESET = "\u001B[m";
+        String GREEN = "\u001B[32m";
+
         return new Styler() {
             @Override
             public List<String> styleCell(Column column, int row, int col, List<String> data) {
@@ -128,36 +136,87 @@ public class ResultsService {
         };
     }
 
-    private static String formatRewriteImproved(Rewrite rewrite) {
-        String name = rewrite.name();
+    /**
+     * Converts a raw List of String arrays into a structured List of Rows. * @param headers The header array (e.g.,
+     * ["RuleID", "Match", ...])
+     *
+     * @param tableData
+     *            The raw data rows (List<String[]>)
+     *
+     * @return A List<Row> ready for the Qute template
+     */
+    private static List<Row> convertToRows(String[] headers, List<String[]> tableData) {
 
-        // Parse the name format: parentFolderName/csvFileName:line_number|pattern.symbol|type
-        if (name.contains("/") && name.contains(":") && name.contains("|")) {
-            try {
-                String[] pathAndRest = name.split(":", 2);
-                String path = pathAndRest[0];
-                String[] lineAndDetails = pathAndRest[1].split("\\|", 3);
-                String lineNumber = lineAndDetails[0];
-                String patternSymbol = lineAndDetails.length > 1 ? lineAndDetails[1] : "N/A";
-                String type = lineAndDetails.length > 2 ? lineAndDetails[2] : "N/A";
+        boolean isRuleIdColumn = headers.length > 0 && "Rule ID".equalsIgnoreCase(headers[0]);
+        List<Row> resultRows = new ArrayList<>();
 
-                return String.format("File: %s\nLine: %s\nPattern: %s\nType: %s\nMatch ID: %s", path, lineNumber,
-                        patternSymbol, type, rewrite.matchId());
-            } catch (Exception e) {
-                // Fallback if parsing fails
-                return String.format("Rewrite match: %s (ID: %s)", rewrite.name(), rewrite.matchId());
+        for (String[] stringRow : tableData) {
+            List<Cell> cells = new ArrayList<>();
+
+            for (int i = 0; i < stringRow.length; i++) {
+                String rawCellText = stringRow[i];
+
+                // Handle the "RuleID" column
+                if (i == 0 && isRuleIdColumn && rawCellText != null && !rawCellText.isBlank()) {
+                    String url = String.format(RULE_REPO_URL_FORMAT, rawCellText);
+                    String displayText = rawCellText.replace("\n", "<br>");
+
+                    cells.add(new Cell(displayText, url));
+                } else {
+                    if (rawCellText == null) {
+                        cells.add(new Cell(""));
+                        continue;
+                    }
+
+                    // Replace newlines
+                    String displayText = rawCellText.replace("\n", "<br>");
+
+                    // Find and replace all embedded URIs
+                    String replacement = "<a href=\"$0\">$0</a>";
+                    displayText = URL_PATTERN.matcher(displayText).replaceAll(replacement);
+
+                    cells.add(new Cell(displayText));
+                }
             }
-        } else {
-            // Fallback for unexpected format
-            return String.format("Rewrite match: %s (ID: %s)", rewrite.name(), rewrite.matchId());
+            resultRows.add(new Row(cells));
         }
+
+        return resultRows;
     }
 
-    private static String formatSymbolInformation(SymbolInformation si) {
-        return String.format("Found %s at line %s, char: %s - %s", si.getName(),
-                si.getLocation().getRange().getStart().getLine() + 1,
-                si.getLocation().getRange().getStart().getCharacter(),
-                si.getLocation().getRange().getEnd().getCharacter());
-    }
+    private static @NotNull TemplateLocator getTemplateLocator() {
+        final String templateBasePath = "/templates/";
 
+        TemplateLocator templateLocator = new TemplateLocator() {
+            @Override
+            public Optional<TemplateLocation> locate(String id) {
+                String fullPath = templateBasePath + id + ".html";
+                InputStream in = ResultsService.class.getResourceAsStream(fullPath);
+
+                if (in == null) {
+                    System.err.println("Template not found: " + fullPath);
+                    return Optional.empty();
+                }
+
+                // Create a TemplateLocation that can read from the InputStream
+                return Optional.of(new TemplateLocation() {
+                    @Override
+                    public Reader read() {
+                        // Get a fresh InputStream for each read
+                        InputStream inputStream = ResultsService.class.getResourceAsStream(fullPath);
+                        if (inputStream == null) {
+                            throw new RuntimeException("Template not found: " + fullPath);
+                        }
+                        return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                    }
+
+                    @Override
+                    public Optional<Variant> getVariant() {
+                        return Optional.empty();
+                    }
+                });
+            }
+        };
+        return templateLocator;
+    }
 }
