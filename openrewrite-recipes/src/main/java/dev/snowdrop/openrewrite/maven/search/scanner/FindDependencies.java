@@ -15,7 +15,7 @@
  */
 package dev.snowdrop.openrewrite.maven.search.scanner;
 
-import dev.snowdrop.openrewrite.maven.search.MatchingReport;
+import dev.snowdrop.openrewrite.maven.table.DependencyReport;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.jspecify.annotations.Nullable;
@@ -58,7 +58,7 @@ public class FindDependencies extends ScanningRecipe<Set<Dependency>> {
         return "Finds first-order dependency uses, i.e. dependencies that are defined directly in a project.";
     }
 
-    private transient MatchingReport report = new MatchingReport(this);
+    private transient DependencyReport report = new DependencyReport(this);
 
     @Override
     public Set<Dependency> getInitialValue(ExecutionContext ctx) {
@@ -99,7 +99,7 @@ public class FindDependencies extends ScanningRecipe<Set<Dependency>> {
         System.out.printf("Dependencies set size: %s%n", dependencies.size());
         for (Dependency dep : dependencies) {
             report.insertRow(ctx,
-                    new MatchingReport.Row(matchId, MatchingReport.Type.POM, MatchingReport.Symbol.DEPENDENCY,
+                    new DependencyReport.Row(matchId, DependencyReport.Type.POM, DependencyReport.Symbol.DEPENDENCY,
                             String.format("%s:%s:%s", dep.getGroupId(), dep.getArtifactId(), dep.getVersion()),
                             "pom.xml" // TODO : How can we get the sourceFile ?
                     ));
