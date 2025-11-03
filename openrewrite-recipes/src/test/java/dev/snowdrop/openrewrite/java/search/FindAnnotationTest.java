@@ -9,9 +9,7 @@ public class FindAnnotationTest implements RewriteTest {
     @Test
     public void testFindAnnotation() {
 
-        FindAnnotations findAnnotation = new FindAnnotations(false);
-        findAnnotation.matchId = "match-deprecated-001";
-        findAnnotation.pattern = "@java.lang.Deprecated";
+        FindAnnotations findAnnotation = new FindAnnotations("match-deprecated-001", "@java.lang.Deprecated", false);
 
         rewriteRun(spec -> spec.dataTableAsCsv(AnnotationsReport.class, """
                 matchId,type,symbol,pattern,sourceFilePath,className

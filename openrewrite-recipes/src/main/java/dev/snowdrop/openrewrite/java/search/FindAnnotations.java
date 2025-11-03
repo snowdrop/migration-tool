@@ -22,7 +22,20 @@ import static java.util.stream.Collectors.toSet;
 
 @EqualsAndHashCode(callSuper = false)
 @Value
-public class FindAnnotations extends FindRecipe {
+public class FindAnnotations extends Recipe {
+
+    /**
+     * ID of the matching tool needed to reconcile the records where a match took place
+     */
+    @Option(displayName = "Match id", description = "ID of the matching tool needed to reconcile the records where a match took place", required = true)
+    public String matchId;
+
+    /**
+     * A symbol pattern, expressed as a method pattern to search about: annotation, field, method, etc. See
+     * {@link AnnotationMatcher} for syntax.
+     */
+    @Option(displayName = "Symbol pattern", description = "A symbol pattern, expressed as a method pattern to search about: annotation, field, method, etc.", example = "@java.lang.SuppressWarnings(\"deprecation\")")
+    public String pattern;
 
     @Option(displayName = "Match on meta annotations", description = "When enabled, matches on meta annotations of the annotation pattern.", required = false)
     @Nullable
