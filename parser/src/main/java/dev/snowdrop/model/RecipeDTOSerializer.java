@@ -8,25 +8,25 @@ import java.io.IOException;
 
 public class RecipeDTOSerializer extends StdSerializer<RecipeDTO> {
 
-    public RecipeDTOSerializer() {
-        this(null);
-    }
+	public RecipeDTOSerializer() {
+		this(null);
+	}
 
-    public RecipeDTOSerializer(Class<RecipeDTO> t) {
-        super(t);
-    }
+	public RecipeDTOSerializer(Class<RecipeDTO> t) {
+		super(t);
+	}
 
-    @Override
-    public void serialize(RecipeDTO dto, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        gen.writeStartObject();
-        gen.writeFieldName(dto.name());
+	@Override
+	public void serialize(RecipeDTO dto, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		gen.writeStartObject();
+		gen.writeFieldName(dto.name());
 
-        gen.writeStartObject();
-        for (Parameter p : dto.parameters()) {
-            gen.writeStringField(p.parameter(), p.value());
-        }
+		gen.writeStartObject();
+		for (Parameter p : dto.parameters()) {
+			gen.writeStringField(p.parameter(), p.value());
+		}
 
-        gen.writeEndObject();
-        gen.writeEndObject();
-    }
+		gen.writeEndObject();
+		gen.writeEndObject();
+	}
 }

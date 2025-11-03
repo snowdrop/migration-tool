@@ -10,22 +10,22 @@ import dev.snowdrop.transform.provider.model.ExecutionResult;
  */
 public interface MigrationProvider {
 
-    /**
-     * Gets the provider type identifier (ai, openrewrite, manual)
-     *
-     * @return the provider type string
-     */
-    String getProviderType();
+	/**
+	 * Gets the provider type identifier (ai, openrewrite, manual)
+	 *
+	 * @return the provider type string
+	 */
+	String getProviderType();
 
-    /**
-     * Executes the migration transformation for the given task
-     *
-     * @param task
-     *            the migration task containing the rule and instructions
-     * @param context
-     *            the execution context containing project path, settings, etc.
-     *
-     * @return the execution result with success status and details
-     */
-    ExecutionResult execute(MigrationTask task, ExecutionContext context);
+	/**
+	 * Executes the migration transformation for the given task
+	 *
+	 * @param task
+	 *            the migration task containing the rule and instructions
+	 * @param context
+	 *            the execution context containing project path, settings, etc.
+	 *
+	 * @return the execution result with success status and details
+	 */
+	ExecutionResult execute(MigrationTask task, ExecutionContext context);
 }

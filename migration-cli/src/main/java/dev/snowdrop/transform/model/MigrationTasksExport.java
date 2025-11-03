@@ -7,5 +7,5 @@ import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public record MigrationTasksExport(String title, String projectPath, String timestamp,
-        Map<String, MigrationTask> migrationTasks) {
+		Map<String, MigrationTask> migrationTasks) {
 }

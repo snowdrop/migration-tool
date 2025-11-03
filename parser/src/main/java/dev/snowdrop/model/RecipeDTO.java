@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public record RecipeDTO(UUID id, String name, List<Parameter> parameters) {
-    public RecipeDTO withId(UUID newId) {
-        return new RecipeDTO(newId, this.name, this.parameters);
-    }
+	public RecipeDTO withId(UUID newId) {
+		return new RecipeDTO(newId, this.name, this.parameters);
+	}
 }

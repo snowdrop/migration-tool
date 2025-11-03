@@ -18,19 +18,19 @@ import static java.util.Collections.emptyList;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Servers {
-    @JacksonXmlProperty(localName = "server")
-    @JacksonXmlElementWrapper(useWrapping = false)
-    @With
-    List<Server> servers = emptyList();
+	@JacksonXmlProperty(localName = "server")
+	@JacksonXmlElementWrapper(useWrapping = false)
+	@With
+	List<Server> servers = emptyList();
 
-    public Servers merge(Servers servers) {
-        final Map<String, Server> merged = new LinkedHashMap<>();
-        for (Server server : this.servers) {
-            merged.put(server.id, server);
-        }
-        if (servers != null) {
-            servers.getServers().forEach(server -> merged.putIfAbsent(server.getId(), server));
-        }
-        return new Servers(new ArrayList<>(merged.values()));
-    }
+	public Servers merge(Servers servers) {
+		final Map<String, Server> merged = new LinkedHashMap<>();
+		for (Server server : this.servers) {
+			merged.put(server.id, server);
+		}
+		if (servers != null) {
+			servers.getServers().forEach(server -> merged.putIfAbsent(server.getId(), server));
+		}
+		return new Servers(new ArrayList<>(merged.values()));
+	}
 }

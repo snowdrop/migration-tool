@@ -17,20 +17,20 @@ import java.util.List;
 @Data
 @With
 public class ServerConfiguration {
-    @JacksonXmlProperty(localName = "property")
-    @JacksonXmlElementWrapper(localName = "httpHeaders")
-    @Nullable
-    public List<HttpHeader> httpHeaders;
+	@JacksonXmlProperty(localName = "property")
+	@JacksonXmlElementWrapper(localName = "httpHeaders")
+	@Nullable
+	public List<HttpHeader> httpHeaders;
 
-    /**
-     * Timeout in milliseconds for reading connecting to and reading from the connection.
-     */
-    @Nullable
-    public Long timeout;
+	/**
+	 * Timeout in milliseconds for reading connecting to and reading from the connection.
+	 */
+	@Nullable
+	public Long timeout;
 
-    @JsonCreator
-    public ServerConfiguration(List<HttpHeader> httpHeaders, @JsonProperty("timeout") @Nullable Long timeout) {
-        this.httpHeaders = httpHeaders;
-        this.timeout = timeout;
-    }
+	@JsonCreator
+	public ServerConfiguration(List<HttpHeader> httpHeaders, @JsonProperty("timeout") @Nullable Long timeout) {
+		this.httpHeaders = httpHeaders;
+		this.timeout = timeout;
+	}
 }

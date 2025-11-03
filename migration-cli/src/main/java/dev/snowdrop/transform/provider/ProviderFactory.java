@@ -13,33 +13,33 @@ import java.util.Optional;
  */
 public class ProviderFactory {
 
-    private static final Map<String, MigrationProvider> providers = new HashMap<>();
+	private static final Map<String, MigrationProvider> providers = new HashMap<>();
 
-    static {
-        registerProvider(new OpenRewriteProvider());
-        registerProvider(new AiProvider());
-        registerProvider(new ManualProvider());
-    }
+	static {
+		registerProvider(new OpenRewriteProvider());
+		registerProvider(new AiProvider());
+		registerProvider(new ManualProvider());
+	}
 
-    /**
-     * Registers a provider with the factory.
-     *
-     * @param provider
-     *            the provider to register
-     */
-    public static void registerProvider(MigrationProvider provider) {
-        providers.put(provider.getProviderType(), provider);
-    }
+	/**
+	 * Registers a provider with the factory.
+	 *
+	 * @param provider
+	 *            the provider to register
+	 */
+	public static void registerProvider(MigrationProvider provider) {
+		providers.put(provider.getProviderType(), provider);
+	}
 
-    /**
-     * Gets a provider by type.
-     *
-     * @param providerType
-     *            the provider type (ai, openrewrite, manual)
-     *
-     * @return the provider if found, empty otherwise
-     */
-    public static Optional<MigrationProvider> getProvider(String providerType) {
-        return Optional.ofNullable(providers.get(providerType));
-    }
+	/**
+	 * Gets a provider by type.
+	 *
+	 * @param providerType
+	 *            the provider type (ai, openrewrite, manual)
+	 *
+	 * @return the provider if found, empty otherwise
+	 */
+	public static Optional<MigrationProvider> getProvider(String providerType) {
+		return Optional.ofNullable(providers.get(providerType));
+	}
 }
