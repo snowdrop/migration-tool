@@ -47,4 +47,15 @@ public class SimpleQueryTest extends AbstractQueryParser {
         Assert.assertTrue(queries.size() == 1);
         Assertions.assertTrue(queries.contains(expectedQuery));
     }
+
+    @Test
+    public void pomDependency() {
+        String annotationQuery = "pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')";
+        QueryVisitor visitor = parseQuery(annotationQuery);
+        Query expectedQuery = new Query("pom", "dependency", Map.of("gavs", "org.springframework.boot:spring-boot-starter-web"));
+
+        Set<Query> queries = visitor.getSimpleQueries();
+        Assert.assertTrue(queries.size() == 1);
+        Assertions.assertTrue(queries.contains(expectedQuery));
+    }
 }
