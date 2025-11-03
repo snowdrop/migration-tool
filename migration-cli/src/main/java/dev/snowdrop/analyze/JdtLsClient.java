@@ -243,10 +243,17 @@ public class JdtLsClient {
 
     public List<SymbolInformation> executeQueryCommand(Config config, Rule rule, Query q) {
 
+        String location = getLocationCode(q.symbol());
+        if (location == null || location.equals("0")) {
+            throw new IllegalStateException(
+                    "The language server's location code don't exist using the when condition of the rule: "
+                            + rule.ruleID());
+        }
+
         // Map the Query object with the RuleEntry parameters to be sent to the Language Server
         var paramsMap = Map.of("project", q.fileType().toLowerCase(), // This value should be java
-                "location", getLocationCode(q.symbol()), // The symbol should correspond to one of the value that LS
-                                                         // supports: annotation, etc
+                "location", location, // The symbol should correspond to one of the value that LS
+                                      // supports: annotation, etc
                 "query", q.keyValues().get("name"), // TODO: To be improved as we need a mapper able to extract the k=v
                                                     // and convert them to the pattern
                 "analysisMode", "source-only" // 2 modes are supported: source-only and full
@@ -255,7 +262,7 @@ public class JdtLsClient {
         List<Object> cmdArguments = List.of(paramsMap);
 
         if (process == null || !process.isAlive()) {
-            throw new IllegalStateException("JDT-LS process is not running");
+            throw new IllegalStateException("The jdt-ls server/process is not running");
         }
 
         try {

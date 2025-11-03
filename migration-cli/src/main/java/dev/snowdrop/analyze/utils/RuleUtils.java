@@ -32,7 +32,7 @@ public class RuleUtils {
         case "METHOD" -> "13";
         case "CLASS" -> "14";
         default -> {
-            logger.warnf("Unknown location type '{}', defaulting to 0", location);
+            logger.errorf("Unknown language server location type %s, defaulting to 0", location);
             yield "0";
         }
         };
