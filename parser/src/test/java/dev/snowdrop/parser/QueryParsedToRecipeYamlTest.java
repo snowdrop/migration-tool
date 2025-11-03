@@ -70,12 +70,13 @@ public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
 
     @Test
     public void queryWithAnd() {
-        String queryWithAnd = "java.annotation is (name='@SpringBootApplication') AND pom.dependency is (artifactId='quarkus-core', version='3.16.2')";
+        String queryWithAnd = "java.annotation is (name='@SpringBootApplication') AND pom.dependency is (gavs='io.quarkus:quarkus-core:3.16.2', groupId='io.quarkus', artifactId='quarkus-core', version='3.16.2')";
         QueryVisitor visitor = parseQuery(queryWithAnd);
 
         // Don't include simple quotes around the key or value
         Query queryA = new Query("java", "annotation", Map.of("name", "@SpringBootApplication"));
-        Query queryB = new Query("pom", "dependency", Map.of("artifactId", "quarkus-core", "version", "3.16.2"));
+        Query queryB = new Query("pom", "dependency", Map.of("gavs", "io.quarkus:quarkus-core:3.16.2", "groupId",
+                "io.quarkus", "artifactId", "quarkus-core", "version", "3.16.2"));
 
         Set<Query> queries = visitor.getAndQueries();
         var queryList = queries.stream().toList();
@@ -129,7 +130,9 @@ public class QueryParsedToRecipeYamlTest extends AbstractQueryParser {
                     .orElse(null);
 
             expectedYaml = String.format("""
-                    org.openrewrite.maven.search.FindDependency:
+                    dev.snowdrop.openrewrite.maven.search.FindDependency:
+                      gavs: "io.quarkus:quarkus-core:3.16.2"
+                      groupId: "io.quarkus"
                       artifactId: "quarkus-core"
                       version: "3.16.2"
                       matchId: "%s"
