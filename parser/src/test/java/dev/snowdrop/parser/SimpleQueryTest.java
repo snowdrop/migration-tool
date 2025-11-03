@@ -49,7 +49,7 @@ public class SimpleQueryTest extends AbstractQueryParser {
     }
 
     @Test
-    public void pomDependency() {
+    public void shouldParseAPomDependencyQuery() {
         String annotationQuery = "pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')";
         QueryVisitor visitor = parseQuery(annotationQuery);
         Query expectedQuery = new Query("pom", "dependency", Map.of("gavs", "org.springframework.boot:spring-boot-starter-web"));
