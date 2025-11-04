@@ -49,7 +49,7 @@ jobs:
           echo "✅ Created/switched to transform branch"
 
       - name: Upload built artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: built-migration-cli
           path: |
@@ -102,7 +102,7 @@ jobs:
           }
 
       - name: Upload jdtls analysis results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: jdtls-analysis-results
@@ -138,7 +138,7 @@ jobs:
           }
 
       - name: Upload openrewrite analysis results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: openrewrite-analysis-results
@@ -192,7 +192,7 @@ jobs:
           done
 
       - name: Upload analysis reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: e2e-analysis-results
           path: |
