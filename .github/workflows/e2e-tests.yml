@@ -70,7 +70,7 @@ jobs:
           java-version: 21
 
       - name: Download built artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: built-migration-cli
 
@@ -121,7 +121,7 @@ jobs:
           java-version: 21
 
       - name: Download built artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: built-migration-cli
 
@@ -151,18 +151,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download built artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: built-migration-cli
 
       - name: Download jdtls analysis results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: jdtls-analysis-results
         continue-on-error: true
 
       - name: Download openrewrite analysis results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: openrewrite-analysis-results
         continue-on-error: true
