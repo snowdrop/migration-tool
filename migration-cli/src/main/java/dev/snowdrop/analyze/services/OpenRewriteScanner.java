@@ -12,19 +12,18 @@ import java.util.Map;
 
 public class OpenRewriteScanner implements CodeScanner {
 	private final Config config;
-	private final RewriteService rewriteService;
 
-	public OpenRewriteScanner(Config config, RewriteService rewriteService) {
+	public OpenRewriteScanner(Config config) {
 		this.config = config;
-		this.rewriteService = rewriteService;
 	}
 
 	@Override
 	public Map<String, MigrationTask> analyze(List<Rule> rules) throws IOException {
 		Map<String, MigrationTask> tasks = new HashMap<>();
+		RewriteService rewriteService = new RewriteService(config);
 
 		for (Rule rule : rules) {
-			Map<String, List<Rewrite>> results = rewriteService.executeRewriteCmd(config, rule);
+			Map<String, List<Rewrite>> results = rewriteService.executeRewriteCmd(rule);
 			tasks.put(rule.ruleID(), new MigrationTask().withRule(rule).withRewriteResults(results.get(rule.ruleID()))
 					.withInstruction(rule.instructions()));
 		}

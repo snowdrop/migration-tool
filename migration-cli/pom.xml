@@ -28,10 +28,11 @@
             <version>${project.version}</version>
         </dependency>
 
-                <dependency>
-                    <groupId>io.quarkus</groupId>
-                    <artifactId>quarkus-picocli</artifactId>
-                </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-picocli</artifactId>
+        </dependency>
+
         <!-- Openrewrite -->
         <dependency>
             <groupId>org.openrewrite</groupId>
@@ -72,6 +73,11 @@
         <dependency>
             <groupId>org.eclipse.lsp4j</groupId>
             <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5-mockito</artifactId>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

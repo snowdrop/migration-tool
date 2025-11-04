@@ -16,10 +16,7 @@ public class ScannerFactory {
 				JdtLsClient client = new JdtLsClientBuilder().withConfig(config).build();
 				yield new JdtLsScanner(config, client);
 			}
-			case Scanner.OPENREWRITE -> {
-				RewriteService service = new RewriteService();
-				yield new OpenRewriteScanner(config, service);
-			}
+			case Scanner.OPENREWRITE -> new OpenRewriteScanner(config);
 			default -> throw new IllegalArgumentException("Unknown scanner: " + scannerType);
 		};
 	}
