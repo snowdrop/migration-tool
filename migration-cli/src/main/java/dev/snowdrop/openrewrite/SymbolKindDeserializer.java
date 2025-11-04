@@ -8,9 +8,9 @@ import org.eclipse.lsp4j.SymbolKind;
 import java.io.IOException;
 
 public class SymbolKindDeserializer extends JsonDeserializer<SymbolKind> {
-    @Override
-    public SymbolKind deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-        int kindValue = parser.getIntValue();
-        return SymbolKind.forValue(kindValue);
-    }
+	@Override
+	public SymbolKind deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+		int kindValue = parser.getIntValue();
+		return SymbolKind.forValue(kindValue);
+	}
 }

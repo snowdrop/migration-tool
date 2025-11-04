@@ -8,5 +8,5 @@ import java.nio.file.Path;
  * Context information for provider execution including project settings and configuration.
  */
 public record ExecutionContext(Path projectPath, boolean verbose, boolean dryRun, String provideType,
-        Assistant assistant, String openRewriteMavenPluginVersion, String compositeRecipeName) {
+		Assistant assistant, String openRewriteMavenPluginVersion, String compositeRecipeName) {
 }

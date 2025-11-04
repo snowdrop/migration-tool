@@ -37,95 +37,95 @@ import static java.util.stream.Collectors.toList;
 @EqualsAndHashCode(callSuper = false)
 public class CreateJavaClassFromTemplate extends ScanningRecipe<AtomicBoolean> {
 
-    @Option(displayName = "Template of the java class to be created", description = "The template of the java class to be created.")
-    String classTemplate;
+	@Option(displayName = "Template of the java class to be created", description = "The template of the java class to be created.")
+	String classTemplate;
 
-    @Option(displayName = "Source root", description = "The source root of the new class file.", example = "src/main/java")
-    String sourceRoot;
+	@Option(displayName = "Source root", description = "The source root of the new class file.", example = "src/main/java")
+	String sourceRoot;
 
-    @Option(displayName = "Package name", description = "The package of the new class.", example = "org.openrewrite.example")
-    String packageName;
+	@Option(displayName = "Package name", description = "The package of the new class.", example = "org.openrewrite.example")
+	String packageName;
 
-    @Option(displayName = "Modifier", description = "The class modifier.", valid = { "public", "private", "protected",
-            "package-private" }, example = "public")
-    String modifier;
+	@Option(displayName = "Modifier", description = "The class modifier.", valid = {"public", "private", "protected",
+			"package-private"}, example = "public")
+	String modifier;
 
-    @Option(displayName = "Class name", description = "File path of new file.", example = "ExampleClass")
-    String className;
+	@Option(displayName = "Class name", description = "File path of new file.", example = "ExampleClass")
+	String className;
 
-    @Option(displayName = "Overwrite existing file", description = "If there is an existing file, should it be overwritten.", required = false)
-    @Nullable
-    Boolean overwriteExisting;
+	@Option(displayName = "Overwrite existing file", description = "If there is an existing file, should it be overwritten.", required = false)
+	@Nullable
+	Boolean overwriteExisting;
 
-    @Option(displayName = "Relative directory path", description = "Directory path of new class.", required = false, example = "foo/bar")
-    @Nullable
-    String relativePath;
+	@Option(displayName = "Relative directory path", description = "Directory path of new class.", required = false, example = "foo/bar")
+	@Nullable
+	String relativePath;
 
-    @Override
-    public String getDisplayName() {
-        return "Create Java class";
-    }
+	@Override
+	public String getDisplayName() {
+		return "Create Java class";
+	}
 
-    @Override
-    public String getDescription() {
-        return "Create a new, empty Java class.";
-    }
+	@Override
+	public String getDescription() {
+		return "Create a new, empty Java class.";
+	}
 
-    @Override
-    public AtomicBoolean getInitialValue(ExecutionContext ctx) {
-        return new AtomicBoolean(true);
-    }
+	@Override
+	public AtomicBoolean getInitialValue(ExecutionContext ctx) {
+		return new AtomicBoolean(true);
+	}
 
-    @Override
-    public TreeVisitor<?, ExecutionContext> getScanner(AtomicBoolean shouldCreate) {
-        return new CreateFileVisitor(getSourcePath(), shouldCreate);
-    }
+	@Override
+	public TreeVisitor<?, ExecutionContext> getScanner(AtomicBoolean shouldCreate) {
+		return new CreateFileVisitor(getSourcePath(), shouldCreate);
+	}
 
-    @Override
-    public Collection<SourceFile> generate(AtomicBoolean shouldCreate, ExecutionContext ctx) {
-        if (shouldCreate.get()) {
-            return createEmptyClass().collect(toList());
-        }
-        return emptyList();
-    }
+	@Override
+	public Collection<SourceFile> generate(AtomicBoolean shouldCreate, ExecutionContext ctx) {
+		if (shouldCreate.get()) {
+			return createEmptyClass().collect(toList());
+		}
+		return emptyList();
+	}
 
-    @Override
-    public TreeVisitor<?, ExecutionContext> getVisitor(AtomicBoolean created) {
-        Path path = getSourcePath();
-        return new JavaIsoVisitor<ExecutionContext>() {
-            @Override
-            public J.CompilationUnit visitCompilationUnit(J.CompilationUnit cu, ExecutionContext ctx) {
-                if ((created.get() || Boolean.TRUE.equals(overwriteExisting)) && path.equals(cu.getSourcePath())) {
-                    Optional<SourceFile> sourceFile = createEmptyClass().findFirst();
-                    if (sourceFile.isPresent() && sourceFile.get() instanceof J.CompilationUnit) {
-                        J.CompilationUnit newCu = (J.CompilationUnit) sourceFile.get();
-                        return cu.withClasses(newCu.getClasses()).withSourcePath(path);
-                    }
-                }
+	@Override
+	public TreeVisitor<?, ExecutionContext> getVisitor(AtomicBoolean created) {
+		Path path = getSourcePath();
+		return new JavaIsoVisitor<ExecutionContext>() {
+			@Override
+			public J.CompilationUnit visitCompilationUnit(J.CompilationUnit cu, ExecutionContext ctx) {
+				if ((created.get() || Boolean.TRUE.equals(overwriteExisting)) && path.equals(cu.getSourcePath())) {
+					Optional<SourceFile> sourceFile = createEmptyClass().findFirst();
+					if (sourceFile.isPresent() && sourceFile.get() instanceof J.CompilationUnit) {
+						J.CompilationUnit newCu = (J.CompilationUnit) sourceFile.get();
+						return cu.withClasses(newCu.getClasses()).withSourcePath(path);
+					}
+				}
 
-                return cu;
-            }
-        };
-    }
+				return cu;
+			}
+		};
+	}
 
-    private Stream<SourceFile> createEmptyClass() {
-        String packageModifier = "package-private".equals(modifier) ? "" : modifier + " ";
-        return JavaParser.fromJavaVersion().build()
-                .parse(String.format(classTemplate, packageName, packageModifier, className))
-                .map(brandNewFile -> brandNewFile.withSourcePath(getSourcePath()));
-    }
+	private Stream<SourceFile> createEmptyClass() {
+		String packageModifier = "package-private".equals(modifier) ? "" : modifier + " ";
+		return JavaParser.fromJavaVersion().build()
+				.parse(String.format(classTemplate, packageName, packageModifier, className))
+				.map(brandNewFile -> brandNewFile.withSourcePath(getSourcePath()));
+	}
 
-    @SuppressWarnings("java:S1075")
-    private Path getSourcePath() {
-        String path = relativePath;
-        if (path == null) {
-            path = "";
-        }
+	@SuppressWarnings("java:S1075")
+	private Path getSourcePath() {
+		String path = relativePath;
+		if (path == null) {
+			path = "";
+		}
 
-        if (!path.isEmpty() && !path.endsWith("/")) {
-            path += "/";
-        }
+		if (!path.isEmpty() && !path.endsWith("/")) {
+			path += "/";
+		}
 
-        return Paths.get(String.format("%s%s/%s/%s.java", path, sourceRoot, packageName.replace('.', '/'), className));
-    }
+		return Paths.get(String.format("%s%s/%s/%s.java", path, sourceRoot, packageName.replace('.', '/'), className));
+	}
 }

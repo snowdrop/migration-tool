@@ -189,6 +189,9 @@
                 <groupId>net.revelc.code.formatter</groupId>
                 <artifactId>formatter-maven-plugin</artifactId>
                 <version>${formatter.plugin.version}</version>
+                <configuration>
+                    <configFile>${maven.multiModuleProjectDirectory}/formatter-config.xml</configFile>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

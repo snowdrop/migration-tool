@@ -13,11 +13,11 @@ import lombok.experimental.FieldDefaults;
 @JacksonXmlRootElement(localName = "settings")
 public class MavenSettings {
 
-    @With
-    public Servers servers;
+	@With
+	public Servers servers;
 
-    @JsonCreator
-    public MavenSettings(@JsonProperty("servers") Servers servers) {
-        this.servers = servers;
-    }
+	@JsonCreator
+	public MavenSettings(@JsonProperty("servers") Servers servers) {
+		this.servers = servers;
+	}
 }

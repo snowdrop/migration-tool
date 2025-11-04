@@ -7,81 +7,81 @@ import com.opencsv.bean.CsvBindByPosition;
  */
 public class CsvRecord {
 
-    @CsvBindByPosition(position = 0)
-    private String matchId;
+	@CsvBindByPosition(position = 0)
+	private String matchId;
 
-    @CsvBindByPosition(position = 1)
-    private String pattern;
+	@CsvBindByPosition(position = 1)
+	private String pattern;
 
-    @CsvBindByPosition(position = 2)
-    private String symbol;
+	@CsvBindByPosition(position = 2)
+	private String symbol;
 
-    @CsvBindByPosition(position = 3)
-    private String type;
+	@CsvBindByPosition(position = 3)
+	private String type;
 
-    // Additional fields can be added as needed
-    @CsvBindByPosition(position = 4)
-    private String additionalInfo1;
+	// Additional fields can be added as needed
+	@CsvBindByPosition(position = 4)
+	private String additionalInfo1;
 
-    @CsvBindByPosition(position = 5)
-    private String additionalInfo2;
+	@CsvBindByPosition(position = 5)
+	private String additionalInfo2;
 
-    // Default constructor
-    public CsvRecord() {
-    }
+	// Default constructor
+	public CsvRecord() {
+	}
 
-    // Getters and setters
-    public String getMatchId() {
-        return matchId;
-    }
+	// Getters and setters
+	public String getMatchId() {
+		return matchId;
+	}
 
-    public void setMatchId(String matchId) {
-        this.matchId = matchId;
-    }
+	public void setMatchId(String matchId) {
+		this.matchId = matchId;
+	}
 
-    public String getPattern() {
-        return pattern;
-    }
+	public String getPattern() {
+		return pattern;
+	}
 
-    public void setPattern(String pattern) {
-        this.pattern = pattern;
-    }
+	public void setPattern(String pattern) {
+		this.pattern = pattern;
+	}
 
-    public String getSymbol() {
-        return symbol;
-    }
+	public String getSymbol() {
+		return symbol;
+	}
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
+	}
 
-    public String getType() {
-        return type;
-    }
+	public String getType() {
+		return type;
+	}
 
-    public void setType(String type) {
-        this.type = type;
-    }
+	public void setType(String type) {
+		this.type = type;
+	}
 
-    public String getAdditionalInfo1() {
-        return additionalInfo1;
-    }
+	public String getAdditionalInfo1() {
+		return additionalInfo1;
+	}
 
-    public void setAdditionalInfo1(String additionalInfo1) {
-        this.additionalInfo1 = additionalInfo1;
-    }
+	public void setAdditionalInfo1(String additionalInfo1) {
+		this.additionalInfo1 = additionalInfo1;
+	}
 
-    public String getAdditionalInfo2() {
-        return additionalInfo2;
-    }
+	public String getAdditionalInfo2() {
+		return additionalInfo2;
+	}
 
-    public void setAdditionalInfo2(String additionalInfo2) {
-        this.additionalInfo2 = additionalInfo2;
-    }
+	public void setAdditionalInfo2(String additionalInfo2) {
+		this.additionalInfo2 = additionalInfo2;
+	}
 
-    @Override
-    public String toString() {
-        return "CsvRecord{" + "matchId='" + matchId + '\'' + ", pattern='" + pattern + '\'' + ", symbol='" + symbol
-                + '\'' + ", type='" + type + '\'' + '}';
-    }
+	@Override
+	public String toString() {
+		return "CsvRecord{" + "matchId='" + matchId + '\'' + ", pattern='" + pattern + '\'' + ", symbol='" + symbol
+				+ '\'' + ", type='" + type + '\'' + '}';
+	}
 }

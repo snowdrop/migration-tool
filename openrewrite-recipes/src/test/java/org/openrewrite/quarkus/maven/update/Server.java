@@ -11,18 +11,18 @@ import lombok.experimental.FieldDefaults;
 @Data
 @With
 public class Server {
-    public String id;
-    public String username;
-    public String password;
-    public ServerConfiguration configuration;
+	public String id;
+	public String username;
+	public String password;
+	public ServerConfiguration configuration;
 
-    @JsonCreator
-    public Server(@JsonProperty("id") String id, @JsonProperty("username") String username,
-            @JsonProperty("password") String password,
-            @JsonProperty("configuration") ServerConfiguration configuration) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.configuration = configuration;
-    }
+	@JsonCreator
+	public Server(@JsonProperty("id") String id, @JsonProperty("username") String username,
+			@JsonProperty("password") String password,
+			@JsonProperty("configuration") ServerConfiguration configuration) {
+		this.id = id;
+		this.username = username;
+		this.password = password;
+		this.configuration = configuration;
+	}
 }

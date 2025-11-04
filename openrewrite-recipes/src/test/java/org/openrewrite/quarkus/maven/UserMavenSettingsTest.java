@@ -29,50 +29,50 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class UserMavenSettingsTest {
 
-    private final MavenExecutionContextView ctx = MavenExecutionContextView
-            .view(new InMemoryExecutionContext((ThrowingConsumer<Throwable>) input -> {
-                throw input;
-            }));
+	private final MavenExecutionContextView ctx = MavenExecutionContextView
+			.view(new InMemoryExecutionContext((ThrowingConsumer<Throwable>) input -> {
+				throw input;
+			}));
 
-    @Disabled
-    @Test
-    void serverHttpHeaders() throws IOException {
-        var settingsXML = Parser.Input.fromString(Path.of("settings.xml"),
-                // language=xml
-                """
-                        <settings>
-                            <servers>
-                                <server>
-                                    <id>maven-snapshots</id>
-                                    <configuration>
-                                        <httpHeaders>
-                                            <property>
-                                                <name>X-JFrog-Art-Api</name>
-                                                <value>myApiToken</value>
-                                            </property>
-                                        </httpHeaders>
-                                    </configuration>
-                                </server>
-                            </servers>
-                            <profiles>
-                                <profile>
-                                    <id>my-profile</id>
-                                    <repositories>
-                                        <repository>
-                                            <id>maven-snapshots</id>
-                                            <name>Private Repo</name>
-                                            <url>https://repo.company.net/maven</url>
-                                        </repository>
-                                    </repositories>
-                                </profile>
-                            </profiles>
-                        </settings>
-                        """);
+	@Disabled
+	@Test
+	void serverHttpHeaders() throws IOException {
+		var settingsXML = Parser.Input.fromString(Path.of("settings.xml"),
+				// language=xml
+				"""
+						<settings>
+						    <servers>
+						        <server>
+						            <id>maven-snapshots</id>
+						            <configuration>
+						                <httpHeaders>
+						                    <property>
+						                        <name>X-JFrog-Art-Api</name>
+						                        <value>myApiToken</value>
+						                    </property>
+						                </httpHeaders>
+						            </configuration>
+						        </server>
+						    </servers>
+						    <profiles>
+						        <profile>
+						            <id>my-profile</id>
+						            <repositories>
+						                <repository>
+						                    <id>maven-snapshots</id>
+						                    <name>Private Repo</name>
+						                    <url>https://repo.company.net/maven</url>
+						                </repository>
+						            </repositories>
+						        </profile>
+						    </profiles>
+						</settings>
+						""");
 
-        MavenSettings settings = new Interpolator()
-                .interpolate(MavenXmlMapper.readMapper().readValue(settingsXML.getSource(ctx), MavenSettings.class));
+		MavenSettings settings = new Interpolator()
+				.interpolate(MavenXmlMapper.readMapper().readValue(settingsXML.getSource(ctx), MavenSettings.class));
 
-        MavenSettings.Server server = settings.getServers().getServers().getFirst();
-        assertThat(server.getConfiguration().getHttpHeaders().getFirst().getName()).isEqualTo("X-JFrog-Art-Api");
-    }
+		MavenSettings.Server server = settings.getServers().getServers().getFirst();
+		assertThat(server.getConfiguration().getHttpHeaders().getFirst().getName()).isEqualTo("X-JFrog-Art-Api");
+	}
 }

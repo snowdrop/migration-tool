@@ -4,13 +4,13 @@ import io.smallrye.config.ConfigMapping;
 
 @ConfigMapping(prefix = "analyzer")
 public interface JdtLSConfiguration {
-    String appPath();
+	String appPath();
 
-    String rulesPath();
+	String rulesPath();
 
-    String jdtLsPath();
+	String jdtLsPath();
 
-    String jdtWorkspacePath();
+	String jdtWorkspacePath();
 
-    String jdtLsCommand();
+	String jdtLsCommand();
 }

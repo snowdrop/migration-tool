@@ -23,104 +23,104 @@ import java.util.Optional;
 
 public class ApplyOpenRewriteRecipe {
 
-    private static Instant start;
-    private static Instant finish;
+	private static Instant start;
+	private static Instant finish;
 
-    public static void main(String[] args) {
+	public static void main(String[] args) {
 
-        String javaFilePath = Optional.ofNullable(System.getProperty("JAVA_SPRINGBOOT_APPLICATION_FILE_PATH")).orElse(
-                "/Users/cmoullia/code/application-modernisation/spring-to-quarkus-guide/java-analyzer-quarkus/applications/spring-boot-todo-app/src/main/java/com/todo/app/AppApplication.java");
+		String javaFilePath = Optional.ofNullable(System.getProperty("JAVA_SPRINGBOOT_APPLICATION_FILE_PATH")).orElse(
+				"/Users/cmoullia/code/application-modernisation/spring-to-quarkus-guide/java-analyzer-quarkus/applications/spring-boot-todo-app/src/main/java/com/todo/app/AppApplication.java");
 
-        String JDT_LS_JSON_RESPONSE = String.format("""
-                [
-                  {
-                    "name": "org.springframework.boot.autoconfigure.SpringBootApplication",
-                    "kind": 5,
-                    "location": {
-                      "uri": "file://%s",
-                      "range": {
-                        "start": { "line": 3.0, "character": 7.0 },
-                        "end": { "line": 3.0, "character": 67.0 }
-                      }
-                    },
-                    "containerName": ""
-                  }
-                ]""", javaFilePath);
+		String JDT_LS_JSON_RESPONSE = String.format("""
+				[
+				  {
+				    "name": "org.springframework.boot.autoconfigure.SpringBootApplication",
+				    "kind": 5,
+				    "location": {
+				      "uri": "file://%s",
+				      "range": {
+				        "start": { "line": 3.0, "character": 7.0 },
+				        "end": { "line": 3.0, "character": 67.0 }
+				      }
+				    },
+				    "containerName": ""
+				  }
+				]""", javaFilePath);
 
-        start = Instant.now();
+		start = Instant.now();
 
-        // Configure Jackson ObjectMapper with custom SymbolKind deserializer
-        ObjectMapper objectMapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(SymbolKind.class, new SymbolKindDeserializer());
-        objectMapper.registerModule(module);
+		// Configure Jackson ObjectMapper with custom SymbolKind deserializer
+		ObjectMapper objectMapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(SymbolKind.class, new SymbolKindDeserializer());
+		objectMapper.registerModule(module);
 
-        // Parse JSON using Jackson
-        TypeReference<List<Result>> resultListType = new TypeReference<List<Result>>() {
-        };
-        List<Result> results;
-        try {
-            results = objectMapper.readValue(JDT_LS_JSON_RESPONSE, resultListType);
-        } catch (Exception e) {
-            System.err.println("Failed to parse jdt language server JSON response: " + e.getMessage());
-            return;
-        }
+		// Parse JSON using Jackson
+		TypeReference<List<Result>> resultListType = new TypeReference<List<Result>>() {
+		};
+		List<Result> results;
+		try {
+			results = objectMapper.readValue(JDT_LS_JSON_RESPONSE, resultListType);
+		} catch (Exception e) {
+			System.err.println("Failed to parse jdt language server JSON response: " + e.getMessage());
+			return;
+		}
 
-        if (results.isEmpty()) {
-            System.out.println("No result found !!");
-            return;
-        }
+		if (results.isEmpty()) {
+			System.out.println("No result found !!");
+			return;
+		}
 
-        Result target = results.get(0);
-        System.out.println(
-                "Found symbol '" + target.name() + "' with kind: " + target.kind() + " within the json string");
+		Result target = results.get(0);
+		System.out.println(
+				"Found symbol '" + target.name() + "' with kind: " + target.kind() + " within the json string");
 
-        // Apply the Openrewrite transformation
-        runOpenRewriteTransformation(target);
-    }
+		// Apply the Openrewrite transformation
+		runOpenRewriteTransformation(target);
+	}
 
-    private static void runOpenRewriteTransformation(Result result) {
-        String sourceCode;
-        try {
-            URI fileUri = new URI(result.location().uri());
-            Path filePath = Paths.get(fileUri);
+	private static void runOpenRewriteTransformation(Result result) {
+		String sourceCode;
+		try {
+			URI fileUri = new URI(result.location().uri());
+			Path filePath = Paths.get(fileUri);
 
-            // Read the content from the file
-            sourceCode = Files.readString(filePath);
-            System.out.println("\nSuccessfully read content from: " + filePath);
+			// Read the content from the file
+			sourceCode = Files.readString(filePath);
+			System.out.println("\nSuccessfully read content from: " + filePath);
 
-        } catch (Exception e) {
-            System.err.println("Failed to read or create source file from URI: " + result.location().uri());
-            e.printStackTrace();
-            return; // Exit if we can't get the source code
-        }
+		} catch (Exception e) {
+			System.err.println("Failed to read or create source file from URI: " + result.location().uri());
+			e.printStackTrace();
+			return; // Exit if we can't get the source code
+		}
 
-        System.out.println("--- SOURCE CODE BEFORE TRANSFORMATION ---");
-        System.out.println(sourceCode);
-        System.out.println("-----------------------------------------\n");
+		System.out.println("--- SOURCE CODE BEFORE TRANSFORMATION ---");
+		System.out.println(sourceCode);
+		System.out.println("-----------------------------------------\n");
 
-        Recipe recipe = new ReplaceSpringBootApplicationWithQuarkusMainAnnotation();
-        ExecutionContext ctx = new InMemoryExecutionContext(Throwable::printStackTrace);
+		Recipe recipe = new ReplaceSpringBootApplicationWithQuarkusMainAnnotation();
+		ExecutionContext ctx = new InMemoryExecutionContext(Throwable::printStackTrace);
 
-        // Parse the source file into OpenRewrite's format (LST)
-        J.CompilationUnit cu = JavaParser.fromJavaVersion().build().parse(ctx, sourceCode).findFirst()
-                .map(J.CompilationUnit.class::cast)
-                .orElseThrow(() -> new IllegalArgumentException("Could not parse source code."));
+		// Parse the source file into OpenRewrite's format (LST)
+		J.CompilationUnit cu = JavaParser.fromJavaVersion().build().parse(ctx, sourceCode).findFirst()
+				.map(J.CompilationUnit.class::cast)
+				.orElseThrow(() -> new IllegalArgumentException("Could not parse source code."));
 
-        J.CompilationUnit transformedCu = (J.CompilationUnit) recipe.getVisitor().visit(cu, ctx);
+		J.CompilationUnit transformedCu = (J.CompilationUnit) recipe.getVisitor().visit(cu, ctx);
 
-        if (transformedCu == cu) {
-            System.out.println("Recipe did not make any changes.");
-        } else {
-            String transformedCode = transformedCu.printAll();
-            System.out.println("--- SOURCE CODE AFTER TRANSFORMATION ---");
-            System.out.println(transformedCode);
-            System.out.println("----------------------------------------");
-        }
+		if (transformedCu == cu) {
+			System.out.println("Recipe did not make any changes.");
+		} else {
+			String transformedCode = transformedCu.printAll();
+			System.out.println("--- SOURCE CODE AFTER TRANSFORMATION ---");
+			System.out.println(transformedCode);
+			System.out.println("----------------------------------------");
+		}
 
-        finish = Instant.now();
-        long timeElapsed = Duration.between(start, finish).toMillis();
-        System.out.println("--- Elapsed time: " + timeElapsed + " ms ---");
+		finish = Instant.now();
+		long timeElapsed = Duration.between(start, finish).toMillis();
+		System.out.println("--- Elapsed time: " + timeElapsed + " ms ---");
 
-    }
+	}
 }

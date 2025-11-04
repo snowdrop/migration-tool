@@ -11,12 +11,12 @@ import lombok.experimental.FieldDefaults;
 @Data
 @With
 public class HttpHeader {
-    String name;
-    String value;
+	String name;
+	String value;
 
-    @JsonCreator
-    public HttpHeader(@JsonProperty("name") String name, @JsonProperty("value") String value) {
-        this.name = name;
-        this.value = value;
-    }
+	@JsonCreator
+	public HttpHeader(@JsonProperty("name") String name, @JsonProperty("value") String value) {
+		this.name = name;
+		this.value = value;
+	}
 }

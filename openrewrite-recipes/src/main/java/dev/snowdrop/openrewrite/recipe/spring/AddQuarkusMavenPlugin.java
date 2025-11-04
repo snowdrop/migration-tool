@@ -16,33 +16,33 @@ import java.util.Optional;
 @EqualsAndHashCode(callSuper = false)
 public class AddQuarkusMavenPlugin extends Recipe {
 
-    @Override
-    public String getDisplayName() {
-        return "Add Quarkus Maven plugin";
-    }
+	@Override
+	public String getDisplayName() {
+		return "Add Quarkus Maven plugin";
+	}
 
-    @Override
-    public String getDescription() {
-        return "Adds the Quarkus Maven plugin using the same version as the quarkus-bom in dependency management.";
-    }
+	@Override
+	public String getDescription() {
+		return "Adds the Quarkus Maven plugin using the same version as the quarkus-bom in dependency management.";
+	}
 
-    @Override
-    public TreeVisitor<?, ExecutionContext> getVisitor() {
-        return new MavenIsoVisitor<ExecutionContext>() {
-            @Override
-            public Xml.Document visitDocument(Xml.Document document, ExecutionContext ctx) {
-                Optional<String> quarkusVersion = getResolutionResult().getPom().getRequested()
-                        .getDependencyManagement().stream()
-                        .filter(dep -> "io.quarkus.platform".equals(dep.getGroupId())
-                                && "quarkus-bom".equals(dep.getArtifactId()))
-                        .map(ManagedDependency::getVersion).findFirst();
-                // noinspection OptionalIsPresent
-                if (!quarkusVersion.isPresent()) {
-                    return document;
-                }
-                return (Xml.Document) new AddPlugin("io.quarkus.platform", "quarkus-maven-plugin", quarkusVersion.get(),
-                        null, null, null, null).getVisitor().visitNonNull(document, ctx);
-            }
-        };
-    }
+	@Override
+	public TreeVisitor<?, ExecutionContext> getVisitor() {
+		return new MavenIsoVisitor<ExecutionContext>() {
+			@Override
+			public Xml.Document visitDocument(Xml.Document document, ExecutionContext ctx) {
+				Optional<String> quarkusVersion = getResolutionResult().getPom().getRequested()
+						.getDependencyManagement().stream()
+						.filter(dep -> "io.quarkus.platform".equals(dep.getGroupId())
+								&& "quarkus-bom".equals(dep.getArtifactId()))
+						.map(ManagedDependency::getVersion).findFirst();
+				// noinspection OptionalIsPresent
+				if (!quarkusVersion.isPresent()) {
+					return document;
+				}
+				return (Xml.Document) new AddPlugin("io.quarkus.platform", "quarkus-maven-plugin", quarkusVersion.get(),
+						null, null, null, null).getVisitor().visitNonNull(document, ctx);
+			}
+		};
+	}
 }

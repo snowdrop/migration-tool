@@ -40,106 +40,106 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 public class AddQuarkusRun extends Recipe {
 
-    private static final String QUARKUS_MAIN_ANNOTATION = "@io.quarkus.runtime.annotations.QuarkusMain";
+	private static final String QUARKUS_MAIN_ANNOTATION = "@io.quarkus.runtime.annotations.QuarkusMain";
 
-    @Option(displayName = "Name of the Quarkus Application class", description = "Name of the Quarkus Application class implementing QuarkusApplication", required = false)
-    String quarkusApplicationClass;
+	@Option(displayName = "Name of the Quarkus Application class", description = "Name of the Quarkus Application class implementing QuarkusApplication", required = false)
+	String quarkusApplicationClass;
 
-    @Override
-    public String getDisplayName() {
-        return "Replace SpringApplication.run() method with Quarkus.run()";
-    }
+	@Override
+	public String getDisplayName() {
+		return "Replace SpringApplication.run() method with Quarkus.run()";
+	}
 
-    @Override
-    public String getDescription() {
-        return "Replace SpringApplication.run() method with Quarkus.run()";
-    }
+	@Override
+	public String getDescription() {
+		return "Replace SpringApplication.run() method with Quarkus.run()";
+	}
 
-    transient SpringBootScanReport report = new SpringBootScanReport(this);
+	transient SpringBootScanReport report = new SpringBootScanReport(this);
 
-    @Override
-    public TreeVisitor<?, ExecutionContext> getVisitor() {
-        return new SpringBootToQuarkusMainVisitor();
-    }
+	@Override
+	public TreeVisitor<?, ExecutionContext> getVisitor() {
+		return new SpringBootToQuarkusMainVisitor();
+	}
 
-    private class SpringBootToQuarkusMainVisitor extends JavaIsoVisitor<ExecutionContext> {
+	private class SpringBootToQuarkusMainVisitor extends JavaIsoVisitor<ExecutionContext> {
 
-        public AnnotationMatcher quarkusMainAnnotationMatcher = new AnnotationMatcher(QUARKUS_MAIN_ANNOTATION);
+		public AnnotationMatcher quarkusMainAnnotationMatcher = new AnnotationMatcher(QUARKUS_MAIN_ANNOTATION);
 
-        @Override
-        public J.CompilationUnit visitCompilationUnit(J.CompilationUnit cu, ExecutionContext ctx) {
-            return super.visitCompilationUnit(cu, ctx);
-        }
+		@Override
+		public J.CompilationUnit visitCompilationUnit(J.CompilationUnit cu, ExecutionContext ctx) {
+			return super.visitCompilationUnit(cu, ctx);
+		}
 
-        @Override
-        public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration m, ExecutionContext ctx) {
-            JavaType.Method mType = m.getMethodType();
+		@Override
+		public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration m, ExecutionContext ctx) {
+			JavaType.Method mType = m.getMethodType();
 
-            System.out.println("Visit Method declaration: ");
-            System.out.println("Method name: " + m.getMethodType().getName());
-            System.out.println("Return type: " + mType.getReturnType());
+			System.out.println("Visit Method declaration: ");
+			System.out.println("Method name: " + m.getMethodType().getName());
+			System.out.println("Return type: " + mType.getReturnType());
 
-            boolean hasStaticModifier = J.Modifier.hasModifier(m.getModifiers(), J.Modifier.Type.Static);
-            System.out.println("Has static modifier: " + hasStaticModifier);
+			boolean hasStaticModifier = J.Modifier.hasModifier(m.getModifiers(), J.Modifier.Type.Static);
+			System.out.println("Has static modifier: " + hasStaticModifier);
 
-            if ("main".equals(m.getSimpleName()) && "void".equals(mType.getReturnType().toString())
-                    && hasStaticModifier) {
-                J.ClassDeclaration parentClass = getCursor().firstEnclosing(J.ClassDeclaration.class);
-                System.out.println("Processing the main method of the class: " + parentClass.getSimpleName());
+			if ("main".equals(m.getSimpleName()) && "void".equals(mType.getReturnType().toString())
+					&& hasStaticModifier) {
+				J.ClassDeclaration parentClass = getCursor().firstEnclosing(J.ClassDeclaration.class);
+				System.out.println("Processing the main method of the class: " + parentClass.getSimpleName());
 
-                if (hasAnnotation(parentClass.getLeadingAnnotations(), "QuarkusMain")) {
-                    System.out.println(
-                            "Processing the Java Class including the static main method and having as Class annotation: @QuarkusMain");
-                    J.MethodDeclaration n = getCursor().firstEnclosing(J.MethodDeclaration.class);
+				if (hasAnnotation(parentClass.getLeadingAnnotations(), "QuarkusMain")) {
+					System.out.println(
+							"Processing the Java Class including the static main method and having as Class annotation: @QuarkusMain");
+					J.MethodDeclaration n = getCursor().firstEnclosing(J.MethodDeclaration.class);
 
-                    Parameter p = findParameter(m.getParameters(), 0);
-                    System.out.println("Method parameter: " + p);
+					Parameter p = findParameter(m.getParameters(), 0);
+					System.out.println("Method parameter: " + p);
 
-                    J.VariableDeclarations param = (J.VariableDeclarations) m.getParameters().getFirst();
-                    J.VariableDeclarations.NamedVariable variable = param.getVariables().getFirst();
+					J.VariableDeclarations param = (J.VariableDeclarations) m.getParameters().getFirst();
+					J.VariableDeclarations.NamedVariable variable = param.getVariables().getFirst();
 
-                    maybeAddImport("io.quarkus.runtime.Quarkus");
-                    maybeAddImport("io.quarkus.runtime.annotations.QuarkusMain");
+					maybeAddImport("io.quarkus.runtime.Quarkus");
+					maybeAddImport("io.quarkus.runtime.annotations.QuarkusMain");
 
-                    String javaTemplate;
-                    if (quarkusApplicationClass != null) {
-                        javaTemplate = String.format("Quarkus.run(%s.class, #{any()});", quarkusApplicationClass);
-                    } else {
-                        javaTemplate = "Quarkus.run(#{any()});";
-                    }
+					String javaTemplate;
+					if (quarkusApplicationClass != null) {
+						javaTemplate = String.format("Quarkus.run(%s.class, #{any()});", quarkusApplicationClass);
+					} else {
+						javaTemplate = "Quarkus.run(#{any()});";
+					}
 
-                    return JavaTemplate.builder(javaTemplate).imports("io.quarkus.runtime.Quarkus")
-                            .javaParser(JavaParser.fromJavaVersion().classpath(JavaParser.runtimeClasspath())).build()
-                            .apply(getCursor(), m.getCoordinates().replaceBody(), variable.getName());
-                }
-            }
-            return m;
-        }
+					return JavaTemplate.builder(javaTemplate).imports("io.quarkus.runtime.Quarkus")
+							.javaParser(JavaParser.fromJavaVersion().classpath(JavaParser.runtimeClasspath())).build()
+							.apply(getCursor(), m.getCoordinates().replaceBody(), variable.getName());
+				}
+			}
+			return m;
+		}
 
-        private boolean hasAnnotation(List<J.Annotation> annotations, String annotationName) {
-            for (J.Annotation a : annotations) {
-                System.out.println("Class annotation name: " + a.getSimpleName());
-                if (quarkusMainAnnotationMatcher.matches(a)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
+		private boolean hasAnnotation(List<J.Annotation> annotations, String annotationName) {
+			for (J.Annotation a : annotations) {
+				System.out.println("Class annotation name: " + a.getSimpleName());
+				if (quarkusMainAnnotationMatcher.matches(a)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 
-    private Parameter findParameter(List<Statement> parameters, int pos) {
-        Parameter parameter = null;
-        J.VariableDeclarations var = (J.VariableDeclarations) parameters.get(pos);
+	private Parameter findParameter(List<Statement> parameters, int pos) {
+		Parameter parameter = null;
+		J.VariableDeclarations var = (J.VariableDeclarations) parameters.get(pos);
 
-        // Extract the type and name
-        String paramType = var.getType().toString();
-        // A parameter declaration usually has only one variable, so we get it from index 0
-        String paramName = var.getVariables().get(0).getSimpleName();
+		// Extract the type and name
+		String paramType = var.getType().toString();
+		// A parameter declaration usually has only one variable, so we get it from index 0
+		String paramName = var.getVariables().get(0).getSimpleName();
 
-        // Create and return the new Parameter record in one step
-        return new Parameter(paramName, paramType);
-    }
+		// Create and return the new Parameter record in one step
+		return new Parameter(paramName, paramType);
+	}
 
-    public record Parameter(String name, String type) {
-    }
+	public record Parameter(String name, String type) {
+	}
 }
