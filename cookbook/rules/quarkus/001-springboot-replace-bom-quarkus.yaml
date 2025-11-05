@@ -9,7 +9,9 @@
   message: "SpringBoot to Quarkus."
   ruleID: 001-springboot-replace-bom-quarkus
   when:
-    condition: pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')
+    # As such a condition cannot be processed by our engine as jdt-ls scanner don't support it, we must use the java.annotation
+    # condition: pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')
+    condition: java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
   order: 1
   instructions:
     ai:
