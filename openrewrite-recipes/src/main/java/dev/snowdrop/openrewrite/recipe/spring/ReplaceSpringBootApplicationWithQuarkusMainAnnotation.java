@@ -12,51 +12,51 @@ import org.openrewrite.java.tree.TypeUtils;
 
 public class ReplaceSpringBootApplicationWithQuarkusMainAnnotation extends Recipe {
 
-    @Override
-    public String getDisplayName() {
-        return "Convert the @SpringBootApplication annotation to @QuarkusMain";
-    }
+	@Override
+	public String getDisplayName() {
+		return "Convert the @SpringBootApplication annotation to @QuarkusMain";
+	}
 
-    @Override
-    public String getDescription() {
-        return "Convert the @SpringBootApplication annotation to @QuarkusMain.";
-    }
+	@Override
+	public String getDescription() {
+		return "Convert the @SpringBootApplication annotation to @QuarkusMain.";
+	}
 
-    @Override
-    public TreeVisitor<?, ExecutionContext> getVisitor() {
-        return new SpringBootToQuarkusMainVisitor();
-    }
+	@Override
+	public TreeVisitor<?, ExecutionContext> getVisitor() {
+		return new SpringBootToQuarkusMainVisitor();
+	}
 
-    private class SpringBootToQuarkusMainVisitor extends JavaIsoVisitor<ExecutionContext> {
+	private class SpringBootToQuarkusMainVisitor extends JavaIsoVisitor<ExecutionContext> {
 
-        @Override
-        public J.CompilationUnit visitCompilationUnit(J.CompilationUnit cu, ExecutionContext ctx) {
-            return super.visitCompilationUnit(cu, ctx);
-        }
+		@Override
+		public J.CompilationUnit visitCompilationUnit(J.CompilationUnit cu, ExecutionContext ctx) {
+			return super.visitCompilationUnit(cu, ctx);
+		}
 
-        @Override
-        public J.Annotation visitAnnotation(J.Annotation annotation, ExecutionContext ctx) {
-            J.Annotation a = super.visitAnnotation(annotation, ctx);
+		@Override
+		public J.Annotation visitAnnotation(J.Annotation annotation, ExecutionContext ctx) {
+			J.Annotation a = super.visitAnnotation(annotation, ctx);
 
-            AnnotationMatcher matcher = new AnnotationMatcher(
-                    "@org.springframework.boot.autoconfigure.SpringBootApplication");
+			AnnotationMatcher matcher = new AnnotationMatcher(
+					"@org.springframework.boot.autoconfigure.SpringBootApplication");
 
-            if (!matcher.matches(a)) {
-                return a;
-            }
+			if (!matcher.matches(a)) {
+				return a;
+			}
 
-            maybeRemoveImport(TypeUtils.asFullyQualified(a.getType()));
-            maybeAddImport("io.quarkus.runtime.QuarkusMain");
+			maybeRemoveImport(TypeUtils.asFullyQualified(a.getType()));
+			maybeAddImport("io.quarkus.runtime.QuarkusMain");
 
-            // Replace with QuarkusMain annotation
-            return JavaTemplate.builder("@QuarkusMain")
-                    // Load the Quarkus resources using the TypeTable mechanism
-                    // See:
-                    // https://docs.openrewrite.org/authoring-recipes/multiple-versions#typetable-generation-for-maven-projects
-                    .javaParser(JavaParser.fromJavaVersion().classpathFromResources(ctx, "quarkus-core"))
-                    .imports("io.quarkus.runtime.annotations.QuarkusMain").build()
-                    .apply(getCursor(), a.getCoordinates().replace());
+			// Replace with QuarkusMain annotation
+			return JavaTemplate.builder("@QuarkusMain")
+					// Load the Quarkus resources using the TypeTable mechanism
+					// See:
+					// https://docs.openrewrite.org/authoring-recipes/multiple-versions#typetable-generation-for-maven-projects
+					.javaParser(JavaParser.fromJavaVersion().classpathFromResources(ctx, "quarkus-core"))
+					.imports("io.quarkus.runtime.annotations.QuarkusMain").build()
+					.apply(getCursor(), a.getCoordinates().replace());
 
-        }
-    }
+		}
+	}
 }

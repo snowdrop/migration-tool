@@ -43,19 +43,20 @@ public class SimpleQueryTest extends AbstractQueryParser {
 		// Should automatically use "name" as default key for annotation
 		Query expectedQuery = new Query("java", "annotation", Map.of("name", "@SpringBootApplication"));
 
-        Set<Query> queries = visitor.getSimpleQueries();
-        Assert.assertTrue(queries.size() == 1);
-        Assertions.assertTrue(queries.contains(expectedQuery));
-    }
+		Set<Query> queries = visitor.getSimpleQueries();
+		Assert.assertTrue(queries.size() == 1);
+		Assertions.assertTrue(queries.contains(expectedQuery));
+	}
 
-    @Test
-    public void shouldParseAPomDependencyQuery() {
-        String annotationQuery = "pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')";
-        QueryVisitor visitor = parseQuery(annotationQuery);
-        Query expectedQuery = new Query("pom", "dependency", Map.of("gavs", "org.springframework.boot:spring-boot-starter-web"));
+	@Test
+	public void shouldParseAPomDependencyQuery() {
+		String annotationQuery = "pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')";
+		QueryVisitor visitor = parseQuery(annotationQuery);
+		Query expectedQuery = new Query("pom", "dependency",
+				Map.of("gavs", "org.springframework.boot:spring-boot-starter-web"));
 
-        Set<Query> queries = visitor.getSimpleQueries();
-        Assert.assertTrue(queries.size() == 1);
-        Assertions.assertTrue(queries.contains(expectedQuery));
-    }
+		Set<Query> queries = visitor.getSimpleQueries();
+		Assert.assertTrue(queries.size() == 1);
+		Assertions.assertTrue(queries.contains(expectedQuery));
+	}
 }
