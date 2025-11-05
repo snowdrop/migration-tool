@@ -37,10 +37,16 @@ public class RewriteService {
 	public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
 	public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
 
-	public static Map<String, List<Rewrite>> executeRewriteCmd(Config config, Rule rule) {
+	private final Config config;
+
+	public RewriteService(Config config) {
+		this.config = config;
+	}
+
+	public Map<String, List<Rewrite>> executeRewriteCmd(Rule rule) {
 		Map<String, List<Rewrite>> ruleResults = new HashMap<>();
 
-		// Parse first the Rule condition to populate the Query object using the YAML Condition query
+		// Parse first the Rule condition to populate the Query object using the YAML condition query
 		// See the parser maven project for examples, unit tests
 		QueryVisitor visitor = QueryUtils.parseAndVisit(rule.when().condition());
 
@@ -51,17 +57,19 @@ public class RewriteService {
 		 *
 		 * - Clauses separated with the OR operator:
 		 *
-		 * FIND java.annotation is '@SpringBootApplication' OR java.annotation is '@Deprecated'
+		 * java.annotation is '@SpringBootApplication' OR java.annotation is '@Deprecated'
 		 *
 		 * - Clauses separated with the AND operator:
 		 *
-		 * FIND java.annotation is '@SpringBootApplication' AND pom.dependency is (groupId='org.springframework.boot',
+		 * java.annotation is '@SpringBootApplication' AND pom.dependency is (groupId='org.springframework.boot',
 		 * artifactId='spring-boot', version='3.4.2')
 		 *
+		 * See grammar definition:
+		 * https://raw.githubusercontent.com/snowdrop/migration-tool/refs/heads/main/parser/src/main/antlr4/Query.g4
 		 */
 		if (visitor.getSimpleQueries().size() == 1) {
 			visitor.getSimpleQueries().stream().findFirst().ifPresent(q -> {
-				List<Rewrite> results = executeQueryCommand(config, rule, Collections.singleton(q));
+				List<Rewrite> results = executeQueryCommand(config, Collections.singleton(q));
 				ruleResults.merge(rule.ruleID(), results, (existing, newResults) -> {
 					List<Rewrite> combined = new ArrayList<>(existing);
 					combined.addAll(newResults);
@@ -69,7 +77,7 @@ public class RewriteService {
 				});
 			});
 		} else if (visitor.getOrQueries().size() > 1) {
-			List<Rewrite> results = executeQueryCommand(config, rule, visitor.getOrQueries());
+			List<Rewrite> results = executeQueryCommand(config, visitor.getOrQueries());
 			ruleResults.merge(rule.ruleID(), results, (existing, newResults) -> {
 				List<Rewrite> combined = new ArrayList<>(existing);
 				combined.addAll(newResults);
@@ -77,7 +85,7 @@ public class RewriteService {
 			});
 		} else if (visitor.getAndQueries().size() > 1) {
 			// TODO: To be tested
-			List<Rewrite> results = executeQueryCommand(config, rule, visitor.getAndQueries());
+			List<Rewrite> results = executeQueryCommand(config, visitor.getAndQueries());
 			ruleResults.merge(rule.ruleID(), results, (existing, newResults) -> {
 				List<Rewrite> combined = new ArrayList<>(existing);
 				combined.addAll(newResults);
@@ -91,7 +99,7 @@ public class RewriteService {
 		return ruleResults;
 	}
 
-	private static List<Rewrite> executeQueryCommand(Config config, Rule rule, Set<Query> queries) {
+	private List<Rewrite> executeQueryCommand(Config config, Set<Query> queries) {
 
 		// Composite recipe - using Map with List to allow multiple entries with same key
 		// List<Map<String, Map<String, String>>> recipes = new ArrayList<>();
@@ -168,7 +176,7 @@ public class RewriteService {
 		return allResults;
 	}
 
-	private static ObjectMapper yamlRecipeMapper() {
+	private ObjectMapper yamlRecipeMapper() {
 		YAMLFactory factory = new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
 		ObjectMapper yamlMapper = new ObjectMapper(factory);
 
@@ -240,7 +248,7 @@ public class RewriteService {
 	 *
 	 * @return List of Rewrite objects for matching records
 	 */
-	private static List<Rewrite> findRecordsMatching(String projectPath, String matchIdToSearch) {
+	private List<Rewrite> findRecordsMatching(String projectPath, String matchIdToSearch) {
 		List<Rewrite> results = new ArrayList<>();
 
 		// Openrewrite folder where CSV files are generated

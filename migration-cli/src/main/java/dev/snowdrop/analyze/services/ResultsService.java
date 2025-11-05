@@ -1,17 +1,26 @@
 package dev.snowdrop.analyze.services;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.freva.asciitable.AsciiTable;
 import com.github.freva.asciitable.Column;
 import com.github.freva.asciitable.HorizontalAlign;
 import com.github.freva.asciitable.Styler;
 import dev.snowdrop.analyze.Config;
+import dev.snowdrop.analyze.model.MigrationTask;
+import dev.snowdrop.analyze.model.Rewrite;
 import dev.snowdrop.analyze.model.html.Cell;
 import dev.snowdrop.analyze.model.html.Row;
+import dev.snowdrop.analyze.utils.TerminalUtils;
+import dev.snowdrop.commands.AnalyzeCommand;
 import io.quarkus.qute.*;
+import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -27,17 +36,25 @@ import java.util.stream.Collectors;
 public class ResultsService {
 	private static final Logger logger = Logger.getLogger(ResultsService.class);
 
-	private static final String RULE_REPO_URL_FORMAT;
+	public static final String RULE_REPO_URL_FORMAT;
 
 	static {
 		RULE_REPO_URL_FORMAT = ConfigProvider.getConfig().getValue("analyzer.rules.repo_url", String.class);
+	}
+
+	private final String source;
+	private final String target;
+
+	public ResultsService(String source, String target) {
+		this.source = source;
+		this.target = target;
 	}
 
 	// This regex finds URLs starting with http://, https://, or file:///
 	// and captures them. It stops at whitespace or a '<' (to avoid our <br> tag).
 	private static final Pattern URL_PATTERN = Pattern.compile("(https?://[^\\s<]+|file:///[^\\s<]+)");
 
-	public static void exportAsHtml(Config config, List<String[]> rawTableData) {
+	public void exportAsHtml(Config config, List<String[]> rawTableData) {
 		String[] headers = {"Rule ID", "Source to Target", "Match", "Information Details"};
 		List<Row> tableData = convertToRows(headers, rawTableData);
 
@@ -70,7 +87,7 @@ public class ResultsService {
 		}
 	}
 
-	public static void exportAsCsv(Config config, List<String[]> rawTableData) {
+	public void exportAsCsv(Config config, List<String[]> rawTableData) {
 		String[] headers = {"Rule ID", "Source to Target", "Match", "Information Details"};
 		List<Row> tableData = convertToRows(headers, rawTableData);
 
@@ -103,9 +120,9 @@ public class ResultsService {
 		}
 	}
 
-	public static void showCsvTable(List<String[]> tableData) {
+	public void showCsvTable(List<String[]> tableData) {
 		System.out.println("\n=== Code Analysis Results ===");
-		String asciiTable = AsciiTable.builder().styler(customizeStyle())
+		String asciiTable = AsciiTable.builder().styler(TerminalUtils.customizeStyle(RULE_REPO_URL_FORMAT))
 				.data(tableData,
 						Arrays.asList(
 								new Column().header("Rule ID").headerAlign(HorizontalAlign.LEFT)
@@ -247,5 +264,125 @@ public class ResultsService {
 			}
 		};
 		return templateLocator;
+	}
+
+	public List<String[]> generateDataTable(Map<String, MigrationTask> results, String source, String target) {
+		// Prepare data for the table
+		List<String[]> tableData = new ArrayList<>();
+
+		for (Map.Entry<String, MigrationTask> entry : results.entrySet()) {
+			String ruleId = entry.getKey();
+			MigrationTask aTask = entry.getValue();
+
+			List<?> queryResults = new ArrayList<>();
+
+			if (aTask.getLsResults() != null && !aTask.getLsResults().isEmpty()) {
+				queryResults = aTask.getLsResults();
+			}
+
+			if (aTask.getRewriteResults() != null && !aTask.getRewriteResults().isEmpty()) {
+				queryResults = aTask.getRewriteResults();
+			}
+
+			String hasQueryResults = queryResults.isEmpty() ? "No" : "Yes";
+			String sourceToTarget = String.format("%s -> %s", source, target);
+
+			if (queryResults.isEmpty()) {
+				tableData.add(new String[]{ruleId, sourceToTarget, hasQueryResults, "No match found"});
+			} else {
+				// Process ALL results, not just the first one
+				StringBuilder allResultsDetails = new StringBuilder();
+
+				for (int i = 0; i < queryResults.size(); i++) {
+					Object result = queryResults.get(i);
+
+					if (result instanceof SymbolInformation symbolInfo) {
+						String symbolDetails = formatSymbolInformation(symbolInfo);
+						allResultsDetails.append(symbolDetails).append("\n").append(symbolInfo.getLocation().getUri());
+					} else if (result instanceof Rewrite rewrite) {
+						String rewriteDetails = formatRewriteImproved(rewrite);
+						allResultsDetails.append(rewriteDetails);
+					} else {
+						// Fallback for unknown types
+						allResultsDetails.append("Unknown result type: ").append(result.getClass().getSimpleName());
+					}
+
+					// Add separator between multiple results (except for the last one)
+					if (i < queryResults.size() - 1) {
+						allResultsDetails.append("\n--- rewrite ---\n");
+					}
+				}
+
+				tableData.add(new String[]{ruleId, sourceToTarget, hasQueryResults, allResultsDetails.toString()});
+			}
+		}
+
+		// Sorts the List<String[]> by comparing the first element (row[0]) of each array which is the RuleID
+		tableData.sort(Comparator.comparing(row -> row[0]));
+
+		return tableData;
+	}
+
+	private static String formatRewriteImproved(Rewrite rewrite) {
+		String name = rewrite.name();
+
+		// Parse the name format: parentFolderName/csvFileName:line_number|pattern.symbol|type
+		if (name.contains("/") && name.contains(":") && name.contains("|")) {
+			try {
+				String[] pathAndRest = name.split(":", 2);
+				String path = pathAndRest[0];
+				String[] lineAndDetails = pathAndRest[1].split("\\|", 3);
+				String lineNumber = lineAndDetails[0];
+				String patternSymbol = lineAndDetails.length > 1 ? lineAndDetails[1] : "N/A";
+				String type = lineAndDetails.length > 2 ? lineAndDetails[2] : "N/A";
+
+				return String.format("File: %s\nLine: %s\nPattern: %s\nType: %s\nMatch ID: %s", path, lineNumber,
+						patternSymbol, type, rewrite.matchId());
+			} catch (Exception e) {
+				// Fallback if parsing fails
+				return String.format("Rewrite match: %s (ID: %s)", rewrite.name(), rewrite.matchId());
+			}
+		} else {
+			// Fallback for unexpected format
+			return String.format("Rewrite match: %s (ID: %s)", rewrite.name(), rewrite.matchId());
+		}
+	}
+
+	private static String formatSymbolInformation(SymbolInformation si) {
+		return String.format("Found %s at line %s, char: %s - %s", si.getName(),
+				si.getLocation().getRange().getStart().getLine() + 1,
+				si.getLocation().getRange().getStart().getCharacter(),
+				si.getLocation().getRange().getEnd().getCharacter());
+	}
+
+	public void exportAsJson(Config config, Map<String, MigrationTask> tasks) {
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm")
+					.withLocale(Locale.getDefault());
+			String dateTimeformated = LocalDateTime.now().format(formatter);
+
+			AnalyzeCommand.MigrationTasksExport exportData = new AnalyzeCommand.MigrationTasksExport(
+					"Migration Analysis Results", config.appPath(), dateTimeformated, tasks);
+
+			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+			objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+			File outputFile = new File(String.format("%s/analysing-%s-report_%s.json", config.appPath(),
+					config.scanner(), dateTimeformated));
+
+			// Ensure parent directory exists
+			if (outputFile.getParentFile() != null) {
+				outputFile.getParentFile().mkdirs();
+			}
+
+			objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, exportData);
+			logger.infof("📄 Migration tasks exported to: %s", outputFile);
+
+		} catch (IOException e) {
+			logger.errorf("❌ Failed to export migration tasks to JSON: %s", e.getMessage());
+			if (config.verbose()) {
+				logger.error("Export error details:", e);
+			}
+		}
 	}
 }
