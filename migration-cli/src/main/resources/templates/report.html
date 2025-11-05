@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analysis & Migration Report</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        h1 {
+            color: #222;
+        }
+
+        .report-table-container {
+            max-width: 1200px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            background-color: #ffffff;
+
+            /* Add this for more predictable column widths */
+            table-layout: fixed;
+        }
+
+        table th {
+            background-color: #007bff;
+            color: #ffffff;
+            font-weight: 600;
+            padding: 16px 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 13px;
+        }
+
+        table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #555;
+            /* Helps prevent long text from breaking the layout */
+            word-wrap: break-word;
+        }
+
+        table tbody tr:nth-of-type(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f8ff;
+        }
+
+        table tbody tr:last-of-type td {
+            border-bottom: none;
+        }
+
+        /* Target the 1st column (th and td) */
+        table th:nth-child(1),
+        table td:nth-child(1) {
+            width: 20%;
+            text-align: left;
+        }
+
+        table th:nth-child(2),
+        table td:nth-child(2) {
+            width: 15%;
+            text-align: center;
+        }
+
+        table th:nth-child(3),
+        table td:nth-child(3) {
+            width: 5%;
+            text-align: center;
+        }
+
+        /* Target the 4th column (th and td) */
+        table th:nth-child(4),
+        table td:nth-child(4) {
+            width: 60%;
+        }
+
+        /* Targets all <a> tags inside a table cell <td> */
+        table td a {
+            color: #9e4f01;
+            text-decoration: none; /* Removes the default underline */
+        }
+
+        /* Optional: Sets the color for links that have already been clicked */
+        table td a:visited {
+            color: #653301;
+        }
+
+        /* Optional: Adds the underline back when a user hovers over it */
+        table td a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+
+<h1>Analysis & Migration Report</h1>
+
+<div class="report-table-container">
+    <table>
+        <thead>
+        <tr>
+            {#for header in headers}
+                <th>{header}</th>
+            {/for}
+        </tr>
+        </thead>
+        <tbody>
+        {#for row in tableData}
+            <tr>
+                {#for cell in row.cells}
+                    <td>
+                    {#if cell.url}
+                        <a href={cell.url}>{cell.text}</a>
+                    {#else}
+                        {cell.text}
+                    {/if}
+                    </td>
+                {/for}
+            </tr>
+        {/for}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
