@@ -9,14 +9,11 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.CsvRecord;
 import dev.snowdrop.analyze.model.Rewrite;
-import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.mapper.QueryToRecipeMapper;
 import dev.snowdrop.model.Parameter;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.model.RecipeDTO;
 import dev.snowdrop.model.RecipeDTOSerializer;
-import dev.snowdrop.parser.QueryUtils;
-import dev.snowdrop.parser.QueryVisitor;
 import dev.snowdrop.transform.model.CompositeRecipe;
 import org.jboss.logging.Logger;
 
@@ -28,78 +25,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class RewriteService {
-	private static final Logger logger = Logger.getLogger(RewriteService.class);
+public class ScanCommandExecutor {
+
+	private static final Logger logger = Logger.getLogger(CodeScannerService.class);
 	public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
 	public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
 
-	private final Config config;
-
-	public RewriteService(Config config) {
-		this.config = config;
-	}
-
-	public Map<String, List<Rewrite>> executeRewriteCmd(Rule rule) {
-		Map<String, List<Rewrite>> ruleResults = new HashMap<>();
-
-		// Parse first the Rule condition to populate the Query object using the YAML condition query
-		// See the parser maven project for examples, unit tests
-		QueryVisitor visitor = QueryUtils.parseAndVisit(rule.when().condition());
-
-		/*
-		 * Handle the 3 supported cases where the query contains:
-		 *
-		 * - One clause: java.annotation is '@SpringBootApplication'
-		 *
-		 * - Clauses separated with the OR operator:
-		 *
-		 * java.annotation is '@SpringBootApplication' OR java.annotation is '@Deprecated'
-		 *
-		 * - Clauses separated with the AND operator:
-		 *
-		 * java.annotation is '@SpringBootApplication' AND pom.dependency is (groupId='org.springframework.boot',
-		 * artifactId='spring-boot', version='3.4.2')
-		 *
-		 * See grammar definition:
-		 * https://raw.githubusercontent.com/snowdrop/migration-tool/refs/heads/main/parser/src/main/antlr4/Query.g4
-		 */
-		if (visitor.getSimpleQueries().size() == 1) {
-			visitor.getSimpleQueries().stream().findFirst().ifPresent(q -> {
-				List<Rewrite> results = executeQueryCommand(config, Collections.singleton(q));
-				ruleResults.merge(rule.ruleID(), results, (existing, newResults) -> {
-					List<Rewrite> combined = new ArrayList<>(existing);
-					combined.addAll(newResults);
-					return combined;
-				});
-			});
-		} else if (visitor.getOrQueries().size() > 1) {
-			List<Rewrite> results = executeQueryCommand(config, visitor.getOrQueries());
-			ruleResults.merge(rule.ruleID(), results, (existing, newResults) -> {
-				List<Rewrite> combined = new ArrayList<>(existing);
-				combined.addAll(newResults);
-				return combined;
-			});
-		} else if (visitor.getAndQueries().size() > 1) {
-			// TODO: To be tested
-			List<Rewrite> results = executeQueryCommand(config, visitor.getAndQueries());
-			ruleResults.merge(rule.ruleID(), results, (existing, newResults) -> {
-				List<Rewrite> combined = new ArrayList<>(existing);
-				combined.addAll(newResults);
-				return combined;
-			});
-		} else {
-			logger.warnf("Rule %s has no valid condition(s)", rule.ruleID());
-			ruleResults.put(rule.ruleID(), new ArrayList<>());
-		}
-
-		return ruleResults;
-	}
-
-	private List<Rewrite> executeQueryCommand(Config config, Set<Query> queries) {
+	public List<Rewrite> executeQueryCommand(Config config, Set<Query> queries) {
 
 		// Composite recipe - using Map with List to allow multiple entries with same key
 		// List<Map<String, Map<String, String>>> recipes = new ArrayList<>();
@@ -176,7 +116,7 @@ public class RewriteService {
 		return allResults;
 	}
 
-	private ObjectMapper yamlRecipeMapper() {
+	public ObjectMapper yamlRecipeMapper() {
 		YAMLFactory factory = new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
 		ObjectMapper yamlMapper = new ObjectMapper(factory);
 
@@ -189,7 +129,7 @@ public class RewriteService {
 
 	// TODO The following code is similar to the transform maven command.
 	// We should investigate if we could have one method able to generate it for analyze and transform
-	private static boolean execMvnCmd(String AppProjectPath, boolean verbose, String gavs, String rewriteYamlName) {
+	public boolean execMvnCmd(String AppProjectPath, boolean verbose, String gavs, String rewriteYamlName) {
 		try {
 			List<String> command = new ArrayList<>();
 			String outputDirectoryRewriteName = rewriteYamlName.substring(0, rewriteYamlName.lastIndexOf('.'));
@@ -248,7 +188,7 @@ public class RewriteService {
 	 *
 	 * @return List of Rewrite objects for matching records
 	 */
-	private List<Rewrite> findRecordsMatching(String projectPath, String matchIdToSearch) {
+	public List<Rewrite> findRecordsMatching(String projectPath, String matchIdToSearch) {
 		List<Rewrite> results = new ArrayList<>();
 
 		// Openrewrite folder where CSV files are generated
@@ -323,5 +263,4 @@ public class RewriteService {
 
 		return results;
 	}
-
 }

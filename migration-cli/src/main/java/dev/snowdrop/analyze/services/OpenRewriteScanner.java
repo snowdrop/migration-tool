@@ -20,10 +20,12 @@ public class OpenRewriteScanner implements CodeScanner {
 	@Override
 	public Map<String, MigrationTask> analyze(List<Rule> rules) throws IOException {
 		Map<String, MigrationTask> tasks = new HashMap<>();
-		RewriteService rewriteService = new RewriteService(config);
+		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
+		CodeScannerService codeScannerService = new CodeScannerService(config, scanCommandExecutor);
 
 		for (Rule rule : rules) {
-			Map<String, List<Rewrite>> results = rewriteService.executeRewriteCmd(rule);
+			ScanningResult scanningResult = codeScannerService.scan(rule);
+			Map<String, List<Rewrite>> results = scanningResult.getRewrites();
 			tasks.put(rule.ruleID(), new MigrationTask().withRule(rule).withRewriteResults(results.get(rule.ruleID()))
 					.withInstruction(rule.instructions()));
 		}
