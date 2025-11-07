@@ -24,15 +24,9 @@ public class QueryToRecipeMapper {
 					Map.of("matchOnMetaAnnotations", "false" // key and value
 					)),
 
-			"POM.DEPENDENCY",
-			new RecipeMappingConfig("dev.snowdrop.openrewrite.maven.search.FindDependency",
-					Map.of("gavs", "gavs", "groupId", "groupId", // 1
-							// to
-							// 1
-							// translation
-							"artifactId", "artifactId", // 1 to 1 translation
-							"version", "version" // 1 to 1 translation
-					),
+			"POM.DEPENDENCY", new RecipeMappingConfig("dev.snowdrop.openrewrite.maven.search.FindDependency",
+					// 1 to 1 translation for GAV properties
+					Map.of("gavs", "gavs", "groupId", "groupId", "artifactId", "artifactId", "version", "version"),
 					// No additional parameters
 					Map.of()));
 
