@@ -56,7 +56,7 @@ class RewriteServiceTest {
 	void testExecuteRewriteCmd_SimpleCondition() {
 		QueryVisitor mockVisitor = mock(QueryVisitor.class);
 		when(mockVisitor.getSimpleQueries())
-				.thenReturn(Set.of(new Query("java.annotation", "is", Map.of("name", "@SpringBootApplication"))));
+				.thenReturn(Set.of(new Query("java", "annotation", Map.of("name", "@SpringBootApplication"))));
 		when(mockVisitor.getOrQueries()).thenReturn(Collections.emptySet());
 		when(mockVisitor.getAndQueries()).thenReturn(Collections.emptySet());
 
@@ -79,8 +79,8 @@ class RewriteServiceTest {
 		QueryVisitor mockVisitor = mock(QueryVisitor.class);
 		when(mockVisitor.getSimpleQueries()).thenReturn(Collections.emptySet());
 		when(mockVisitor.getOrQueries())
-				.thenReturn(Set.of(new Query("java.annotation", "is", Map.of("name", "@RestController")),
-						new Query("java.annotation", "is", Map.of("name", "@GetMapping"))));
+				.thenReturn(Set.of(new Query("java", "annotation", Map.of("name", "@RestController")),
+						new Query("java", "annotation", Map.of("name", "@GetMapping"))));
 		when(mockVisitor.getAndQueries()).thenReturn(Collections.emptySet());
 
 		Rule rule = mockRule("or-condition-test",
@@ -104,8 +104,8 @@ class RewriteServiceTest {
 		when(mockVisitor.getSimpleQueries()).thenReturn(Collections.emptySet());
 		when(mockVisitor.getOrQueries()).thenReturn(Collections.emptySet());
 		when(mockVisitor.getAndQueries())
-				.thenReturn(Set.of(new Query("pom.dependency", "is", Map.of("name", "spring-boot")),
-						new Query("java.annotation", "is", Map.of("name", "@SpringBootApp"))));
+				.thenReturn(Set.of(new Query("pom", "dependency", Map.of("name", "spring-boot")),
+						new Query("java", "annotation", Map.of("name", "@SpringBootApp"))));
 
 		Rule rule = mockRule("and-condition-test",
 				"pom.dependency is 'spring-boot' AND java.annotation is '@SpringBootApp'");
