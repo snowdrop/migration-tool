@@ -11,11 +11,15 @@ public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
 	Set<Query> simpleQueries = new LinkedHashSet<>();
 	Set<Query> andQueries = new LinkedHashSet<>();
 	Set<Query> orQueries = new LinkedHashSet<>();
+	private boolean inAndOperation = false;
+	private boolean inOrOperation = false;
 
 	@Override
 	public Set<Query> visitOrOperation(QueryParser.OrOperationContext ctx) {
-		// System.out.println("!!! visitOrOperation called !!!");
 		List<QueryParser.OperationContext> OrOps = ctx.operation();
+		boolean previousInOrOperation = inOrOperation;
+		inOrOperation = true;
+
 		OrOps.forEach(orOp -> {
 			// Recursively visit each operand - it might be SimpleClause or another Operation
 			Set<Query> childQueries = visit(orOp);
@@ -23,13 +27,17 @@ public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
 				orQueries.addAll(childQueries);
 			}
 		});
+
+		inOrOperation = previousInOrOperation;
 		return orQueries;
 	}
 
 	@Override
 	public Set<Query> visitAndOperation(QueryParser.AndOperationContext ctx) {
-		// System.out.println("!!! visitAndOperation called !!!");
 		List<QueryParser.OperationContext> AndOps = ctx.operation();
+		boolean previousInAndOperation = inAndOperation;
+		inAndOperation = true;
+
 		AndOps.forEach(andOp -> {
 			// Recursively visit each operand - it might be SimpleClause or another Operation
 			Set<Query> childQueries = visit(andOp);
@@ -37,6 +45,8 @@ public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
 				andQueries.addAll(childQueries);
 			}
 		});
+
+		inAndOperation = previousInAndOperation;
 		return andQueries;
 	}
 
@@ -47,15 +57,11 @@ public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
 
 		// Check if the clause has key-value pairs or just a single value
 		if (cctx.keyValuePair() != null && !cctx.keyValuePair().isEmpty()) {
-			// Handle case with key-value pairs: java.annotation is (name='@SpringBootApplication')
+			// Handle case with key=value pairs: java.annotation is (name='@SpringBootApplication')
 			keyValuePairs = cctx.keyValuePair().stream()
-					.collect(Collectors.toMap(kvp -> kvp.key().getText(), kvp -> removeQuotes(kvp.value().getText()) // Remove
-																																									// quotes
-																																									// from
-																																									// value
-					));
+					.collect(Collectors.toMap(kvp -> kvp.key().getText(), kvp -> removeQuotes(kvp.value().getText())));
 		} else if (cctx.value() != null) {
-			// Handle case with single value: java.annotation is '@SpringBootApplication'
+			// Handle case where there is no k=v but only a single value: java.annotation is '@SpringBootApplication'
 			String value = removeQuotes(cctx.value().getText()); // Remove quotes from value
 			String symbol = cctx.symbol() != null ? cctx.symbol().getText() : "";
 
@@ -66,9 +72,17 @@ public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
 
 		Query qr = new Query(cctx.fileType().getText(), cctx.symbol() != null ? cctx.symbol().getText() : "",
 				keyValuePairs);
-		simpleQueries.add(qr);
 
-		return simpleQueries;
+		// Only add to simpleQueries if this clause is not part of an AND or OR operation
+		if (!inAndOperation && !inOrOperation) {
+			simpleQueries.add(qr);
+		}
+
+		// Create a temporary set to return this single query
+		Set<Query> result = new LinkedHashSet<>();
+		result.add(qr);
+
+		return result;
 	}
 
 	/**
