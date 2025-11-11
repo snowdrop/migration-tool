@@ -3,6 +3,7 @@ package dev.snowdrop.analyze.services;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.Rule;
+import dev.snowdrop.model.Query;
 import dev.snowdrop.parser.QueryUtils;
 import dev.snowdrop.parser.QueryVisitor;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +19,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,7 +61,7 @@ class CodeScannerServiceTest {
 				"simple-condition-rule", null, when, Collections.emptyList(), 1, null);
 
 		QueryVisitor queryVisitor = QueryUtils.parseAndVisit(rule.when().condition());
-		List<Match> matches = List.of(new Match("9a02b8b2-2148-48ea-b29d-6d2f1aa223a5",
+		List<Match> matches = List.of(new Match("1",
 				"2025-11-10_16-11-55-417/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:5|JAVA.ANNOTATION|org.springframework.boot.autoconfigure.SpringBootApplication"));
 		when(scanCommandExecutor.executeQueryCommand(config, queryVisitor.getSimpleQueries())).thenReturn(matches);
 
@@ -87,11 +89,11 @@ class CodeScannerServiceTest {
 				"or-condition-test", null, when, Collections.emptyList(), 1, null);
 
 		QueryVisitor queryVisitor = QueryUtils.parseAndVisit(rule.when().condition());
-		Match controller = new Match("774ce8d3-cbc3-4c2e-9843-9f5f261c9469",
+		Match controller = new Match("1",
 				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:13|JAVA.ANNOTATION|org.springframework.stereotype.Controller");
-		Match autowired = new Match("478c7f05-5ca0-4733-8d06-1d4b2996ac99",
+		Match autowired = new Match("2",
 				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:8|JAVA.ANNOTATION|org.springframework.beans.factory.annotation.Autowired");
-		Match getMapping = new Match("070ba121-691a-4399-9797-517cc23153a1",
+		Match getMapping = new Match("3",
 				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:14|JAVA.ANNOTATION|org.springframework.web.bind.annotation.GetMapping");
 		List<Match> matches = List.of(controller, getMapping, autowired);
 		when(scanCommandExecutor.executeQueryCommand(config, queryVisitor.getOrQueries())).thenReturn(matches);
@@ -103,6 +105,34 @@ class CodeScannerServiceTest {
 		assertTrue(result.containsKey("or-condition-test"));
 		assertEquals(3, result.get("or-condition-test").size());
 		assertThat(result.get("or-condition-test")).isEqualTo(matches);
+
+	}
+
+	@Test
+	void testExecuteRewriteCmdWithAndConditionNew() {
+		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
+				"java.annotation is 'Autowired' AND java.annotation is 'RestController'");
+		Rule rule = new Rule("mandatory", Collections.emptyList(), "desc", 1,
+				List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
+				"and-condition-test", null, when, Collections.emptyList(), 1, null);
+
+		Match controller = new Match("1",
+				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:13|JAVA.ANNOTATION|org.springframework.stereotype.RestController");
+		Match autowired = new Match("2",
+				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:8|JAVA.ANNOTATION|org.springframework.beans.factory.annotation.Autowired");
+		List<Match> matches = List.of(controller, autowired);
+		Query queryAutowired = new Query("java", "annotation", Map.of("name", "Autowired"));
+		Query queryController = new Query("java", "annotation", Map.of("name", "RestController"));
+		when(scanCommandExecutor.executeQueryCommand(config, Set.of(queryAutowired))).thenReturn(List.of(autowired));
+		when(scanCommandExecutor.executeQueryCommand(config, Set.of(queryController))).thenReturn(List.of(controller));
+
+		ScanningResult scanningResult = codeScannerService.scan(rule);
+		assertTrue(scanningResult.isMatchSucceeded());
+		Map<String, List<Match>> result = scanningResult.getMatches();
+		assertNotNull(result);
+		assertTrue(result.containsKey("and-condition-test"));
+		assertEquals(2, result.get("and-condition-test").size());
+		assertThat(result.get("and-condition-test")).containsExactlyInAnyOrderElementsOf(matches);
 
 	}
 
