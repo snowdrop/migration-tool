@@ -1,7 +1,7 @@
 package dev.snowdrop.analyze.services;
 
 import dev.snowdrop.analyze.Config;
-import dev.snowdrop.analyze.model.Rewrite;
+import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.parser.QueryUtils;
 import dev.snowdrop.parser.QueryVisitor;
@@ -26,7 +26,7 @@ public class CodeScannerService {
 		// Parse first the Rule condition to populate the Query object using the YAML condition query
 		// See the parser maven project for examples, unit tests
 		QueryVisitor visitor = QueryUtils.parseAndVisit(rule.when().condition());
-		Map<String, List<Rewrite>> results = new HashMap<>();
+		Map<String, List<Match>> results = new HashMap<>();
 		boolean matchSucceeded = false;
 
 		/*
@@ -54,9 +54,9 @@ public class CodeScannerService {
 			results.put(rule.ruleID(), scanCommandExecutor.executeQueryCommand(config, visitor.getOrQueries()));
 			matchSucceeded = results.get(rule.ruleID()).stream().anyMatch(r -> r != null);
 		} else if (!visitor.getAndQueries().isEmpty()) {
-			List<Rewrite> allRewrites = results.put(rule.ruleID(),
+			List<Match> allMatches = results.put(rule.ruleID(),
 					scanCommandExecutor.executeQueryCommand(config, visitor.getAndQueries()));
-			results.put(rule.ruleID(), allRewrites);
+			results.put(rule.ruleID(), allMatches);
 		} else {
 			logger.warnf("Rule %s has no valid condition(s)", rule.ruleID());
 			results.put(rule.ruleID(), Collections.emptyList());

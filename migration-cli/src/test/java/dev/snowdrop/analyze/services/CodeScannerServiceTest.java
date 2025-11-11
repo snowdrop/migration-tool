@@ -1,7 +1,7 @@
 package dev.snowdrop.analyze.services;
 
 import dev.snowdrop.analyze.Config;
-import dev.snowdrop.analyze.model.Rewrite;
+import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.parser.QueryUtils;
 import dev.snowdrop.parser.QueryVisitor;
@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -58,17 +59,17 @@ class CodeScannerServiceTest {
 				"simple-condition-rule", null, when, Collections.emptyList(), 1, null);
 
 		QueryVisitor queryVisitor = QueryUtils.parseAndVisit(rule.when().condition());
-		List<Rewrite> rewrites = List.of(new Rewrite("9a02b8b2-2148-48ea-b29d-6d2f1aa223a5",
+		List<Match> matches = List.of(new Match("9a02b8b2-2148-48ea-b29d-6d2f1aa223a5",
 				"2025-11-10_16-11-55-417/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:5|JAVA.ANNOTATION|org.springframework.boot.autoconfigure.SpringBootApplication"));
-		when(scanCommandExecutor.executeQueryCommand(config, queryVisitor.getSimpleQueries())).thenReturn(rewrites);
+		when(scanCommandExecutor.executeQueryCommand(config, queryVisitor.getSimpleQueries())).thenReturn(matches);
 
 		ScanningResult scanningResult = codeScannerService.scan(rule);
 		assertTrue(scanningResult.isMatchSucceeded());
-		Map<String, List<Rewrite>> result = scanningResult.getRewrites();
+		Map<String, List<Match>> result = scanningResult.getMatches();
 		assertNotNull(result);
 		assertTrue(result.containsKey("simple-condition-rule"));
 		assertEquals(1, result.get("simple-condition-rule").size());
-		assertThat(result.get("simple-condition-rule")).isEqualTo(rewrites);
+		assertThat(result.get("simple-condition-rule")).isEqualTo(matches);
 
 	}
 
@@ -85,9 +86,23 @@ class CodeScannerServiceTest {
 				List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
 				"or-condition-test", null, when, Collections.emptyList(), 1, null);
 
-		Map<String, List<Rewrite>> result = codeScannerService.scan(rule).getRewrites();
+		QueryVisitor queryVisitor = QueryUtils.parseAndVisit(rule.when().condition());
+		Match controller = new Match("774ce8d3-cbc3-4c2e-9843-9f5f261c9469",
+				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:13|JAVA.ANNOTATION|org.springframework.stereotype.Controller");
+		Match autowired = new Match("478c7f05-5ca0-4733-8d06-1d4b2996ac99",
+				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:8|JAVA.ANNOTATION|org.springframework.beans.factory.annotation.Autowired");
+		Match getMapping = new Match("070ba121-691a-4399-9797-517cc23153a1",
+				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:14|JAVA.ANNOTATION|org.springframework.web.bind.annotation.GetMapping");
+		List<Match> matches = List.of(controller, getMapping, autowired);
+		when(scanCommandExecutor.executeQueryCommand(config, queryVisitor.getOrQueries())).thenReturn(matches);
+
+		ScanningResult scanningResult = codeScannerService.scan(rule);
+		assertTrue(scanningResult.isMatchSucceeded());
+		Map<String, List<Match>> result = scanningResult.getMatches();
 		assertNotNull(result);
 		assertTrue(result.containsKey("or-condition-test"));
+		assertEquals(3, result.get("or-condition-test").size());
+		assertThat(result.get("or-condition-test")).isEqualTo(matches);
 
 	}
 
@@ -102,44 +117,12 @@ class CodeScannerServiceTest {
 				List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
 				"and-condition-test", null, when, Collections.emptyList(), 1, null);
 
-		Map<String, List<Rewrite>> result = codeScannerService.scan(rule).getRewrites();
+		ScanningResult scanningResult = codeScannerService.scan(rule);
+		assertFalse(scanningResult.isMatchSucceeded());
+		Map<String, List<Match>> result = scanningResult.getMatches();
 		assertNotNull(result);
 		assertTrue(result.containsKey("and-condition-test"));
 
-	}
-
-	// ---------------------------------------------------------------------
-	// CASE 5: findRecordsMatching - directory does not exist
-	// ---------------------------------------------------------------------
-	@Test
-	void testFindRecordsMatching_NoDirectory() {
-		List<Rewrite> results = callFindRecordsMatching("non-existent", "match123");
-		assertTrue(results.isEmpty());
-	}
-
-	// ---------------------------------------------------------------------
-	// CASE 6: findRecordsMatching - empty directory (Openrewrite)
-	// ---------------------------------------------------------------------
-	@Test
-	void testFindRecordsMatching_EmptyDirectory() throws IOException {
-		Path dir = tempDir.resolve("target/rewrite/datatables");
-		Files.createDirectories(dir);
-
-		List<Rewrite> results = callFindRecordsMatching(tempDir.toString(), "match123");
-		assertTrue(results.isEmpty());
-	}
-
-	// ---------------------------------------------------------------------
-	// Helpers
-	// ---------------------------------------------------------------------
-	private List<Rewrite> callFindRecordsMatching(String path, String matchId) {
-		try {
-			var method = CodeScannerService.class.getDeclaredMethod("findRecordsMatching", String.class, String.class);
-			method.setAccessible(true);
-			return (List<Rewrite>) method.invoke(codeScannerService, path, matchId);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 }

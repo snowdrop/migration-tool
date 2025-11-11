@@ -7,8 +7,8 @@ import com.github.freva.asciitable.Column;
 import com.github.freva.asciitable.HorizontalAlign;
 import com.github.freva.asciitable.Styler;
 import dev.snowdrop.analyze.Config;
+import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.MigrationTask;
-import dev.snowdrop.analyze.model.Rewrite;
 import dev.snowdrop.analyze.model.html.Cell;
 import dev.snowdrop.analyze.model.html.Row;
 import dev.snowdrop.analyze.utils.TerminalUtils;
@@ -299,8 +299,8 @@ public class ResultsService {
 					if (result instanceof SymbolInformation symbolInfo) {
 						String symbolDetails = formatSymbolInformation(symbolInfo);
 						allResultsDetails.append(symbolDetails).append("\n").append(symbolInfo.getLocation().getUri());
-					} else if (result instanceof Rewrite rewrite) {
-						String rewriteDetails = formatRewriteImproved(rewrite);
+					} else if (result instanceof Match match) {
+						String rewriteDetails = formatRewriteImproved(match);
 						allResultsDetails.append(rewriteDetails);
 					} else {
 						// Fallback for unknown types
@@ -323,8 +323,8 @@ public class ResultsService {
 		return tableData;
 	}
 
-	private static String formatRewriteImproved(Rewrite rewrite) {
-		String name = rewrite.name();
+	private static String formatRewriteImproved(Match match) {
+		String name = match.name();
 
 		// Parse the name format: parentFolderName/csvFileName:line_number|pattern.symbol|type
 		if (name.contains("/") && name.contains(":") && name.contains("|")) {
@@ -337,14 +337,14 @@ public class ResultsService {
 				String type = lineAndDetails.length > 2 ? lineAndDetails[2] : "N/A";
 
 				return String.format("File: %s\nLine: %s\nPattern: %s\nType: %s\nMatch ID: %s", path, lineNumber,
-						patternSymbol, type, rewrite.matchId());
+						patternSymbol, type, match.matchId());
 			} catch (Exception e) {
 				// Fallback if parsing fails
-				return String.format("Rewrite match: %s (ID: %s)", rewrite.name(), rewrite.matchId());
+				return String.format("Rewrite match: %s (ID: %s)", match.name(), match.matchId());
 			}
 		} else {
 			// Fallback for unexpected format
-			return String.format("Rewrite match: %s (ID: %s)", rewrite.name(), rewrite.matchId());
+			return String.format("Rewrite match: %s (ID: %s)", match.name(), match.matchId());
 		}
 	}
 

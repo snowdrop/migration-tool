@@ -8,7 +8,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBeanBuilder;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.CsvRecord;
-import dev.snowdrop.analyze.model.Rewrite;
+import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.mapper.QueryToRecipeMapper;
 import dev.snowdrop.model.Parameter;
 import dev.snowdrop.model.Query;
@@ -39,7 +39,7 @@ public class ScanCommandExecutor {
 	public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
 	public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
 
-	public List<Rewrite> executeQueryCommand(Config config, Set<Query> queries) {
+	public List<Match> executeQueryCommand(Config config, Set<Query> queries) {
 
 		// Composite recipe - using Map with List to allow multiple entries with same key
 		// List<Map<String, Map<String, String>>> recipes = new ArrayList<>();
@@ -102,7 +102,7 @@ public class ScanCommandExecutor {
 		}
 
 		// Iterate through the recipe list to get the results
-		List<Rewrite> allResults = new ArrayList<>();
+		List<Match> allResults = new ArrayList<>();
 		recipeDTOs.stream().forEach(dto -> {
 			// Get from the DTO the matchId to search about
 			String matchId = dto.parameters().stream().filter(p -> p.parameter().equals("matchId"))
@@ -188,8 +188,8 @@ public class ScanCommandExecutor {
 	 *
 	 * @return List of Rewrite objects for matching records
 	 */
-	public List<Rewrite> findRecordsMatching(String projectPath, String matchIdToSearch) {
-		List<Rewrite> results = new ArrayList<>();
+	public List<Match> findRecordsMatching(String projectPath, String matchIdToSearch) {
+		List<Match> results = new ArrayList<>();
 
 		// Openrewrite folder where CSV files are generated
 		Path openRewriteCsvPath = Paths.get(projectPath, "target", "rewrite", "datatables");
@@ -241,7 +241,7 @@ public class ScanCommandExecutor {
 													// line numbering)
 													pattern, symbolType, fileType);
 
-											results.add(new Rewrite(matchIdToSearch, name));
+											results.add(new Match(matchIdToSearch, name));
 											logger.infof("Found match in %s at record %d: %s", csvFile, i + 1, name);
 										}
 									}

@@ -9,7 +9,7 @@ import java.util.List;
 public class MigrationTask {
 	private Rule rule;
 	private List<SymbolInformation> lsResults;
-	private List<Rewrite> rewriteResults;
+	private List<Match> matchResults;
 	private Rule.Instruction instruction;
 
 	public MigrationTask() {
@@ -30,8 +30,8 @@ public class MigrationTask {
 		return this;
 	}
 
-	public MigrationTask withRewriteResults(List<Rewrite> rewriteResults) {
-		this.rewriteResults = rewriteResults;
+	public MigrationTask withMatchResults(List<Match> matchResults) {
+		this.matchResults = matchResults;
 		return this;
 	}
 
@@ -43,7 +43,7 @@ public class MigrationTask {
 		return lsResults;
 	}
 
-	public List<Rewrite> getRewriteResults() {
-		return rewriteResults;
+	public List<Match> getRewriteResults() {
+		return matchResults;
 	}
 }
