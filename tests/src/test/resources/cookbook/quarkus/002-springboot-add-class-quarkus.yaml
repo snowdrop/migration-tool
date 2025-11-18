@@ -1,0 +1,44 @@
+- category: mandatory
+  customVariables: []
+  description: SpringBoot to Quarkus
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "SpringBoot to Quarkus."
+  ruleID: 002-springboot-add-class-quarkus
+  when:
+    condition: java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
+  order: 2
+  instructions:
+    ai:
+      #- promptMessage: "Add a new class com.todo.app.TodoApplication which implements QuarkusApplication. Use stdout to send a message: Hello user using args[0]. Next Pass as first argument: TodoApplication.class to Quarkus.run()"
+      - tasks:
+          - "Add a new class com.todo.app.TodoApplication which implements QuarkusApplication."
+          - "Don't add the annotation @QuarkusMain to this class."
+          - "Use stdout to send a message: Hello user using args[0] within the method which override run()."
+
+    manual:
+      - todo: "See openrewrite instructions"
+    openrewrite:
+      - name: Add a Quarkus class from class template"
+        description: Add a Quarkus class from class template
+        recipeList:
+          - dev.snowdrop.openrewrite.recipe.spring.CreateJavaClassFromTemplate:
+              className: "TodoApplication"
+              modifier: "public"
+              packageName: "com.todo.app"
+              sourceRoot: "src/main/java"
+              classTemplate: |
+                package %s;
+                import io.quarkus.runtime.QuarkusApplication;
+                %sclass %s implements QuarkusApplication {
+                    @Override
+                    public int run(String... args) throws Exception {
+                      System.out.println("Hello user " + args[0]);
+                      return 0;
+                    }
+                }
+        gav:
+          - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
