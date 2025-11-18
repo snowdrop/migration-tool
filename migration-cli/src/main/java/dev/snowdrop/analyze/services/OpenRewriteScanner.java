@@ -6,6 +6,7 @@ import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.Rule;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,9 @@ public class OpenRewriteScanner implements CodeScanner {
 
 		for (Rule rule : rules) {
 			ScanningResult scanningResult = codeScannerService.scan(rule);
-			Map<String, List<Match>> results = scanningResult.getMatches();
+			Map<String, List<Match>> results = scanningResult.isMatchSucceeded()
+					? scanningResult.getMatches()
+					: Collections.emptyMap();
 			tasks.put(rule.ruleID(), new MigrationTask().withRule(rule).withMatchResults(results.get(rule.ruleID()))
 					.withInstruction(rule.instructions()));
 		}
