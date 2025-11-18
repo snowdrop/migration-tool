@@ -1,0 +1,21 @@
+- category: mandatory
+  customVariables: []
+  description: SpringBoot to Quarkus
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "SpringBoot to Quarkus."
+  ruleID: 005-springboot-to-quarkus-rest-annotations-and
+  when:
+    condition: |
+      java.annotation is 'org.springframework.stereotype.Controller' AND
+      java.annotation is 'org.springframework.web.bind.annotation.GetMapping'
+  order: 4
+  instructions:
+    ai:
+      - tasks:
+          - "TODO"
+    manual:
+      - todo: "See openrewrite instructions"

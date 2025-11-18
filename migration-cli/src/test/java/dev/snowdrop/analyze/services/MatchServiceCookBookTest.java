@@ -1,7 +1,7 @@
 package dev.snowdrop.analyze.services;
 
 import dev.snowdrop.analyze.Config;
-import dev.snowdrop.analyze.model.Rewrite;
+import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,9 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class RewriteServiceCookBookTest {
+class MatchServiceCookBookTest {
 
-	private RewriteService rewriteService;
+	private CodeScannerService codeScannerService;
 	private Config config;
 
 	@TempDir
@@ -36,7 +36,8 @@ class RewriteServiceCookBookTest {
 	@BeforeEach
 	void setUp() {
 		config = createTestConfig();
-		rewriteService = new RewriteService(config);
+		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
+		codeScannerService = new CodeScannerService(config, scanCommandExecutor);
 	}
 
 	// ============================================
@@ -49,7 +50,7 @@ class RewriteServiceCookBookTest {
 		Rule rule = createRule000_AnnotationNotFound();
 
 		// When
-		Map<String, List<Rewrite>> result = rewriteService.executeRewriteCmd(rule);
+		Map<String, List<Match>> result = codeScannerService.scan(rule).getMatches();
 
 		// Then
 		assertNotNull(result);
@@ -65,7 +66,7 @@ class RewriteServiceCookBookTest {
 		Rule rule = createRule001_ReplaceBomQuarkus();
 
 		// When
-		Map<String, List<Rewrite>> result = rewriteService.executeRewriteCmd(rule);
+		Map<String, List<Match>> result = codeScannerService.scan(rule).getMatches();
 
 		// Then
 		assertNotNull(result);
@@ -80,7 +81,7 @@ class RewriteServiceCookBookTest {
 		Rule rule = createRule002_AddQuarkusClass();
 
 		// When
-		Map<String, List<Rewrite>> result = rewriteService.executeRewriteCmd(rule);
+		Map<String, List<Match>> result = codeScannerService.scan(rule).getMatches();
 
 		// Then
 		assertNotNull(result);
@@ -94,7 +95,7 @@ class RewriteServiceCookBookTest {
 		Rule rule = createRule003_QuarkusMainAnnotation();
 
 		// When
-		Map<String, List<Rewrite>> result = rewriteService.executeRewriteCmd(rule);
+		Map<String, List<Match>> result = codeScannerService.scan(rule).getMatches();
 
 		// Then
 		assertNotNull(result);
@@ -108,7 +109,7 @@ class RewriteServiceCookBookTest {
 		Rule rule = createRule004_RestAnnotations();
 
 		// When
-		Map<String, List<Rewrite>> result = rewriteService.executeRewriteCmd(rule);
+		Map<String, List<Match>> result = codeScannerService.scan(rule).getMatches();
 
 		// Then
 		assertNotNull(result);
@@ -120,7 +121,7 @@ class RewriteServiceCookBookTest {
 	@MethodSource("provideRealWorldRules")
 	void testExecuteRewriteCmd_WithRealWorldRules(String ruleId, Rule rule, String expectedConditionType) {
 		// When
-		Map<String, List<Rewrite>> result = rewriteService.executeRewriteCmd(rule);
+		Map<String, List<Match>> result = codeScannerService.scan(rule).getMatches();
 
 		// Then
 		assertNotNull(result, "Result should not be null for rule: " + ruleId);
@@ -137,7 +138,7 @@ class RewriteServiceCookBookTest {
 		Rule rule = createRule001_ReplaceBomQuarkus();
 
 		// When
-		rewriteService.executeRewriteCmd(rule);
+		codeScannerService.scan(rule);
 
 		// Then
 		Path rewriteYml = tempDir.resolve("rewrite.yml");
@@ -153,7 +154,7 @@ class RewriteServiceCookBookTest {
 		Rule rule = createRule004_RestAnnotations();
 
 		// When
-		rewriteService.executeRewriteCmd(rule);
+		codeScannerService.scan(rule);
 
 		// Then
 		Path rewriteYml = tempDir.resolve("rewrite.yml");
@@ -172,9 +173,9 @@ class RewriteServiceCookBookTest {
 		Rule rule3 = createRule003_QuarkusMainAnnotation(); // order: 3
 
 		// When
-		Map<String, List<Rewrite>> result1 = rewriteService.executeRewriteCmd(rule1);
-		Map<String, List<Rewrite>> result2 = rewriteService.executeRewriteCmd(rule2);
-		Map<String, List<Rewrite>> result3 = rewriteService.executeRewriteCmd(rule3);
+		Map<String, List<Match>> result1 = codeScannerService.scan(rule1).getMatches();
+		Map<String, List<Match>> result2 = codeScannerService.scan(rule2).getMatches();
+		Map<String, List<Match>> result3 = codeScannerService.scan(rule3).getMatches();
 
 		// Then
 		assertNotNull(result1);
@@ -213,7 +214,7 @@ class RewriteServiceCookBookTest {
 	/**
 	 * Rule 000: Search non existent annotation (dummy.SpringApplication)
 	 */
-	private Rule createRule000_AnnotationNotFound() {
+	public static Rule createRule000_AnnotationNotFound() {
 		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
 				"java.annotation is 'dummy.SpringApplication'");
 
@@ -387,10 +388,11 @@ class RewriteServiceCookBookTest {
 	// ============================================
 
 	private static Stream<Arguments> provideRealWorldRules() {
-		RewriteServiceCookBookTest testInstance = new RewriteServiceCookBookTest();
+		MatchServiceCookBookTest testInstance = new MatchServiceCookBookTest();
 		testInstance.tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "test-" + System.currentTimeMillis());
 		testInstance.config = testInstance.createTestConfig();
-		testInstance.rewriteService = new RewriteService(testInstance.config);
+		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
+		testInstance.codeScannerService = new CodeScannerService(testInstance.config, scanCommandExecutor);
 
 		return Stream.of(
 				Arguments.of("000-springboot-annotation-notfound", testInstance.createRule000_AnnotationNotFound(),

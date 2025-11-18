@@ -2,10 +2,11 @@ package dev.snowdrop.analyze.services;
 
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.MigrationTask;
-import dev.snowdrop.analyze.model.Rewrite;
+import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.Rule;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,11 +21,15 @@ public class OpenRewriteScanner implements CodeScanner {
 	@Override
 	public Map<String, MigrationTask> analyze(List<Rule> rules) throws IOException {
 		Map<String, MigrationTask> tasks = new HashMap<>();
-		RewriteService rewriteService = new RewriteService(config);
+		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
+		CodeScannerService codeScannerService = new CodeScannerService(config, scanCommandExecutor);
 
 		for (Rule rule : rules) {
-			Map<String, List<Rewrite>> results = rewriteService.executeRewriteCmd(rule);
-			tasks.put(rule.ruleID(), new MigrationTask().withRule(rule).withRewriteResults(results.get(rule.ruleID()))
+			ScanningResult scanningResult = codeScannerService.scan(rule);
+			Map<String, List<Match>> results = scanningResult.isMatchSucceeded()
+					? scanningResult.getMatches()
+					: Collections.emptyMap();
+			tasks.put(rule.ruleID(), new MigrationTask().withRule(rule).withMatchResults(results.get(rule.ruleID()))
 					.withInstruction(rule.instructions()));
 		}
 
