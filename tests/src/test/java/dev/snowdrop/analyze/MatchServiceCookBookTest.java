@@ -4,28 +4,31 @@ import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.analyze.services.CodeScannerService;
 import dev.snowdrop.analyze.services.ScanCommandExecutor;
+import dev.snowdrop.analyze.services.ScanningResult;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
-import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFile;
-import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MatchServiceCookBookTest {
 
@@ -35,134 +38,154 @@ class MatchServiceCookBookTest {
 	@TempDir
 	Path tempDir;
 
-	Path rulesPath;
+	//    private final Path parentProjectPath = Paths.get(".").toAbsolutePath().getParent().getParent();
+	//    private final String appPath = parentProjectPath + "/applications/spring-boot-todo-app";
+
+	private final Path appPath = Paths
+			.get(Objects.requireNonNull(getClass().getClassLoader().getResource("spring-boot-todo-app")).toURI());
+
+	MatchServiceCookBookTest() throws URISyntaxException {
+	}
 
 	@BeforeEach
-	void setUp() throws Exception {
-		String applicationToScan = "spring-boot-todo-app";
-		Path destinationPath = tempDir.resolve(applicationToScan);
-		copyFolder(applicationToScan, destinationPath);
-
-		String cookBook = "cookbook";
-		rulesPath = tempDir.resolve(cookBook);
-		copyFolder(cookBook, rulesPath);
-
-		config = createTestConfig(destinationPath, rulesPath);
-
+	void setUp() {
+		config = createTestConfig();
 		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
 		codeScannerService = new CodeScannerService(config, scanCommandExecutor);
+
 	}
 
 	// ============================================
-	// Tests based on resources/cookbook yaml
+	// Tests based on cookbook/rules/quarkus
 	// ============================================
 
-	@ParameterizedTest
-	@CsvSource({"quarkus/000-springboot-annotation-notfound.yaml,spring-boot-todo-app"})
-	void testRule000_SpringBootAnnotationNotFound(String ruleSubPath, String appName) throws IOException {
-		// Given a path of rules, got the rule to be processed
-		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
+	@Test
+	void testRule000_SpringBootAnnotationNotFound() {
+		// Given
+		Rule rule = createRule000_AnnotationNotFound();
 
 		// When
-		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+		ScanningResult scanningResult = codeScannerService.scan(rule);
+		Map<String, List<Match>> result = scanningResult.getMatches();
 
 		// Then
-		assertNotNull(result);
+		assertFalse(scanningResult.isMatchSucceeded());
 		assertTrue(result.containsKey("000-springboot-annotation-notfound"));
 
-		Path rewriteYml = tempDir.resolve(Path.of(appName, "rewrite.yml"));
-		assertTrue(Files.exists(rewriteYml));
 	}
 
-	@ParameterizedTest
-	@CsvSource({"quarkus/001-springboot-replace-bom-quarkus.yaml"})
-	void testRule001_ReplaceBomQuarkus(String ruleSubPath) throws IOException {
+	@Test
+	void testRule001_ReplaceBomQuarkus() {
 		// Given
-		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
+		Rule rule = createRule001_ReplaceBomQuarkus();
 
 		// When
-		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+		ScanningResult scanningResult = codeScannerService.scan(rule);
+		Map<String, List<Match>> result = scanningResult.getMatches();
 
 		// Then
 		assertNotNull(result);
+		assertTrue(scanningResult.isMatchSucceeded());
 		assertTrue(result.containsKey("001-springboot-replace-bom-quarkus"));
-		assertEquals(1, rules.getFirst().order());
-		assertEquals("mandatory", rules.getFirst().category());
+		assertThat(result.get("001-springboot-replace-bom-quarkus")).isNotNull();
+		assertEquals(1, rule.order());
+		assertEquals("mandatory", rule.category());
 	}
 
-	@ParameterizedTest
-	@CsvSource({"quarkus/002-springboot-add-class-quarkus.yaml"})
-	void testRule002_AddQuarkusClass(String ruleSubPath) throws IOException {
+	@Test
+	void testRule002_AddQuarkusClass() {
 		// Given
-		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
+		Rule rule = createRule002_AddQuarkusClass();
 
 		// When
-		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+		ScanningResult scanningResult = codeScannerService.scan(rule);
+		Map<String, List<Match>> result = scanningResult.getMatches();
 
 		// Then
 		assertNotNull(result);
+		assertTrue(scanningResult.isMatchSucceeded());
 		assertTrue(result.containsKey("002-springboot-add-class-quarkus"));
-		assertEquals(2, rules.getFirst().order());
+		assertThat(result.get("002-springboot-add-class-quarkus")).isNotNull();
+		assertEquals(2, rule.order());
 	}
 
-	@ParameterizedTest
-	@CsvSource({"quarkus/003-springboot-to-quarkus-main-annotation.yaml"})
-	void testRule003_QuarkusMainAnnotation(String ruleSubPath) throws IOException {
+	@Test
+	void testRule003_QuarkusMainAnnotation() {
 		// Given
-		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
+		Rule rule = createRule003_QuarkusMainAnnotation();
 
 		// When
-		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+		ScanningResult scanningResult = codeScannerService.scan(rule);
+		Map<String, List<Match>> result = scanningResult.getMatches();
 
 		// Then
+		assertTrue(scanningResult.isMatchSucceeded());
 		assertNotNull(result);
-		assertTrue(result.containsKey("003-springboot-to-quarkus-main-annotation"));
-		assertEquals(3, rules.getFirst().order());
+		assertTrue(result.containsKey("003-springboot-to-quarkusmain-annotation"));
+		assertThat(result.get("003-springboot-to-quarkusmain-annotation")).isNotNull();
+		assertEquals(3, rule.order());
+
 	}
 
-	@ParameterizedTest
-	@CsvSource({"quarkus/004-springboot-to-quarkus-rest-annotations.yaml"})
-	void testRule004_RestAnnotations_WithOrConditions(String ruleSubPath) throws IOException {
+	@Test
+	void testRule004_RestAnnotations_WithOrConditions() {
 		// Given
-		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
+		Rule rule = createRule004_RestAnnotations();
 
 		// When
-		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+		ScanningResult scanningResult = codeScannerService.scan(rule);
+		Map<String, List<Match>> result = scanningResult.getMatches();
 
 		// Then
+		assertTrue(scanningResult.isMatchSucceeded());
 		assertNotNull(result);
 		assertTrue(result.containsKey("004-springboot-to-quarkus-rest-annotations"));
-		assertEquals(4, rules.getFirst().order());
+		assertThat(result.get("004-springboot-to-quarkus-rest-annotations")).isNotNull();
+		assertEquals(4, rule.order());
 	}
 
 	@ParameterizedTest
-	@CsvSource({"quarkus/001-springboot-replace-bom-quarkus.yaml,spring-boot-todo-app"})
-	void testExecuteRewriteCmd_WithDependencyCondition(String ruleSubPath, String appName) throws IOException {
-		// Given
-		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
-
+	@MethodSource("provideRealWorldRules")
+	void testExecuteRewriteCmd_WithRealWorldRules(String ruleId, Rule rule, String expectedConditionType) {
 		// When
-		codeScannerService.scan(rules.getFirst()).getMatches();
+		Map<String, List<Match>> result = codeScannerService.scan(rule).getMatches();
 
 		// Then
-		Path rewriteYml = tempDir.resolve(Path.of(appName, "rewrite.yml"));
+		assertNotNull(result, "Result should not be null for rule: " + ruleId);
+		assertTrue(result.containsKey(ruleId), "Result should contain key: " + ruleId);
+
+		// Verify YAML file creation
+
+		Path rewriteYml = tempDir.resolve(appPath + "/rewrite.yml");
+		assertTrue(Files.exists(rewriteYml), "rewrite.yml should exist for rule: " + ruleId);
+	}
+
+	@Test
+	void testExecuteRewriteCmd_WithDependencyCondition() throws IOException {
+		// Given
+		Rule rule = createRule001_ReplaceBomQuarkus();
+
+		// When
+		codeScannerService.scan(rule);
+
+		// Then
+		Path rewriteYml = tempDir.resolve(appPath + "/rewrite.yml");
 		String content = Files.readString(rewriteYml);
 
 		assertTrue(content.contains("dev.snowdrop.openrewrite.MatchConditions"));
 		assertFalse(content.isEmpty());
 	}
 
-	@ParameterizedTest
-	@CsvSource({"quarkus/004-springboot-to-quarkus-rest-annotations.yaml,spring-boot-todo-app"})
-	void testExecuteRewriteCmd_WithComplexOrConditions(String ruleSubPath, String appName) throws IOException {
+	@Test
+	void testExecuteRewriteCmd_WithComplexOrConditions() throws IOException {
 		// Given
-		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
+		Rule rule = createRule004_RestAnnotations();
 
 		// When
-		codeScannerService.scan(rules.getFirst()).getMatches();
+		codeScannerService.scan(rule);
 
 		// Then
-		Path rewriteYml = tempDir.resolve(Path.of(appName, "rewrite.yml"));
+		Path rewriteYml = tempDir.resolve(appPath + "/rewrite.yml");
 		assertTrue(Files.exists(rewriteYml));
 
 		String content = Files.readString(rewriteYml);
@@ -171,22 +194,24 @@ class MatchServiceCookBookTest {
 	}
 
 	@Test
-	void testMultipleRulesInSequence() throws IOException {
-		// Given - Simulate sequential execution of Rules according to order: 000 to 004
-		List<Rule> rules = parseRulesFromFolder(Path.of(rulesPath.toString(), "quarkus"));
+	void testMultipleRulesInSequence() {
+		// Given - Simulate sequential execution of Rules according to order
+		Rule rule1 = createRule001_ReplaceBomQuarkus(); // order: 1
+		Rule rule2 = createRule002_AddQuarkusClass(); // order: 2
+		Rule rule3 = createRule003_QuarkusMainAnnotation(); // order: 3
 
 		// When
-		Map<String, List<Match>> result1 = codeScannerService.scan(rules.get(0)).getMatches();
-		Map<String, List<Match>> result2 = codeScannerService.scan(rules.get(1)).getMatches();
-		Map<String, List<Match>> result3 = codeScannerService.scan(rules.get(2)).getMatches();
+		Map<String, List<Match>> result1 = codeScannerService.scan(rule1).getMatches();
+		Map<String, List<Match>> result2 = codeScannerService.scan(rule2).getMatches();
+		Map<String, List<Match>> result3 = codeScannerService.scan(rule3).getMatches();
 
 		// Then
 		assertNotNull(result1);
 		assertNotNull(result2);
 		assertNotNull(result3);
 
-		assertTrue(rules.get(0).order() < rules.get(1).order());
-		assertTrue(rules.get(2).order() < rules.get(3).order());
+		assertTrue(rule1.order() < rule2.order());
+		assertTrue(rule2.order() < rule3.order());
 	}
 
 	@Test
@@ -208,22 +233,6 @@ class MatchServiceCookBookTest {
 		// Then
 		assertTrue(rule.labels().contains("konveyor.io/source=springboot"));
 		assertTrue(rule.labels().contains("konveyor.io/target=quarkus"));
-	}
-
-	@Disabled
-	@ParameterizedTest
-	@MethodSource("provideRealWorldRules")
-	void testExecuteRewriteCmd_WithRealWorldRules(String ruleId, Rule rule, String expectedConditionType) {
-		// When
-		Map<String, List<Match>> result = codeScannerService.scan(rule).getMatches();
-
-		// Then
-		assertNotNull(result, "Result should not be null for rule: " + ruleId);
-		assertTrue(result.containsKey(ruleId), "Result should contain key: " + ruleId);
-
-		// Verify YAML file creation
-		Path rewriteYml = tempDir.resolve("rewrite.yml");
-		assertTrue(Files.exists(rewriteYml), "rewrite.yml should exist for rule: " + ruleId);
 	}
 
 	// ============================================
@@ -406,10 +415,10 @@ class MatchServiceCookBookTest {
 	// Provider for parametrized tests
 	// ============================================
 
-	private static Stream<Arguments> provideRealWorldRules() {
+	private static Stream<Arguments> provideRealWorldRules() throws URISyntaxException {
 		MatchServiceCookBookTest testInstance = new MatchServiceCookBookTest();
 		testInstance.tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "test-" + System.currentTimeMillis());
-		testInstance.config = testInstance.createTestConfig(testInstance.tempDir, testInstance.rulesPath);
+		testInstance.config = testInstance.createTestConfig();
 		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
 		testInstance.codeScannerService = new CodeScannerService(testInstance.config, scanCommandExecutor);
 
@@ -426,31 +435,8 @@ class MatchServiceCookBookTest {
 						"or-conditions"));
 	}
 
-	private static void copyFolder(String source, Path target, CopyOption... options) throws Exception {
-		URL resourceUrl = MatchServiceCookBookTest.class.getClassLoader().getResource(source);
-		if (resourceUrl == null) {
-			throw new RuntimeException("Resource folder not found: " + source);
-		}
-		Path sourcePath = Paths.get(resourceUrl.toURI());
-		Path destinationPath = target;
-
-		Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				Files.createDirectories(destinationPath.resolve(sourcePath.relativize(dir).toString()));
-				return FileVisitResult.CONTINUE;
-			}
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				Files.copy(file, destinationPath.resolve(sourcePath.relativize(file).toString()), options);
-				return FileVisitResult.CONTINUE;
-			}
-		});
-	}
-
-	private Config createTestConfig(Path applicationToScan, Path rulesPath) {
-		return new Config(applicationToScan.toString(), rulesPath, "springboot", "quarkus", "./jdt/konveyor-jdtls",
+	private Config createTestConfig() {
+		return new Config(appPath.toString(), Paths.get("./rules"), "springboot", "quarkus", "./jdt/konveyor-jdtls",
 				"./jdt", "io.konveyor.tackle.ruleEntry", false, "json", "openrewrite");
 	}
-
 }
