@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
@@ -157,17 +158,12 @@ public class AnalyzeCommand implements Runnable {
 		resultsService.showCsvTable(tableData);
 
 		// Export rules, results and migration instructions
-		switch (config.output()) {
-			case "html" :
-				resultsService.exportAsHtml(config, tableData);
-				break;
-			case "csv" :
-				resultsService.exportAsCsv(config, tableData);
-				break;
-			case "json" :
-			default :
-				resultsService.exportAsJson(config, tasks);
-				break;
+		String output = Objects.requireNonNullElse(config.output(), "json");
+
+		switch (output) {
+			case "html" -> resultsService.exportAsHtml(config, tableData);
+			case "csv" -> resultsService.exportAsCsv(config, tableData);
+			default -> resultsService.exportAsJson(config, tasks);
 		}
 
 		logger.infof("⏳ Waiting for commands to complete...");
