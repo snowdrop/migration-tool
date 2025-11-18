@@ -72,19 +72,20 @@ class MatchServiceCookBookTest {
         assertTrue(Files.exists(rewriteYml));
     }
 
-    @Test
-    void testRule001_ReplaceBomQuarkus() {
+    @ParameterizedTest
+    @CsvSource({"quarkus/001-springboot-replace-bom-quarkus.yaml,spring-boot-todo-app"})
+    void testRule001_ReplaceBomQuarkus(String ruleSubPath, String appName) throws IOException {
         // Given
-        Rule rule = createRule001_ReplaceBomQuarkus();
+        List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(),ruleSubPath));
 
         // When
-        Map<String, List<Match>> result = codeScannerService.scan(rule).getMatches();
+        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
 
         // Then
         assertNotNull(result);
         assertTrue(result.containsKey("001-springboot-replace-bom-quarkus"));
-        assertEquals(1, rule.order());
-        assertEquals("mandatory", rule.category());
+        assertEquals(1, rules.getFirst().order());
+        assertEquals("mandatory", rules.getFirst().category());
     }
 
     @Test
