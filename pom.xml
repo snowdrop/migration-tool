@@ -37,7 +37,9 @@
     <modules>
         <module>openrewrite-recipes</module>
         <module>parser</module>
+        <module>mapper</module>
         <module>migration-cli</module>
+        <module>tests</module>
     </modules>
 
     <dependencyManagement>

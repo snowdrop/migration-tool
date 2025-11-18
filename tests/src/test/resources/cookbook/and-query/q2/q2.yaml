@@ -1,0 +1,23 @@
+# mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -r ../cookbook/tests/and-query/q1 --scanner openrewrite"
+# Should be false
+- category: mandatory
+  customVariables: []
+  description: SpringBoot to Quarkus
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "SpringBoot to Quarkus."
+  ruleID: test-and-query
+  when:
+    condition: |
+      java.annotation is 'org.springframework.stereotype.Controller' AND
+      java.annotation is 'org.springframework.web.bind.annotation.GetMappingg'
+  order: 4
+  instructions:
+    ai:
+      - tasks:
+          - "TODO"
+    manual:
+      - todo: "See openrewrite instructions"

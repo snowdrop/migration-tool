@@ -1,0 +1,13 @@
+# Should be false
+- category: optional
+  customVariables: []
+  description: Remove the SpringBoot @SpringBootApplication annotation
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "The dummy.SpringApplication annotation do not exist"
+  ruleID: 000-springboot-annotation-notfound
+  when:
+    condition: java.annotation is 'dummy.SpringApplication'

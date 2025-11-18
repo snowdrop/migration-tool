@@ -1,0 +1,35 @@
+- category: mandatory
+  customVariables: []
+  description: SpringBoot to Quarkus
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "SpringBoot to Quarkus."
+  ruleID: 004-springboot-to-quarkus-rest-annotations
+  when:
+    condition: |
+      java.annotation is 'org.springframework.stereotype.Controller' OR
+      java.annotation is 'org.springframework.beans.factory.annotation.Autowired' OR
+      java.annotation is 'org.springframework.web.bind.annotation.GetMapping' OR
+      java.annotation is 'org.springframework.web.bind.annotation.DeleteMapping' OR
+      java.annotation is 'org.springframework.web.bind.annotation.PathVariable' OR
+      java.annotation is 'org.springframework.web.bind.annotation.PostMapping' OR
+      java.annotation is 'org.springframework.web.bind.annotation.RequestBody' OR
+      java.annotation is 'org.springframework.web.bind.annotation.ResponseBody'
+  order: 4
+  instructions:
+    ai:
+      - tasks:
+          - "TODO"
+    manual:
+      - todo: "See openrewrite instructions"
+    # TODO
+    # openrewrite:
+    #   - name: SpringBoot to Quarkus
+    #     description: Replace the SpringBootApplication annotation with QuarkusMain, Remove the statement SpringApplication.run(), Add the io.quarkus.runtime.Quarkus.run() method within the main void method and pass the String[] args as parameter"
+    #     recipeList:
+    #     -
+    #     gav:
+    #     - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT

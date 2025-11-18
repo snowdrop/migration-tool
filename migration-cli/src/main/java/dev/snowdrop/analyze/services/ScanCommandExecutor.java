@@ -9,7 +9,7 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.CsvRecord;
 import dev.snowdrop.analyze.model.Match;
-import dev.snowdrop.mapper.QueryToRecipeMapper;
+import dev.snowdrop.mapper.openrewrite.QueryToRecipeMapper;
 import dev.snowdrop.model.Parameter;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.model.RecipeDTO;
@@ -129,7 +129,7 @@ public class ScanCommandExecutor {
 
 	// TODO The following code is similar to the transform maven command.
 	// We should investigate if we could have one method able to generate it for analyze and transform
-	public boolean execMvnCmd(String AppProjectPath, boolean verbose, String gavs, String rewriteYamlName) {
+	public boolean execMvnCmd(String appProjectPath, boolean verbose, String gavs, String rewriteYamlName) {
 		try {
 			List<String> command = new ArrayList<>();
 			String outputDirectoryRewriteName = rewriteYamlName.substring(0, rewriteYamlName.lastIndexOf('.'));
@@ -151,7 +151,7 @@ public class ScanCommandExecutor {
 			logger.infof("Executing command: %s", commandStr);
 
 			ProcessBuilder processBuilder = new ProcessBuilder(command);
-			processBuilder.directory(Paths.get(AppProjectPath).toFile());
+			processBuilder.directory(Paths.get(appProjectPath).toFile());
 			processBuilder.redirectErrorStream(true);
 
 			Process process = processBuilder.start();

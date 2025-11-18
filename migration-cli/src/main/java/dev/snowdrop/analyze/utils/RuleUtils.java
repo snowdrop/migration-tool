@@ -66,23 +66,6 @@ public class RuleUtils {
 		};
 	}
 
-	public static List<Rule> loadRules(Path rulesPath) {
-		logger.info("📋 Loading migration rules...");
-
-		try {
-			File rulesDir = new File(rulesPath.toUri());
-			if (!rulesDir.exists()) {
-				logger.errorf("⚠️  Rules directory not found: %s", rulesPath);
-				return List.of();
-			}
-
-			return YamlRuleParser.parseRulesFromFolder(rulesDir.toPath());
-		} catch (Exception e) {
-			logger.errorf("❌ Error loading rules: %s", e.getMessage());
-			return List.of();
-		}
-	}
-
 	/**
 	 * Add a method to get the value of the SymbolKind File(1), Module(2), Namespace(3), Package(4), Class(5),
 	 * Method(6), Property(7), Field(8), Constructor(9), Enum(10), Interface(11), Function(12), Variable(13),
