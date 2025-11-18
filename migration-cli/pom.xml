@@ -24,6 +24,11 @@
         </dependency>
         <dependency>
             <groupId>dev.snowdrop</groupId>
+            <artifactId>mapper</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.snowdrop</groupId>
             <artifactId>openrewrite-recipes</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -12,7 +12,6 @@
     <artifactId>parser</artifactId>
     <name>Migration Tool :: Query parser</name>
 
-
     <dependencies>
         <!-- ANTLR -->
         <dependency>

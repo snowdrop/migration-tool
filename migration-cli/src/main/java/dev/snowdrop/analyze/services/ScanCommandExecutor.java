@@ -9,7 +9,7 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.CsvRecord;
 import dev.snowdrop.analyze.model.Match;
-import dev.snowdrop.mapper.QueryToRecipeMapper;
+import dev.snowdrop.mapper.openrewrite.QueryToRecipeMapper;
 import dev.snowdrop.model.Parameter;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.model.RecipeDTO;
