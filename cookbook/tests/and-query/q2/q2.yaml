@@ -1,5 +1,6 @@
-# mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -r ../cookbook/tests/and-query/q1 --scanner openrewrite"
-# Should be false
+# Cmd: mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -r ../cookbook/tests/and-query/q2"
+# Scanner: rewrite
+# Match: false
 - category: mandatory
   customVariables: []
   description: SpringBoot to Quarkus

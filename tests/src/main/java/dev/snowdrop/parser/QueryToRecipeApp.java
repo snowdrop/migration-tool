@@ -1,15 +1,14 @@
-package dev.snowdrop.mapper.tool;
+package dev.snowdrop.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import dev.snowdrop.mapper.openrewrite.QueryToRecipeMapper;
+import dev.snowdrop.mapper.config.ScannerConfig;
+import dev.snowdrop.mapper.java.annotation.JavaAnnotationMapper;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.model.RecipeDTO;
-import dev.snowdrop.model.RecipeDTOSerializer;
-import dev.snowdrop.parser.QueryUtils;
-import dev.snowdrop.parser.QueryVisitor;
+import dev.snowdrop.serializer.RecipeDTOSerializer;
 import dev.snowdrop.reconciler.MatchingUtils;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,7 +29,10 @@ public class QueryToRecipeApp {
 		visitor.getSimpleQueries().forEach(q -> {
 			app.logQueryResult(q);
 			// Create for each Query the corresponding RecipeDTO
-			RecipeDTO dto = QueryToRecipeMapper.map(q);
+			ScannerConfig scannerConfig = new ScannerConfig();
+			scannerConfig.setScanner("openrewrite");
+			JavaAnnotationMapper mapper = new JavaAnnotationMapper();
+			RecipeDTO dto = (RecipeDTO) mapper.map(q);
 			dto = dto.withId(MatchingUtils.generateUID());
 			System.out.println(dto);
 
@@ -51,8 +53,11 @@ public class QueryToRecipeApp {
 		visitor = QueryUtils.parseAndVisit(query);
 		visitor.getAndQueries().forEach(q -> {
 			app.logQueryResult(q);
-			// Create for each Query the corresponding RecipeDTO
-			RecipeDTO dto = QueryToRecipeMapper.map(q);
+
+			ScannerConfig scannerConfig = new ScannerConfig();
+			scannerConfig.setScanner("openrewrite");
+			JavaAnnotationMapper mapper = new JavaAnnotationMapper();
+			RecipeDTO dto = (RecipeDTO) mapper.map(q);
 			dto = dto.withId(MatchingUtils.generateUID());
 			System.out.println(dto);
 
@@ -77,8 +82,11 @@ public class QueryToRecipeApp {
 		visitor = QueryUtils.parseAndVisit(query);
 		visitor.getOrQueries().forEach(q -> {
 			app.logQueryResult(q);
-			// Create for each Query the corresponding RecipeDTO
-			RecipeDTO dto = QueryToRecipeMapper.map(q);
+
+			ScannerConfig scannerConfig = new ScannerConfig();
+			scannerConfig.setScanner("openrewrite");
+			JavaAnnotationMapper mapper = new JavaAnnotationMapper();
+			RecipeDTO dto = (RecipeDTO) mapper.map(q);
 			dto = dto.withId(MatchingUtils.generateUID());
 			System.out.println(dto);
 

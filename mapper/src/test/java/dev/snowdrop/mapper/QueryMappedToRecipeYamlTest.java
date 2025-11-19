@@ -5,10 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import dev.snowdrop.mapper.openrewrite.QueryToRecipeMapper;
+import dev.snowdrop.mapper.config.ScannerConfig;
+import dev.snowdrop.mapper.java.annotation.JavaAnnotationMapper;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.model.RecipeDTO;
-import dev.snowdrop.model.RecipeDTOSerializer;
+import dev.snowdrop.serializer.RecipeDTOSerializer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -36,7 +37,10 @@ public class QueryMappedToRecipeYamlTest {
 		Query q = new Query("java", "annotation", Map.of("name", "@SpringBootApplication"));
 
 		// Map the query to its DTO
-		RecipeDTO dto = QueryToRecipeMapper.map(q);
+		ScannerConfig scannerConfig = new ScannerConfig();
+		scannerConfig.setScanner("openrewrite");
+		JavaAnnotationMapper mapper = new JavaAnnotationMapper();
+		RecipeDTO dto = (RecipeDTO) mapper.map(q);
 
 		// Get the UUID created as dto parameter
 		String matchId = dto.parameters().stream().filter(p -> p.parameter().equals("matchId")).map(p -> p.value())
@@ -59,12 +63,15 @@ public class QueryMappedToRecipeYamlTest {
 
 	@Test
 	public void shouldPomDependencyMapRecipeDTO() {
-		Query query = new Query("pom", "dependency", Map.of("gavs", "io.quarkus:quarkus-core:3.16.2", "groupId",
+		Query q = new Query("pom", "dependency", Map.of("gavs", "io.quarkus:quarkus-core:3.16.2", "groupId",
 				"io.quarkus", "artifactId", "quarkus-core", "version", "3.16.2"));
 
 		String generatedYaml = null;
 		try {
-			RecipeDTO dto = QueryToRecipeMapper.map(query);
+			ScannerConfig scannerConfig = new ScannerConfig();
+			scannerConfig.setScanner("openrewrite");
+			JavaAnnotationMapper mapper = new JavaAnnotationMapper();
+			RecipeDTO dto = (RecipeDTO) mapper.map(q);
 			generatedYaml = yamlMapper.writeValueAsString(dto);
 
 			// Get the UUID created as dto parameter

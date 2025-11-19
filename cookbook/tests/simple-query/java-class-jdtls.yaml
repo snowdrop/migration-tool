@@ -1,6 +1,6 @@
-# Cmd: mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -r ../cookbook/tests/or-query/q2"
-# Scanner: rewrite
-# Match: false
+# cmd: mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -r ../cookbook/tests/simple-query/java-class-jdtls.yaml"
+# scanner: jdtls
+# Match: true
 - category: mandatory
   customVariables: []
   description: SpringBoot to Quarkus
@@ -13,8 +13,7 @@
   ruleID: test-and-query
   when:
     condition: |
-      java.annotation is 'org.springframework.stereotype.Controllerr' OR
-      java.annotation is 'org.springframework.web.bind.annotation.GetMappinggg'
+      java.class is 'TaskController'
   order: 4
   instructions:
     ai:

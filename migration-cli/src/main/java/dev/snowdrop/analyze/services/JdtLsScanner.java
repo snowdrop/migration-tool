@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated
 public class JdtLsScanner implements CodeScanner {
 	private final Config config;
 	private final JdtLsClient jdtLsClient;

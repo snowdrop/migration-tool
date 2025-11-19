@@ -1,10 +1,13 @@
 package dev.snowdrop.analyze.services;
 
 import dev.snowdrop.analyze.Config;
+import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -13,18 +16,48 @@ import java.util.concurrent.TimeoutException;
 public class AnalyzeService {
 
 	private final Config config;
+	private final ScannerFactory scannerFactory;
+	private final CodeScannerService codeScannerService;
+
+	public AnalyzeService(Config config) {
+		this(config, new ScannerFactory());
+	}
 
 	public AnalyzeService(Config config, ScannerFactory scannerFactory) {
 		this.config = config;
 		this.scannerFactory = scannerFactory;
+		this.codeScannerService = new CodeScannerService(config, new ScanCommandExecutor());
 	}
 
-	private final ScannerFactory scannerFactory;
-
-	public Map<String, MigrationTask> analyzeCodeFromRule(String scannerType, List<Rule> rules)
-			throws IOException, ExecutionException, InterruptedException, TimeoutException {
+	@Deprecated
+	public Map<String, MigrationTask> analyzeCodeFromRule(String scannerType, List<Rule> rules) throws IOException {
 		CodeScanner scanner = scannerFactory.createScanner(ScannerFactory.Scanner.fromLabel(scannerType), config);
 		return scanner.analyze(rules);
+	}
+
+	/**
+	 * Analyzes code from rules using dynamic scanner selection.
+	 * Unlike analyzeCodeFromRule, this method doesn't select a scanner upfront.
+	 * Instead, it dynamically selects the appropriate scanner for each query
+	 * during iteration based on the query-scanner mapping configuration.
+	 *
+	 * @param rules the migration rules to analyze
+	 * @return map of rule ID to migration tasks with analysis results
+	 */
+	public Map<String, MigrationTask> analyzeCodeWithDynamicScanning(List<Rule> rules) {
+		Map<String, MigrationTask> tasks = new HashMap<>();
+
+		for (Rule rule : rules) {
+			ScanningResult scanningResult = codeScannerService.scan(rule);
+			Map<String, List<Match>> results = scanningResult.isMatchSucceeded()
+					? scanningResult.getMatches()
+					: Collections.emptyMap();
+
+			tasks.put(rule.ruleID(), new MigrationTask().withRule(rule).withMatchResults(results.get(rule.ruleID()))
+					.withInstruction(rule.instructions()));
+		}
+
+		return tasks;
 	}
 
 }

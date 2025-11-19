@@ -7,6 +7,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.analyze.utils.LSClient;
+import dev.snowdrop.model.JavaClassDTO;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.parser.QueryUtils;
 import dev.snowdrop.parser.QueryVisitor;
@@ -43,9 +44,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
-import static dev.snowdrop.analyze.utils.RuleUtils.getLocationCode;
-import static dev.snowdrop.analyze.utils.RuleUtils.getLocationName;
-import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
+import static dev.snowdrop.mapper.JdtLsUtils.getLocationCode;
+import static dev.snowdrop.mapper.JdtLsUtils.getLocationName;
 
 public class JdtLsClient {
 	private static final Logger logger = Logger.getLogger(JdtLsClient.class);
@@ -176,81 +176,40 @@ public class JdtLsClient {
 		}
 	}
 
-	public Map<String, List<SymbolInformation>> executeLsCmd(Rule rule) {
-		Map<String, List<SymbolInformation>> ruleResults = new HashMap<>();
-
-		// Log the LS Query command to be executed on the LS server
-		logger.infof("==== CLIENT: Sending the command '%s' ...", config.lsCmd());
+	public List<SymbolInformation> executeCommand(Config config, Query q, Object dto) {
+		// TODO: Find a way to cast properly
+		JavaClassDTO javaClassDTO = (JavaClassDTO) dto;
+		List<Object> cmdArguments = List.of(javaClassDTO.cmdParams());
 
 		if (process == null || !process.isAlive()) {
-			throw new IllegalStateException("JDT-LS process is not running");
+			throw new IllegalStateException("The jdt-ls server/process is not running");
 		}
 
-		// Parse first the Rule condition to populate the Query object using the YAML condition query
-		// See the parser maven project for examples, unit tests
-		QueryVisitor visitor = QueryUtils.parseAndVisit(rule.when().condition());
+		try {
+			CompletableFuture<List<SymbolInformation>> symbolsFuture = future
+					.thenApplyAsync(ignored -> executeLsCmd(config, cmdArguments)).exceptionally(throwable -> {
+						logger.errorf(
+								String.format("Error executing LS command for query %s-%s", q.fileType(), q.symbol()),
+								throwable.getMessage(), throwable);
+						return new ArrayList<SymbolInformation>();
+					});
 
-		/*
-		 * Handle the 3 supported cases where the query contains:
-		 *
-		 * - One clause: FIND java.annotation WHERE (name='@SpringBootApplication')
-		 *
-		 * - Clauses separated with the OR operator:
-		 *
-		 * FIND java.annotation WHERE (name='@SpringBootApplication') OR java.annotation WHERE (name='@Deprecated')
-		 *
-		 * - Clauses separated with the AND operator:
-		 *
-		 * FIND java.annotation WHERE (name='@SpringBootApplication') AND pom.dependency WHERE
-		 * (groupId='org.springframework.boot', artifactId='spring-boot', version='3.4.2')
-		 *
-		 */
-		if (visitor.getSimpleQueries().size() == 1) {
-			visitor.getSimpleQueries().stream().findFirst().ifPresent(q -> {
-				List<SymbolInformation> results = executeQueryCommand(config, rule, q);
-				ruleResults.putAll(Map.of(rule.ruleID(), results));
-			});
-		} else if (visitor.getOrQueries().size() > 1) {
-			visitor.getOrQueries().stream().forEach(q -> {
-				List<SymbolInformation> results = executeQueryCommand(config, rule, q);
-				ruleResults.putAll(Map.of(rule.ruleID(), results));
-			});
-		} else if (visitor.getAndQueries().size() > 1) {
-			visitor.getAndQueries().stream().forEach(q -> {
-				List<SymbolInformation> results = executeQueryCommand(config, rule, q);
-				ruleResults.putAll(Map.of(rule.ruleID(), results));
-			});
-		} else {
-			logger.warnf("Rule %s has no valid condition(s)", rule.ruleID());
-			ruleResults.put(rule.ruleID(), new ArrayList<>());
+			return symbolsFuture.get(); // Wait for completion
+		} catch (InterruptedException | ExecutionException e) {
+			logger.errorf(String.format("Failed to execute command for %s-%s", q.fileType(), q.symbol()),
+					e.getMessage());
+			return null;
 		}
-
-		/*
-		 * Old code deprecated in favor of the Antlr parser ! // Handle three cases: single java.referenced, OR
-		 * conditions, AND conditions if (rule.when().or() != null && !rule.when().or().isEmpty()) {
-		 * logger.infof("Rule When includes: %s between java.referenced", "OR"); rule.when().or().forEach(condition -> {
-		 * List<SymbolInformation> results = executeCommandForCondition(config, rule, condition.javaReferenced());
-		 * ruleResults.putAll(Map.of(rule.ruleID(),results)); }); } else if (rule.when().and() != null &&
-		 * !rule.when().and().isEmpty()) { logger.infof("Rule When includes: %s between java.referenced", "AND");
-		 * rule.when().and().forEach(condition -> { List<SymbolInformation> results = executeCommandForCondition(config,
-		 * rule, condition.javaReferenced()); ruleResults.putAll(Map.of(rule.ruleID(),results)); }); } else if
-		 * (rule.when().javaReferenced() != null) { logger.infof("Rule When includes: single java.referenced");
-		 * List<SymbolInformation> results = executeCommandForCondition(config, rule, rule.when().javaReferenced());
-		 * ruleResults.putAll(Map.of(rule.ruleID(),results)); } else {
-		 * logger.warnf("Rule %s has no valid java.referenced conditions", rule.ruleID());
-		 * ruleResults.put(rule.ruleID(), new ArrayList<>()); }
-		 */
-
-		return ruleResults;
 	}
 
-	public List<SymbolInformation> executeQueryCommand(Config config, Rule rule, Query q) {
+	@Deprecated
+	public List<SymbolInformation> executeCommand(Config config, Query q) {
 
 		String location = getLocationCode(q.symbol());
 		if (location == null || location.equals("0")) {
-			throw new IllegalStateException(
-					"The language server's location code don't exist using the when condition of the rule: "
-							+ rule.ruleID());
+			throw new IllegalStateException(String.format(
+					"The language server's location code don't exist using the when condition of the query: %s-%s",
+					q.fileType(), q.symbol()));
 		}
 
 		// Map the Query object with the RuleEntry parameters to be sent to the Language Server
@@ -270,47 +229,22 @@ public class JdtLsClient {
 
 		try {
 			CompletableFuture<List<SymbolInformation>> symbolsFuture = future
-					.thenApplyAsync(ignored -> executeCmd(config, rule, cmdArguments)).exceptionally(throwable -> {
-						logger.errorf("Error executing LS command for rule %s: %s", rule.ruleID(),
+					.thenApplyAsync(ignored -> executeLsCmd(config, cmdArguments)).exceptionally(throwable -> {
+						logger.errorf(
+								String.format("Error executing LS command for query %s-%s", q.fileType(), q.symbol()),
 								throwable.getMessage(), throwable);
 						return new ArrayList<SymbolInformation>();
 					});
 
 			return symbolsFuture.get(); // Wait for completion
 		} catch (InterruptedException | ExecutionException e) {
-			logger.errorf("Failed to execute command for rule %s: %s", rule.ruleID(), e.getMessage());
+			logger.errorf(String.format("Failed to execute command for %s-%s", q.fileType(), q.symbol()),
+					e.getMessage());
 			return null;
 		}
 	}
 
-	@Deprecated
-	private List<SymbolInformation> executeCommandForCondition(JdtLsClient client, Rule rule,
-			Rule.JavaReferenced javaReferenced) {
-		var paramsMap = Map.of("project", "java", // hard coded value to java within the analyzer java external-provider
-				"location", getLocationCode(javaReferenced.location()), "query", javaReferenced.pattern(), // pattern
-				// from the
-				// rule
-				"analysisMode", "source-only" // 2 modes are supported: source-only and full
-		);
-
-		List<Object> cmdArguments = List.of(paramsMap);
-
-		try {
-			CompletableFuture<List<SymbolInformation>> symbolsFuture = client.future
-					.thenApplyAsync(ignored -> executeCmd(config, rule, cmdArguments)).exceptionally(throwable -> {
-						logger.errorf("Error executing LS command for rule %s: %s", rule.ruleID(),
-								throwable.getMessage(), throwable);
-						return new ArrayList<SymbolInformation>();
-					});
-
-			return symbolsFuture.get(); // Wait for completion
-		} catch (InterruptedException | ExecutionException e) {
-			logger.errorf("Failed to execute command for rule %s: %s", rule.ruleID(), e.getMessage());
-			return null;
-		}
-	}
-
-	public List<SymbolInformation> executeCmd(Config config, Rule rule, List<Object> arguments) {
+	public List<SymbolInformation> executeLsCmd(Config config, List<Object> arguments) {
 		List<Object> cmdArguments = (arguments != null && !arguments.isEmpty()) ? arguments : Collections.EMPTY_LIST;
 
 		ExecuteCommandParams commandParams = new ExecuteCommandParams(config.lsCmd(), cmdArguments);
@@ -326,8 +260,8 @@ public class JdtLsClient {
 		List<SymbolInformation> symbolInformationList = new ArrayList<>();
 
 		if (result != null) {
-			logger.infof("==== CLIENT: --- Command params: %s.", commandParams);
-			logger.infof("==== CLIENT: --- Search Results found for rule: %s.", rule.ruleID());
+			logger.infof("==== CLIENT: --- Search Results found !");
+			logger.infof("==== CLIENT: --- Command executed with params: %s.", commandParams);
 			logger.infof("==== CLIENT: --- JSON response: %s", gson.toJson(result));
 
 			try {
@@ -402,6 +336,102 @@ public class JdtLsClient {
 		}
 
 		return symbolInformationList;
+	}
+
+	@Deprecated
+	public Map<String, List<SymbolInformation>> executeLsCmd(Rule rule) {
+		Map<String, List<SymbolInformation>> ruleResults = new HashMap<>();
+
+		// Log the LS Query command to be executed on the LS server
+		logger.infof("==== CLIENT: Sending the command '%s' ...", config.lsCmd());
+
+		if (process == null || !process.isAlive()) {
+			throw new IllegalStateException("JDT-LS process is not running");
+		}
+
+		// Parse first the Rule condition to populate the Query object using the YAML condition query
+		// See the parser maven project for examples, unit tests
+		QueryVisitor visitor = QueryUtils.parseAndVisit(rule.when().condition());
+
+		/*
+		 * Handle the 3 supported cases where the query contains:
+		 *
+		 * - One clause: FIND java.annotation WHERE (name='@SpringBootApplication')
+		 *
+		 * - Clauses separated with the OR operator:
+		 *
+		 * FIND java.annotation WHERE (name='@SpringBootApplication') OR java.annotation WHERE (name='@Deprecated')
+		 *
+		 * - Clauses separated with the AND operator:
+		 *
+		 * FIND java.annotation WHERE (name='@SpringBootApplication') AND pom.dependency WHERE
+		 * (groupId='org.springframework.boot', artifactId='spring-boot', version='3.4.2')
+		 *
+		 */
+		if (visitor.getSimpleQueries().size() == 1) {
+			visitor.getSimpleQueries().stream().findFirst().ifPresent(q -> {
+				List<SymbolInformation> results = executeCommand(config, q);
+				ruleResults.putAll(Map.of(rule.ruleID(), results));
+			});
+		} else if (visitor.getOrQueries().size() > 1) {
+			visitor.getOrQueries().stream().forEach(q -> {
+				List<SymbolInformation> results = executeCommand(config, q);
+				ruleResults.putAll(Map.of(rule.ruleID(), results));
+			});
+		} else if (visitor.getAndQueries().size() > 1) {
+			visitor.getAndQueries().stream().forEach(q -> {
+				List<SymbolInformation> results = executeCommand(config, q);
+				ruleResults.putAll(Map.of(rule.ruleID(), results));
+			});
+		} else {
+			logger.warnf("Rule %s has no valid condition(s)", rule.ruleID());
+			ruleResults.put(rule.ruleID(), new ArrayList<>());
+		}
+
+		/*
+		 * Old code deprecated in favor of the Antlr parser ! // Handle three cases: single java.referenced, OR
+		 * conditions, AND conditions if (rule.when().or() != null && !rule.when().or().isEmpty()) {
+		 * logger.infof("Rule When includes: %s between java.referenced", "OR"); rule.when().or().forEach(condition -> {
+		 * List<SymbolInformation> results = executeCommandForCondition(config, rule, condition.javaReferenced());
+		 * ruleResults.putAll(Map.of(rule.ruleID(),results)); }); } else if (rule.when().and() != null &&
+		 * !rule.when().and().isEmpty()) { logger.infof("Rule When includes: %s between java.referenced", "AND");
+		 * rule.when().and().forEach(condition -> { List<SymbolInformation> results = executeCommandForCondition(config,
+		 * rule, condition.javaReferenced()); ruleResults.putAll(Map.of(rule.ruleID(),results)); }); } else if
+		 * (rule.when().javaReferenced() != null) { logger.infof("Rule When includes: single java.referenced");
+		 * List<SymbolInformation> results = executeCommandForCondition(config, rule, rule.when().javaReferenced());
+		 * ruleResults.putAll(Map.of(rule.ruleID(),results)); } else {
+		 * logger.warnf("Rule %s has no valid java.referenced conditions", rule.ruleID());
+		 * ruleResults.put(rule.ruleID(), new ArrayList<>()); }
+		 */
+
+		return ruleResults;
+	}
+
+	@Deprecated
+	private List<SymbolInformation> executeCommandForCondition(JdtLsClient client, Rule rule,
+			Rule.JavaReferenced javaReferenced) {
+		var paramsMap = Map.of("project", "java", // hard coded value to java within the analyzer java external-provider
+				"location", getLocationCode(javaReferenced.location()), "query", javaReferenced.pattern(), // pattern
+				// from the
+				// rule
+				"analysisMode", "source-only" // 2 modes are supported: source-only and full
+		);
+
+		List<Object> cmdArguments = List.of(paramsMap);
+
+		try {
+			CompletableFuture<List<SymbolInformation>> symbolsFuture = client.future
+					.thenApplyAsync(ignored -> executeLsCmd(config, cmdArguments)).exceptionally(throwable -> {
+						logger.errorf("Error executing LS command for rule %s: %s", rule.ruleID(),
+								throwable.getMessage(), throwable);
+						return new ArrayList<SymbolInformation>();
+					});
+
+			return symbolsFuture.get(); // Wait for completion
+		} catch (InterruptedException | ExecutionException e) {
+			logger.errorf("Failed to execute command for rule %s: %s", rule.ruleID(), e.getMessage());
+			return null;
+		}
 	}
 
 }
