@@ -1,0 +1,54 @@
+name: CI to build the executable
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        required: false
+        description: Binary platform
+        type: string
+        default: "macOS-latest"
+  workflow_call:
+    inputs:
+      platform:
+        required: false
+        description: Binary platform
+        type: string
+        default: "macOS-latest"
+
+jobs:
+  build:
+    name: 'Build with Graal on ${{ inputs.platform }}'
+    runs-on: ${{ inputs.platform }}
+    steps:
+      - name: 'Check out repository'
+        uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: 'true'
+
+      - name: 'Build project'
+        run: mvn install -DskipTests
+
+      - name: 'Build Native Image'
+        run: mvn -ntp -B --file pom.xml -Pnative package -DskipTests -pl migration-cli
+
+      - name: 'Create distribution'
+        run: mvn -ntp -B --file pom.xml -Pdist package -DskipTests -pl migration-cli
+
+      - name: 'Upload build artifact'
+        uses: actions/upload-artifact@v5
+        with:
+          name: migration-cli-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            server/target/distributions/*.tar.gz
