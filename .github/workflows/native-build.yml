@@ -16,7 +16,7 @@ jobs:
   # Build native executable per runner
   package:
     name: 'Build with Graal on ${{ github.event.inputs.platform }}'
-    runs-on: ${{ github.event.inputs.platform }}
+    runs-on: "${{ github.event.inputs.platform }}"
     steps:
       - name: 'Check out repository'
         uses: actions/checkout@v5
