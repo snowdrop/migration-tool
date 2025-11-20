@@ -51,4 +51,4 @@ jobs:
         with:
           name: migration-cli-${{ runner.os }}-${{ runner.arch }}
           path: |
-            server/target/distributions/*.tar.gz
+            migration-cli/target/distributions/*.tar.gz
