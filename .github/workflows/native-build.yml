@@ -15,6 +15,9 @@ on:
         description: Binary platform
         type: string
         default: "macOS-latest"
+  # To be removed when job is finalized
+  pull_request:
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   # Build native executable per runner
