@@ -1,4 +1,4 @@
-name: Native build
+name: CI to build the executable
 
 on:
   workflow_dispatch:
@@ -8,15 +8,18 @@ on:
         description: Binary platform
         type: string
         default: "macOS-latest"
-  # To be removed when job is finalized
-  pull_request:
-    types: [ opened, synchronize, reopened ]
+  workflow_call:
+    inputs:
+      platform:
+        required: false
+        description: Binary platform
+        type: string
+        default: "macOS-latest"
 
 jobs:
-  # Build native executable per runner
-  package:
-    name: 'Build with Graal on ${{ github.event.inputs.platform }}'
-    runs-on: ubuntu-latest
+  build:
+    name: 'Build with Graal on ${{ inputs.platform }}'
+    runs-on: ${{ inputs.platform }}
     steps:
       - name: 'Check out repository'
         uses: actions/checkout@v5
