@@ -61,7 +61,7 @@ class CodeScannerServiceTest {
 				"simple-condition-rule", null, when, Collections.emptyList(), 1, null);
 
 		QueryVisitor queryVisitor = QueryUtils.parseAndVisit(rule.when().condition());
-		List<Match> matches = List.of(new Match("1",
+		List<Match> matches = List.of(new Match("1", "openrewrite",
 				"2025-11-10_16-11-55-417/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:5|JAVA.ANNOTATION|org.springframework.boot.autoconfigure.SpringBootApplication"));
 		when(scanCommandExecutor.executeQueryCommand(config, queryVisitor.getSimpleQueries())).thenReturn(matches);
 
@@ -89,11 +89,11 @@ class CodeScannerServiceTest {
 				"or-condition-test", null, when, Collections.emptyList(), 1, null);
 
 		QueryVisitor queryVisitor = QueryUtils.parseAndVisit(rule.when().condition());
-		Match controller = new Match("1",
+		Match controller = new Match("1", "openrewrite",
 				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:13|JAVA.ANNOTATION|org.springframework.stereotype.Controller");
-		Match autowired = new Match("2",
+		Match autowired = new Match("2", "openrewrite",
 				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:8|JAVA.ANNOTATION|org.springframework.beans.factory.annotation.Autowired");
-		Match getMapping = new Match("3",
+		Match getMapping = new Match("3", "openrewrite",
 				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:14|JAVA.ANNOTATION|org.springframework.web.bind.annotation.GetMapping");
 		List<Match> matches = List.of(controller, getMapping, autowired);
 		when(scanCommandExecutor.executeQueryCommand(config, queryVisitor.getOrQueries())).thenReturn(matches);
@@ -116,9 +116,9 @@ class CodeScannerServiceTest {
 				List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
 				"and-condition-test", null, when, Collections.emptyList(), 1, null);
 
-		Match controller = new Match("1",
+		Match controller = new Match("1", "openrewrite",
 				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:13|JAVA.ANNOTATION|org.springframework.stereotype.RestController");
-		Match autowired = new Match("2",
+		Match autowired = new Match("2", "openrewrite",
 				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:8|JAVA.ANNOTATION|org.springframework.beans.factory.annotation.Autowired");
 		List<Match> matches = List.of(controller, autowired);
 		Query queryAutowired = new Query("java", "annotation", Map.of("name", "Autowired"));

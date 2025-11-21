@@ -1,31 +1,38 @@
-package dev.snowdrop.mapper.openrewrite;
+package dev.snowdrop.mapper.java.annotation;
 
+import dev.snowdrop.mapper.QueryMapper;
 import dev.snowdrop.model.Parameter;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.model.RecipeDTO;
 import dev.snowdrop.model.RecipeMappingConfig;
 import dev.snowdrop.reconciler.MatchingUtils;
+import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class QueryToRecipeMapper {
+import static dev.snowdrop.mapper.MapperUtils.orderedMap;
+
+/**
+ * OpenRewrite scanner-specific mapper for JavaAnnotation queries.
+ * Maps java.annotation queries to OpenRewrite FindAnnotations recipes.
+ * Returns RecipeDTO objects suitable for OpenRewrite recipe execution.
+ */
+public class OpenRewriteJavaAnnotationMapper implements QueryMapper<Object> {
+
+	private static final Logger logger = Logger.getLogger(OpenRewriteJavaAnnotationMapper.class);
 
 	private static final Map<String, RecipeMappingConfig> MAPPINGS = Map.of("JAVA.ANNOTATION",
-			new RecipeMappingConfig(
-					"dev.snowdrop.openrewrite.java.search.FindAnnotations", orderedMap("name", "pattern"),
+			new RecipeMappingConfig("dev.snowdrop.openrewrite.java.search.FindAnnotations",
+					orderedMap("name", "pattern"),
 					// Additional parameters
-					orderedMap("matchOnMetaAnnotations", "false")),
+					orderedMap("matchOnMetaAnnotations", "false")));
 
-			"POM.DEPENDENCY", new RecipeMappingConfig("dev.snowdrop.openrewrite.maven.search.FindDependency",
-					// 1 to 1 translation for GAV properties
-					orderedMap("gavs", "gavs", "groupId", "groupId", "artifactId", "artifactId", "version", "version"),
-					// No additional parameters
-					Map.of()));
+	@Override
+	public RecipeDTO map(Query query) {
+		logger.debugf("Creating RecipeDTO for OpenRewrite scanner: %s.%s", query.fileType(), query.symbol());
 
-	public static RecipeDTO map(Query query) {
 		String mappingKey = (query.fileType() + "." + query.symbol()).toUpperCase();
 
 		RecipeMappingConfig config = MAPPINGS.get(mappingKey);
@@ -38,15 +45,7 @@ public class QueryToRecipeMapper {
 
 		// Translate and add parameters from the original query
 		List<Parameter> parameters = new ArrayList<>();
-		/*        for (Map.Entry<String, String> entry : query.keyValues().entrySet()) {
-		    String key = entry.getKey();
-		    String translatedKey = config.parameters().get(key);
 
-		    if (translatedKey != null) {
-		        parameters.add(new Parameter(translatedKey, entry.getValue()));
-		    }
-		    // TODO: You could add a warning here for untranslatable keys
-		}*/
 		for (Map.Entry<String, String> mappingEntry : config.parameters().entrySet()) {
 			String queryKey = mappingEntry.getKey(); // e.g., "name"
 			String translatedKey = mappingEntry.getValue(); // e.g., "pattern"
@@ -66,17 +65,8 @@ public class QueryToRecipeMapper {
 		return new RecipeDTO(null, recipeName, parameters);
 	}
 
-	/**
-	 * Helper to create a Map that preserves insertion order.
-	 * (Java's Map.of() does not guarantee order).
-	 */
-	private static Map<String, String> orderedMap(String... keyValues) {
-		Map<String, String> map = new LinkedHashMap<>();
-		for (int i = 0; i < keyValues.length; i += 2) {
-			if (i + 1 < keyValues.length) {
-				map.put(keyValues[i], keyValues[i + 1]);
-			}
-		}
-		return map;
+	@Override
+	public String getSupportedDtoClass() {
+		return "dev.snowdrop.model.RecipeDTO";
 	}
 }

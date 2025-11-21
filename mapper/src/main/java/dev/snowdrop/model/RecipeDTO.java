@@ -1,7 +1,6 @@
 package dev.snowdrop.model;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public record RecipeDTO(UUID id, String name, List<Parameter> parameters) {

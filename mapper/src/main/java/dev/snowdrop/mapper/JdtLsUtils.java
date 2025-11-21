@@ -1,14 +1,9 @@
-package dev.snowdrop.analyze.utils;
+package dev.snowdrop.mapper;
 
-import dev.snowdrop.analyze.model.Rule;
 import org.jboss.logging.Logger;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.List;
-
-public class RuleUtils {
-	private static final Logger logger = Logger.getLogger(RuleUtils.class);
+public class JdtLsUtils {
+	private static final Logger logger = Logger.getLogger(JdtLsUtils.class);
 
 	public static String getLocationCode(String location) {
 		if (location == null) {
@@ -65,11 +60,4 @@ public class RuleUtils {
 			}
 		};
 	}
-
-	/**
-	 * Add a method to get the value of the SymbolKind File(1), Module(2), Namespace(3), Package(4), Class(5),
-	 * Method(6), Property(7), Field(8), Constructor(9), Enum(10), Interface(11), Function(12), Variable(13),
-	 * Constant(14), String(15), Number(16), Boolean(17), Array(18), Object(19), Key(20), Null(21), EnumMember(22),
-	 * Struct(23), Event(24), Operator(25), TypeParameter(26);
-	 */
 }

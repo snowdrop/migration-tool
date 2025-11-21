@@ -274,11 +274,13 @@ public class ResultsService {
 			String ruleId = entry.getKey();
 			MigrationTask aTask = entry.getValue();
 
-			List<?> queryResults = new ArrayList<>();
+			List<Match> queryResults = new ArrayList<>();
 
+			/* This code is deprecated since we handle now a query/scanner (and not all queries for one scanner only) and use a match result
 			if (aTask.getLsResults() != null && !aTask.getLsResults().isEmpty()) {
 				queryResults = aTask.getLsResults();
 			}
+			*/
 
 			if (aTask.getRewriteResults() != null && !aTask.getRewriteResults().isEmpty()) {
 				queryResults = aTask.getRewriteResults();
@@ -290,26 +292,34 @@ public class ResultsService {
 			if (queryResults.isEmpty()) {
 				tableData.add(new String[]{ruleId, sourceToTarget, hasQueryResults, "No match found"});
 			} else {
-				// Process ALL results, not just the first one
 				StringBuilder allResultsDetails = new StringBuilder();
 
 				for (int i = 0; i < queryResults.size(); i++) {
-					Object result = queryResults.get(i);
+					Match match = queryResults.get(i);
 
+					String resultDetails = formatMatchResult(match);
+					if (resultDetails.length() > 0) {
+						allResultsDetails.append(resultDetails);
+					} else {
+						allResultsDetails.append("No results found");
+					}
+
+					/* This code is deprecated since we handle now a query/scanner (and not all queries for one scanner only) and use a match result
 					if (result instanceof SymbolInformation symbolInfo) {
 						String symbolDetails = formatSymbolInformation(symbolInfo);
 						allResultsDetails.append(symbolDetails).append("\n").append(symbolInfo.getLocation().getUri());
 					} else if (result instanceof Match match) {
-						String rewriteDetails = formatRewriteImproved(match);
-						allResultsDetails.append(rewriteDetails);
+						String resultDetails = formatRewriteImproved(match);
+						allResultsDetails.append(resultDetails);
 					} else {
 						// Fallback for unknown types
 						allResultsDetails.append("Unknown result type: ").append(result.getClass().getSimpleName());
 					}
+					*/
 
 					// Add separator between multiple results (except for the last one)
 					if (i < queryResults.size() - 1) {
-						allResultsDetails.append("\n--- rewrite ---\n");
+						allResultsDetails.append("\n--- result ---\n");
 					}
 				}
 
@@ -323,8 +333,26 @@ public class ResultsService {
 		return tableData;
 	}
 
-	private static String formatRewriteImproved(Match match) {
-		String name = match.name();
+	private static String formatMatchResult(Match match) {
+
+		switch (match.scannerType()) {
+			case "jdtls" :
+				var symbolInformations = (ArrayList<SymbolInformation>) match.result();
+				// TODO: Should we consider to support to handle a list of SymbolInformation when we issue a jdtls query too ?
+				var symbolDetails = formatSymbolInformation(symbolInformations.get(0));
+				symbolDetails.append("\n").append(symbolInformations.get(0).getLocation().getUri());
+				return symbolDetails.toString();
+			case "openrewrite" :
+				return formatRewrite(match);
+			case "maven" :
+				return match.result().toString();
+			default :
+				return "";
+		}
+	}
+
+	private static String formatRewrite(Match match) {
+		String name = (String) match.result();
 
 		// Parse the name format: parentFolderName/csvFileName:line_number|pattern.symbol|type
 		if (name.contains("/") && name.contains(":") && name.contains("|")) {
@@ -340,19 +368,20 @@ public class ResultsService {
 						patternSymbol, type, match.matchId());
 			} catch (Exception e) {
 				// Fallback if parsing fails
-				return String.format("Rewrite match: %s (ID: %s)", match.name(), match.matchId());
+				return String.format("Rewrite match: %s (ID: %s)", (String) match.result(), match.matchId());
 			}
 		} else {
 			// Fallback for unexpected format
-			return String.format("Rewrite match: %s (ID: %s)", match.name(), match.matchId());
+			return String.format("Rewrite match: %s (ID: %s)", (String) match.result(), match.matchId());
 		}
 	}
 
-	private static String formatSymbolInformation(SymbolInformation si) {
-		return String.format("Found %s at line %s, char: %s - %s", si.getName(),
+	private static StringBuilder formatSymbolInformation(SymbolInformation si) {
+		var formatStr = String.format("Found %s at line %s, char: %s - %s", si.getName(),
 				si.getLocation().getRange().getStart().getLine() + 1,
 				si.getLocation().getRange().getStart().getCharacter(),
 				si.getLocation().getRange().getEnd().getCharacter());
+		return new StringBuilder(formatStr);
 	}
 
 	public void exportAsJson(Config config, Map<String, MigrationTask> tasks) {

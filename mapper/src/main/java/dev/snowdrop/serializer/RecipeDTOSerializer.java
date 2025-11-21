@@ -1,8 +1,10 @@
-package dev.snowdrop.model;
+package dev.snowdrop.serializer;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import dev.snowdrop.model.Parameter;
+import dev.snowdrop.model.RecipeDTO;
 
 import java.io.IOException;
 

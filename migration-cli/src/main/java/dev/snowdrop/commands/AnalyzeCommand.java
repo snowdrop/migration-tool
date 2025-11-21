@@ -13,16 +13,13 @@ import org.jboss.logging.Logger;
 import picocli.CommandLine;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
-import static dev.snowdrop.analyze.utils.YamlRuleParser.filterRules;
-import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
+import static dev.snowdrop.analyze.utils.YamlRuleParser.*;
 
 @CommandLine.Command(name = "analyze", description = "Analyze a project for migration")
 @ApplicationScoped
@@ -66,8 +63,14 @@ public class AnalyzeCommand implements Runnable {
 		try {
 			List<Rule> rules = loadRules(config.rulesPath(), config.sourceTechnology(), config.targetTechnology());
 
-			AnalyzeService analyzeService = new AnalyzeService(config, new ScannerFactory());
-			Map<String, MigrationTask> tasks = analyzeService.analyzeCodeFromRule(scanner, rules);
+			/* Deprecated
+			   AnalyzeService analyzeService = new AnalyzeService(config, new ScannerFactory());
+			   Map<String, MigrationTask> tasks = analyzeService.analyzeCodeFromRule(scanner, rules);
+			 */
+
+			// Switch to the new analyseService able to map a query using its scanner to the corresponding DTO to issue a command
+			AnalyzeService analyzeService = new AnalyzeService(config);
+			Map<String, MigrationTask> tasks = analyzeService.analyzeCodeWithDynamicScanning(rules);
 
 			displayResults(tasks, config);
 
@@ -136,7 +139,12 @@ public class AnalyzeCommand implements Runnable {
 
 	public List<Rule> loadRules(Path rulesPath, String sourceTech, String targetTech) throws IOException {
 
-		List<Rule> rules = parseRulesFromFolder(rulesPath);
+		List<Rule> rules;
+		if (Files.isRegularFile(rulesPath)) {
+			rules = parseRulesFromFile(rulesPath).stream().sorted(Comparator.comparingInt(Rule::order)).toList();
+		} else {
+			rules = parseRulesFromFolder(rulesPath);
+		}
 
 		// Filter the rules according to the source and target technology
 		List<Rule> filteredRules = filterRules(rules, sourceTech, targetTech);
