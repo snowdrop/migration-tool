@@ -27,6 +27,11 @@ public class JdtlsQueryScanner implements QueryScanner {
 	private static JdtLsClient jdtLsClientInstance;
 	private static boolean isStarted = false;
 	private static final Object lock = new Object();
+	private QueryScannerMappingLoader queryScannerMappingLoader;
+
+	public JdtlsQueryScanner() {
+		this.queryScannerMappingLoader = new QueryScannerMappingLoader();
+	}
 
 	@Override
 	public List<Match> executeQueries(Config config, Set<Query> queries) {
@@ -36,7 +41,7 @@ public class JdtlsQueryScanner implements QueryScanner {
 
 		for (Query query : queries) {
 			// Get scanner configuration for this query
-			ScannerConfig scannerConfig = QueryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
+			ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
 
 			// Validate that this query should be handled by JDTLS scanner
 			if (!"jdtls".equals(scannerConfig.getScanner())) {
@@ -72,7 +77,7 @@ public class JdtlsQueryScanner implements QueryScanner {
 	@Override
 	public boolean supports(Query query) {
 		// Check the configuration to see if this query should use the JDTLS scanner
-		ScannerConfig scannerConfig = QueryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
+		ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
 		return "jdtls".equals(scannerConfig.getScanner());
 	}
 

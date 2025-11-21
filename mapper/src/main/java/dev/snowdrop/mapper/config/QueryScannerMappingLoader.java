@@ -17,7 +17,7 @@ public class QueryScannerMappingLoader {
 	private static final String CONFIG_FILE_NAME = "query-scanner-mapping.yml";
 	private static QueryScannerMapping cachedMapping;
 
-	private QueryScannerMappingLoader() {
+	public QueryScannerMappingLoader() {
 	}
 
 	/**
@@ -27,25 +27,14 @@ public class QueryScannerMappingLoader {
 	 * @return the parsed QueryScannerMapping configuration
 	 * @throws RuntimeException if the configuration cannot be loaded
 	 */
-	public static QueryScannerMapping loadMapping() {
+	public QueryScannerMapping loadMapping() {
 		if (cachedMapping == null) {
 			cachedMapping = loadMappingFromFile();
 		}
 		return cachedMapping;
 	}
 
-	/**
-	 * Forces a reload of the configuration from file, bypassing cache.
-	 *
-	 * @return the freshly loaded QueryScannerMapping configuration
-	 * @throws RuntimeException if the configuration cannot be loaded
-	 */
-	public static QueryScannerMapping reloadMapping() {
-		cachedMapping = loadMappingFromFile();
-		return cachedMapping;
-	}
-
-	private static QueryScannerMapping loadMappingFromFile() {
+	private QueryScannerMapping loadMappingFromFile() {
 		try {
 			logger.infof("Loading query scanner mapping from %s", CONFIG_FILE_NAME);
 
@@ -76,7 +65,7 @@ public class QueryScannerMappingLoader {
 	 * @param symbol the query symbol (e.g., "annotation", "dependency")
 	 * @return the scanner configuration
 	 */
-	public static ScannerConfig getScannerConfig(String type, String symbol) {
+	public ScannerConfig getScannerConfig(String type, String symbol) {
 		return loadMapping().getScannerConfig(type, symbol);
 	}
 }

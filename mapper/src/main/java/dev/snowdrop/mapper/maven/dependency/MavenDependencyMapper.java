@@ -28,10 +28,16 @@ public class MavenDependencyMapper implements QueryMapper<Object> {
 	// Registry of scanner-specific mappers
 	private static final Map<String, QueryMapper<Object>> SCANNER_MAPPERS = new HashMap<>();
 
+	private QueryScannerMappingLoader queryScannerMappingLoader;
+
 	static {
 		// Initialize scanner-specific mappers
 		SCANNER_MAPPERS.put("maven", new InternalMavenDependencyMapper());
 		SCANNER_MAPPERS.put("openrewrite", new OpenRewriteMavenDependencyMapper());
+	}
+
+	public MavenDependencyMapper() {
+		queryScannerMappingLoader = new QueryScannerMappingLoader();
 	}
 
 	@Override
@@ -39,7 +45,7 @@ public class MavenDependencyMapper implements QueryMapper<Object> {
 		logger.debugf("Mapping query %s.%s using factory pattern", query.fileType(), query.symbol());
 
 		// Get scanner configuration for this query to determine scanner type
-		ScannerConfig scannerConfig = QueryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
+		ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
 		String scannerType = scannerConfig.getScanner();
 
 		logger.debugf("Using scanner type: %s for query %s.%s", scannerType, query.fileType(), query.symbol());

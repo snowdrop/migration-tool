@@ -27,6 +27,11 @@ import java.util.*;
 public class MavenQueryScanner implements QueryScanner {
 	private static final Logger logger = Logger.getLogger(MavenQueryScanner.class);
 	private ModelBuilder modelBuilder = null;
+	private QueryScannerMappingLoader queryScannerMappingLoader;
+
+	public MavenQueryScanner() {
+		this.queryScannerMappingLoader = new QueryScannerMappingLoader();
+	}
 
 	@Override
 	public List<Match> executeQueries(Config config, Set<Query> queries) {
@@ -36,7 +41,7 @@ public class MavenQueryScanner implements QueryScanner {
 
 		for (Query query : queries) {
 			// Get scanner configuration for this query
-			ScannerConfig scannerConfig = QueryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
+			ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
 
 			// Validate that this query should be handled by Maven scanner
 			if (!"maven".equals(scannerConfig.getScanner())) {
@@ -70,7 +75,7 @@ public class MavenQueryScanner implements QueryScanner {
 	@Override
 	public boolean supports(Query query) {
 		// Check the configuration to see if this query should use the Maven scanner
-		ScannerConfig scannerConfig = QueryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
+		ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
 		return "maven".equals(scannerConfig.getScanner());
 	}
 

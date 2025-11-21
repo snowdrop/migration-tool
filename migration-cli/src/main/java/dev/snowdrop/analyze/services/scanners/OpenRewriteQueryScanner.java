@@ -45,6 +45,11 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 	private static final Logger logger = Logger.getLogger(OpenRewriteQueryScanner.class);
 	public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
 	public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
+	private QueryScannerMappingLoader queryScannerMappingLoader;
+
+	public OpenRewriteQueryScanner() {
+		this.queryScannerMappingLoader = new QueryScannerMappingLoader();
+	}
 
 	@Override
 	public List<Match> executeQueries(Config config, Set<Query> queries) {
@@ -56,7 +61,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
 		for (Query query : queries) {
 			// Get scanner configuration for this query
-			ScannerConfig scannerConfig = QueryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
+			ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
 
 			// Validate that this query should be handled by OpenRewrite scanner
 			if (!"openrewrite".equals(scannerConfig.getScanner())) {
@@ -145,7 +150,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 			List<Match> queryResults = findRecordsMatching(config.appPath(), matchId);
 
 			// Log the DTO class that was configured for this query type
-			ScannerConfig scannerConfig = QueryScannerMappingLoader.getScannerConfig(originalQuery.fileType(),
+			ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(originalQuery.fileType(),
 					originalQuery.symbol());
 			logger.debugf("Found %d matches for query %s.%s (DTO: %s)", queryResults.size(), originalQuery.fileType(),
 					originalQuery.symbol(), scannerConfig.getDto());
@@ -165,7 +170,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 	@Override
 	public boolean supports(Query query) {
 		// Check the configuration to see if this query should use the OpenRewrite scanner
-		ScannerConfig scannerConfig = QueryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
+		ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
 		return "openrewrite".equals(scannerConfig.getScanner());
 	}
 

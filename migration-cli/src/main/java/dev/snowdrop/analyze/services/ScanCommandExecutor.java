@@ -19,11 +19,12 @@ public class ScanCommandExecutor {
 
 	private static final Logger logger = Logger.getLogger(ScanCommandExecutor.class);
 
-	// Scanner registry - maps scanner types to their implementations
 	private final Map<String, QueryScanner> scannerRegistry;
+	private QueryScannerMappingLoader queryScannerMappingLoader;
 
 	public ScanCommandExecutor() {
 		this.scannerRegistry = initializeScanners();
+		this.queryScannerMappingLoader = new QueryScannerMappingLoader();
 	}
 
 	public List<Match> executeQueryCommand(Config config, Set<Query> queries) {
@@ -81,7 +82,7 @@ public class ScanCommandExecutor {
 		Map<String, Set<Query>> grouped = new HashMap<>();
 
 		for (Query query : queries) {
-			ScannerConfig config = QueryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
+			ScannerConfig config = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
 			String scannerType = config.getScanner();
 
 			grouped.computeIfAbsent(scannerType, k -> new HashSet<>()).add(query);
