@@ -53,7 +53,7 @@ class ProcessRulesTest extends BaseRulesTest {
     @CsvSource({
         "simple-query/pom-dependency-maven.yaml"
     })
-    void testQueryPomDependencyWithMavenScanner(String ruleSubPath) throws IOException {
+    void shouldMatchQueryPomDependencyWithMavenScanner(String ruleSubPath) throws IOException {
         // Given a path, got the rule to be processed
         List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 

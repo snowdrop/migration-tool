@@ -60,7 +60,7 @@ class ProcessRulesTest extends BaseRulesTest {
     @CsvSource({
         "simple-query/java-class-jdtls.yaml"
     })
-    void testQueryJavaClassWithScannerJdtLs(String ruleSubPath) throws IOException {
+    void shouldMatchJavaClassWithScannerJdtLs(String ruleSubPath) throws IOException {
         // Given a path, got the rule to be processed
         List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 

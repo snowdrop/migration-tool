@@ -54,7 +54,7 @@ class ProcessRulesTest extends BaseRulesTest {
 	@CsvSource({
         "simple-query/java-annotation-rewrite.yaml"
     })
-	void testQueryJavaAnnotationWithScannerRewrite(String ruleSubPath) throws IOException {
+	void shouldMatchJavaAnnotationWithScannerRewrite(String ruleSubPath) throws IOException {
 		// Given a path, got the rule to be processed
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
