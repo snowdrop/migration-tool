@@ -19,6 +19,7 @@
     <properties>
         <jreleaser.version>1.21.0</jreleaser.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
         <distribution.directory>${project.build.directory}/distributions</distribution.directory>
         <executable-suffix />
     </properties>
@@ -93,6 +94,16 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>${os-maven-plugin.version}</version>
+            </extension>
+        </extensions>
+    </build>
 
     <profiles>
         <profile>
