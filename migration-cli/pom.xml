@@ -18,6 +18,7 @@
 
     <properties>
         <jreleaser.version>1.21.0</jreleaser.version>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
     </properties>
 
     <dependencies>
