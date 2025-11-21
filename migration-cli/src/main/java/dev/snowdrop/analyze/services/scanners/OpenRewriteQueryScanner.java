@@ -45,7 +45,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 	private static final Logger logger = Logger.getLogger(OpenRewriteQueryScanner.class);
 	public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
 	public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
-	private QueryScannerMappingLoader queryScannerMappingLoader;
+	private final QueryScannerMappingLoader queryScannerMappingLoader;
 
 	public OpenRewriteQueryScanner() {
 		this.queryScannerMappingLoader = new QueryScannerMappingLoader();

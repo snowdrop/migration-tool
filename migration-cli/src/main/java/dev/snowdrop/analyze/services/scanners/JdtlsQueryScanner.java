@@ -27,7 +27,7 @@ public class JdtlsQueryScanner implements QueryScanner {
 	private static JdtLsClient jdtLsClientInstance;
 	private static boolean isStarted = false;
 	private static final Object lock = new Object();
-	private QueryScannerMappingLoader queryScannerMappingLoader;
+	private final QueryScannerMappingLoader queryScannerMappingLoader;
 
 	public JdtlsQueryScanner() {
 		this.queryScannerMappingLoader = new QueryScannerMappingLoader();

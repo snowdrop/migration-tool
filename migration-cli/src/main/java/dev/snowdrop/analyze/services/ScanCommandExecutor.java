@@ -20,7 +20,7 @@ public class ScanCommandExecutor {
 	private static final Logger logger = Logger.getLogger(ScanCommandExecutor.class);
 
 	private final Map<String, QueryScanner> scannerRegistry;
-	private QueryScannerMappingLoader queryScannerMappingLoader;
+	private final QueryScannerMappingLoader queryScannerMappingLoader;
 
 	public ScanCommandExecutor() {
 		this.scannerRegistry = initializeScanners();

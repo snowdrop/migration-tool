@@ -22,7 +22,7 @@ public class JavaClassMapper implements QueryMapper {
 	// Registry of scanner-specific mappers
 	private static final Map<String, QueryMapper<Object>> SCANNER_MAPPERS = new HashMap<>();
 
-	private QueryScannerMappingLoader queryScannerMappingLoader;
+	private final QueryScannerMappingLoader queryScannerMappingLoader;
 
 	static {
 		// Initialize scanner-specific mappers

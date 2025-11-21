@@ -27,7 +27,7 @@ import java.util.*;
 public class MavenQueryScanner implements QueryScanner {
 	private static final Logger logger = Logger.getLogger(MavenQueryScanner.class);
 	private ModelBuilder modelBuilder = null;
-	private QueryScannerMappingLoader queryScannerMappingLoader;
+	private final QueryScannerMappingLoader queryScannerMappingLoader;
 
 	public MavenQueryScanner() {
 		this.queryScannerMappingLoader = new QueryScannerMappingLoader();
