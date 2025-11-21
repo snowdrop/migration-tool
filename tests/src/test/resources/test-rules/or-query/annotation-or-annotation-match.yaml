@@ -1,4 +1,4 @@
-# Cmd: mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -r ../cookbook/tests/or-query/q1 -o json"
+# Cmd: mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -r ../tests/src/test/resources/test-rules/or-query/q1 -o json"
 # Scanner: rewrite
 # Match: true
 - category: mandatory
