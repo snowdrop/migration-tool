@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>dev.snowdrop</groupId>
     <artifactId>migration-tool-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Migration Tool :: Parent </name>
+    <name>Migration Tool :: Parent</name>
     <description>Migration Tool - Parent project</description>
+    <inceptionYear>2025</inceptionYear>
+    <url>https://github.com/snowdrop/migration-tool</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -16,10 +19,10 @@
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.29.3</quarkus.platform.version>
+        <quarkus.platform.version>3.29.4</quarkus.platform.version>
 
-        <openrewrite-recipe-bom.version>3.18.0</openrewrite-recipe-bom.version>
-        <spring-boot.version>3.5.7</spring-boot.version>
+        <openrewrite-recipe-bom.version>3.19.0</openrewrite-recipe-bom.version>
+        <spring-boot.version>3.5.8</spring-boot.version>
         <org.eclipse.lsp4j.version>0.24.0</org.eclipse.lsp4j.version>
         <lombok.version>1.18.42</lombok.version>
         <gson.version>2.13.2</gson.version>
@@ -41,6 +44,25 @@
         <module>migration-cli</module>
         <module>tests</module>
     </modules>
+
+    <developers>
+        <developer>
+            <id>cmoulliard</id>
+            <name>Charles Moulliard</name>
+            <email>cmoulliard@ibm.com</email>
+        </developer>
+        <developer>
+            <id>aureamunoz</id>
+            <name>Aurea Munoz Hernandez</name>
+            <email>aureamunoz@ibm.com</email>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Apache-2.0</name>
+        </license>
+    </licenses>
 
     <dependencyManagement>
         <dependencies>
@@ -126,25 +148,26 @@
     <build>
         <pluginManagement>
             <plugins>
-               <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${surefire.plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <systemPropertyVariables>
-                        <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
-                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                        <maven.home>${maven.home}</maven.home>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
+                <plugin>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${surefire.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <systemPropertyVariables>
+                            <native.image.path>${project.build.directory}/${project.build.finalName}-runner
+                            </native.image.path>
+                            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                            <maven.home>${maven.home}</maven.home>
+                        </systemPropertyVariables>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>

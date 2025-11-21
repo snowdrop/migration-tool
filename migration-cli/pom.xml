@@ -18,6 +18,11 @@
 
     <properties>
         <maven.version>3.9.11</maven.version>
+        <jreleaser.version>1.21.0</jreleaser.version>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
+        <distribution.directory>${project.build.directory}/distributions</distribution.directory>
+        <executable-suffix />
     </properties>
 
     <dependencies>
@@ -109,7 +114,7 @@
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
             <artifactId>quarkus-langchain4j-anthropic</artifactId>
-            <version>1.4.0</version>
+            <version>1.4.2</version>
         </dependency>
 
         <!-- lsp4j -->
@@ -128,5 +133,134 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>${os-maven-plugin.version}</version>
+            </extension>
+        </extensions>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jreleaser</groupId>
+                        <artifactId>jreleaser-maven-plugin</artifactId>
+                        <version>${jreleaser.version}</version>
+                        <configuration>
+                            <jreleaser>
+                                <release>
+                                    <github>
+                                        <changelog>
+                                            <formatted>ALWAYS</formatted>
+                                            <preset>conventional-commits</preset>
+                                        </changelog>
+                                    </github>
+                                </release>
+                                <distributions>
+                                    <migration-cli>
+                                        <name>migration-cli</name>
+                                        <type>BINARY</type>
+                                        <brew>
+                                            <active>RELEASE</active>
+                                            <multiPlatform>true</multiPlatform>
+                                        </brew>
+                                        <sdkman>
+                                            <active>RELEASE</active>
+                                        </sdkman>
+                                        <artifacts>
+                                            <artifact>
+                                                <path>
+                                                    {{artifactsDir}}/{{distributionName}}-{{projectVersion}}-linux-x86_64.tar.gz
+                                                </path>
+                                                <transform>
+                                                    artifacts/{{distributionName}}-{{projectEffectiveVersion}}-linux-x86_64.tar.gz
+                                                </transform>
+                                                <platform>linux-x86_64</platform>
+                                            </artifact>
+                                            <!--<artifact>
+                                                <path>
+                                                    {{artifactsDir}}/{{distributionName}}-{{projectVersion}}-windows-x86_64.zip
+                                                </path>
+                                                <transform>
+                                                    artifacts/{{distributionName}}-{{projectEffectiveVersion}}-windows-x86_64.zip
+                                                </transform>
+                                                <platform>windows-x86_64</platform>
+                                            </artifact>-->
+                                            <artifact>
+                                                <path>
+                                                    {{artifactsDir}}/{{distributionName}}-{{projectVersion}}-osx-x86_64.tar.gz
+                                                </path>
+                                                <transform>
+                                                    artifacts/{{distributionName}}-{{projectEffectiveVersion}}-osx-x86_64.tar.gz
+                                                </transform>
+                                                <platform>osx-x86_64</platform>
+                                            </artifact>
+                                            <artifact>
+                                                <path>
+                                                    {{artifactsDir}}/{{distributionName}}-{{projectVersion}}-osx-aarch_64.tar.gz
+                                                </path>
+                                                <transform>
+                                                    artifacts/{{distributionName}}-{{projectEffectiveVersion}}-osx-aarch_64.tar.gz
+                                                </transform>
+                                                <platform>osx-aarch_64</platform>
+                                            </artifact>
+                                        </artifacts>
+                                    </migration-cli>
+                                </distributions>
+                            </jreleaser>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>dist</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>${maven-assembly-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>make-distribution</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <attach>false</attach>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <finalName>${project.artifactId}-${project.version}-${os.detected.classifier}</finalName>
+                            <outputDirectory>${distribution.directory}</outputDirectory>
+                            <workDirectory>${project.build.directory}/assembly/work</workDirectory>
+                            <descriptors>
+                                <descriptor>src/main/assembly/assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>dist-windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <executable-suffix>.exe</executable-suffix>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>
