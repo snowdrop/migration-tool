@@ -43,65 +43,65 @@ jobs:
       - name: 'Build Native Image'
         run: mvn -ntp -B --file pom.xml -Pnative package -DskipTests -pl migration-cli
 
-      - name: 'Create self-signed certificate (macOS only)'
-        if: runner.os == 'macOS'
-        run: |
-          # Create a self-signed certificate for code signing
-          security create-keychain -p "" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "" build.keychain
-          security set-keychain-settings -t 3600 -u build.keychain
-
-          # Generate the self-signed certificate
-          security add-certificates -k build.keychain /System/Library/Keychains/SystemRootCertificates.keychain
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
-
-          # Create certificate
-          cat > cert.conf << EOF
-          [req]
-          distinguished_name = req_distinguished_name
-          x509_extensions = v3_req
-          prompt = no
-
-          [req_distinguished_name]
-          CN = Migration Tool Self-Signed Certificate
-          O = Migration Tool
-          OU = IBM Middleware
-          C = BE
-
-          [v3_req]
-          keyUsage = digitalSignature
-          extendedKeyUsage = codeSigning
-          EOF
-
-          # Generate private key and certificate
-          openssl req -new -newkey rsa:2048 -nodes -keyout cert.key -x509 -days 365 -out cert.crt -config cert.conf
-
-          # Create PKCS#12 bundle which is preferred by macOS keychain
-          openssl pkcs12 -export -out cert.p12 -inkey cert.key -in cert.crt -passout pass:
-
-          # Import PKCS#12 bundle to keychain (this creates the proper linkage between cert and key)
-          security import cert.p12 -k build.keychain -P "" -T /usr/bin/codesign -T /usr/bin/security
-
-          # Set partition list to allow codesign to use the key
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
-
-      - name: 'Sign binary (macOS only)'
-        if: runner.os == 'macOS'
-        run: |
-          # Sign the native binary
-          BINARY_PATH="migration-cli/target/migration-cli-1.0.0-SNAPSHOT-runner"
-          if [ -f "$BINARY_PATH" ]; then
-            echo "Signing binary: $BINARY_PATH"
-            # List available certificates for debugging
-            security find-identity -v -p codesigning build.keychain
-            codesign --force --sign "Migration Tool Self-Signed Certificate" --timestamp=none "$BINARY_PATH"
-            echo "Verifying signature:"
-            codesign --verify --verbose "$BINARY_PATH"
-          else
-            echo "Binary not found at $BINARY_PATH"
-            ls -la migration-cli/target/
-          fi
+      #- name: 'Create self-signed certificate (macOS only)'
+      #  if: runner.os == 'macOS'
+      #  run: |
+      #    # Create a self-signed certificate for code signing
+      #    security create-keychain -p "" build.keychain
+      #    security default-keychain -s build.keychain
+      #    security unlock-keychain -p "" build.keychain
+      #    security set-keychain-settings -t 3600 -u build.keychain
+      #
+      #    # Generate the self-signed certificate
+      #    security add-certificates -k build.keychain /System/Library/Keychains/SystemRootCertificates.keychain
+      #    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+      #
+      #    # Create certificate
+      #    cat > cert.conf << EOF
+      #    [req]
+      #    distinguished_name = req_distinguished_name
+      #    x509_extensions = v3_req
+      #    prompt = no
+      #
+      #    [req_distinguished_name]
+      #    CN = Migration Tool Self-Signed Certificate
+      #    O = Migration Tool
+      #    OU = IBM Middleware
+      #    C = BE
+      #
+      #    [v3_req]
+      #    keyUsage = digitalSignature
+      #    extendedKeyUsage = codeSigning
+      #    EOF
+      #
+      #    # Generate private key and certificate
+      #    openssl req -new -newkey rsa:2048 -nodes -keyout cert.key -x509 -days 365 -out cert.crt -config cert.conf
+      #
+      #    # Create PKCS#12 bundle which is preferred by macOS keychain
+      #    openssl pkcs12 -export -out cert.p12 -inkey cert.key -in cert.crt -passout pass:
+      #
+      #    # Import PKCS#12 bundle to keychain (this creates the proper linkage between cert and key)
+      #    security import cert.p12 -k build.keychain -P "" -T /usr/bin/codesign -T /usr/bin/security
+      #
+      #    # Set partition list to allow codesign to use the key
+      #    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+      #
+      #- name: 'Sign binary (macOS only)'
+      #  if: runner.os == 'macOS'
+      #  run: |
+      #    # Sign the native binary
+      #    BINARY_PATH="migration-cli/target/migration-cli-1.0.0-SNAPSHOT-runner"
+      #    if [ -f "$BINARY_PATH" ]; then
+      #      echo "Signing binary: $BINARY_PATH"
+      #      # List available certificates for debugging
+      #      security find-identity -v -p codesigning build.keychain
+      #      codesign --force --sign "Migration Tool Self-Signed Certificate" --timestamp=none "$BINARY_PATH"
+      #      echo "Verifying signature:"
+      #      codesign --verify --verbose "$BINARY_PATH"
+      #    else
+      #      echo "Binary not found at $BINARY_PATH"
+      #      ls -la migration-cli/target/
+      #    fi
 
       - name: 'Create distribution'
         run: mvn -ntp -B --file pom.xml -Pdist package -DskipTests -pl migration-cli
