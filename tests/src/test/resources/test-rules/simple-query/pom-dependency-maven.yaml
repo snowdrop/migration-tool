@@ -1,5 +1,5 @@
-# Cmd: mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -r ../cookbook/tests/and-query/q1"
-# Scanner: rewrite
+# cmd: mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -r ../tests/src/test/resources/test-rules/simple-query/pom-dependency-maven.yaml"
+# scanner: maven
 # Match: true
 - category: mandatory
   customVariables: []
@@ -10,11 +10,10 @@
     - konveyor.io/target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
-  ruleID: test-and-query
+  ruleID: pom-dependency
   when:
     condition: |
-      java.annotation is 'org.springframework.stereotype.Controller' AND
-      java.annotation is 'org.springframework.web.bind.annotation.GetMapping'
+      pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')
   order: 4
   instructions:
     ai:

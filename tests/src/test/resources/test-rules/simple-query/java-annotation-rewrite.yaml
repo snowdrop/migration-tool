@@ -1,4 +1,5 @@
-# mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -r ../cookbook/tests/or-query/q1 -o json --scanner openrewrite"
+# Cmd: mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -r ../tests/src/test/resources/test-rules/simple-query/java-annotation-rewrite.yaml"
+# Scanner: openrewrite
 # Match: true
 - category: mandatory
   customVariables: []
@@ -9,11 +10,10 @@
     - konveyor.io/target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
-  ruleID: test-and-query
+  ruleID: java-annotation-controller-found
   when:
     condition: |
-      java.annotation is 'org.springframework.stereotype.Controller' OR
-      java.annotation is 'org.springframework.web.bind.annotation.GetMapping'
+      java.annotation is 'org.springframework.stereotype.Controller'
   order: 4
   instructions:
     ai:

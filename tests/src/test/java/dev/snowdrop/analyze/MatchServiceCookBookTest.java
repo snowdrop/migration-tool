@@ -14,9 +14,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +25,7 @@ import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFile;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
 import static org.junit.jupiter.api.Assertions.*;
 
-class MatchServiceCookBookTest {
+class MatchServiceCookBookTest extends BaseRulesTest {
 
 	private CodeScannerService codeScannerService;
 	private Config config;
@@ -36,18 +34,26 @@ class MatchServiceCookBookTest {
 	Path tempDir;
 
 	Path rulesPath;
+	String jdtls;
 
 	@BeforeEach
 	void setUp() throws Exception {
+		// Copy the code of the project to analyze within the temp dir
 		String applicationToScan = "spring-boot-todo-app";
 		Path destinationPath = tempDir.resolve(applicationToScan);
 		copyFolder(applicationToScan, destinationPath);
 
+		// Copy the rules to be evaluated the temp dir
 		String cookBook = "cookbook";
 		rulesPath = tempDir.resolve(cookBook);
 		copyFolder(cookBook, rulesPath);
 
-		config = createTestConfig(destinationPath, rulesPath);
+		// Copy the jdt-ls server
+		String jdtls = "jdt/konveyor-jdtls";
+		copyFolder(jdtls, tempDir.resolve(jdtls));
+
+		// Configure the test with the parameters
+		config = createTestConfig(destinationPath, rulesPath, jdtls);
 
 		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
 		codeScannerService = new CodeScannerService(config, scanCommandExecutor);
@@ -409,7 +415,8 @@ class MatchServiceCookBookTest {
 	private static Stream<Arguments> provideRealWorldRules() {
 		MatchServiceCookBookTest testInstance = new MatchServiceCookBookTest();
 		testInstance.tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "test-" + System.currentTimeMillis());
-		testInstance.config = testInstance.createTestConfig(testInstance.tempDir, testInstance.rulesPath);
+		testInstance.config = testInstance.createTestConfig(testInstance.tempDir, testInstance.rulesPath,
+				testInstance.jdtls);
 		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
 		testInstance.codeScannerService = new CodeScannerService(testInstance.config, scanCommandExecutor);
 
@@ -425,32 +432,4 @@ class MatchServiceCookBookTest {
 				Arguments.of("004-springboot-to-quarkus-rest-annotations", testInstance.createRule004_RestAnnotations(),
 						"or-conditions"));
 	}
-
-	private static void copyFolder(String source, Path target, CopyOption... options) throws Exception {
-		URL resourceUrl = MatchServiceCookBookTest.class.getClassLoader().getResource(source);
-		if (resourceUrl == null) {
-			throw new RuntimeException("Resource folder not found: " + source);
-		}
-		Path sourcePath = Paths.get(resourceUrl.toURI());
-		Path destinationPath = target;
-
-		Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				Files.createDirectories(destinationPath.resolve(sourcePath.relativize(dir).toString()));
-				return FileVisitResult.CONTINUE;
-			}
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				Files.copy(file, destinationPath.resolve(sourcePath.relativize(file).toString()), options);
-				return FileVisitResult.CONTINUE;
-			}
-		});
-	}
-
-	private Config createTestConfig(Path applicationToScan, Path rulesPath) {
-		return new Config(applicationToScan.toString(), rulesPath, "springboot", "quarkus", "./jdt/konveyor-jdtls",
-				"./jdt", "io.konveyor.tackle.ruleEntry", false, "json", "openrewrite");
-	}
-
 }
