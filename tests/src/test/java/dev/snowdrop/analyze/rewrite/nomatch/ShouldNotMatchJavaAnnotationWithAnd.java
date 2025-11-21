@@ -1,4 +1,4 @@
-package dev.snowdrop.analyze.rewrite;
+package dev.snowdrop.analyze.rewrite.nomatch;
 
 import dev.snowdrop.analyze.BaseRulesTest;
 import dev.snowdrop.analyze.Config;
@@ -17,10 +17,9 @@ import java.util.List;
 import java.util.Map;
 
 import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFile;
-import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
 import static org.junit.jupiter.api.Assertions.*;
 
-class ProcessRulesTest extends BaseRulesTest {
+class ShouldNotMatchJavaAnnotationWithAnd extends BaseRulesTest {
 
 	private CodeScannerService codeScannerService;
 	private Config config;
@@ -29,21 +28,21 @@ class ProcessRulesTest extends BaseRulesTest {
 	Path tempDir;
 
 	Path rulesPath;
-    String jdtls = "";
+	String jdtls = "";
 
 	@BeforeEach
 	void setUp() throws Exception {
-        // Copy the code of the project to analyze within the temp dir
+		// Copy the code of the project to analyze within the temp dir
 		String applicationToScan = "spring-boot-todo-app";
 		Path destinationPath = tempDir.resolve(applicationToScan);
 		copyFolder(applicationToScan, destinationPath);
 
-        // Copy the rules to be evaluated the temp dir
+		// Copy the rules to be evaluated the temp dir
 		String cookBook = "test-rules";
 		rulesPath = tempDir.resolve(cookBook);
 		copyFolder(cookBook, rulesPath);
 
-        // Configure the test with parameters
+		// Configure the test with parameters
 		config = createTestConfig(destinationPath, rulesPath, jdtls);
 
 		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
@@ -51,10 +50,8 @@ class ProcessRulesTest extends BaseRulesTest {
 	}
 
 	@ParameterizedTest
-	@CsvSource({
-        "simple-query/java-annotation-rewrite.yaml"
-    })
-	void shouldMatchJavaAnnotationWithScannerRewrite(String ruleSubPath) throws IOException {
+	@CsvSource({"and-query/annotation-and-annotation-no_match.yaml"})
+	void shouldNotMatchJavaAnnotationWithAnd(String ruleSubPath) throws IOException {
 		// Given a path, got the rule to be processed
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
@@ -63,15 +60,15 @@ class ProcessRulesTest extends BaseRulesTest {
 
 		// Then
 		assertNotNull(result);
-        assertTrue(result.containsKey("java-annotation-controller-found"));
+		assertTrue(result.containsKey("annotation-and-annotation-no_match"));
 
-        Match match = result.get("java-annotation-controller-found").getFirst();
-        assertNotNull(match);
+		Match match = result.get("annotation-and-annotation-no_match").get(0);
+		assertNotNull(match);
 
-        String csvRecord = (String)match.result();
-        assertEquals(true,csvRecord.contains("org.springframework.stereotype.Controller"));
-        assertEquals(true,csvRecord.contains("dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv"));
-        assertEquals(true,csvRecord.contains("JAVA.ANNOTATION"));
+		String csvRecord = (String) match.result();
+		assertEquals(true, csvRecord.contains("org.springframework.stereotype.Controller"));
+		assertEquals(true, csvRecord.contains("dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv"));
+		assertEquals(true, csvRecord.contains("JAVA.ANNOTATION"));
 	}
 
 }

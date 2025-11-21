@@ -34,25 +34,25 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 	Path tempDir;
 
 	Path rulesPath;
-    String jdtls;
+	String jdtls;
 
 	@BeforeEach
 	void setUp() throws Exception {
-        // Copy the code of the project to analyze within the temp dir
+		// Copy the code of the project to analyze within the temp dir
 		String applicationToScan = "spring-boot-todo-app";
 		Path destinationPath = tempDir.resolve(applicationToScan);
 		copyFolder(applicationToScan, destinationPath);
 
-        // Copy the rules to be evaluated the temp dir
+		// Copy the rules to be evaluated the temp dir
 		String cookBook = "cookbook";
 		rulesPath = tempDir.resolve(cookBook);
 		copyFolder(cookBook, rulesPath);
 
-        // Copy the jdt-ls server
-        String jdtls = "jdt/konveyor-jdtls";
-        copyFolder(jdtls, tempDir.resolve(jdtls));
+		// Copy the jdt-ls server
+		String jdtls = "jdt/konveyor-jdtls";
+		copyFolder(jdtls, tempDir.resolve(jdtls));
 
-        // Configure the test with the parameters
+		// Configure the test with the parameters
 		config = createTestConfig(destinationPath, rulesPath, jdtls);
 
 		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
@@ -415,7 +415,8 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 	private static Stream<Arguments> provideRealWorldRules() {
 		MatchServiceCookBookTest testInstance = new MatchServiceCookBookTest();
 		testInstance.tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "test-" + System.currentTimeMillis());
-		testInstance.config = testInstance.createTestConfig(testInstance.tempDir, testInstance.rulesPath, testInstance.jdtls);
+		testInstance.config = testInstance.createTestConfig(testInstance.tempDir, testInstance.rulesPath,
+				testInstance.jdtls);
 		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
 		testInstance.codeScannerService = new CodeScannerService(testInstance.config, scanCommandExecutor);
 
