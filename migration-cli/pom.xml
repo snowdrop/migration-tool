@@ -19,6 +19,8 @@
     <properties>
         <jreleaser.version>1.21.0</jreleaser.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <distribution.directory>${project.build.directory}/distributions</distribution.directory>
+        <executable-suffix />
     </properties>
 
     <dependencies>
@@ -197,6 +199,17 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>dist-windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <executable-suffix>.exe</executable-suffix>
+            </properties>
         </profile>
     </profiles>
 
