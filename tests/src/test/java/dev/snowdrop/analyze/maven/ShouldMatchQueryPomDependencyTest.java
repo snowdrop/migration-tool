@@ -66,8 +66,7 @@ class ShouldMatchQueryPomDependencyTest extends BaseRulesTest {
 		assertNotNull(match);
 
 		String dependencyResult = (String) match.result();
-		// TODO: To be fixed as code returns the location of the pom g:a:v and not what we search about: org.springframework.boot:spring-boot-starter-web
-		assertEquals(true, dependencyResult.contains("com.todo:app:0.0.1-SNAPSHOT"));
+		assertEquals(true, dependencyResult.contains("org.springframework.boot:spring-boot-starter-web"));
 	}
 
 }
