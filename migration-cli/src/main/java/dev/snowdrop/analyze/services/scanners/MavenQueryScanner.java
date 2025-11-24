@@ -96,8 +96,8 @@ public class MavenQueryScanner implements QueryScanner {
 		if (loc.isPresent()) {
 			InputLocation il = loc.get();
 			// The il.getSource().getModelId() returns the ID of the artifact within the model BUT not the artifact that we are looking for !
-            var result = String.format("Dependency: %s found in file:\n %s\nat line: %d and position: %d",
-                formatGav(groupId,artifactId,version), il.getSource().getLocation(), il.getLineNumber(),
+			var result = String.format("Dependency: %s found in file:\n %s\nat line: %d and position: %d",
+					formatGav(groupId, artifactId, version), il.getSource().getLocation(), il.getLineNumber(),
 					il.getColumnNumber());
 			results.add(new Match("", "maven", result));
 		}
@@ -134,10 +134,10 @@ public class MavenQueryScanner implements QueryScanner {
 
 			if (dep.isPresent()) {
 				// Found it!
-                logger.debugf("Dep groupId location: %s", dep.get().getLocation("groupId"));
-                logger.debugf("Dep artifactId location: %s", dep.get().getLocation("artifactId"));
-                logger.debugf("Dep version location: %s", dep.get().getLocation("version"));
-                logger.debugf("Dep location: %s", dep.get().getLocation(""));
+				logger.debugf("Dep groupId location: %s", dep.get().getLocation("groupId"));
+				logger.debugf("Dep artifactId location: %s", dep.get().getLocation("artifactId"));
+				logger.debugf("Dep version location: %s", dep.get().getLocation("version"));
+				logger.debugf("Dep location: %s", dep.get().getLocation(""));
 				return Optional.ofNullable(dep.get().getLocation(""));
 			}
 		}
@@ -269,20 +269,20 @@ public class MavenQueryScanner implements QueryScanner {
 		return resolved;
 	}
 
-    public String formatGav(String groupId, String artifactId, String version) {
-        if (groupId == null || artifactId == null) {
-            throw new IllegalArgumentException("GroupId and ArtifactId cannot be null.");
-        }
+	public String formatGav(String groupId, String artifactId, String version) {
+		if (groupId == null || artifactId == null) {
+			throw new IllegalArgumentException("GroupId and ArtifactId cannot be null.");
+		}
 
-        List<String> parts = new ArrayList<>();
-        parts.add(groupId);
-        parts.add(artifactId);
+		List<String> parts = new ArrayList<>();
+		parts.add(groupId);
+		parts.add(artifactId);
 
-        if (version != null && !version.isEmpty()) {
-            parts.add(version);
-        }
+		if (version != null && !version.isEmpty()) {
+			parts.add(version);
+		}
 
-        return String.join(":", parts);
-    }
+		return String.join(":", parts);
+	}
 
 }
