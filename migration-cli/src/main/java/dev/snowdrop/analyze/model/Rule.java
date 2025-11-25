@@ -32,7 +32,10 @@ public record Rule(String category, @JsonProperty("customVariables") List<String
 			@JsonProperty("or") List<Condition> or, @JsonProperty("and") List<Condition> and,
 
 			// New field added to allow to use the new query language which can be defined as one string line
-			@JsonProperty("condition") String condition) {
+			@JsonProperty("condition") String condition,
+
+			// Precondition that must be satisfied before processing the main condition
+			@JsonProperty(value = "precondition") String precondition) {
 	}
 
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
