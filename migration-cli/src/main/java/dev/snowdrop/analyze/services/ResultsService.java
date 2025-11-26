@@ -13,6 +13,7 @@ import dev.snowdrop.analyze.model.html.Cell;
 import dev.snowdrop.analyze.model.html.Row;
 import dev.snowdrop.analyze.utils.TerminalUtils;
 import dev.snowdrop.commands.AnalyzeCommand;
+import dev.snowdrop.transform.model.MigrationTasksExport;
 import io.quarkus.qute.*;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -280,10 +281,14 @@ public class ResultsService {
 			if (aTask.getLsResults() != null && !aTask.getLsResults().isEmpty()) {
 				queryResults = aTask.getLsResults();
 			}
-			*/
 
 			if (aTask.getRewriteResults() != null && !aTask.getRewriteResults().isEmpty()) {
 				queryResults = aTask.getRewriteResults();
+			}
+			*/
+
+			if (aTask.getMatchResults() != null && !aTask.getMatchResults().isEmpty()) {
+				queryResults = aTask.getMatchResults();
 			}
 
 			String hasQueryResults = queryResults.isEmpty() ? "No" : "Yes";
@@ -298,7 +303,7 @@ public class ResultsService {
 					Match match = queryResults.get(i);
 
 					String resultDetails = formatMatchResult(match);
-					if (resultDetails.length() > 0) {
+					if (!resultDetails.isEmpty()) {
 						allResultsDetails.append(resultDetails);
 					} else {
 						allResultsDetails.append("No results found");
@@ -390,8 +395,8 @@ public class ResultsService {
 					.withLocale(Locale.getDefault());
 			String dateTimeformated = LocalDateTime.now().format(formatter);
 
-			AnalyzeCommand.MigrationTasksExport exportData = new AnalyzeCommand.MigrationTasksExport(
-					"Migration Analysis Results", config.appPath(), dateTimeformated, tasks);
+			MigrationTasksExport exportData = new MigrationTasksExport("Migration Analysis Results", config.appPath(),
+					dateTimeformated, tasks);
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);

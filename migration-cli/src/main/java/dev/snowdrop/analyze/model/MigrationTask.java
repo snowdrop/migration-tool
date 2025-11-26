@@ -8,9 +8,13 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class MigrationTask {
 	private Rule rule;
-	private List<SymbolInformation> lsResults;
-	private List<Match> matchResults;
 	private Rule.Instruction instruction;
+	private List<Match> matchResults;
+
+	@Deprecated
+	private List<SymbolInformation> lsResults;
+	@Deprecated
+	private List<Match> rewriteResults;
 
 	public MigrationTask() {
 	}
@@ -25,11 +29,6 @@ public class MigrationTask {
 		return this;
 	}
 
-	public MigrationTask withLsResults(List<SymbolInformation> lsResults) {
-		this.lsResults = lsResults;
-		return this;
-	}
-
 	public MigrationTask withMatchResults(List<Match> matchResults) {
 		this.matchResults = matchResults;
 		return this;
@@ -39,10 +38,28 @@ public class MigrationTask {
 		return rule;
 	}
 
+	public List<Match> getMatchResults() {
+		return matchResults;
+	}
+
+	@Deprecated
+	public MigrationTask withLsResults(List<SymbolInformation> lsResults) {
+		this.lsResults = lsResults;
+		return this;
+	}
+
+	@Deprecated
+	public MigrationTask withRewriteResults(List<Match> rewriteResults) {
+		this.rewriteResults = rewriteResults;
+		return this;
+	}
+
+	@Deprecated
 	public List<SymbolInformation> getLsResults() {
 		return lsResults;
 	}
 
+	@Deprecated
 	public List<Match> getRewriteResults() {
 		return matchResults;
 	}
