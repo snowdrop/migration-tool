@@ -74,7 +74,7 @@ flowchart LR
 
 The rule represents, per se, the contract definition between what we would like to discover within the code source scanned: java, properties, xml, json, maven or gradle files and what a provider should do to properly transform the code. 
 
-As presented hereafter, we have introduced 2 new fields part of the Rule YAML file:
+As presented hereafter, we have introduced different new fields part of the Rule YAML file:
 
 - `order`: The order to apply the instructions against the flow which is composed of several rules
 - `instructions`: List of instructions/tasks to be executed by a provider
@@ -121,7 +121,29 @@ The list of the AI's tasks will be executed one by one as user's chat message. W
 
 The openrewrite section contains the list of the recipes and/or preconditions to be executed using the maven openrewrite goal and gav are maven dependencies
 
-TODO: Add `precondition` and Antlr rule syntax !
+To make an application `elligible` for a migration plan and by consequence to let the `conditions` of the rules to be then executed, we have introduced
+a new field for that purpose: `precondition`. If during the `analysis` of the application, the `precondition` fails, then the process stops, otherwise the conditions will be executed:
+
+```yaml
+- category: mandatory
+  customVariables: []
+  description: SpringBoot to Quarkus
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "SpringBoot to Quarkus."
+  ruleID: spring-boot-parent-precondition-match
+  when:
+    # Example of precondition checking if we have a Spring Boot Parent version: 3.5.3
+    precondition: |
+      pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-parent:3.5.3')
+    # If the precondition matches and is tru, then the condition's rule will be executed
+    condition: |
+      java.annotation is '@SpringBootApplication'
+...
+```
 
 ## Architecture of the PoC
 
