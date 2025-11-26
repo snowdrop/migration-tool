@@ -144,6 +144,60 @@ a new field for that purpose: `precondition`. If during the `analysis` of the ap
       java.annotation is '@SpringBootApplication'
 ...
 ```
+To simplify the adoption of the Rule as unit of work to analyse an application to be migrated, we have simplified the YAML query syntax to adopt a more user-friendly language more in line with the language that a user will use to search about something in a project. 
+
+The simplified query language syntax is defined using Antlr grammar and supports a query with a simple `clause` or multiple `clauses` separated with `AND`, `OR` operators
+
+```g4
+grammar Query;
+
+@header {
+package dev.snowdrop.parser.antlr;
+}
+
+searchQuery: operation;
+operation
+    : operation AND operation #AndOperation
+    | operation OR operation  #OrOperation
+    | clause                  #SimpleClause
+    ;
+
+clause: fileType ('.' symbol)? ('is' | '=') (value | '(' keyValuePair (',' keyValuePair)* ')');
+fileType: 'JAVA' | 'java' | 'POM' | 'pom' | 'TEXT' | 'text' | 'PROPERTY' | 'property' | 'YAML' | 'yaml' | 'JSON' | 'json';
+symbol: ID;
+keyValuePair: key '=' value;
+key: QUOTED_STRING | ID;
+value: QUOTED_STRING | ID;
+logicalOp: AND | OR;
+
+// LEXER vocabulary of the language
+IS:    'is';
+AND:   'AND';
+OR:    'OR';
+
+ID:            [a-zA-Z][a-zA-Z0-9-]*; // Identifier, allows dots for package names
+QUOTED_STRING: '\'' ( ~('\''|'\\') | '\\' . )* '\''   // Single-quoted string
+             | '"' ( ~('"'|'\\') | '\\' . )* '"';     // Double-quoted string
+EQUALS:        '=';
+DOT:           '.';
+COMMA:         ',';
+LPAREN:        '(';
+RPAREN:        ')';
+
+WS:            [ \t\r\n]+ -> skip; // Skip whitespace
+```
+
+Examples of queries
+```yaml
+  when:
+    condition: java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
+    condition: |
+      java.annotation is 'org.springframework.stereotype.Controller' OR
+      java.annotation is 'org.springframework.web.bind.annotation.GetMapping'
+    condition: |
+      pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web') AND
+      java.annotation is 'org.springframework.stereotype.Controller'
+```
 
 ## Architecture of the PoC
 
