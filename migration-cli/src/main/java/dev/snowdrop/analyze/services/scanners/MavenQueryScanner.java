@@ -2,23 +2,30 @@ package dev.snowdrop.analyze.services.scanners;
 
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;
+import dev.snowdrop.analyze.model.ScannerType;
 import dev.snowdrop.mapper.DynamicDTOMapper;
-import dev.snowdrop.mapper.config.QueryScannerMappingLoader;
-import dev.snowdrop.mapper.config.ScannerConfig;
 import dev.snowdrop.model.MavenDependencyDTO;
 import dev.snowdrop.model.Query;
-
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.InputLocation;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
-import org.apache.maven.model.building.*;
+import org.apache.maven.model.building.DefaultModelBuilderFactory;
+import org.apache.maven.model.building.DefaultModelBuildingRequest;
+import org.apache.maven.model.building.ModelBuilder;
+import org.apache.maven.model.building.ModelBuildingRequest;
+import org.apache.maven.model.building.ModelBuildingResult;
 import org.jboss.logging.Logger;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * Scanner implementation for Maven POM dependency queries.
@@ -27,10 +34,10 @@ import java.util.*;
 public class MavenQueryScanner implements QueryScanner {
 	private static final Logger logger = Logger.getLogger(MavenQueryScanner.class);
 	private ModelBuilder modelBuilder = null;
-	private final QueryScannerMappingLoader queryScannerMappingLoader;
+	private static final String MAVEN_DEP_DTO = "dev.snowdrop.model.MavenDependencyDTO";
 
 	public MavenQueryScanner() {
-		this.queryScannerMappingLoader = new QueryScannerMappingLoader();
+
 	}
 
 	@Override
@@ -39,32 +46,34 @@ public class MavenQueryScanner implements QueryScanner {
 
 		List<Match> allResults = new ArrayList<>();
 
-		for (Query query : queries) {
-			// Get scanner configuration for this query
-			ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
+		for (Query q : queries) {
+			List<Match> partial = scansCodeFor(config, q);
 
-			// Validate that this query should be handled by Maven scanner
-			if (!"maven".equals(scannerConfig.getScanner())) {
-				logger.warnf("Query %s.%s is configured for scanner '%s', not 'maven'. Skipping.", query.fileType(),
-						query.symbol(), scannerConfig.getScanner());
-				continue;
+			if (partial != null && !partial.isEmpty()) {
+				allResults.addAll(partial);
 			}
-
-			// Log the DTO class that should be used for this query
-			String dtoClassName = scannerConfig.getDto();
-			logger.debugf("Query %s.%s will use DTO: %s", query.fileType(), query.symbol(), dtoClassName);
-
-			MavenDependencyDTO dto = DynamicDTOMapper.mapToDTO(query, dtoClassName);
-
-			List<Match> queryResults = executeSingleQuery(config, scannerConfig.getScanner(), query, dto);
-			allResults.addAll(queryResults);
-
-			logger.debugf("Found %d matches for query %s.%s (DTO: %s)", queryResults.size(), query.fileType(),
-					query.symbol(), dtoClassName);
 		}
 
 		logger.infof("Maven scanner completed. Total matches found: %d", allResults.size());
 		return allResults;
+	}
+
+	@Override
+	public List<Match> scansCodeFor(Config config, Query query) {
+		logger.infof("Maven scanner executing for query %s.%s", query.fileType(), query.symbol());
+
+		if (config.scanner() != null && !ScannerType.MAVEN.label().equals(config.scanner())) {
+			logger.warnf("Query %s.%s is configured for scanner '%s', not 'maven'. Skipping.", query.fileType(),
+					query.symbol(), config.scanner());
+			return new ArrayList<>();
+		}
+
+		List<Match> results = executeSingleQuery(config, query);
+
+		logger.debugf("Found %d matches for query %s.%s ", results.size(), query.fileType(), query.symbol());
+
+		logger.infof("Maven scanner completed. Total matches found: %d", results.size());
+		return results;
 	}
 
 	@Override
@@ -75,14 +84,24 @@ public class MavenQueryScanner implements QueryScanner {
 	@Override
 	public boolean supports(Query query) {
 		// Check the configuration to see if this query should use the Maven scanner
-		ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
-		return "maven".equals(scannerConfig.getScanner());
+		String symbol = query.symbol();
+		String fileType = query.fileType();
+		return fileType.contains("pom") && symbol.contains("dependency");
 	}
 
-	private List<Match> executeSingleQuery(Config config, String scannerType, Query query, MavenDependencyDTO dto) {
+	private List<Match> executeSingleQuery(Config config, Query query) {
 		List<Match> results = new ArrayList<>();
 
 		logger.infof("Executing Maven dependency query: %s", query);
+
+		MavenDependencyDTO dto;
+		try {
+			dto = DynamicDTOMapper.mapToDTO(query, MAVEN_DEP_DTO);
+		} catch (Exception e) {
+			logger.errorf("Error creating Maven DTO for query %s.%s: %s", query.fileType(), query.symbol(),
+					e.getMessage());
+			return new ArrayList<>();
+		}
 
 		// Extract dependency search criteria from DTO
 		String groupId = dto != null ? dto.groupId() : query.keyValues().get("groupId");
@@ -125,8 +144,6 @@ public class MavenQueryScanner implements QueryScanner {
 	public Optional<InputLocation> searchDependency(Model model, String pomPath, String groupId, String artifactId,
 			String version, boolean isEffectiveModel) {
 
-		//model.getBuild().getPlugins().stream().forEach(p -> {System.out.printf("Plugin gav: %s:%s:%s\n", p.getGroupId(), p.getArtifactId(), p.getVersion());});
-
 		if (model.getDependencies() != null) {
 			//printDependencies(model.getDependencies());
 			Optional<Dependency> dep = model.getDependencies().stream()
@@ -143,8 +160,6 @@ public class MavenQueryScanner implements QueryScanner {
 		}
 
 		if (model.getDependencyManagement() != null) {
-			//logger.info("========= Dependencies of DependencyManagement ==========");
-			//printDependencies(model.getDependencyManagement().getDependencies());
 			Optional<Dependency> dep = model.getDependencyManagement().getDependencies().stream()
 					.filter(d -> matchesGav(d, groupId, artifactId, version, model, isEffectiveModel)).findFirst();
 

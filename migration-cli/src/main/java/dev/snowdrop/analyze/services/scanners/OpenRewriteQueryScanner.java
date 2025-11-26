@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.opencsv.CSVReader;
+import com.opencsv.bean.CsvToBeanBuilder;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.CsvRecord;
 import dev.snowdrop.analyze.model.Match;
-import dev.snowdrop.mapper.config.QueryScannerMappingLoader;
-import dev.snowdrop.mapper.config.ScannerConfig;
+import dev.snowdrop.analyze.model.ScannerType;
 import dev.snowdrop.mapper.DynamicDTOMapper;
 import dev.snowdrop.model.Parameter;
 import dev.snowdrop.model.Query;
@@ -33,9 +34,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.opencsv.CSVReader;
-import com.opencsv.bean.CsvToBeanBuilder;
-
 /**
  * Scanner implementation for Java-related queries using OpenRewrite.
  * Handles queries like java.annotation, java.referenced, java.method, etc.
@@ -45,68 +43,62 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 	private static final Logger logger = Logger.getLogger(OpenRewriteQueryScanner.class);
 	public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
 	public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
-	private final QueryScannerMappingLoader queryScannerMappingLoader;
+	private static final String OPENREWRITE_DEP_DTO = "dev.snowdrop.model.JavaAnnotationDTO";
 
 	public OpenRewriteQueryScanner() {
-		this.queryScannerMappingLoader = new QueryScannerMappingLoader();
+
 	}
 
 	@Override
 	public List<Match> executeQueries(Config config, Set<Query> queries) {
 		logger.infof("OpenRewrite scanner executing %d queries", queries.size());
 
-		// Filter queries that are actually configured for OpenRewrite scanner
-		List<Query> validQueries = new ArrayList<>();
-		List<RecipeDTO> recipeDTOs = new ArrayList<>();
+		List<Match> allResults = new ArrayList<>();
 
-		for (Query query : queries) {
-			// Get scanner configuration for this query
-			ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
+		for (Query q : queries) {
+			List<Match> partial = scansCodeFor(config, q);
 
-			// Validate that this query should be handled by OpenRewrite scanner
-			if (!"openrewrite".equals(scannerConfig.getScanner())) {
-				logger.warnf("Query %s.%s is configured for scanner '%s', not 'openrewrite'. Skipping.",
-						query.fileType(), query.symbol(), scannerConfig.getScanner());
-				continue;
+			if (partial != null && !partial.isEmpty()) {
+				allResults.addAll(partial);
 			}
-
-			// Get the DTO class that should be used for this query
-			String dtoClassName = scannerConfig.getDto();
-			logger.debugf("Query %s.%s will use DTO: %s", query.fileType(), query.symbol(), dtoClassName);
-
-			validQueries.add(query);
-
-			// TODO: As the name of the class is know here, do we need to get it using scannerConfig.getDto();
-			RecipeDTO dto = DynamicDTOMapper.mapToDTO(query, dtoClassName);
-			recipeDTOs.add(dto);
-			logger.debugf("DTO created using configured DTO %s: %s", dtoClassName, dto);
 		}
 
-		// If no valid queries for this scanner, return empty result
-		if (validQueries.isEmpty()) {
-			logger.infof("No queries configured for OpenRewrite scanner");
+		logger.infof("OpenRewrite scanner completed. Total matches found: %d", allResults.size());
+		return allResults;
+	}
+
+	@Override
+	public List<Match> scansCodeFor(Config config, Query query) {
+		logger.infof("OpenRewrite scanner executing 1 query");
+
+		if (config.scanner() != null && !ScannerType.OPENREWRITE.label().equals(config.scanner())) {
+			logger.warnf("Query %s.%s is configured for scanner '%s', not 'openrewrite'. Skipping.", query.fileType(),
+					query.symbol(), config.scanner());
 			return new ArrayList<>();
 		}
 
-		logger.infof("Processing %d queries configured for OpenRewrite scanner", validQueries.size());
+		logger.debugf("Query %s.%s will use DTO: %s", query.fileType(), query.symbol(), OPENREWRITE_DEP_DTO);
 
-		// Composite recipe - using Map with List to allow multiple entries with same key
-		List<Object> recipes = new ArrayList<>();
-
-		for (RecipeDTO dto : recipeDTOs) {
-			Map<String, String> parameters = dto.parameters().stream().collect(
-					Collectors.toMap(Parameter::parameter, Parameter::value, (v1, v2) -> v2, LinkedHashMap::new));
-
-			Map<String, Map<String, String>> singleRecipe = Map.of(dto.name(), parameters);
-			recipes.add(singleRecipe);
+		RecipeDTO dto;
+		try {
+			dto = DynamicDTOMapper.mapToDTO(query, OPENREWRITE_DEP_DTO);
+		} catch (Exception e) {
+			logger.errorf("Error creating DTO for query %s.%s: %s", query.fileType(), query.symbol(), e.getMessage());
+			return new ArrayList<>();
 		}
+
+		logger.debugf("DTO created using configured DTO %s: %s", OPENREWRITE_DEP_DTO, dto);
+
+		Map<String, String> parameters = dto.parameters().stream()
+				.collect(Collectors.toMap(Parameter::parameter, Parameter::value, (v1, v2) -> v2, LinkedHashMap::new));
+
+		Map<String, Map<String, String>> singleRecipe = Map.of(dto.name(), parameters);
 
 		CompositeRecipe compositeRecipe = new CompositeRecipe("specs.openrewrite.org/v1beta/recipe",
 				"dev.snowdrop.openrewrite.MatchConditions", "Try to match a resource", "Try to match a resource.",
-				recipes);
+				List.of(singleRecipe));
 
-		// Render the recipe as YAML
-		String yamlRecipe = "";
+		String yamlRecipe;
 		try {
 			yamlRecipe = yamlRecipeMapper().writeValueAsString(compositeRecipe);
 			logger.debugf("Recipe generated: %s", yamlRecipe);
@@ -128,7 +120,9 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		}
 
 		// Recipe's jar files
-		String gavs = "org.openrewrite:rewrite-java:8.65.0,org.openrewrite.recipe:rewrite-java-dependencies:1.44.0,dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT";
+		String gavs = "org.openrewrite:rewrite-java:8.65.0,"
+				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.44.0,"
+				+ "dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT";
 
 		// Execute the maven rewrite goal command
 		boolean succeed = execMvnCmd(config.appPath(), true, gavs, rewriteYamlName);
@@ -138,28 +132,16 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		}
 
 		// Iterate through the recipe list to get the results
-		List<Match> allResults = new ArrayList<>();
-		for (int i = 0; i < recipeDTOs.size(); i++) {
-			RecipeDTO dto = recipeDTOs.get(i);
-			Query originalQuery = validQueries.get(i);
+		String matchId = dto.parameters().stream().filter(p -> p.parameter().equals("matchId")).map(Parameter::value)
+				.findAny().orElse(null);
 
-			// Get from the DTO the matchId to search about
-			String matchId = dto.parameters().stream().filter(p -> p.parameter().equals("matchId"))
-					.map(Parameter::value).findAny().orElse(null);
+		List<Match> results = findRecordsMatching(config.appPath(), matchId);
 
-			List<Match> queryResults = findRecordsMatching(config.appPath(), matchId);
+		logger.debugf("Found %d matches for query %s.%s (DTO: %s)", results.size(), query.fileType(), query.symbol(),
+				OPENREWRITE_DEP_DTO);
 
-			// Log the DTO class that was configured for this query type
-			ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(originalQuery.fileType(),
-					originalQuery.symbol());
-			logger.debugf("Found %d matches for query %s.%s (DTO: %s)", queryResults.size(), originalQuery.fileType(),
-					originalQuery.symbol(), scannerConfig.getDto());
-
-			allResults.addAll(queryResults);
-		}
-
-		logger.infof("OpenRewrite scanner completed. Total matches found: %d", allResults.size());
-		return allResults;
+		logger.infof("OpenRewrite scanner completed. Total matches found: %d", results.size());
+		return results;
 	}
 
 	@Override
@@ -169,9 +151,9 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
 	@Override
 	public boolean supports(Query query) {
-		// Check the configuration to see if this query should use the OpenRewrite scanner
-		ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
-		return "openrewrite".equals(scannerConfig.getScanner());
+		String symbol = query.symbol();
+		String fileType = query.fileType();
+		return fileType.contains("java") && symbol.contains("annotation");
 	}
 
 	private ObjectMapper yamlRecipeMapper() {

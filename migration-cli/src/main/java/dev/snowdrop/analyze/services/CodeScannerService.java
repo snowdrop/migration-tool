@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class CodeScannerService {
 	private static final Logger logger = Logger.getLogger(CodeScannerService.class);
@@ -80,17 +79,37 @@ public class CodeScannerService {
 		 */
 
 		if (!visitor.getSimpleQueries().isEmpty()) {
-			results.put(rule.ruleID(), scanCommandExecutor.executeQueryCommand(config, visitor.getSimpleQueries()));
-			matchSucceeded = !results.get(rule.ruleID()).isEmpty();
+			List<Match> aggregatedResults = new ArrayList<>();
+
+			for (Query q : visitor.getSimpleQueries()) {
+				List<Match> partial = scanCommandExecutor.executeCommandForQuery(config, q);
+				if (partial != null && !partial.isEmpty()) {
+					aggregatedResults.addAll(partial);
+				}
+			}
+
+			results.put(rule.ruleID(), aggregatedResults);
+			matchSucceeded = !aggregatedResults.isEmpty();
 		} else if (!visitor.getOrQueries().isEmpty()) {
-			results.put(rule.ruleID(), scanCommandExecutor.executeQueryCommand(config, visitor.getOrQueries()));
-			matchSucceeded = results.get(rule.ruleID()).stream().anyMatch(java.util.Objects::nonNull);
+			List<Match> aggregated = new ArrayList<>();
+
+			for (Query q : visitor.getOrQueries()) {
+				List<Match> partial = scanCommandExecutor.executeCommandForQuery(config, q);
+
+				if (partial != null && !partial.isEmpty()) {
+					aggregated.addAll(partial);
+				}
+			}
+
+			results.put(rule.ruleID(), aggregated);
+			matchSucceeded = aggregated.stream().anyMatch(r -> r != null);
 		} else if (!visitor.getAndQueries().isEmpty()) {
 			boolean allMatched = true;
 			List<Match> andMatches = new ArrayList<>();
 
 			for (Query q : visitor.getAndQueries()) {
-				List<Match> partial = scanCommandExecutor.executeQueryCommand(config, Set.of(q));
+
+				List<Match> partial = scanCommandExecutor.executeCommandForQuery(config, q);
 				andMatches.addAll(partial);
 
 				// If any subquery has no results, the AND fails.

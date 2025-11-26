@@ -24,6 +24,8 @@ public interface QueryScanner {
 	 */
 	List<Match> executeQueries(Config config, Set<Query> queries);
 
+	List<Match> scansCodeFor(Config config, Query query);
+
 	/**
 	 * Returns the scanner type identifier.
 	 *

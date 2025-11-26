@@ -19,7 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFile;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ShouldMatchJavaClassTest extends BaseRulesTest {
 
@@ -49,7 +50,8 @@ class ShouldMatchJavaClassTest extends BaseRulesTest {
 		copyFolder(jdtls, tempDir.resolve(jdtls));
 
 		// Configure the test with the parameters
-		config = createTestConfig(destinationPath, rulesPath, tempDir.resolve("jdt").toString());
+		String jdtls = tempDir.resolve("jdt").toString();
+		config = createTestConfig(destinationPath, rulesPath, jdtls);
 
 		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
 		codeScannerService = new CodeScannerService(config, scanCommandExecutor);

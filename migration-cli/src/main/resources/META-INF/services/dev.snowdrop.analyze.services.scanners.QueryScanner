@@ -1,0 +1,3 @@
+dev.snowdrop.analyze.services.scanners.JdtlsQueryScanner
+dev.snowdrop.analyze.services.scanners.MavenQueryScanner
+dev.snowdrop.analyze.services.scanners.OpenRewriteQueryScanner

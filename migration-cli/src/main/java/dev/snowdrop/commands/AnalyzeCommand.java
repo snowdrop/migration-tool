@@ -1,12 +1,10 @@
 package dev.snowdrop.commands;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.analyze.services.AnalyzeService;
 import dev.snowdrop.analyze.services.ResultsService;
-import dev.snowdrop.analyze.services.ScannerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
@@ -16,10 +14,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
-import static dev.snowdrop.analyze.utils.YamlRuleParser.*;
+import static dev.snowdrop.analyze.utils.YamlRuleParser.filterRules;
+import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFile;
+import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
 
 @CommandLine.Command(name = "analyze", description = "Analyze a project for migration")
 @ApplicationScoped
@@ -63,14 +67,9 @@ public class AnalyzeCommand implements Runnable {
 		try {
 			List<Rule> rules = loadRules(config.rulesPath(), config.sourceTechnology(), config.targetTechnology());
 
-			/* Deprecated
-			   AnalyzeService analyzeService = new AnalyzeService(config, new ScannerFactory());
-			   Map<String, MigrationTask> tasks = analyzeService.analyzeCodeFromRule(scanner, rules);
-			 */
-
 			// Switch to the new analyseService able to map a query using its scanner to the corresponding DTO to issue a command
 			AnalyzeService analyzeService = new AnalyzeService(config);
-			Map<String, MigrationTask> tasks = analyzeService.analyzeCodeWithDynamicScanning(rules);
+			Map<String, MigrationTask> tasks = analyzeService.analyze(rules);
 
 			displayResults(tasks, config);
 

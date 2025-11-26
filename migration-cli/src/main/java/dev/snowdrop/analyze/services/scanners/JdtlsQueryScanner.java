@@ -3,10 +3,8 @@ package dev.snowdrop.analyze.services.scanners;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.JdtLsClient;
 import dev.snowdrop.analyze.model.Match;
-import dev.snowdrop.mapper.DynamicDTOMapper;
+import dev.snowdrop.analyze.model.ScannerType;
 import dev.snowdrop.mapper.config.QueryScannerMappingLoader;
-import dev.snowdrop.mapper.config.ScannerConfig;
-import dev.snowdrop.model.JavaClassDTO;
 import dev.snowdrop.model.Query;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.jboss.logging.Logger;
@@ -39,30 +37,15 @@ public class JdtlsQueryScanner implements QueryScanner {
 
 		List<Match> allResults = new ArrayList<>();
 
-		for (Query query : queries) {
-			// Get scanner configuration for this query
-			ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
+		for (Query q : queries) {
+			List<Match> partial = scansCodeFor(config, q);
 
-			// Validate that this query should be handled by JDTLS scanner
-			if (!"jdtls".equals(scannerConfig.getScanner())) {
-				logger.warnf("Query %s.%s is configured for scanner '%s', not 'jdtls'. Skipping.", query.fileType(),
-						query.symbol(), scannerConfig.getScanner());
-				continue;
+			if (partial != null && !partial.isEmpty()) {
+				allResults.addAll(partial);
 			}
-
-			// Log the DTO class that should be used for this query
-			String dtoClassName = scannerConfig.getDto();
-			logger.debugf("Query %s.%s will use DTO: %s", query.fileType(), query.symbol(), dtoClassName);
-
-			// TODO: As the name of the class is know here, do we need to get it using scannerConfig.getDto();
-			List<Match> queryResults = executeQuery(config, query, DynamicDTOMapper.mapToDTO(query, dtoClassName));
-			allResults.addAll(queryResults);
-
-			logger.debugf("Found %d matches for query %s.%s (DTO: %s)", queryResults.size(), query.fileType(),
-					query.symbol(), dtoClassName);
 		}
 
-		// We can now stop the server
+		// Stop the server after processing all queries
 		shutdown();
 
 		logger.infof("JDTLS scanner completed. Total matches found: %d", allResults.size());
@@ -76,12 +59,29 @@ public class JdtlsQueryScanner implements QueryScanner {
 
 	@Override
 	public boolean supports(Query query) {
-		// Check the configuration to see if this query should use the JDTLS scanner
-		ScannerConfig scannerConfig = queryScannerMappingLoader.getScannerConfig(query.fileType(), query.symbol());
-		return "jdtls".equals(scannerConfig.getScanner());
+		String symbol = query.symbol();
+		String fileType = query.fileType();
+		return (fileType.contains("java") && symbol.contains("class"))
+				|| (fileType.contains("java") && symbol.contains("package"));
 	}
 
-	private List<Match> executeQuery(Config config, Query query, JavaClassDTO dto) {
+	public List<Match> scansCodeFor(Config config, Query query) {
+		logger.infof("JDTLS scanner executing 1 query");
+
+		if (config.scanner() != null && !ScannerType.JDTLS.label().equals(config.scanner())) {
+			logger.warnf("Query %s.%s is configured for scanner '%s', not 'jdtls'. Skipping.", query.fileType(),
+					query.symbol(), config.scanner());
+			return new ArrayList<>();
+		}
+
+		List<Match> results = executeQuery(config, query);
+
+		logger.debugf("Found %d matches for query %s.%s (DTO: %s)", results.size(), query.fileType(), query.symbol());
+
+		return results;
+	}
+
+	private List<Match> executeQuery(Config config, Query query) {
 		List<Match> results = new ArrayList<>();
 
 		logger.infof("Executing JDTLS query: %s.%s", query.fileType(), query.symbol());
@@ -91,7 +91,7 @@ public class JdtlsQueryScanner implements QueryScanner {
 			JdtLsClient jdtLsClient = getJdtLsClient(config);
 
 			logger.infof("JDT-LS server is ready, query processing for %s.%s", query.fileType(), query.symbol());
-			List<SymbolInformation> symbolResults = jdtLsClient.executeCommand(config, query, dto);
+			List<SymbolInformation> symbolResults = jdtLsClient.executeCommand(config, query);
 
 			// TODO: As there is no matchId created for a JDTLS query, we will use the type+symbol. To be reviewed
 			var matchId = String.format("%s-%s", query.fileType(), query.symbol());
