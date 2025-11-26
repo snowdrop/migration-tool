@@ -130,12 +130,9 @@ The project uses the [Spring TODO](./applications/spring-boot-todo-app) example 
 The poc has been designed using the following technology:
 - [Quarkus and Picocli](https://quarkus.io/guides/picocli) to manage the CLI part and commands 
 - [konveyor jdt language server](https://github.com/konveyor/java-analyzer-bundle) to scan the java files to search about using the rule `when` condition.
-- [Openrewrite recipe](https://docs.openrewrite.org/concepts-and-explanations/recipes) to execute using the `maven rewrite` goal the transformation as defined part of the rule's instructions
+- [Openrewrite recipe](https://docs.openrewrite.org/concepts-and-explanations/recipes) to execute using the `maven rewrite` goal the transformations as defined part of the rule's instructions
 - [Antlr](https://www.antlr.org/) as parser tool to generate the code for the new Query Simpler language to be used to `Match` conditions
 - The different applications: `jdt-ls server`, `mvn command` are executed as OS processes using Java `ProcessBuilder`.
-
-> [!IMPORTANT]
-> The rule engine of this PoC is pretty basic and only translate the YAML `java.referenced` value to the corresponding `json request` needed to execute the JSON-RPC call with the command [io.konveyor.tackle.RuleEntry](https://github.com/konveyor/java-analyzer-bundle/blob/b387834212adb6271a233efe310e6c3e0b113029/java-analyzer-bundle.core/src/main/java/io/konveyor/tackle/core/internal/SampleDelegateCommandHandler.java#L47-L53).
 
 ## Requirements
 
@@ -159,14 +156,12 @@ set ID $(podman create --name kantra-download quay.io/konveyor/kantra:$VERSION)
 podman cp $ID:/jdtls ./jdt/konveyor-jdtls
 ```
 
-If you're using bash, remember to use export when setting environment variables
-
 > [!NOTE]
-> Copy the `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/java-analyzer-bundle.core-1.0.0-SNAPSHOT.jarjava-analyzer-bundle.core-1.0.0-SNAPSHOT.jar` to the `./lib/` folder of this project to use it as dependency (to access the code) as it is not published on a maven repository server !
+> If you're using bash and not fishell, remember too to export the environment variables !
 
 ## Hal client's commands
 
-The client proposes 2 commands: 
+Our Migration Tool client (aka hal) proposes 2 commands: 
 
 - **[analyze](#scan-and-analyze)**: Scan the code source using the rules matching conditions and generate a JSON report augmented with the provider's instructions.
 - **[transform](#transform-your-application)**: Apply the transformation's instructions using as input the JSON report by using the chosen provider
