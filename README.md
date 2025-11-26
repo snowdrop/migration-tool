@@ -15,7 +15,7 @@ This project and proof of concept show how to better handle the end-to-end migra
 
 ### Introduction
 
-Many tools, like the [konveyor kantra client](https://github.com/konveyor/kantra/) supports today the following flow. It generates an analysis report that users can use to review the issues reported, their criticality and what they should do to transform the code part of the message and/or links to websites. 
+Many tools, like the [konveyor kantra client](https://github.com/konveyor/kantra/) supports today the following flow. It generates an analysis report that users can use to review the issues reported, their criticality and what they should do to transform the code part of the message and/or links. 
 ```mermaid
 ---
 title: Analysis and migration flow
@@ -31,15 +31,19 @@ flowchart LR
 > [!NOTE]
 > The kantra client can be used to transform the code using openrewrite recipes.
 
-While this flow, which also includes instructions to be executed manually or by an external tool; IDE, etc, works pretty well, it suffers from a few limitations: 
+While this flow, which also includes instructions to be executed manually or by an external tool; IDE, etc., works pretty well, it suffers from a few limitations: 
 
-- Lack of clear instructions to be executed during a transformation step according to the target technology to be used: openrewrite, AI, etc, 
+- Lack of clear instructions to be executed during a transformation step according to the target technology to be used: openrewrite, AI, etc. 
 - No order to play or execute the instructions,
 - The absence of `precondition` prevents determining the application's `eligibility` for analysis,
 - Difficulty to figure out which rules should be used part of a migration plan,
-- Complexity of the rule syntax to define the `match` condition with operators: `AND`, `OR`
+- Complexity of the rule syntax to define the `match` condition with operators: `AND`, `OR` to indentify files where changes are needed
 
-While such limitations are not problematic for the users doing manually the transformation or executing a predefined migration plan, that could become a real challenge when it is needed to apply recipes or delegate to AI the responsibility to propose solutions. AI will generate hallucinating results and this lack of predictability will discourage many users to rely on it. On the other site, as openrewrite during the execution of a recipe will compile the code, then the user could be faced to compilation errors, etc.
+While such limitations are not problematic for the users doing manually the transformation or executing a predefined migration plan, that could become a real challenge when it is needed to apply recipes or delegate to AI the responsibility to propose solutions. 
+
+AI will certainly generate hallucinating results and this lack of predictability will discourage many users to rely on it. 
+
+On the other site, if you use as technology `openrewrite` or equivalent, the execution of the transformation steps could fail when by example maven compiles the code of the project analyzed due to changes applied to remove dependencies in a wrong order !
 
 This is why it is important that we improve the existing flow to propose a more `controlled` or `enhanced` flow as depicted hereafter:
 
@@ -117,7 +121,7 @@ The list of the AI's tasks will be executed one by one as user's chat message. W
 
 The openrewrite section contains the list of the recipes and/or preconditions to be executed using the maven openrewrite goal and gav are maven dependencies
 
-TODO: Add `recondition`
+TODO: Add `precondition` and Antlr rule syntax !
 
 ## Architecture of the PoC
 
