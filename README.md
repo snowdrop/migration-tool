@@ -181,7 +181,7 @@ Commands:
 
 ### Scan and analyze
 
-To execute the command using the Quarkus Picocli CLI able to scan, analyze and generate the migration plan report (optional), execute this command 
+To analyze and generate the migration plan report (optional), execute this `analyze` command 
 ```shell
 Usage: hal analyze [-v] [--jdt-ls-path=<jdtLsPath>]
                    [--jdt-workspace=<jdtWorkspace>] [-o=<output>]
@@ -202,11 +202,30 @@ Analyze a project for migration
                               openrewrite
   -t, --target=<target>     Target technology to consider for analysis
   -v, --verbose             Enable verbose output
+```
 
-  
-...  
-
+using either the `quarkus:dev` goal or the jar file created from the previous maven command executed
+```
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
+
+or 
+
+❯ java -jar /PATH/TO/migration-tool-parent/migration-cli/target/quarkus-app/quarkus-run.jar analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
+__  ____  __  _____   ___  __ ____  ______ 
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
+2025-11-26 11:51:41,701 WARN  [io.qua.config] (main) Unrecognized configuration key "quarkus.langchain4j.anthropic.chat-model.model" was provided; it will be ignored; verify that the dependency extension for this configuration is set or that you did not make a typo
+2025-11-26 11:51:41,797 INFO  [io.quarkus] (main) migration-cli 1.0.0-SNAPSHOT on JVM (powered by Quarkus 3.29.4) started in 0.309s. 
+2025-11-26 11:51:41,797 INFO  [io.quarkus] (main) Profile prod activated. 
+2025-11-26 11:51:41,797 INFO  [io.quarkus] (main) Installed features: [cdi, langchain4j, langchain4j-anthropic, picocli, qute, rest-client, rest-client-jackson, smallrye-context-propagation, vertx]
+Usage: hal [COMMAND]
+Quarkus Hal client able to scan, analyze and migrate a java application using
+instructions
+Commands:
+  analyze    Analyze a project for migration
+  transform  Transform a java application
+  help       Display help information about the specified command.
 ```
 
 > [!TIP]
@@ -224,7 +243,7 @@ mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring
 
 #### jdt-ls scanner
 
-By default, the `analyze` client command will use as scanner tool: konveyor jdt-ls sever
+By default, the `analyze` client command will use as scanner tool: konveyor jdt-ls server
 
 During the execution of the command, you will be able to see within the terminal the log reporting the JSON responses when condition(s) matches like also a summary table.
 ```text
