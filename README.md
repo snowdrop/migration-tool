@@ -122,7 +122,7 @@ The list of the AI's tasks will be executed one by one as user's chat message. W
 The openrewrite section contains the list of the recipes and/or preconditions to be executed using the maven openrewrite goal and gav are maven dependencies
 
 To make an application `elligible` for a migration plan and by consequence to let the `conditions` of the rules to be then executed, we have introduced
-a new field for that purpose: `precondition`. If during the `analysis` of the application, the `precondition` fails, then the process stops, otherwise the conditions will be executed:
+a new field for that purpose: `precondition`. If, during the `analysis` of the application, the `precondition` fails, then the process stops otherwise the conditions will be executed:
 
 ```yaml
 - category: mandatory
