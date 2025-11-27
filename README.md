@@ -233,7 +233,7 @@ podman cp $ID:/jdtls ./jdt/konveyor-jdtls
 ```
 
 > [!NOTE]
-> If you're using bash and not fishell, remember too to export the environment variables !
+> If you're using bash and not fishell, remember to export the environment variables too!
 
 ## Hal client's commands
 
