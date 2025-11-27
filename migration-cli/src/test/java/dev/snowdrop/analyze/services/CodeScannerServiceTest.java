@@ -55,7 +55,7 @@ class CodeScannerServiceTest {
 	@Test
 	void testExecuteRewriteCmdWithSimpleCondition() {
 		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
-				"java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'");
+				"java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'", null);
 		Rule rule = new Rule("mandatory", Collections.emptyList(), "desc", 1,
 				List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
 				"simple-condition-rule", null, when, Collections.emptyList(), 1, null);
@@ -83,7 +83,8 @@ class CodeScannerServiceTest {
 		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
 				"java.annotation is 'org.springframework.stereotype.Controller' OR\n"
 						+ "      java.annotation is 'org.springframework.beans.factory.annotation.Autowired' OR\n"
-						+ "      java.annotation is 'org.springframework.web.bind.annotation.GetMapping'");
+						+ "      java.annotation is 'org.springframework.web.bind.annotation.GetMapping'",
+				null);
 		Rule rule = new Rule("mandatory", Collections.emptyList(), "desc", 1,
 				List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
 				"or-condition-test", null, when, Collections.emptyList(), 1, null);
@@ -111,7 +112,7 @@ class CodeScannerServiceTest {
 	@Test
 	void testExecuteRewriteCmdWithAndConditionNew() {
 		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
-				"java.annotation is 'Autowired' AND java.annotation is 'RestController'");
+				"java.annotation is 'Autowired' AND java.annotation is 'RestController'", null);
 		Rule rule = new Rule("mandatory", Collections.emptyList(), "desc", 1,
 				List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
 				"and-condition-test", null, when, Collections.emptyList(), 1, null);
@@ -142,7 +143,7 @@ class CodeScannerServiceTest {
 	@Test
 	void testExecuteRewriteCmdWithAndCondition() {
 		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
-				"pom.dependency is spring-boot AND java.annotation is 'RestController'");
+				"pom.dependency is spring-boot AND java.annotation is 'RestController'", null);
 		Rule rule = new Rule("mandatory", Collections.emptyList(), "desc", 1,
 				List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
 				"and-condition-test", null, when, Collections.emptyList(), 1, null);

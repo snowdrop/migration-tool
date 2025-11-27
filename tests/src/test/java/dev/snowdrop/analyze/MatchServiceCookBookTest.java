@@ -237,11 +237,11 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 	// ============================================
 
 	/**
-	 * Rule 000: Search non existent annotation (dummy.SpringApplication)
+	 * Rule 000: Search non-existent annotation (dummy.SpringApplication)
 	 */
 	public static Rule createRule000_AnnotationNotFound() {
 		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
-				"java.annotation is 'dummy.SpringApplication'");
+				"java.annotation is 'dummy.SpringApplication'", null);
 
 		Rule.Instruction instructions = new Rule.Instruction(null, // no AI instructions
 				null, // no manual instructions
@@ -260,7 +260,7 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 	 */
 	private Rule createRule001_ReplaceBomQuarkus() {
 		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
-				"pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')");
+				"pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')", null);
 
 		// AI Instructions
 		Rule.Ai[] aiInstructions = new Rule.Ai[]{new Rule.Ai(null,
@@ -295,7 +295,7 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 	 */
 	private Rule createRule002_AddQuarkusClass() {
 		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
-				"java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'");
+				"java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'", null);
 
 		List<String> aiTasks = List.of(
 				"Add a new class com.todo.app.TodoApplication which implements QuarkusApplication.",
@@ -332,7 +332,7 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 	 */
 	private Rule createRule003_QuarkusMainAnnotation() {
 		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
-				"java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'");
+				"java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'", null);
 
 		List<String> aiTasks = List.of(
 				"Can you remove the @SpringBootApplication from the java file com.todo.app.AppApplication.java.",
@@ -381,7 +381,7 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 				java.annotation is 'org.springframework.web.bind.annotation.ResponseBody'
 				""".trim();
 
-		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(), complexCondition);
+		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(), complexCondition, null);
 
 		// AI Instructions
 		Rule.Ai[] aiInstructions = new Rule.Ai[]{new Rule.Ai(null,

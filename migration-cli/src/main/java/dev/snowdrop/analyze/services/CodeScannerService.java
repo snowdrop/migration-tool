@@ -26,9 +26,38 @@ public class CodeScannerService {
 	}
 
 	public ScanningResult scan(Rule rule) {
-		// Parse first the Rule condition to populate the Query object using the YAML condition query
-		// See the parser maven project for examples, unit tests
-		QueryVisitor visitor = QueryUtils.parseAndVisit(rule.when().condition());
+
+		/*
+		   Check for precondition before processing the main condition
+		   If the precondition succeeded, then we continue to parse the rules
+		   Otherwise we throw an exception to tell to the user that we cannot analyze the application
+		 */
+		if (rule.when().precondition() != null && !rule.when().precondition().trim().isEmpty()) {
+			QueryVisitor preconditionVisitor = QueryUtils.parseAndVisit(rule.when().precondition());
+			ScanningResult preconditionResult = executeQueryWithVisitor(preconditionVisitor, rule);
+
+			if (preconditionResult.isMatchSucceeded()) {
+				logger.warnf("Precondition matched for rule %s: %s", rule.ruleID(), rule.when().precondition());
+			}
+
+			if (!preconditionResult.isMatchSucceeded()) {
+				throw new PreconditionFailedException("Project does not meet the precondition requirements for rule: "
+						+ rule.ruleID() + ". Precondition query: " + rule.when().precondition());
+			}
+		}
+
+		return executeQueryWithVisitor(QueryUtils.parseAndVisit(rule.when().condition()), rule);
+	}
+
+	/**
+	 * Executes the query using the visitor pattern and returns the scanning result.
+	 * This method handles the different types of queries (simple, OR, AND) and their execution logic.
+	 *
+	 * @param visitor the QueryVisitor containing the parsed query information
+	 * @param rule the rule being processed
+	 * @return ScanningResult containing the match status and results
+	 */
+	private ScanningResult executeQueryWithVisitor(QueryVisitor visitor, Rule rule) {
 		Map<String, List<Match>> results = new HashMap<>();
 		boolean matchSucceeded = false;
 
@@ -55,7 +84,7 @@ public class CodeScannerService {
 			matchSucceeded = !results.get(rule.ruleID()).isEmpty();
 		} else if (!visitor.getOrQueries().isEmpty()) {
 			results.put(rule.ruleID(), scanCommandExecutor.executeQueryCommand(config, visitor.getOrQueries()));
-			matchSucceeded = results.get(rule.ruleID()).stream().anyMatch(r -> r != null);
+			matchSucceeded = results.get(rule.ruleID()).stream().anyMatch(java.util.Objects::nonNull);
 		} else if (!visitor.getAndQueries().isEmpty()) {
 			boolean allMatched = true;
 			List<Match> andMatches = new ArrayList<>();
@@ -76,7 +105,7 @@ public class CodeScannerService {
 				return combined;
 			});
 
-			matchSucceeded = matchSucceeded || allMatched;
+			matchSucceeded = allMatched;
 		} else {
 			logger.warnf("Rule %s has no valid condition(s)", rule.ruleID());
 			results.put(rule.ruleID(), Collections.emptyList());
