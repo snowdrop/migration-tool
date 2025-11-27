@@ -178,10 +178,4 @@ public class AnalyzeCommand implements Runnable {
 		Thread.sleep(2000);
 	}
 
-	// Data structure for JSON export
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	public record MigrationTasksExport(String title, String projectPath, String timestamp,
-			Map<String, MigrationTask> migrationTasks) {
-	}
-
 }
