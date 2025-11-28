@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,7 +62,8 @@ class CodeScannerServiceTest {
 		QueryVisitor queryVisitor = QueryUtils.parseAndVisit(rule.when().condition());
 		List<Match> matches = List.of(new Match("1", "openrewrite",
 				"2025-11-10_16-11-55-417/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:5|JAVA.ANNOTATION|org.springframework.boot.autoconfigure.SpringBootApplication"));
-		when(scanCommandExecutor.executeQueryCommand(config, queryVisitor.getSimpleQueries())).thenReturn(matches);
+		when(scanCommandExecutor.executeCommandForQuery(config, queryVisitor.getSimpleQueries().iterator().next()))
+				.thenReturn(matches);
 
 		ScanningResult scanningResult = codeScannerService.scan(rule);
 		assertTrue(scanningResult.isMatchSucceeded());
@@ -97,7 +97,8 @@ class CodeScannerServiceTest {
 		Match getMapping = new Match("3", "openrewrite",
 				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:14|JAVA.ANNOTATION|org.springframework.web.bind.annotation.GetMapping");
 		List<Match> matches = List.of(controller, getMapping, autowired);
-		when(scanCommandExecutor.executeQueryCommand(config, queryVisitor.getOrQueries())).thenReturn(matches);
+		when(scanCommandExecutor.executeCommandForQuery(config, queryVisitor.getOrQueries().iterator().next()))
+				.thenReturn(matches);
 
 		ScanningResult scanningResult = codeScannerService.scan(rule);
 		assertTrue(scanningResult.isMatchSucceeded());
@@ -124,8 +125,8 @@ class CodeScannerServiceTest {
 		List<Match> matches = List.of(controller, autowired);
 		Query queryAutowired = new Query("java", "annotation", Map.of("name", "Autowired"));
 		Query queryController = new Query("java", "annotation", Map.of("name", "RestController"));
-		when(scanCommandExecutor.executeQueryCommand(config, Set.of(queryAutowired))).thenReturn(List.of(autowired));
-		when(scanCommandExecutor.executeQueryCommand(config, Set.of(queryController))).thenReturn(List.of(controller));
+		when(scanCommandExecutor.executeCommandForQuery(config, queryAutowired)).thenReturn(List.of(autowired));
+		when(scanCommandExecutor.executeCommandForQuery(config, queryController)).thenReturn(List.of(controller));
 
 		ScanningResult scanningResult = codeScannerService.scan(rule);
 		assertTrue(scanningResult.isMatchSucceeded());

@@ -5,34 +5,19 @@ import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 public class AnalyzeService {
 
 	private final Config config;
-	private final ScannerFactory scannerFactory;
 	private final CodeScannerService codeScannerService;
 
 	public AnalyzeService(Config config) {
-		this(config, new ScannerFactory());
-	}
-
-	public AnalyzeService(Config config, ScannerFactory scannerFactory) {
 		this.config = config;
-		this.scannerFactory = scannerFactory;
 		this.codeScannerService = new CodeScannerService(config, new ScanCommandExecutor());
-	}
-
-	@Deprecated
-	public Map<String, MigrationTask> analyzeCodeFromRule(String scannerType, List<Rule> rules) throws IOException {
-		CodeScanner scanner = scannerFactory.createScanner(ScannerFactory.Scanner.fromLabel(scannerType), config);
-		return scanner.analyze(rules);
 	}
 
 	/**
@@ -44,7 +29,7 @@ public class AnalyzeService {
 	 * @param rules the migration rules to analyze
 	 * @return map of rule ID to migration tasks with analysis results
 	 */
-	public Map<String, MigrationTask> analyzeCodeWithDynamicScanning(List<Rule> rules) {
+	public Map<String, MigrationTask> analyze(List<Rule> rules) {
 		Map<String, MigrationTask> tasks = new HashMap<>();
 
 		for (Rule rule : rules) {
