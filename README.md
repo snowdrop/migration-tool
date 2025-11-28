@@ -13,7 +13,9 @@ This project and proof of concept show how to better handle the end-to-end migra
 
 ## Migration Flow
 
-Many tools, like the [konveyor kantra client](https://github.com/konveyor/kantra/) supports today the following flow. It generates an analysis report that users can use to review the issues reported, their criticality and what they should do to transform the code part of the message and/or links to websites. 
+### Introduction
+
+Many tools, like the [konveyor kantra client](https://github.com/konveyor/kantra/) supports today the following flow. It generates an analysis report that users can use to review the issues reported, their criticality and what they should do to transform the code part of the message and/or links. 
 ```mermaid
 ---
 title: Analysis and migration flow
@@ -29,14 +31,21 @@ flowchart LR
 > [!NOTE]
 > The kantra client can be used to transform the code using openrewrite recipes.
 
-While this flow, including also the transformation step, works pretty well, it suffers froms 2 limitations: 
+While this flow, which also includes instructions to be executed manually or by an external tool; IDE, etc., works pretty well, it suffers from a few limitations: 
 
-- Lack of clear instructions to be executed during a transformation step 
-- No order to play or execute the instructions.
+- Lack of clear instructions to be executed during a transformation step according to the target technology to be used: openrewrite, AI, etc. 
+- No order to play or execute the instructions,
+- The absence of `precondition` prevents determining the application's `eligibility` for analysis,
+- Difficulty to figure out which rules should be used part of a migration plan,
+- Complexity of the rule syntax to define the `match` condition with operators: `AND`, `OR` to indentify files where changes are needed
 
-While such limitations are not problematic for the users doing manually the transformation, that will become a real challenge when it is needed to apply recipes or delegate to AI the responsibility to propose solutions. AI will generate hallucinating results and this lack of predictability will discourage many users to rely on it. On the other site, as openrewrite during the execution of a recipe will compile the code, then the user will be faced to compilation errors, etc.
+While such limitations are not problematic for the users doing manually the transformation or executing a predefined migration plan, that could become a real challenge when it is needed to apply recipes or delegate to AI the responsibility to propose solutions. 
 
-This is why it is important that we improve the existing flow to propose a more "controlled" flow as depicted hereafter:
+AI will certainly generate hallucinating results and this lack of predictability will discourage many users to rely on it. 
+
+On the other site, if you use as technology `openrewrite` or equivalent, the execution of the transformation steps could fail when by example maven compiles the code of the project analyzed due to changes applied to remove dependencies in a wrong order !
+
+This is why it is important that we improve the existing flow to propose a more `controlled` or `enhanced` flow as depicted hereafter:
 
 ```mermaid
 ---
@@ -61,13 +70,14 @@ flowchart LR
     style F fill:#fff8e1 
 ```
 
+### Enhanced rule
+
 The rule represents, per se, the contract definition between what we would like to discover within the code source scanned: java, properties, xml, json, maven or gradle files and what a provider should do to properly transform the code. 
 
-As presented hereafter, we have introduced 2 new fields part of the Rule YAML file:
+As presented hereafter, we have introduced different new fields part of the Rule YAML file:
 
 - `order`: The order to apply the instructions against the flow which is composed of several rules
 - `instructions`: List of instructions/tasks to be executed by a provider
-
 
 ```yaml
 - ruleID: springboot-annotations-to-quarkus-00000
@@ -111,6 +121,84 @@ The list of the AI's tasks will be executed one by one as user's chat message. W
 
 The openrewrite section contains the list of the recipes and/or preconditions to be executed using the maven openrewrite goal and gav are maven dependencies
 
+To make an application `elligible` for a migration plan and by consequence to let the `conditions` of the rules to be then executed, we have introduced
+a new field for that purpose: `precondition`. If, during the `analysis` of the application, the `precondition` fails, then the process stops otherwise the conditions will be executed:
+
+```yaml
+- category: mandatory
+  customVariables: []
+  description: SpringBoot to Quarkus
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "SpringBoot to Quarkus."
+  ruleID: spring-boot-parent-precondition-match
+  when:
+    # Example of precondition checking if we have a Spring Boot Parent version: 3.5.3
+    precondition: |
+      pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-parent:3.5.3')
+    # If the precondition matches and is tru, then the condition's rule will be executed
+    condition: |
+      java.annotation is '@SpringBootApplication'
+...
+```
+To simplify the adoption of the Rule as unit of work to analyse an application to be migrated, we have simplified the YAML query syntax to adopt a more user-friendly language more in line with the language that a user will use to search about something in a project. 
+
+The simplified query language syntax is defined using Antlr grammar and supports a query with a simple `clause` or multiple `clauses` separated with `AND`, `OR` operators
+
+```g4
+grammar Query;
+
+@header {
+package dev.snowdrop.parser.antlr;
+}
+
+searchQuery: operation;
+operation
+    : operation AND operation #AndOperation
+    | operation OR operation  #OrOperation
+    | clause                  #SimpleClause
+    ;
+
+clause: fileType ('.' symbol)? ('is' | '=') (value | '(' keyValuePair (',' keyValuePair)* ')');
+fileType: 'JAVA' | 'java' | 'POM' | 'pom' | 'TEXT' | 'text' | 'PROPERTY' | 'property' | 'YAML' | 'yaml' | 'JSON' | 'json';
+symbol: ID;
+keyValuePair: key '=' value;
+key: QUOTED_STRING | ID;
+value: QUOTED_STRING | ID;
+logicalOp: AND | OR;
+
+// LEXER vocabulary of the language
+IS:    'is';
+AND:   'AND';
+OR:    'OR';
+
+ID:            [a-zA-Z][a-zA-Z0-9-]*; // Identifier, allows dots for package names
+QUOTED_STRING: '\'' ( ~('\''|'\\') | '\\' . )* '\''   // Single-quoted string
+             | '"' ( ~('"'|'\\') | '\\' . )* '"';     // Double-quoted string
+EQUALS:        '=';
+DOT:           '.';
+COMMA:         ',';
+LPAREN:        '(';
+RPAREN:        ')';
+
+WS:            [ \t\r\n]+ -> skip; // Skip whitespace
+```
+
+Examples of queries
+```yaml
+  when:
+    condition: java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
+    condition: |
+      java.annotation is 'org.springframework.stereotype.Controller' OR
+      java.annotation is 'org.springframework.web.bind.annotation.GetMapping'
+    condition: |
+      pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web') AND
+      java.annotation is 'org.springframework.stereotype.Controller'
+```
+
 ## Architecture of the PoC
 
 The project uses the [Spring TODO](./applications/spring-boot-todo-app) example as the java project to be analyzed using augmented [rules](./cookbook/rules).
@@ -118,12 +206,9 @@ The project uses the [Spring TODO](./applications/spring-boot-todo-app) example 
 The poc has been designed using the following technology:
 - [Quarkus and Picocli](https://quarkus.io/guides/picocli) to manage the CLI part and commands 
 - [konveyor jdt language server](https://github.com/konveyor/java-analyzer-bundle) to scan the java files to search about using the rule `when` condition.
-- [Openrewrite recipe](https://docs.openrewrite.org/concepts-and-explanations/recipes) to execute using the `maven rewrite` goal the transformation as defined part of the rule's instructions
+- [Openrewrite recipe](https://docs.openrewrite.org/concepts-and-explanations/recipes) to execute using the `maven rewrite` goal the transformations as defined part of the rule's instructions
 - [Antlr](https://www.antlr.org/) as parser tool to generate the code for the new Query Simpler language to be used to `Match` conditions
 - The different applications: `jdt-ls server`, `mvn command` are executed as OS processes using Java `ProcessBuilder`.
-
-> [!IMPORTANT]
-> The rule engine of this PoC is pretty basic and only translate the YAML `java.referenced` value to the corresponding `json request` needed to execute the JSON-RPC call with the command [io.konveyor.tackle.RuleEntry](https://github.com/konveyor/java-analyzer-bundle/blob/b387834212adb6271a233efe310e6c3e0b113029/java-analyzer-bundle.core/src/main/java/io/konveyor/tackle/core/internal/SampleDelegateCommandHandler.java#L47-L53).
 
 ## Requirements
 
@@ -147,14 +232,12 @@ set ID $(podman create --name kantra-download quay.io/konveyor/kantra:$VERSION)
 podman cp $ID:/jdtls ./jdt/konveyor-jdtls
 ```
 
-If you're using bash, remember to use export when setting environment variables
-
 > [!NOTE]
-> Copy the `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/java-analyzer-bundle.core-1.0.0-SNAPSHOT.jarjava-analyzer-bundle.core-1.0.0-SNAPSHOT.jar` to the `./lib/` folder of this project to use it as dependency (to access the code) as it is not published on a maven repository server !
+> If you're using bash and not fishell, remember to export the environment variables too!
 
 ## Hal client's commands
 
-The client proposes 2 commands: 
+Our Migration Tool client (aka hal) proposes 2 commands: 
 
 - **[analyze](#scan-and-analyze)**: Scan the code source using the rules matching conditions and generate a JSON report augmented with the provider's instructions.
 - **[transform](#transform-your-application)**: Apply the transformation's instructions using as input the JSON report by using the chosen provider
@@ -174,7 +257,7 @@ Commands:
 
 ### Scan and analyze
 
-To execute the command using the Quarkus Picocli CLI able to scan, analyze and generate the migration plan report (optional), execute this command 
+To analyze and generate the migration plan report (optional), execute this `analyze` command 
 ```shell
 Usage: hal analyze [-v] [--jdt-ls-path=<jdtLsPath>]
                    [--jdt-workspace=<jdtWorkspace>] [-o=<output>]
@@ -195,11 +278,30 @@ Analyze a project for migration
                               openrewrite
   -t, --target=<target>     Target technology to consider for analysis
   -v, --verbose             Enable verbose output
+```
 
-  
-...  
-
+using either the `quarkus:dev` goal or the jar file created from the previous maven command executed
+```
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
+
+or 
+
+❯ java -jar /PATH/TO/migration-tool-parent/migration-cli/target/quarkus-app/quarkus-run.jar analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
+__  ____  __  _____   ___  __ ____  ______ 
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
+2025-11-26 11:51:41,701 WARN  [io.qua.config] (main) Unrecognized configuration key "quarkus.langchain4j.anthropic.chat-model.model" was provided; it will be ignored; verify that the dependency extension for this configuration is set or that you did not make a typo
+2025-11-26 11:51:41,797 INFO  [io.quarkus] (main) migration-cli 1.0.0-SNAPSHOT on JVM (powered by Quarkus 3.29.4) started in 0.309s. 
+2025-11-26 11:51:41,797 INFO  [io.quarkus] (main) Profile prod activated. 
+2025-11-26 11:51:41,797 INFO  [io.quarkus] (main) Installed features: [cdi, langchain4j, langchain4j-anthropic, picocli, qute, rest-client, rest-client-jackson, smallrye-context-propagation, vertx]
+Usage: hal [COMMAND]
+Quarkus Hal client able to scan, analyze and migrate a java application using
+instructions
+Commands:
+  analyze    Analyze a project for migration
+  transform  Transform a java application
+  help       Display help information about the specified command.
 ```
 
 > [!TIP]
@@ -217,7 +319,7 @@ mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring
 
 #### jdt-ls scanner
 
-By default, the `analyze` client command will use as scanner tool: konveyor jdt-ls sever
+By default, the `analyze` client command will use as scanner tool: konveyor jdt-ls server
 
 During the execution of the command, you will be able to see within the terminal the log reporting the JSON responses when condition(s) matches like also a summary table.
 ```text
