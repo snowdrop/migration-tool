@@ -149,21 +149,21 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${compiler-plugin.version}</version>
-                <jdtLSConfiguration>
+                <configuration>
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>
-                </jdtLSConfiguration>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
-                <jdtLSConfiguration>
+                <configuration>
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>
                     </systemPropertyVariables>
-                </jdtLSConfiguration>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -174,13 +174,13 @@
                             <goal>integration-test</goal>
                             <goal>verify</goal>
                         </goals>
-                        <jdtLSConfiguration>
+                        <configuration>
                             <systemPropertyVariables>
                                 <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
                                 <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                                 <maven.home>${maven.home}</maven.home>
                             </systemPropertyVariables>
-                        </jdtLSConfiguration>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
