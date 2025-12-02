@@ -3,8 +3,7 @@ package dev.snowdrop.analyze.services.scanners;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.ScannerType;
-import dev.snowdrop.mapper.DynamicDTOMapper;
-import dev.snowdrop.model.MavenDependencyDTO;
+import dev.snowdrop.model.MavenGav;
 import dev.snowdrop.model.Query;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.InputLocation;
@@ -94,19 +93,11 @@ public class MavenQueryScanner implements QueryScanner {
 
 		logger.infof("Executing Maven dependency query: %s", query);
 
-		MavenDependencyDTO dto;
-		try {
-			dto = DynamicDTOMapper.mapToDTO(query, MAVEN_DEP_DTO);
-		} catch (Exception e) {
-			logger.errorf("Error creating Maven DTO for query %s.%s: %s", query.fileType(), query.symbol(),
-					e.getMessage());
-			return new ArrayList<>();
-		}
-
-		// Extract dependency search criteria from DTO
-		String groupId = dto != null ? dto.groupId() : query.keyValues().get("groupId");
-		String artifactId = dto != null ? dto.artifactId() : query.keyValues().get("artifactId");
-		String version = dto != null ? dto.version() : query.keyValues().get("version");
+		MavenGav mvnGav = parseCoordinates(query);
+		// Extract dependency search criteria
+		String groupId = mvnGav.groupId();
+		String artifactId = mvnGav.artifactId();
+		String version = mvnGav.version();
 
 		// Find and analyze pom.xml file
 		Path pomPath = Paths.get(config.appPath(), "pom.xml");
@@ -122,6 +113,16 @@ public class MavenQueryScanner implements QueryScanner {
 		}
 
 		return results;
+	}
+
+	private MavenGav parseCoordinates(Query query) {
+		// "gavs=group:artifact:version"
+		if (query.keyValues().containsKey("gavs")) {
+			String[] parts = query.keyValues().get("gavs").split(":");
+			return new MavenGav(parts[0], parts[1], parts.length > 2 ? parts[2] : "");
+		}
+		return new MavenGav(query.keyValues().get("groupId"), query.keyValues().get("artifactId"),
+				query.keyValues().getOrDefault("version", ""));
 	}
 
 	public Optional<InputLocation> findDependencyLocation(String pomPath, String groupId, String artifactId,

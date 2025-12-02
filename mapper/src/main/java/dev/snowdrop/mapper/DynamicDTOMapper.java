@@ -2,7 +2,6 @@ package dev.snowdrop.mapper;
 
 import dev.snowdrop.mapper.java.annotation.JavaAnnotationMapper;
 import dev.snowdrop.mapper.java.clazz.JavaClassMapper;
-import dev.snowdrop.mapper.maven.dependency.MavenDependencyMapper;
 import dev.snowdrop.model.Query;
 import org.jboss.logging.Logger;
 
@@ -24,7 +23,6 @@ public class DynamicDTOMapper {
 		// Initialize mapper registry with all available mappers
 		registerMapper(new JavaAnnotationMapper());
 		registerMapper(new JavaClassMapper());
-		registerMapper(new MavenDependencyMapper());
 	}
 
 	/**
