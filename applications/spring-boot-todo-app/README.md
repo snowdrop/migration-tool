@@ -62,7 +62,7 @@ In this README, you'll find a comprehensive guide that details your project, enu
 2. **Database Configuration:**
 
    - Install MySQL and create a database.
-   - Update the `application.properties` file with your database jdtLSConfiguration such as username, password, database name and port number.
+   - Update the `application.properties` file with your database configuration such as username, password, database name and port number.
 
 3. **Build and Run the Application:**
 
