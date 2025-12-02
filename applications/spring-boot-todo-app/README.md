@@ -64,7 +64,7 @@ In this README, you'll find a comprehensive guide that details your project, enu
    - Install MySQL and create a database.
    - Update the `application.properties` file with your database configuration such as username, password, database name and port number.
 
-   An alternative could also be to launch a container using docker or podman
+   An alternative is to launch the MySQL as a container using docker or podman
    ```bash
    podman run --detach \
         --name mysql_todo_db \
