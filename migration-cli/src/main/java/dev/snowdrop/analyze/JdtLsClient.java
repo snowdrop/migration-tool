@@ -7,7 +7,6 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.analyze.utils.LSClient;
-import dev.snowdrop.model.JavaClassDTO;
 import dev.snowdrop.model.Query;
 import dev.snowdrop.parser.QueryUtils;
 import dev.snowdrop.parser.QueryVisitor;
@@ -44,8 +43,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
-import static dev.snowdrop.mapper.JdtLsUtils.getLocationCode;
-import static dev.snowdrop.mapper.JdtLsUtils.getLocationName;
+import static dev.snowdrop.analyze.utils.JdtLsUtils.getLocationCode;
+import static dev.snowdrop.analyze.utils.JdtLsUtils.getLocationName;
 
 public class JdtLsClient {
 	private static final Logger logger = Logger.getLogger(JdtLsClient.class);
@@ -176,31 +175,31 @@ public class JdtLsClient {
 		}
 	}
 
-	public List<SymbolInformation> executeCommand(Config config, Query q, Object dto) {
-		// TODO: Find a way to cast properly
-		JavaClassDTO javaClassDTO = (JavaClassDTO) dto;
-		List<Object> cmdArguments = List.of(javaClassDTO.cmdParams());
-
-		if (process == null || !process.isAlive()) {
-			throw new IllegalStateException("The jdt-ls server/process is not running");
-		}
-
-		try {
-			CompletableFuture<List<SymbolInformation>> symbolsFuture = future
-					.thenApplyAsync(ignored -> executeLsCmd(config, cmdArguments)).exceptionally(throwable -> {
-						logger.errorf(
-								String.format("Error executing LS command for query %s-%s", q.fileType(), q.symbol()),
-								throwable.getMessage(), throwable);
-						return new ArrayList<SymbolInformation>();
-					});
-
-			return symbolsFuture.get(); // Wait for completion
-		} catch (InterruptedException | ExecutionException e) {
-			logger.errorf(String.format("Failed to execute command for %s-%s", q.fileType(), q.symbol()),
-					e.getMessage());
-			return null;
-		}
-	}
+	//	public List<SymbolInformation> executeCommand(Config config, Query q, Object dto) {
+	//		// TODO: Find a way to cast properly
+	//		JavaClassDTO javaClassDTO = (JavaClassDTO) dto;
+	//		List<Object> cmdArguments = List.of(javaClassDTO.cmdParams());
+	//
+	//		if (process == null || !process.isAlive()) {
+	//			throw new IllegalStateException("The jdt-ls server/process is not running");
+	//		}
+	//
+	//		try {
+	//			CompletableFuture<List<SymbolInformation>> symbolsFuture = future
+	//					.thenApplyAsync(ignored -> executeLsCmd(config, cmdArguments)).exceptionally(throwable -> {
+	//						logger.errorf(
+	//								String.format("Error executing LS command for query %s-%s", q.fileType(), q.symbol()),
+	//								throwable.getMessage(), throwable);
+	//						return new ArrayList<SymbolInformation>();
+	//					});
+	//
+	//			return symbolsFuture.get(); // Wait for completion
+	//		} catch (InterruptedException | ExecutionException e) {
+	//			logger.errorf(String.format("Failed to execute command for %s-%s", q.fileType(), q.symbol()),
+	//					e.getMessage());
+	//			return null;
+	//		}
+	//	}
 
 	@Deprecated
 	public List<SymbolInformation> executeCommand(Config config, Query q) {

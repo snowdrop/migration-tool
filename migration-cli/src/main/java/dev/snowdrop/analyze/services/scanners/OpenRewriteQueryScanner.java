@@ -1,20 +1,12 @@
 package dev.snowdrop.analyze.services.scanners;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBeanBuilder;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.CsvRecord;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.ScannerType;
-import dev.snowdrop.mapper.DynamicDTOMapper;
-import dev.snowdrop.model.Parameter;
 import dev.snowdrop.model.Query;
-import dev.snowdrop.model.RecipeDTO;
-import dev.snowdrop.serializer.RecipeDTOSerializer;
 import dev.snowdrop.transform.model.CompositeRecipe;
 import org.jboss.logging.Logger;
 
@@ -27,10 +19,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,10 +36,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 	public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
 	public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
 	private static final String OPENREWRITE_DEP_DTO = "dev.snowdrop.model.JavaAnnotationDTO";
-
-	public OpenRewriteQueryScanner() {
-
-	}
+	public static final String OPENREWRITE_MATCH_CONDITIONS = "dev.snowdrop.openrewrite.MatchConditions";
 
 	@Override
 	public List<Match> executeQueries(Config config, Set<Query> queries) {
@@ -79,61 +68,19 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
 		logger.debugf("Query %s.%s will use DTO: %s", query.fileType(), query.symbol(), OPENREWRITE_DEP_DTO);
 
-		RecipeDTO dto;
-		try {
-			dto = DynamicDTOMapper.mapToDTO(query, OPENREWRITE_DEP_DTO);
-		} catch (Exception e) {
-			logger.errorf("Error creating DTO for query %s.%s: %s", query.fileType(), query.symbol(), e.getMessage());
-			return new ArrayList<>();
-		}
+		CompositeRecipe openRewriteRecipe = buildRecipe(query);
 
-		logger.debugf("DTO created using configured DTO %s: %s", OPENREWRITE_DEP_DTO, dto);
-
-		Map<String, String> parameters = dto.parameters().stream()
-				.collect(Collectors.toMap(Parameter::parameter, Parameter::value, (v1, v2) -> v2, LinkedHashMap::new));
-
-		Map<String, Map<String, String>> singleRecipe = Map.of(dto.name(), parameters);
-
-		CompositeRecipe compositeRecipe = new CompositeRecipe("specs.openrewrite.org/v1beta/recipe",
-				"dev.snowdrop.openrewrite.MatchConditions", "Try to match a resource", "Try to match a resource.",
-				List.of(singleRecipe));
-
-		String yamlRecipe;
-		try {
-			yamlRecipe = yamlRecipeMapper().writeValueAsString(compositeRecipe);
-			logger.debugf("Recipe generated: %s", yamlRecipe);
-		} catch (Exception e) {
-			logger.errorf("Error generating YAML recipe: %s", e.getMessage());
-			return new ArrayList<>();
-		}
-
-		// Copy the rewrite yaml file under the project to scan
-		String rewriteYamlName = "rewrite.yml";
-		Path yamlFilePath = Paths.get(config.appPath()).resolve(rewriteYamlName);
-
-		try {
-			Files.write(yamlFilePath, yamlRecipe.getBytes(), StandardOpenOption.CREATE,
-					StandardOpenOption.TRUNCATE_EXISTING);
-		} catch (IOException e) {
-			logger.errorf("Error writing rewrite YAML file: %s", e.getMessage());
-			return new ArrayList<>();
-		}
-
-		// Recipe's jar files
-		String gavs = "org.openrewrite:rewrite-java:8.65.0,"
-				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.44.0,"
-				+ "dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT";
+		String yamlRecipe = toYaml(openRewriteRecipe);
+		logger.debugf("Recipe generated: %s", yamlRecipe);
 
 		// Execute the maven rewrite goal command
-		boolean succeed = execMvnCmd(config.appPath(), true, gavs, rewriteYamlName);
+		boolean succeed = execOpenrewriteMvnPlugin(config.appPath(), true, yamlRecipe);
 		if (!succeed) {
 			logger.warnf("Failed to execute the maven command");
 			return new ArrayList<>();
 		}
 
-		// Iterate through the recipe list to get the results
-		String matchId = dto.parameters().stream().filter(p -> p.parameter().equals("matchId")).map(Parameter::value)
-				.findAny().orElse(null);
+		String matchId = extractMatchId(openRewriteRecipe);
 
 		List<Match> results = findRecordsMatching(config.appPath(), matchId);
 
@@ -143,6 +90,68 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		logger.infof("OpenRewrite scanner completed. Total matches found: %d", results.size());
 		return results;
 	}
+
+	private String extractMatchId(CompositeRecipe composite) {
+		Object first = composite.recipeList().get(0);
+
+		Map<String, Map<String, String>> recipeMap = (Map<String, Map<String, String>>) first;
+
+		Map<String, String> inner = recipeMap.values().iterator().next();
+
+		return inner.get("matchId");
+	}
+
+	private Map<String, String> extractParams(CompositeRecipe composite) {
+		Object first = composite.recipeList().get(0);
+
+		if (!(first instanceof Map<?, ?> rawMap)) {
+			throw new IllegalStateException("recipeList must contain rawMap");
+		}
+
+		Map<String, Map<String, String>> recipeMap = (Map<String, Map<String, String>>) first;
+
+		return recipeMap.values().iterator().next();
+
+	}
+
+	private String extractEntryKey(CompositeRecipe recipe) {
+		Object first = recipe.recipeList().get(0);
+
+		if (!(first instanceof Map<?, ?> rawMap)) {
+			throw new IllegalStateException("recipeList must contain rawMap");
+		}
+
+		Map<String, Map<String, String>> recipeMap = rawMap.entrySet().stream()
+				.collect(Collectors.toMap(e -> (String) e.getKey(), e -> (Map<String, String>) e.getValue()));
+
+		var entry = recipeMap.entrySet().iterator().next();
+
+		return entry.getKey();
+
+	}
+
+	private CompositeRecipe buildRecipe(Query query) {
+		return switch (query.symbol()) {
+			case "annotation" -> buildAnnotationRecipe(query);
+			//			case "class" -> buildClassRecipe(query);
+			//			case "method" -> buildMethodRecipe(query);
+			default -> throw new IllegalArgumentException("Unsupported symbol: " + query.symbol());
+		};
+	}
+
+	private CompositeRecipe buildAnnotationRecipe(Query query) {
+		String annotationName = query.keyValues().get("name");
+		String matchId = UUID.randomUUID().toString();
+
+		Map<String, Map<String, String>> recipe = Map.of("dev.snowdrop.openrewrite.java.search.FindAnnotations", Map
+				.of("pattern", annotationName, "matchId", matchId, "matchOnMetaAnnotations", Boolean.FALSE.toString()));
+
+		CompositeRecipe composite = new CompositeRecipe("specs.openrewrite.org/v1beta/recipe",
+				OPENREWRITE_MATCH_CONDITIONS, "Try to match a resource", "Try to match a resource", List.of(recipe));
+
+		return composite;
+	}
+
 
 	@Override
 	public String getScannerType() {
@@ -156,18 +165,47 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		return fileType.contains("java") && symbol.contains("annotation");
 	}
 
-	private ObjectMapper yamlRecipeMapper() {
-		YAMLFactory factory = new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
-		ObjectMapper yamlMapper = new ObjectMapper(factory);
 
-		SimpleModule module = new SimpleModule();
-		module.addSerializer(RecipeDTO.class, new RecipeDTOSerializer());
-		yamlMapper.registerModule(module);
+	public String toYaml(CompositeRecipe recipe) {
+		StringBuilder yaml = new StringBuilder();
+		yaml.append("type: ").append("\"").append(recipe.type()).append("\"").append("\n");
+		yaml.append("name: ").append("\"").append(recipe.name()).append("\"").append("\n");
+		yaml.append("displayName: ").append("\"").append(recipe.displayName()).append("\"").append("\n");
+		yaml.append("description: ").append("\"").append(recipe.description()).append("\"").append("\n");
+		yaml.append("recipeList:\n");
 
-		return yamlMapper;
+		String entryKey = extractEntryKey(recipe);
+		yaml.append("  - ").append(entryKey).append(":\n");
+
+		extractParams(recipe).forEach((key, value) -> {
+			yaml.append("      ").append(key).append(": ");
+			yaml.append("\"").append(value).append("\"");
+			yaml.append("\n");
+		});
+		logger.debugf("Recipe generated: %s", yaml.toString());
+
+		return yaml.toString();
 	}
 
-	private boolean execMvnCmd(String appProjectPath, boolean verbose, String gavs, String rewriteYamlName) {
+	private boolean execOpenrewriteMvnPlugin(String appProjectPath, boolean verbose, String yamlRecipe) {
+		// Copy the rewrite yaml file under the project to scan
+		String rewriteYamlName = "rewrite.yml";
+		Path path = Paths.get(appProjectPath);
+		Path yamlFilePath = path.resolve(rewriteYamlName);
+
+		try {
+			Files.write(yamlFilePath, yamlRecipe.getBytes(), StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			logger.errorf("Error writing rewrite YAML file: %s", e.getMessage());
+			return false;
+		}
+
+		// Recipe's jar files
+		String gavs = "org.openrewrite:rewrite-java:8.65.0,"
+				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.44.0,"
+				+ "dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT";
+
 		try {
 			List<String> command = new ArrayList<>();
 			String outputDirectoryRewriteName = rewriteYamlName.substring(0, rewriteYamlName.lastIndexOf('.'));
@@ -187,7 +225,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 			logger.infof("Executing OpenRewrite command: %s", commandStr);
 
 			ProcessBuilder processBuilder = new ProcessBuilder(command);
-			processBuilder.directory(Paths.get(appProjectPath).toFile());
+			processBuilder.directory(path.toFile());
 			processBuilder.redirectErrorStream(true);
 
 			Process process = processBuilder.start();
