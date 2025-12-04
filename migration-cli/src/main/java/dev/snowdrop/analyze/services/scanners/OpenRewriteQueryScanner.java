@@ -120,8 +120,8 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		}
 
 		// Recipe's jar files
-		String gavs = "org.openrewrite:rewrite-java:8.65.0,"
-				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.44.0,"
+		String gavs = "org.openrewrite:rewrite-java:8.67.1,"
+				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.46.0,"
 				+ "dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT";
 
 		// Execute the maven rewrite goal command
