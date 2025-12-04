@@ -25,6 +25,7 @@ public class JdtlsQueryScanner implements QueryScanner {
 	private static boolean isStarted = false;
 	private static final Object lock = new Object();
 
+	@Deprecated
 	@Override
 	public List<Match> executeQueries(Config config, Set<Query> queries) {
 		logger.infof("JDTLS scanner executing %d queries", queries.size());

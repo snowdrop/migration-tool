@@ -22,6 +22,7 @@ public interface QueryScanner {
 	 * @param queries the set of homogeneous queries to execute
 	 * @return list of matches found by this scanner
 	 */
+	@Deprecated
 	List<Match> executeQueries(Config config, Set<Query> queries);
 
 	List<Match> scansCodeFor(Config config, Query query);

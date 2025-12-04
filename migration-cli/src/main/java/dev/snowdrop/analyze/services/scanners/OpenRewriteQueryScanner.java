@@ -35,9 +35,9 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 	private static final Logger logger = Logger.getLogger(OpenRewriteQueryScanner.class);
 	public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
 	public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
-	private static final String OPENREWRITE_DEP_DTO = "dev.snowdrop.model.JavaAnnotationDTO";
 	public static final String OPENREWRITE_MATCH_CONDITIONS = "dev.snowdrop.openrewrite.MatchConditions";
 
+	@Deprecated
 	@Override
 	public List<Match> executeQueries(Config config, Set<Query> queries) {
 		logger.infof("OpenRewrite scanner executing %d queries", queries.size());
@@ -66,9 +66,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 			return new ArrayList<>();
 		}
 
-		logger.debugf("Query %s.%s will use DTO: %s", query.fileType(), query.symbol(), OPENREWRITE_DEP_DTO);
-
-		CompositeRecipe openRewriteRecipe = buildRecipe(query);
+		CompositeRecipe openRewriteRecipe = parse(query);
 
 		String yamlRecipe = toYaml(openRewriteRecipe);
 		logger.debugf("Recipe generated: %s", yamlRecipe);
@@ -84,8 +82,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
 		List<Match> results = findRecordsMatching(config.appPath(), matchId);
 
-		logger.debugf("Found %d matches for query %s.%s (DTO: %s)", results.size(), query.fileType(), query.symbol(),
-				OPENREWRITE_DEP_DTO);
+		logger.debugf("Found %d matches for query %s.%s ", results.size(), query.fileType(), query.symbol());
 
 		logger.infof("OpenRewrite scanner completed. Total matches found: %d", results.size());
 		return results;
@@ -130,7 +127,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
 	}
 
-	private CompositeRecipe buildRecipe(Query query) {
+	private CompositeRecipe parse(Query query) {
 		return switch (query.symbol()) {
 			case "annotation" -> buildAnnotationRecipe(query);
 			//			case "class" -> buildClassRecipe(query);

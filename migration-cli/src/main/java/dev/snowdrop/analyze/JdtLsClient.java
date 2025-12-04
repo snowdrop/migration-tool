@@ -202,20 +202,20 @@ public class JdtLsClient {
 	//	}
 
 	@Deprecated
-	public List<SymbolInformation> executeCommand(Config config, Query q) {
+	public List<SymbolInformation> executeCommand(Config config, Query query) {
 
-		String location = getLocationCode(q.symbol());
+		String location = getLocationCode(query.symbol());
 		if (location == null || location.equals("0")) {
 			throw new IllegalStateException(String.format(
 					"The language server's location code don't exist using the when condition of the query: %s-%s",
-					q.fileType(), q.symbol()));
+					query.fileType(), query.symbol()));
 		}
 
 		// Map the Query object with the RuleEntry parameters to be sent to the Language Server
-		var paramsMap = Map.of("project", q.fileType().toLowerCase(), // This value should be java
+		var paramsMap = Map.of("project", query.fileType().toLowerCase(), // This value should be java
 				"location", location, // The symbol should correspond to one of the value that LS
 				// supports: annotation, etc
-				"query", q.keyValues().get("name"), // TODO: To be improved as we need a mapper able to extract the k=v
+				"query", query.keyValues().get("name"), // TODO: To be improved as we need a mapper able to extract the k=v
 				// and convert them to the pattern
 				"analysisMode", "source-only" // 2 modes are supported: source-only and full
 		);
@@ -229,15 +229,14 @@ public class JdtLsClient {
 		try {
 			CompletableFuture<List<SymbolInformation>> symbolsFuture = future
 					.thenApplyAsync(ignored -> executeLsCmd(config, cmdArguments)).exceptionally(throwable -> {
-						logger.errorf(
-								String.format("Error executing LS command for query %s-%s", q.fileType(), q.symbol()),
-								throwable.getMessage(), throwable);
+						logger.errorf(String.format("Error executing LS command for query %s-%s", query.fileType(),
+								query.symbol()), throwable.getMessage(), throwable);
 						return new ArrayList<SymbolInformation>();
 					});
 
 			return symbolsFuture.get(); // Wait for completion
 		} catch (InterruptedException | ExecutionException e) {
-			logger.errorf(String.format("Failed to execute command for %s-%s", q.fileType(), q.symbol()),
+			logger.errorf(String.format("Failed to execute command for %s-%s", query.fileType(), query.symbol()),
 					e.getMessage());
 			return null;
 		}

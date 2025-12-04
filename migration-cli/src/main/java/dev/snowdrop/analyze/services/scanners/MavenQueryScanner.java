@@ -39,6 +39,7 @@ public class MavenQueryScanner implements QueryScanner {
 
 	}
 
+	@Deprecated
 	@Override
 	public List<Match> executeQueries(Config config, Set<Query> queries) {
 		logger.infof("Maven scanner executing %d queries", queries.size());
@@ -93,7 +94,7 @@ public class MavenQueryScanner implements QueryScanner {
 
 		logger.infof("Executing Maven dependency query: %s", query);
 
-		MavenGav mvnGav = parseCoordinates(query);
+		MavenGav mvnGav = parse(query);
 		// Extract dependency search criteria
 		String groupId = mvnGav.groupId();
 		String artifactId = mvnGav.artifactId();
@@ -115,7 +116,7 @@ public class MavenQueryScanner implements QueryScanner {
 		return results;
 	}
 
-	private MavenGav parseCoordinates(Query query) {
+	private MavenGav parse(Query query) {
 		// "gavs=group:artifact:version"
 		if (query.keyValues().containsKey("gavs")) {
 			String[] parts = query.keyValues().get("gavs").split(":");
