@@ -1,4 +1,4 @@
-package dev.snowdrop.mapper;
+package dev.snowdrop.analyze.utils;
 
 import org.jboss.logging.Logger;
 

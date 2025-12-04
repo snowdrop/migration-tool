@@ -4,7 +4,6 @@ import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.JdtLsClient;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.ScannerType;
-import dev.snowdrop.mapper.config.QueryScannerMappingLoader;
 import dev.snowdrop.model.Query;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.jboss.logging.Logger;
@@ -25,12 +24,8 @@ public class JdtlsQueryScanner implements QueryScanner {
 	private static JdtLsClient jdtLsClientInstance;
 	private static boolean isStarted = false;
 	private static final Object lock = new Object();
-	private final QueryScannerMappingLoader queryScannerMappingLoader;
 
-	public JdtlsQueryScanner() {
-		this.queryScannerMappingLoader = new QueryScannerMappingLoader();
-	}
-
+	@Deprecated
 	@Override
 	public List<Match> executeQueries(Config config, Set<Query> queries) {
 		logger.infof("JDTLS scanner executing %d queries", queries.size());
