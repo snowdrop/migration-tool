@@ -1,0 +1,85 @@
+- category: mandatory
+  customVariables: []
+  description: SpringBoot to Quarkus
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "SpringBoot to Quarkus."
+  ruleID: 001-springboot-replace-bom-quarkus
+  when:
+    condition: java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
+  order: 1
+  instructions:
+    ai:
+      #- promptMessage: "Can you add to the pom.xml file the Quarkus BOM dependency within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core. The version of quarkus to be used and to included within the pom.xml properties is 3.26.4."
+      - tasks:
+          - "Add to the pom.xml file the Quarkus BOM dependency within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core"
+          - "The version of quarkus to be used and to included within the pom.xml properties is 3.26.4."
+    manual:
+      - todo: "Add the Quarkus BOM and quarkus-arc, quarkus-core dependencies within the pom.xml file"
+    openrewrite:
+      - name: Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file
+        description: Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.
+        recipeList:
+          - org.openrewrite.maven.AddManagedDependency:
+              groupId: io.quarkus.platform
+              artifactId: quarkus-bom
+              version: 3.26.4
+              type: pom
+              scope: import
+              addToRootPom: false
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-core
+              version: 3.26.4
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-arc
+              version: 3.26.4
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-spring-data-jpa
+              version: 3.26.4
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-spring-web
+              version: 3.26.4
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-spring-data-rest
+              version: 3.26.4
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-rest
+              version: 3.26.4
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-rest-jackson
+              version: 3.26.4
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-jdbc-mysql
+              version: 3.26.4
+          - org.openrewrite.maven.RemovePlugin:
+              groupId: org.springframework.boot
+              artifactId: spring-boot-maven-plugin
+          - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+              groupId: org.springframework.boot
+              artifactId: "*"
+              newVersion: 3.5.8
+              overrideManagedVersion: "true"
+          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusMavenPlugin
+          - org.openrewrite.quarkus.spring.RemoveSpringBootParent
+        gav:
+          - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
+          - org.openrewrite:rewrite-maven:8.67.1
+          - org.openrewrite:rewrite-java:8.67.1
+          - org.openrewrite.recipe:rewrite-java-dependencies:1.46.0
+          - org.openrewrite.recipe:rewrite-spring-to-quarkus:0.3.1
+
+
+
+
+
