@@ -152,7 +152,6 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		return composite;
 	}
 
-
 	@Override
 	public String getScannerType() {
 		return "openrewrite";
@@ -164,7 +163,6 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		String fileType = query.fileType();
 		return fileType.contains("java") && symbol.contains("annotation");
 	}
-
 
 	public String toYaml(CompositeRecipe recipe) {
 		StringBuilder yaml = new StringBuilder();

@@ -40,7 +40,6 @@
     <modules>
         <module>openrewrite-recipes</module>
         <module>parser</module>
-        <module>mapper</module>
         <module>migration-cli</module>
         <module>tests</module>
     </modules>
@@ -54,7 +53,7 @@
         <developer>
             <id>aureamunoz</id>
             <name>Aurea Munoz Hernandez</name>
-            <email>aureamunoz@ibm.com</email>
+            <email>amunozhe@ibm.com</email>
         </developer>
     </developers>
 
