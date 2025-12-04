@@ -40,8 +40,10 @@ public class AddQuarkusMavenPlugin extends Recipe {
 				if (!quarkusVersion.isPresent()) {
 					return document;
 				}
-				return (Xml.Document) new AddPlugin("io.quarkus.platform", "quarkus-maven-plugin", quarkusVersion.get(),
-						null, null, null, null).getVisitor().visitNonNull(document, ctx);
+				return (Xml.Document) new AddPlugin2("io.quarkus.platform", "quarkus-maven-plugin",
+						quarkusVersion.get(), null, null,
+						"<executions><execution><goals><goal>build</goal><goal>generate-code</goal><goal>generate-code-tests</goal></goals></execution></executions>",
+						"<extensions>true</extensions>", null).getVisitor().visitNonNull(document, ctx);
 			}
 		};
 	}
