@@ -7,7 +7,6 @@ import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.MethodMatcher;
 import org.openrewrite.java.tree.J;
 import org.openrewrite.java.tree.JavaType;
-import org.jspecify.annotations.Nullable;
 import org.openrewrite.java.tree.TypeTree;
 
 @Value

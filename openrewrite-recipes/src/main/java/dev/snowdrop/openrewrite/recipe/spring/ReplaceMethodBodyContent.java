@@ -5,11 +5,16 @@ import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.JavaTemplate;
+import org.openrewrite.java.MethodMatcher;
 import org.openrewrite.java.tree.J;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
 public class ReplaceMethodBodyContent extends Recipe {
+
+	@Option(displayName = "Method pattern", description = MethodMatcher.METHOD_PATTERN_DESCRIPTION, example = "org.mockito.Matchers anyVararg()")
+	String methodPattern;
+
 	@Override
 	public @NlsRewrite.DisplayName String getDisplayName() {
 		return "Replace method body content";
@@ -20,26 +25,22 @@ public class ReplaceMethodBodyContent extends Recipe {
 		return "Replace method body content.";
 	}
 
-	@Option(displayName = "Name of the method to search", description = "Name of the method where we will remove the parameters")
-	String methodToSearch;
-
 	@Option(displayName = "String replaced", description = "String replaced")
 	String replacement;
 
 	@Override
 	public TreeVisitor<?, ExecutionContext> getVisitor() {
-		return new MethodBodyMainVisitor();
-	}
+		return new JavaIsoVisitor<ExecutionContext>() {
+			private final MethodMatcher methodMatcher = new MethodMatcher(methodPattern, false);
 
-	private class MethodBodyMainVisitor extends JavaIsoVisitor<ExecutionContext> {
-
-		@Override
-		public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext ctx) {
-			JavaTemplate t = JavaTemplate.builder(replacement).build();
-			if (methodToSearch.contains(method.getSimpleName())) {
-				return t.apply(getCursor(), method.getCoordinates().replaceBody());
+			@Override
+			public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext ctx) {
+				JavaTemplate t = JavaTemplate.builder(replacement).build();
+				if (methodMatcher.matches(method.getMethodType())) {
+					return t.apply(getCursor(), method.getCoordinates().replaceBody());
+				}
+				return super.visitMethodDeclaration(method, ctx);
 			}
-			return super.visitMethodDeclaration(method, ctx);
-		}
+		};
 	}
 }

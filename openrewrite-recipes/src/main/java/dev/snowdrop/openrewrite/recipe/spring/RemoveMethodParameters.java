@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
 import org.openrewrite.java.JavaIsoVisitor;
+import org.openrewrite.java.MethodMatcher;
 import org.openrewrite.java.tree.J;
 
 import java.util.Collections;
@@ -11,6 +12,10 @@ import java.util.Collections;
 @Value
 @EqualsAndHashCode(callSuper = false)
 public class RemoveMethodParameters extends Recipe {
+
+	@Option(displayName = "Method pattern", description = MethodMatcher.METHOD_PATTERN_DESCRIPTION, example = "org.mockito.Matchers anyVararg()")
+	String methodPattern;
+
 	@Override
 	public @NlsRewrite.DisplayName String getDisplayName() {
 		return "Replace method body content";
@@ -21,26 +26,24 @@ public class RemoveMethodParameters extends Recipe {
 		return "Replace method body content.";
 	}
 
-	@Option(displayName = "Name of the method to search", description = "Name of the method where we will remove the parameters")
-	String methodToSearch;
-
 	@Override
 	public TreeVisitor<?, ExecutionContext> getVisitor() {
-		return new MethodBodyMainVisitor();
-	}
 
-	private class MethodBodyMainVisitor extends JavaIsoVisitor<ExecutionContext> {
+		return new JavaIsoVisitor<ExecutionContext>() {
+			private final MethodMatcher methodMatcher = new MethodMatcher(methodPattern, false);
 
-		@Override
-		public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext ctx) {
-			if (methodToSearch.contains(method.getSimpleName())) {
-				if (!method.getParameters().isEmpty()) {
-					// Remove the parameters of the method.
-					// Example foo(String bar) => foo()
-					return method.withParameters(Collections.emptyList());
+			@Override
+			public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext ctx) {
+
+				if (methodMatcher.matches(method.getMethodType())) {
+					if (!method.getParameters().isEmpty()) {
+						// Remove the parameters of the method.
+						// Example foo(String bar) => foo()
+						return method.withParameters(Collections.emptyList());
+					}
 				}
+				return super.visitMethodDeclaration(method, ctx);
 			}
-			return super.visitMethodDeclaration(method, ctx);
-		}
+		};
 	}
 }

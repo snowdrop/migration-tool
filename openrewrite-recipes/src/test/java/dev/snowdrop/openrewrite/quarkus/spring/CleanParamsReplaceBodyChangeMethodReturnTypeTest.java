@@ -16,8 +16,8 @@ public class CleanParamsReplaceBodyChangeMethodReturnTypeTest implements Rewrite
 	@Test
 	void replaceMethodSignature() {
 		rewriteRun(spec -> spec
-				.recipe(new CompositeRecipe(List.of(new RemoveMethodParameters("viewHome()"),
-						new ReplaceMethodBodyContent("addMessage()",
+				.recipe(new CompositeRecipe(List.of(new RemoveMethodParameters("TaskController viewHome(..)"),
+						new ReplaceMethodBodyContent("TaskController addMessage(..)",
 								"return new StringBuilder().append(msg).toString();"),
 						new ChangeMethodReturnType("TaskController addMessage(..)", "Object"))))
 				.expectedCyclesThatMakeChanges(1).cycles(1), java("""

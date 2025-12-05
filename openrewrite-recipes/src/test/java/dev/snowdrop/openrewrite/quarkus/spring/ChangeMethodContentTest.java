@@ -20,7 +20,7 @@ public class ChangeMethodContentTest implements RewriteTest {
 
 	@Test
 	void replaceMethodBodyContent() {
-		rewriteRun(spec -> spec.recipe(new ReplaceMethodBodyContent("generateMessage", replacement))
+		rewriteRun(spec -> spec.recipe(new ReplaceMethodBodyContent("TaskController generateMessage()", replacement))
 				.expectedCyclesThatMakeChanges(1).cycles(1), java("""
 						public class TaskController {
 						  public String viewHome() {
