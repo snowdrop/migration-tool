@@ -39,12 +39,12 @@ public class AddPlugin2 extends Recipe {
 	@Nullable
 	String dependencies;
 
-    @Language("xml")
+	@Language("xml")
 	@Option(displayName = "Executions", description = "Optional executions provided as raw XML.", example = "<executions><execution><phase>generate-sources</phase><goals><goal>add-source</goal></goals></execution></executions>", required = false)
 	@Nullable
 	String executions;
 
-    @Language("xml")
+	@Language("xml")
 	@Option(displayName = "Extensions", description = "Optional extensions provided as raw XML.", example = "<extensions>true</extensions>", required = false)
 	@Nullable
 	String extensions;
