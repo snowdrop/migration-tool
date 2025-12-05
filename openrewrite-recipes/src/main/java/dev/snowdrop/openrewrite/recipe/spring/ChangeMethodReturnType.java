@@ -53,8 +53,11 @@ public class ChangeMethodReturnType extends Recipe {
 					System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());
 					*/
 
-					m = m.withReturnTypeExpression(TypeTree.build(" " + newReturnType));
+					// TODO: How can we avoid to add the space here ?
+					m = m.withReturnTypeExpression(TypeTree.build(newReturnType));
 					m = m.withMethodType(m.getMethodType().withReturnType(JavaType.buildType(newReturnType)));
+
+					maybeAddImport(newReturnType);
 
 					/*
 					System.out.println("========== AFTER ==========");
@@ -64,7 +67,7 @@ public class ChangeMethodReturnType extends Recipe {
 					System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());
 					*/
 				}
-				return m;
+				return autoFormat(m, ctx);
 			}
 		};
 	}

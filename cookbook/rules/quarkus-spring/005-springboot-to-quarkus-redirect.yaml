@@ -29,6 +29,9 @@
           - dev.snowdrop.openrewrite.recipe.spring.ChangeMethodReturnType:
               methodPattern: "com.todo.app.controller.TaskController viewIndexPage(..)"
               newReturnType: "RestResponse<String>"
+          - dev.snowdrop.openrewrite.recipe.spring.AddThrowMethodException:
+              methodPattern: "com.todo.app.controller.TaskController viewIndexPage(..)"
+              newException: java.net.URISyntaxException
         gav:
         - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
         - org.openrewrite:rewrite-java:8.67.1

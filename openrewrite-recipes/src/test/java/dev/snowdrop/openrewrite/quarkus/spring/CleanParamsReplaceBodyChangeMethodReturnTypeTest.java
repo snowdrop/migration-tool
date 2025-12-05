@@ -30,14 +30,15 @@ public class CleanParamsReplaceBodyChangeMethodReturnTypeTest implements Rewrite
 						  }
 						}
 						""", """
-						  public class TaskController {
+						public class TaskController {
 						    public String viewHome() {
-						      String res = addMessage("hi");
+						        String res = addMessage("hi");
 						    }
-						     Object addMessage(String msg) {
+
+						    Object addMessage(String msg) {
 						        return new StringBuilder().append(msg).toString();
 						    }
-						  }
+						}
 						"""));
 	}
 }

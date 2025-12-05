@@ -31,7 +31,7 @@
                 return ResponseEntity.ok(tasks);
           - dev.snowdrop.openrewrite.recipe.spring.ChangeMethodReturnType:
               methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
-              newReturnType: "ResponseEntity<List<Task>>"
+              newReturnType: "org.springframework.http.ResponseEntity<List<Task>>"
         gav:
         - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
         - org.openrewrite:rewrite-java:8.67.1
