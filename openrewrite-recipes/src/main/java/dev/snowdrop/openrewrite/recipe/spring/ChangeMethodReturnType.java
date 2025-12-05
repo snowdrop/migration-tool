@@ -44,49 +44,25 @@ public class ChangeMethodReturnType extends Recipe {
 			@Override
 			public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext ctx) {
 				J.MethodDeclaration m = super.visitMethodDeclaration(method, ctx);
-				//JavaType.Method type = m.getMethodType();
 
 				if (methodMatcher.matches(m.getMethodType())) {
-					System.out.println("========== BEFORE ==========");
+					/*System.out.println("========== BEFORE ==========");
 					System.out.printf("Method name: %s \n", m.getSimpleName());
 					System.out.printf("Method modifiers: %s \n", m.getModifiers());
 					System.out.printf("Return Type: %s \n", m.getType());
-                    System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());
-;
-					//type = type.withReturnType(JavaType.buildType(newReturnType));
-					//m = m.withMethodType(type);
+                    System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());*/
+
                     m = m.withReturnTypeExpression(TypeTree.build(" " + newReturnType));
                     m = m.withMethodType(m.getMethodType().withReturnType(JavaType.buildType(newReturnType)));
 
-					System.out.println("========== AFTER ==========");
+					/*System.out.println("========== AFTER ==========");
 					System.out.printf("Method name: %s \n", m.getSimpleName());
 					System.out.printf("Method modifiers: %s \n", m.getModifiers());
 					System.out.printf("Return Type: %s \n", m.getType());
-                    System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());
+                    System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());*/
 				}
 				return m;
 			}
-
-			/*
-			@Override
-			public J.MethodInvocation visitMethodInvocation(J.MethodInvocation method, ExecutionContext ctx) {
-			    J.MethodInvocation m = super.visitMethodInvocation(method, ctx);
-			    JavaType.Method type = m.getMethodType();
-
-			    if (methodMatcher.matches(m.getMethodType())) {
-			        System.out.printf("Method name: %s \n",m.getSimpleName());
-			        System.out.printf("Method type arguments: %s \n",m.getArguments());
-			        System.out.printf("Return Type: %s \n",m.getType());
-			        System.out.printf("Flags: %s \n",m.getMethodType().getFlags());
-			        System.out.printf("Declaring type: %s \n",m.getMethodType().getDeclaringType());
-
-			        return m.withMethodType(type.withReturnType(JavaType.buildType(newReturnType)));
-			    }
-
-			    return m;
-			}
-
-			 */
 		};
 	}
 }
