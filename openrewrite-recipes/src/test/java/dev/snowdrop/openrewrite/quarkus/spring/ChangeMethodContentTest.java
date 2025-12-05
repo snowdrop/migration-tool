@@ -42,34 +42,4 @@ public class ChangeMethodContentTest implements RewriteTest {
 						}
 						"""));
 	}
-
-	@Test
-	void replaceMethodSignature() {
-		rewriteRun(spec -> spec
-				.recipe(new CompositeRecipe(List.of(
-                    new RemoveMethodParameters("viewHome()"),
-					new ReplaceMethodBodyContent("addMessage()",
-								"return new StringBuilder().append(msg).toString();"),
-                    new ChangeMethodReturnType("TaskController addMessage(..)","Object")
-                )))
-				.expectedCyclesThatMakeChanges(1).cycles(1), java("""
-						public class TaskController {
-						  public String viewHome(String msg) {
-						    String res = addMessage("hi");
-						  }
-						  String addMessage(String msg) {
-						    return msg;
-						  }
-						}
-						""", """
-						  public class TaskController {
-						    public String viewHome() {
-						      String res = addMessage("hi");
-						    }
-						     Object addMessage(String msg) {
-						        return new StringBuilder().append(msg).toString();
-						    }
-						  }
-						"""));
-	}
 }

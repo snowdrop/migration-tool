@@ -46,20 +46,24 @@ public class ChangeMethodReturnType extends Recipe {
 				J.MethodDeclaration m = super.visitMethodDeclaration(method, ctx);
 
 				if (methodMatcher.matches(m.getMethodType())) {
-					/*System.out.println("========== BEFORE ==========");
+					/*
+					System.out.println("========== BEFORE ==========");
 					System.out.printf("Method name: %s \n", m.getSimpleName());
 					System.out.printf("Method modifiers: %s \n", m.getModifiers());
 					System.out.printf("Return Type: %s \n", m.getType());
-                    System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());*/
+					System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());
+					*/
 
-                    m = m.withReturnTypeExpression(TypeTree.build(" " + newReturnType));
-                    m = m.withMethodType(m.getMethodType().withReturnType(JavaType.buildType(newReturnType)));
+					m = m.withReturnTypeExpression(TypeTree.build(" " + newReturnType));
+					m = m.withMethodType(m.getMethodType().withReturnType(JavaType.buildType(newReturnType)));
 
-					/*System.out.println("========== AFTER ==========");
+					/*
+					System.out.println("========== AFTER ==========");
 					System.out.printf("Method name: %s \n", m.getSimpleName());
 					System.out.printf("Method modifiers: %s \n", m.getModifiers());
 					System.out.printf("Return Type: %s \n", m.getType());
-                    System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());*/
+					System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());
+					*/
 				}
 				return m;
 			}

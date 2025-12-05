@@ -66,8 +66,8 @@ public class ReplaceMethodReturnTypeTest implements RewriteTest {
 					System.out.printf("Method modifiers: %s \n", m.getModifiers());
 					System.out.printf("Return Type: %s \n", m.getReturnTypeExpression().getType());
 
-                    m = m.withReturnTypeExpression(TypeTree.build(" " + newReturnType));
-                    m = m.withMethodType(m.getMethodType().withReturnType(JavaType.buildType("Object")));
+					m = m.withReturnTypeExpression(TypeTree.build(" " + newReturnType));
+					m = m.withMethodType(m.getMethodType().withReturnType(JavaType.buildType("Object")));
 
 					System.out.println("========== AFTER ==========");
 					System.out.printf("Method name: %s \n", m.getSimpleName());
