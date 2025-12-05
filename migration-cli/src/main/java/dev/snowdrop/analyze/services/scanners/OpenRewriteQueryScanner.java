@@ -209,7 +209,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 			command.add("-B");
 			command.add("-e");
 			command.add(String.format("%s:%s:%s:%s", MAVEN_OPENREWRITE_PLUGIN_GROUP, MAVEN_OPENREWRITE_PLUGIN_ARTIFACT,
-					"6.22.1", "dryRun"));
+					"6.24.0", "dryRun"));
 			command.add(String.format("-Drewrite.activeRecipes=%s", "dev.snowdrop.openrewrite.MatchConditions"));
 			command.add("-Drewrite.recipeArtifactCoordinates=" + gavs);
 			command.add("-Drewrite.exportDatatables=true");
