@@ -12,7 +12,7 @@
     condition: |
       pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-data-jpa') OR
       pom.dependency is (gavs='com.mysql:mysql-connector-j')
-  order: 2
+  order: 3
   instructions:
     ai:
       - tasks:

@@ -25,9 +25,16 @@
           - org.openrewrite.java.ChangeType:
               oldFullyQualifiedTypeName: org.springframework.stereotype.Controller
               newFullyQualifiedTypeName: org.springframework.web.bind.annotation.RestController
-          - org.openrewrite.java.ReplaceStringLiteralValue:
-              oldLiteralValue: 'model.addAttribute("task", new Task());'
-              newLiteralValue: '//model.addAttribute("task", new Task());'
+          - dev.snowdrop.openrewrite.recipe.spring.RemoveMethodParameters:
+              methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
+          - dev.snowdrop.openrewrite.recipe.spring.ReplaceMethodBodyContent:
+              methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
+              replacement: |
+                List<Task> tasks = taskService.getAllTasks();
+                return ResponseEntity.ok(tasks);
+          - dev.snowdrop.openrewrite.recipe.spring.ChangeMethodReturnType:
+              methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
+              newReturnType: "ResponseEntity<List<Task>>"
         gav:
         - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
         - org.openrewrite:rewrite-java:8.67.1
