@@ -53,7 +53,6 @@ public class ChangeMethodReturnType extends Recipe {
 					System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());
 					*/
 
-					// TODO: How can we avoid to add the space here ?
 					m = m.withReturnTypeExpression(TypeTree.build(newReturnType));
 					m = m.withMethodType(m.getMethodType().withReturnType(JavaType.buildType(newReturnType)));
 
