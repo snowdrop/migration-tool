@@ -1,0 +1,37 @@
+- category: mandatory
+  customVariables: []
+  description: SpringBoot to Quarkus
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "SpringBoot to Quarkus."
+  ruleID: 004-springboot-to-quarkus-rest-get-tasks
+  when:
+    condition: |
+      java.annotation is 'org.springframework.stereotype.Controller'
+  order: 4
+  instructions:
+    ai:
+      - tasks:
+          - "TODO"
+    manual:
+      - todo: "See openrewrite instructions"
+    openrewrite:
+      - name: SpringBoot to Quarkus
+        description: Adapt the REST GET /home endpoint as we don't support Model view of Spring Boot
+        recipeList:
+          - dev.snowdrop.openrewrite.recipe.spring.RemoveMethodParameters:
+              methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
+          - dev.snowdrop.openrewrite.recipe.spring.ReplaceMethodBodyContent:
+              methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
+              replacement: |
+                List<Task> tasks = taskService.getAllTasks();
+                return ResponseEntity.ok(tasks);
+          - dev.snowdrop.openrewrite.recipe.spring.ChangeMethodReturnType:
+              methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
+              newReturnType: "ResponseEntity<List<Task>>"
+        gav:
+        - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
+        - org.openrewrite:rewrite-java:8.67.1

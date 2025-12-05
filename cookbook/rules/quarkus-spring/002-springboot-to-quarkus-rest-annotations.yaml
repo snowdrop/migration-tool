@@ -20,21 +20,11 @@
       - todo: "See openrewrite instructions"
     openrewrite:
       - name: SpringBoot to Quarkus
-        description: Replace the Spring org.springframework.stereotype.Controller annotation with org.springframework.stereotype.RestController"
+        description: Replace the Spring org.springframework.stereotype.Controller annotation with org.springframework.stereotype.RestController
         recipeList:
           - org.openrewrite.java.ChangeType:
               oldFullyQualifiedTypeName: org.springframework.stereotype.Controller
               newFullyQualifiedTypeName: org.springframework.web.bind.annotation.RestController
-          - dev.snowdrop.openrewrite.recipe.spring.RemoveMethodParameters:
-              methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
-          - dev.snowdrop.openrewrite.recipe.spring.ReplaceMethodBodyContent:
-              methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
-              replacement: |
-                List<Task> tasks = taskService.getAllTasks();
-                return ResponseEntity.ok(tasks);
-          - dev.snowdrop.openrewrite.recipe.spring.ChangeMethodReturnType:
-              methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
-              newReturnType: "ResponseEntity<List<Task>>"
         gav:
         - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
         - org.openrewrite:rewrite-java:8.67.1
