@@ -34,13 +34,13 @@ public class RemoveMethodParameters extends Recipe {
 		@Override
 		public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext ctx) {
 			if (methodToSearch.contains(method.getSimpleName())) {
-                if (!method.getParameters().isEmpty()) {
-                    // Remove the parameters of the method.
-                    // Example foo(String bar) => foo()
-                    return method.withParameters(Collections.emptyList());
-                }
-            }
-            return super.visitMethodDeclaration(method, ctx);
+				if (!method.getParameters().isEmpty()) {
+					// Remove the parameters of the method.
+					// Example foo(String bar) => foo()
+					return method.withParameters(Collections.emptyList());
+				}
+			}
+			return super.visitMethodDeclaration(method, ctx);
 		}
 	}
 }
