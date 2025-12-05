@@ -19,7 +19,7 @@
     <properties>
         <maven.version>3.9.11</maven.version>
         <jreleaser.version>1.21.0</jreleaser.version>
-        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
         <distribution.directory>${project.build.directory}/distributions</distribution.directory>
         <executable-suffix />
@@ -29,11 +29,6 @@
         <dependency>
             <groupId>dev.snowdrop</groupId>
             <artifactId>parser</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.snowdrop</groupId>
-            <artifactId>mapper</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

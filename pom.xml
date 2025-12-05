@@ -19,7 +19,7 @@
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.29.4</quarkus.platform.version>
+        <quarkus.platform.version>3.30.1</quarkus.platform.version>
 
         <openrewrite-recipe-bom.version>3.19.0</openrewrite-recipe-bom.version>
         <spring-boot.version>4.0.0</spring-boot.version>
@@ -40,7 +40,6 @@
     <modules>
         <module>openrewrite-recipes</module>
         <module>parser</module>
-        <module>mapper</module>
         <module>migration-cli</module>
         <module>tests</module>
     </modules>
@@ -54,7 +53,7 @@
         <developer>
             <id>aureamunoz</id>
             <name>Aurea Munoz Hernandez</name>
-            <email>aureamunoz@ibm.com</email>
+            <email>amunozhe@ibm.com</email>
         </developer>
     </developers>
 
