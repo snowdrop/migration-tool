@@ -1,0 +1,34 @@
+- category: mandatory
+  customVariables: []
+  description: SpringBoot to Quarkus
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "SpringBoot to Quarkus."
+  ruleID: 003-springboot-to-quarkus-add-sql
+  when:
+    condition: |
+      pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-data-jpa') OR
+      pom.dependency is (gavs='com.mysql:mysql-connector-j')
+  order: 2
+  instructions:
+    ai:
+      - tasks:
+          - "TODO"
+    manual:
+      - todo: "See openrewrite instructions"
+    openrewrite:
+      - name: SpringBoot to Quarkus
+        description: Add a SQL file to create records
+        gav:
+          - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
+          - org.openrewrite:rewrite-java:8.67.1
+        recipeList:
+          - org.openrewrite.text.CreateTextFile:
+              relativeFileName: src/main/resources/import.sql
+              overwriteExisting: true
+              fileContents: |
+                INSERT INTO tasks(id, title, description) VALUES (1, 'Migration to Quarkus - step 1', 'Prepare the migration to Quarkus. Step 1');
+                INSERT INTO tasks(id, title, description) VALUES (2, 'Migration to Quarkus - step 2', 'Prepare the migration to Quarkus. Step 2');
