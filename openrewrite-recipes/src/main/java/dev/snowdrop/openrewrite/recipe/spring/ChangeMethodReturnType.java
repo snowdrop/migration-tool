@@ -8,6 +8,7 @@ import org.openrewrite.java.MethodMatcher;
 import org.openrewrite.java.tree.J;
 import org.openrewrite.java.tree.JavaType;
 import org.jspecify.annotations.Nullable;
+import org.openrewrite.java.tree.TypeTree;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -43,23 +44,25 @@ public class ChangeMethodReturnType extends Recipe {
 			@Override
 			public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext ctx) {
 				J.MethodDeclaration m = super.visitMethodDeclaration(method, ctx);
-				JavaType.Method type = m.getMethodType();
+				//JavaType.Method type = m.getMethodType();
 
 				if (methodMatcher.matches(m.getMethodType())) {
 					System.out.println("========== BEFORE ==========");
 					System.out.printf("Method name: %s \n", m.getSimpleName());
 					System.out.printf("Method modifiers: %s \n", m.getModifiers());
 					System.out.printf("Return Type: %s \n", m.getType());
-					System.out.printf("Declaring type: %s \n", m.getMethodType().getDeclaringType());
-
-					type = type.withReturnType(JavaType.buildType(newReturnType));
-					m = m.withMethodType(type);
+                    System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());
+;
+					//type = type.withReturnType(JavaType.buildType(newReturnType));
+					//m = m.withMethodType(type);
+                    m = m.withReturnTypeExpression(TypeTree.build(" " + newReturnType));
+                    m = m.withMethodType(m.getMethodType().withReturnType(JavaType.buildType(newReturnType)));
 
 					System.out.println("========== AFTER ==========");
 					System.out.printf("Method name: %s \n", m.getSimpleName());
 					System.out.printf("Method modifiers: %s \n", m.getModifiers());
 					System.out.printf("Return Type: %s \n", m.getType());
-					System.out.printf("Declaring type: %s \n", m.getMethodType().getDeclaringType());
+                    System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());
 				}
 				return m;
 			}

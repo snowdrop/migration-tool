@@ -10,6 +10,7 @@ import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.MethodMatcher;
 import org.openrewrite.java.tree.J;
 import org.openrewrite.java.tree.JavaType;
+import org.openrewrite.java.tree.TypeTree;
 import org.openrewrite.test.RewriteTest;
 
 import java.util.List;
@@ -47,7 +48,6 @@ public class ReplaceMethodReturnTypeTest implements RewriteTest {
 	}
 
 	@Test
-	@Disabled // This test is disabled due to this error: https://github.com/openrewrite/rewrite/issues/6379
 	@DisplayName("Replace the return type of a method.")
 	void replaceReturnTypeOfMethodDeclared() {
 		String methodPattern = "TaskController addMessage(..)";
@@ -55,7 +55,6 @@ public class ReplaceMethodReturnTypeTest implements RewriteTest {
 
 		rewriteRun(spec -> spec.recipe(toRecipe(() -> new JavaIsoVisitor<>() {
 			final MethodMatcher methodMatcher = new MethodMatcher(methodPattern, false);
-			static boolean methodUpdated = false;
 
 			@Override
 			public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext ctx) {
@@ -65,18 +64,15 @@ public class ReplaceMethodReturnTypeTest implements RewriteTest {
 					System.out.println("========== BEFORE ==========");
 					System.out.printf("Method name: %s \n", m.getSimpleName());
 					System.out.printf("Method modifiers: %s \n", m.getModifiers());
-					System.out.printf("Return Type: %s \n", m.getType());
-					System.out.printf("Declaring type: %s \n", m.getMethodType().getDeclaringType());
+					System.out.printf("Return Type: %s \n", m.getReturnTypeExpression().getType());
 
-					JavaType.Method newType = m.getMethodType().withReturnType(JavaType.buildType(newReturnType));
-					m = m.withMethodType(newType).withName(m.getName().withType(newType));
+                    m = m.withReturnTypeExpression(TypeTree.build(" " + newReturnType));
+                    m = m.withMethodType(m.getMethodType().withReturnType(JavaType.buildType("Object")));
 
 					System.out.println("========== AFTER ==========");
 					System.out.printf("Method name: %s \n", m.getSimpleName());
 					System.out.printf("Method modifiers: %s \n", m.getModifiers());
-					System.out.printf("New return Type: %s \n", m.getMethodType().getReturnType());
-					System.out.printf("Declaring type: %s \n", m.getMethodType().getDeclaringType());
-					methodUpdated = true;
+					System.out.printf("New return Type: %s \n", m.getReturnTypeExpression().getType());
 				}
 				return m;
 			}

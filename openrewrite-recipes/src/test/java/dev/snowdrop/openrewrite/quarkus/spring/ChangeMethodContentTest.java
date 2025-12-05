@@ -1,5 +1,6 @@
 package dev.snowdrop.openrewrite.quarkus.spring;
 
+import dev.snowdrop.openrewrite.recipe.spring.ChangeMethodReturnType;
 import dev.snowdrop.openrewrite.recipe.spring.RemoveMethodParameters;
 import dev.snowdrop.openrewrite.recipe.spring.ReplaceMethodBodyContent;
 import org.junit.jupiter.api.Test;
@@ -45,25 +46,28 @@ public class ChangeMethodContentTest implements RewriteTest {
 	@Test
 	void replaceMethodSignature() {
 		rewriteRun(spec -> spec
-				.recipe(new CompositeRecipe(List.of(new RemoveMethodParameters("viewHome()"),
-						new ReplaceMethodBodyContent("addAttribute()",
-								"return new StringBuilder().append(\"Hi. This is me !\").toString();"))))
+				.recipe(new CompositeRecipe(List.of(
+                    new RemoveMethodParameters("viewHome()"),
+					new ReplaceMethodBodyContent("addMessage()",
+								"return new StringBuilder().append(msg).toString();"),
+                    new ChangeMethodReturnType("TaskController addMessage(..)","Object")
+                )))
 				.expectedCyclesThatMakeChanges(1).cycles(1), java("""
 						public class TaskController {
 						  public String viewHome(String msg) {
-						    String res = addAttribute("task", new Object());
+						    String res = addMessage("hi");
 						  }
-						  String addAttribute(String name, Object value) {
-						    return "Hi";
+						  String addMessage(String msg) {
+						    return msg;
 						  }
 						}
 						""", """
 						  public class TaskController {
 						    public String viewHome() {
-						      String res = addAttribute("task", new Object());
+						      String res = addMessage("hi");
 						    }
-						    String addAttribute(String name, Object value) {
-						        return new StringBuilder().append("Hi. This is me !").toString();
+						     Object addMessage(String msg) {
+						        return new StringBuilder().append(msg).toString();
 						    }
 						  }
 						"""));
