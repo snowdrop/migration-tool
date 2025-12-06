@@ -1,0 +1,28 @@
+- category: mandatory
+  customVariables: []
+  description: SpringBoot DataSource configuration to Quarkus
+  effort: 3
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "Spring Boot DataSource configuration found. Needs migration to Quarkus datasource properties."
+  ruleID: springboot-datasource-config
+  when:
+    condition: |
+      properties.key startsWith 'spring.datasource'
+  order: 5
+  instructions:
+    ai:
+      - tasks:
+          - "Identify all spring.datasource.* properties"
+          - "Map spring.datasource.url to quarkus.datasource.jdbc.url"
+          - "Map spring.datasource.username to quarkus.datasource.username"
+          - "Map spring.datasource.password to quarkus.datasource.password"
+          - "Map spring.datasource.driver-class-name to quarkus.datasource.jdbc.driver"
+          - "Map connection pool properties (hikari) to quarkus.datasource.jdbc.*"
+          - "Update profile-specific files (application-{profile}.properties) accordingly"
+    manual:
+      - todo: "Review DataSource configuration mapping"
+      - todo: "Verify connection pool settings compatibility"
+      - todo: "Test database connectivity after migration"

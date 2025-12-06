@@ -17,8 +17,9 @@ import java.util.List;
 import java.util.Map;
 
 import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFile;
-import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ShouldMatchJavaAnnotation extends BaseRulesTest {
 
@@ -28,7 +29,6 @@ class ShouldMatchJavaAnnotation extends BaseRulesTest {
 	@TempDir
 	Path tempDir;
 
-	Path rulesPath;
 	String jdtls = "";
 
 	@BeforeEach

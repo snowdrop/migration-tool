@@ -33,7 +33,6 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 	@TempDir
 	Path tempDir;
 
-	Path rulesPath;
 	String jdtls;
 
 	@BeforeEach

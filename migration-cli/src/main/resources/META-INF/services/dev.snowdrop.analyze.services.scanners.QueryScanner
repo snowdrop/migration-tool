@@ -1,3 +1,4 @@
 dev.snowdrop.analyze.services.scanners.JdtlsQueryScanner
 dev.snowdrop.analyze.services.scanners.MavenQueryScanner
 dev.snowdrop.analyze.services.scanners.OpenRewriteQueryScanner
+dev.snowdrop.analyze.services.scanners.FileSearchQueryScanner
