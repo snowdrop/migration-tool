@@ -123,9 +123,9 @@ public class FileSearch {
 	private String getGlobPatternByFileType(String fileType) {
 		switch (fileType.toLowerCase()) {
 			case "properties" :
-				return "glob:**/{application.properties,application.yml,application.yaml}";
+				return "glob:**/resources/{application.properties,application.yml,application.yaml}";
 			case "properties.dev" :
-				return "glob:**/{application-dev.properties,application-dev.yml,application-dev.yaml}";
+				return "glob:**/resources/{application-dev.properties,application-dev.yml,application-dev.yaml}";
 			default :
 				throw new IllegalArgumentException(
 						"Unsupported file type: " + fileType + ". Supported types are: 'properties', 'properties.dev'");
