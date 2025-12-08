@@ -28,7 +28,7 @@ import java.util.stream.Stream;
  */
 public class FileSearchQueryScanner implements QueryScanner {
 
-	private static final Logger logger = Logger.getLogger(JdtlsQueryScanner.class);
+	private static final Logger logger = Logger.getLogger(FileSearchQueryScanner.class);
 
 	private final FileSearch contentSearcher;
 
@@ -46,12 +46,17 @@ public class FileSearchQueryScanner implements QueryScanner {
 		List<Match> matches = new ArrayList<>();
 		logger.infof("File search scanner executing for query %s.%s", query.fileType(), query.symbol());
 
+		// TODO: To be discussed with Aurea as we should be able to use it even if the default is jdtls, openrewrite
+		/*
 		if (config.scanner() != null && !ScannerType.FILE_SEARCH.label().equals(config.scanner())) {
 			logger.warnf("Query %s.%s is configured for scanner '%s', not 'File search'. Skipping.", query.fileType(),
 					query.symbol(), config.scanner());
 			return new ArrayList<>();
 		}
-		String regex = "^\\s*(spring\\.datasource|spring\\.jpa).*$";
+		*/
+
+		String escapeDots = query.keyValues().get("value").replace(".", "\\.");
+		String regex = String.format("^\\s*(%s).*$", escapeDots);
 		List<MatchLocation> results = contentSearcher.findPropertiesMatches(Paths.get(config.appPath()), "properties",
 				regex);
 		for (MatchLocation matchLocation : results) {

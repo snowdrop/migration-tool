@@ -10,8 +10,7 @@
   ruleID: 003-springboot-to-quarkus-add-sql
   when:
     condition: |
-      pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-data-jpa') OR
-      pom.dependency is (gavs='com.mysql:mysql-connector-j')
+      properties.key is 'spring.datasource' OR properties.key is 'spring.jpa'
   order: 3
   instructions:
     ai:

@@ -349,7 +349,7 @@ public class ResultsService {
 				return symbolDetails.toString();
 			case "openrewrite" :
 				return formatRewrite(match);
-			case "maven" :
+			case "maven", "file-search" :
 				return match.result().toString();
 			default :
 				return "";
