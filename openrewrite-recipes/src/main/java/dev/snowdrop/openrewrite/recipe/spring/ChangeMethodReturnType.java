@@ -3,11 +3,14 @@ package dev.snowdrop.openrewrite.recipe.spring;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.openrewrite.*;
+import org.openrewrite.java.AddImport;
 import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.MethodMatcher;
 import org.openrewrite.java.tree.J;
 import org.openrewrite.java.tree.JavaType;
 import org.openrewrite.java.tree.TypeTree;
+
+import java.util.List;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -56,8 +59,9 @@ public class ChangeMethodReturnType extends Recipe {
 					m = m.withReturnTypeExpression(TypeTree.build(newReturnType));
 					m = m.withMethodType(m.getMethodType().withReturnType(JavaType.buildType(newReturnType)));
 
-					maybeAddImport(newReturnType);
-
+					// TODO: To be confirmed by Openrewrite team but it seems that we cannot use the maybeAddImport with `withReturnType`
+					//  maybeAddImport(newReturnType);
+					return autoFormat(m, ctx);
 					/*
 					System.out.println("========== AFTER ==========");
 					System.out.printf("Method name: %s \n", m.getSimpleName());
@@ -66,8 +70,17 @@ public class ChangeMethodReturnType extends Recipe {
 					System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());
 					*/
 				}
-				return autoFormat(m, ctx);
+				return m;
 			}
 		};
 	}
+
+	/* DON'T WORK. Wait Openrewrite response !
+	@Override
+	public List<Recipe> getRecipeList() {
+		AddImport aImport = new AddImport(newReturnType, null, false);
+		return List.of(new Recipe.Builder("Add missing import", "Add missing import").visitor(aImport)
+				.build("AddMissingImport"));
+	}
+	*/
 }

@@ -1,5 +1,6 @@
 package dev.snowdrop.openrewrite.quarkus.spring;
 
+import dev.snowdrop.openrewrite.recipe.spring.ChangeMethodReturnType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,47 +54,26 @@ public class ReplaceMethodReturnTypeTest implements RewriteTest {
 		String methodPattern = "TaskController addMessage(..)";
 		String newReturnType = "Object";
 
-		rewriteRun(spec -> spec.recipe(toRecipe(() -> new JavaIsoVisitor<>() {
-			final MethodMatcher methodMatcher = new MethodMatcher(methodPattern, false);
+		rewriteRun(spec -> spec.recipe(new ChangeMethodReturnType(methodPattern, newReturnType))
+				.expectedCyclesThatMakeChanges(1).cycles(1), java("""
+						public class TaskController {
+						  public String viewHome(String msg) {
+						    var res = addMessage(msg);
+						  }
+						  protected String addMessage(String msg) {
+						      return new StringBuilder().append("Hi").append(msg).toString();
+						  }
+						}
+						""", """
+						  public class TaskController {
+						    public String viewHome(String msg) {
+						      var res = addMessage(msg);
+						    }
 
-			@Override
-			public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext ctx) {
-				J.MethodDeclaration m = super.visitMethodDeclaration(method, ctx);
-
-				if (methodMatcher.matches(m.getMethodType())) {
-					System.out.println("========== BEFORE ==========");
-					System.out.printf("Method name: %s \n", m.getSimpleName());
-					System.out.printf("Method modifiers: %s \n", m.getModifiers());
-					System.out.printf("Return Type: %s \n", m.getReturnTypeExpression().getType());
-
-					m = m.withReturnTypeExpression(TypeTree.build(" " + newReturnType));
-					m = m.withMethodType(m.getMethodType().withReturnType(JavaType.buildType("Object")));
-
-					System.out.println("========== AFTER ==========");
-					System.out.printf("Method name: %s \n", m.getSimpleName());
-					System.out.printf("Method modifiers: %s \n", m.getModifiers());
-					System.out.printf("New return Type: %s \n", m.getReturnTypeExpression().getType());
-				}
-				return m;
-			}
-		})).expectedCyclesThatMakeChanges(1).cycles(1), java("""
-				public class TaskController {
-				  public String viewHome(String msg) {
-				    var res = addMessage(msg);
-				  }
-				  protected String addMessage(String msg) {
-				      return new StringBuilder().append("Hi").append(msg).toString();
-				  }
-				}
-				""", """
-				  public class TaskController {
-				    public String viewHome(String msg) {
-				      var res = addMessage(msg);
-				    }
-				    protected Object addMessage(String msg) {
-				        return new StringBuilder().append("Hi").append(msg).toString();
-				    }
-				  }
-				"""));
+						      protected Object addMessage(String msg) {
+						          return new StringBuilder().append("Hi").append(msg).toString();
+						      }
+						  }
+						"""));
 	}
 }
