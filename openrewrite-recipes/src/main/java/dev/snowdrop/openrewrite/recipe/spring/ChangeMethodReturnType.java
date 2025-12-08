@@ -7,10 +7,7 @@ import org.openrewrite.java.AddImport;
 import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.MethodMatcher;
 import org.openrewrite.java.tree.J;
-import org.openrewrite.java.tree.JavaType;
 import org.openrewrite.java.tree.TypeTree;
-
-import java.util.List;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
@@ -48,19 +45,10 @@ public class ChangeMethodReturnType extends Recipe {
 				J.MethodDeclaration m = super.visitMethodDeclaration(method, ctx);
 
 				if (methodMatcher.matches(m.getMethodType())) {
-					/*
-					System.out.println("========== BEFORE ==========");
-					System.out.printf("Method name: %s \n", m.getSimpleName());
-					System.out.printf("Method modifiers: %s \n", m.getModifiers());
-					System.out.printf("Return Type: %s \n", m.getType());
-					System.out.printf("Return Type expression: %s \n", m.getReturnTypeExpression());
-					*/
-
-					m = m.withReturnTypeExpression(TypeTree.build(newReturnType));
-					m = m.withMethodType(m.getMethodType().withReturnType(JavaType.buildType(newReturnType)));
-
-					// TODO: To be confirmed by Openrewrite team but it seems that we cannot use the maybeAddImport with `withReturnType`
-					//  maybeAddImport(newReturnType);
+					m = m.withReturnTypeExpression(
+							TypeTree.build(extractTypeName(newReturnType, TypeFormat.CLASS_NAME_WITH_GENERICS)));
+					doAfterVisit(new AddImport<>(extractTypeName(newReturnType, TypeFormat.QUALIFIED_WITHOUT_GENERICS),
+							null, false));
 					return autoFormat(m, ctx);
 					/*
 					System.out.println("========== AFTER ==========");
@@ -75,12 +63,63 @@ public class ChangeMethodReturnType extends Recipe {
 		};
 	}
 
-	/* DON'T WORK. Wait Openrewrite response !
-	@Override
-	public List<Recipe> getRecipeList() {
-		AddImport aImport = new AddImport(newReturnType, null, false);
-		return List.of(new Recipe.Builder("Add missing import", "Add missing import").visitor(aImport)
-				.build("AddMissingImport"));
+	/**
+	 * Extracts from the return type expressed as FQN, the class name (e.g., List), import name (e.g., java.util.List)
+	 * or simply the Class name with the generic (e.g., List<String></String>)
+	 *
+	 *
+	 * @param fqn The fully qualified name (e.g., "java.util.List<String>").
+	 * @return The type name, including generic parameters or just the class name or import name.
+	 */
+	public static String extractTypeName(String fqn, TypeFormat format) {
+		if (fqn == null || fqn.isEmpty()) {
+			return "";
+		}
+
+		if (format == TypeFormat.QUALIFIED_WITH_GENERICS) {
+			return fqn;
+		}
+
+		// 1. Handle Generics: Find the position of '<' (start of generic parameters)
+		int genericIndex = fqn.indexOf('<');
+		String baseName = fqn;
+		String generics = "";
+
+		if (genericIndex != -1) {
+			generics = fqn.substring(genericIndex); // Captures <String>, <T>, etc.
+			baseName = fqn.substring(0, genericIndex); // Captures only "java.util.List"
+		}
+
+		// 2. Find the position of the last dot (package separator)
+		int lastDotIndex = baseName.lastIndexOf('.');
+
+		String simpleName;
+
+		if (lastDotIndex != -1) {
+			// Extract the name after the last dot
+			simpleName = baseName.substring(lastDotIndex + 1);
+		} else {
+			// No package separator found (already a simple name)
+			simpleName = baseName;
+		}
+
+		// 3. Return the result based on requirements
+		return switch (format) {
+			case SIMPLE -> simpleName; // Return "List" from java.util.List<String>
+			case CLASS_NAME_WITH_GENERICS -> simpleName + generics; // Return "List" + "<String>"
+			case QUALIFIED_WITHOUT_GENERICS -> baseName; // Return java.util.List;
+			case QUALIFIED_WITH_GENERICS -> fqn;
+		};
 	}
-	*/
+
+	public enum TypeFormat {
+		// 1. Return the simple name of the Class (ex: List)
+		SIMPLE,
+		// 2. Return the name of the class and its generic (ex: List<String>)
+		CLASS_NAME_WITH_GENERICS,
+		// 3. Return the FQName but without the generic (ex: java.util.List)
+		QUALIFIED_WITHOUT_GENERICS,
+		// 4. Return the FQName with the generic (ex: java.util.List)
+		QUALIFIED_WITH_GENERICS
+	}
 }
