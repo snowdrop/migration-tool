@@ -1,6 +1,6 @@
 package dev.snowdrop.scanner.file;
 
-import dev.snowdrop.scanner.file.search.model.FilePath;
+import dev.snowdrop.analyze.model.FilePath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,7 +1,7 @@
 package dev.snowdrop.analyze.model;
 
 public enum ScannerType {
-	OPENREWRITE("openrewrite"), JDTLS("jdtls"), MAVEN("maven");
+	OPENREWRITE("openrewrite"), JDTLS("jdtls"), MAVEN("maven"), FILE_SEARCH("file-search");
 
 	private final String label;
 

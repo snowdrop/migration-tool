@@ -1,6 +1,6 @@
 package dev.snowdrop.scanner.file;
 
-import dev.snowdrop.scanner.file.search.model.MatchLocation;
+import dev.snowdrop.analyze.model.MatchLocation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

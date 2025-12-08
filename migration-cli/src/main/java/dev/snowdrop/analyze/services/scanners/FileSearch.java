@@ -1,7 +1,7 @@
-package dev.snowdrop.scanner.file.search;
+package dev.snowdrop.analyze.services.scanners;
 
-import dev.snowdrop.scanner.file.search.model.FilePath;
-import dev.snowdrop.scanner.file.search.model.MatchLocation;
+import dev.snowdrop.analyze.model.FilePath;
+import dev.snowdrop.analyze.model.MatchLocation;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;

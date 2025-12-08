@@ -1,4 +1,4 @@
-package dev.snowdrop.scanner.file.search.model;
+package dev.snowdrop.analyze.model;
 
 import java.nio.file.Path;
 

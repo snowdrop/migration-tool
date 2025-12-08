@@ -6,6 +6,9 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public class BaseRulesTest {
+
+	protected Path rulesPath;
+
 	public static void copyFolder(String source, Path target, CopyOption... options) throws Exception {
 		URL resourceUrl = MatchServiceCookBookTest.class.getClassLoader().getResource(source);
 		if (resourceUrl == null) {
