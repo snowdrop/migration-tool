@@ -11,7 +11,7 @@
   when:
     condition: |
       java.annotation is 'org.springframework.stereotype.Controller'
-  order: 7
+  order: 8
   instructions:
     ai:
       - tasks:
@@ -28,7 +28,7 @@
                 return RestResponse.temporaryRedirect(new URI("/home"));
           - dev.snowdrop.openrewrite.recipe.spring.ChangeMethodReturnType:
               methodPattern: "com.todo.app.controller.TaskController viewIndexPage(..)"
-              newReturnType: "org.jboss.resteasy.reactive.RestResponse.RestResponse<String>"
+              newReturnType: "org.jboss.resteasy.reactive.RestResponse<String>"
           - dev.snowdrop.openrewrite.recipe.spring.AddThrowMethodException:
               methodPattern: "com.todo.app.controller.TaskController viewIndexPage(..)"
               newException: java.net.URISyntaxException

@@ -11,7 +11,7 @@
   when:
     condition: |
       java.annotation is 'org.springframework.stereotype.Controller'
-  order: 6
+  order: 7
   instructions:
     ai:
       - tasks:
