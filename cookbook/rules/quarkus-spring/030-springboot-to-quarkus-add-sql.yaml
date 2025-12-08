@@ -7,11 +7,11 @@
     - konveyor.io/target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
-  ruleID: 003-springboot-to-quarkus-add-sql
+  ruleID: 030-springboot-to-quarkus-add-sql
   when:
     condition: |
       properties.key is 'spring.datasource' OR properties.key is 'spring.jpa'
-  order: 3
+  order: 5
   instructions:
     ai:
       - tasks:

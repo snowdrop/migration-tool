@@ -7,11 +7,11 @@
     - konveyor.io/target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
-  ruleID: 004-springboot-to-quarkus-rest-get-tasks
+  ruleID: 042-springboot-to-quarkus-redirect
   when:
     condition: |
       java.annotation is 'org.springframework.stereotype.Controller'
-  order: 4
+  order: 7
   instructions:
     ai:
       - tasks:
@@ -22,16 +22,16 @@
       - name: SpringBoot to Quarkus
         description: Adapt the REST GET /home endpoint as we don't support Model view of Spring Boot
         recipeList:
-          - dev.snowdrop.openrewrite.recipe.spring.RemoveMethodParameters:
-              methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
           - dev.snowdrop.openrewrite.recipe.spring.ReplaceMethodBodyContent:
-              methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
+              methodPattern: "com.todo.app.controller.TaskController viewIndexPage(..)"
               replacement: |
-                List<Task> tasks = taskService.getAllTasks();
-                return ResponseEntity.ok(tasks);
+                return RestResponse.temporaryRedirect(new URI("/home"));
           - dev.snowdrop.openrewrite.recipe.spring.ChangeMethodReturnType:
-              methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
-              newReturnType: "org.springframework.http.ResponseEntity<List<Task>>"
+              methodPattern: "com.todo.app.controller.TaskController viewIndexPage(..)"
+              newReturnType: "org.jboss.resteasy.reactive.RestResponse.RestResponse<String>"
+          - dev.snowdrop.openrewrite.recipe.spring.AddThrowMethodException:
+              methodPattern: "com.todo.app.controller.TaskController viewIndexPage(..)"
+              newException: java.net.URISyntaxException
         gav:
         - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
         - org.openrewrite:rewrite-java:8.67.1

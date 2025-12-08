@@ -7,7 +7,7 @@
     - konveyor.io/target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
-  ruleID: 001-springboot-replace-bom-quarkus
+  ruleID: 010-springboot-replace-bom-quarkus
   when:
     condition: java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
   order: 1
@@ -37,30 +37,6 @@
           - org.openrewrite.maven.AddDependency:
               groupId: io.quarkus
               artifactId: quarkus-arc
-              version: 3.26.4
-          - org.openrewrite.maven.AddDependency:
-              groupId: io.quarkus
-              artifactId: quarkus-spring-data-jpa
-              version: 3.26.4
-          - org.openrewrite.maven.AddDependency:
-              groupId: io.quarkus
-              artifactId: quarkus-spring-web
-              version: 3.26.4
-          - org.openrewrite.maven.AddDependency:
-              groupId: io.quarkus
-              artifactId: quarkus-spring-data-rest
-              version: 3.26.4
-          - org.openrewrite.maven.AddDependency:
-              groupId: io.quarkus
-              artifactId: quarkus-rest
-              version: 3.26.4
-          - org.openrewrite.maven.AddDependency:
-              groupId: io.quarkus
-              artifactId: quarkus-rest-jackson
-              version: 3.26.4
-          - org.openrewrite.maven.AddDependency:
-              groupId: io.quarkus
-              artifactId: quarkus-jdbc-mysql
               version: 3.26.4
           - org.openrewrite.maven.RemovePlugin:
               groupId: org.springframework.boot
