@@ -46,28 +46,27 @@ public class AddThrowMethodException extends Recipe {
 				J.MethodDeclaration m = super.visitMethodDeclaration(method, ctx);
 
 				if (methodMatcher.matches(m.getMethodType())) {
-					/*
-					  Space before = m.getPadding().getParameters().getLastSpace();
-					  if (before.getWhitespace().isEmpty()) {
-							m = m.withThrows(List.of(TypeTree.build(newException)));
 
-							// Include a space between the throws word and the method declaration
-							m = m.getPadding()
-									.withThrows(m.getPadding().getThrows().withBefore(before.withWhitespace(" ")));
-					   }
+					Space before = m.getPadding().getParameters().getLastSpace();
+					if (before.getWhitespace().isEmpty()) {
+						m = m.withThrows(List.of(TypeTree.build(newException)));
 
-						// Add a space between the throws word and the exception
-						m = m.withThrows(ListUtils.mapFirst(m.getThrows(), aThrows -> {
-							if (aThrows.getPrefix().getWhitespace().isEmpty()) {
-								return aThrows.withPrefix(aThrows.getPrefix().withWhitespace(" "));
-							}
-							return aThrows;
-						}));
-						*/
+						// Include a space between the throws word and the method declaration
+						m = m.getPadding()
+								.withThrows(m.getPadding().getThrows().withBefore(before.withWhitespace(" ")));
+					}
 
-					m = m.withThrows(List.of(TypeTree.build(newException)));
+					// Add a space between the throws word and the exception
+					m = m.withThrows(ListUtils.mapFirst(m.getThrows(), aThrows -> {
+						if (aThrows.getPrefix().getWhitespace().isEmpty()) {
+							return aThrows.withPrefix(aThrows.getPrefix().withWhitespace(" "));
+						}
+						return autoFormat(aThrows, ctx);
+					}));
+
+					/*m = m.withThrows(List.of(TypeTree.build(newException)));
 					maybeAddImport(newException);
-					return autoFormat(m, ctx);
+					return autoFormat(m, ctx);*/
 				}
 				return m;
 			}
