@@ -15,8 +15,10 @@ public class ChangeMethodContentTest implements RewriteTest {
 
 	@Test
 	void replaceMethodBodyContent() {
-		rewriteRun(spec -> spec.recipe(new ReplaceMethodBodyContent("TaskController generateMessage()", replacement))
-				.expectedCyclesThatMakeChanges(1).cycles(1), java("""
+		rewriteRun(
+				spec -> spec.recipe(new ReplaceMethodBodyContent("TaskController generateMessage()", replacement, ""))
+						.expectedCyclesThatMakeChanges(1).cycles(1),
+				java("""
 						public class TaskController {
 						  String generateMessage() {
 						    return "Hi";
@@ -24,10 +26,10 @@ public class ChangeMethodContentTest implements RewriteTest {
 						}
 						""", """
 						public class TaskController {
-						  String generateMessage() {
-						      var msg = "Hi from me";
-						      return msg;
-						  }
+						    String generateMessage() {
+						        var msg = "Hi from me";
+						        return msg;
+						    }
 						}
 						"""));
 	}
