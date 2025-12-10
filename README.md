@@ -317,62 +317,15 @@ If you want to populate an analysis report (aka migration plan) then pass the pa
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -o json"
 ```
 
-#### jdt-ls scanner
+#### Scanner
 
-By default, the `analyze` client command will use as scanner tool: konveyor jdt-ls server
+The tool supports different scanners able to scan the code source:
+- konveyor jdt-ls
+- openrewrite recipe
+- maven
+- file and content search
 
-During the execution of the command, you will be able to see within the terminal the log reporting the JSON responses when condition(s) matches like also a summary table.
-```text
-2025-09-29 12:52:43,605 INFO  [dev.sno.ana.ser.LsSearchService] (ForkJoinPool.commonPool-worker-5) ==== CLIENT: --- Search Results found for rule: springboot-import-to-quarkus-00000.
-2025-09-29 12:52:43,606 INFO  [dev.sno.ana.ser.LsSearchService] (ForkJoinPool.commonPool-worker-5) ==== CLIENT: --- JSON response: [
-  {
-    "name": "org.springframework.boot.autoconfigure.SpringBootApplication",
-    "kind": 2.0,
-    "location": {
-      "uri": "file:///Users/cmoullia/code/application-modernisation/migration-cli-parent/applications/spring-boot-todo-app/src/main/java/com/todo/app/AppApplication.java",
-      "range": {
-        "start": {
-          "line": 3.0,
-          "character": 7.0
-        },
-        "end": {
-          "line": 3.0,
-          "character": 67.0
-        }
-      }
-    },
-    "containerName": ""
-  }
-]
-...
-
-=== Code Analysis Results ===
-┌─────────────────────────────────────────────┬─────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                   Rule ID                   │Found│                                                       Information Details                                                        │
-├─────────────────────────────────────────────┼─────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│springboot-annotations-notfound-00000        │ No  │No symbols found                                                                                                                  │
-├─────────────────────────────────────────────┼─────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│springboot-annotations-to-quarkus-00000      │ Yes │Found SpringBootApplication at line 6, char: 1 - 22                                                                               │
-│                                             │     │file:///Users/cmoullia/code/application-modernisation/migration-cli-parent/applications/spring-boot-todo-app/src/main/java/com/to│
-│                                             │     │do/app/AppApplication.java                                                                                                        │
-├─────────────────────────────────────────────┼─────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│springboot-import-to-quarkus-00000           │ Yes │Found org.springframework.boot.autoconfigure.SpringBootApplication at line 4, char: 7 - 67                                        │
-│                                             │     │file:///Users/cmoullia/code/application-modernisation/migration-cli-parent/applications/spring-boot-todo-app/src/main/java/com/to│
-│                                             │     │do/app/AppApplication.java                                                                                                        │
-└─────────────────────────────────────────────┴─────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-```
-
-> [!CAUTION]
-> If you experiment issues with the language server, you can check its log from this folder: `jdt/.jdt_workspace/.metadata/.log` !
-
-#### Openrewrite scanner
-
-Alternatively, you can use [openrewrite](https://docs.openrewrite.org/) as technology to scan the resources: java, pom, xml, json, properties, etc 
-
-```shell
-mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -o json --scanner openrewrite"
-```
+A scanner can be defined you launch the `analyze` command with the option `--scanner`. In this case, the tool will select it as default to scan and match a condition but will revert to one of the alternative scanners if the default don't support to search about: `<type>.<symbol>` where <type> can be: pom, java, properties, etc. and `symbol`: dependency, key, annotation, etc.
 
 ## Transform your application
 
@@ -457,6 +410,56 @@ Check the console to see the tasks executed and AI's reponses:
 ...
 ```
 If the AI responses are not accurate, then you will have to adapt the instructions as described part of the different Rules YAML files available here: `cookbook/rules/ddd-springboot-****.yaml` !
+
+# Examples of migration scenario
+
+## Spring Boot Todo to Quarkus Application
+
+If you follow the instructions detailed hereafter, you will be able to migrate the [Spring Boot Todo Application](applications/spring-boot-todo-app) to Quarkus. Until now, it is only possible to use the Spring [JPA](https://quarkus.io/guides/spring-data-jpa), [Web/REST](https://quarkus.io/guides/spring-web) supported by Quarkus as Thymeleaf is a technology not available on Quarkus which is using Qute as [Web technology](https://quarkus.io/guides/web) !
+
+To play with the migration-tool, git clone this project: https://github.com/snowdrop/migration-tool/ and compile it: `mvn clean package -DskipTests`.
+
+Next, analyze the project to migrate to generate the json migration report
+```
+mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -r ../cookbook/rules/quarkus-spring --scanner openrewrite"
+```
+
+Transform the project (dry-run mode) and check the content of the `./target` directory (see rewrite folders and patch files)
+```
+mvn -pl migration-cli quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app -p openrewrite --dry-run"
+```
+
+Finally migrate the Spring Boot Todo code to Quarkus
+```
+mvn -pl migration-cli quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app -p openrewrite"
+```
+
+> [!NOTE]
+> We recommend to create a git repository and branch within the "spring-boot-todo-app" to revert to the previous state if you apply the transformation
+
+As documented, to play with the Quarkus application, launch it using the command:
+```
+cd applications/spring-boot-todo-app
+mvn package quarkus:dev -DskipTests
+```
+
+> [!NOTE]
+> it is needed to have podman or docker installed locally as quarkus will launch a MySQL testContainer to access the Todo DB.
+
+If the Quarkus Todo application has started successfully then you can curl the REST endpoints
+```
+curl http://127.0.0.1:8080/home
+
+curl -X POST http://localhost:8080/home \
+-H "Content-Type: application/json" \
+-d '{
+"title": "Prepare migration to Quarkus. Step 3",
+"description": "Analyser le projet et lister toutes les dépendances Spring Data.",
+"dueDate": "2025-12-24"
+}'
+```
+
+Enjoy :-)
 
 ## Tips
 

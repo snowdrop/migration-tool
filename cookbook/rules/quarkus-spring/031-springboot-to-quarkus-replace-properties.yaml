@@ -27,13 +27,13 @@
         recipeList:
           - org.openrewrite.properties.ChangePropertyKey:
               oldPropertyKey: spring.datasource.url
-              newPropertyKey: quarkus.datasource.jdbc.url
+              newPropertyKey: '%prod.quarkus.datasource.jdbc.url'
           - org.openrewrite.properties.ChangePropertyKey:
               oldPropertyKey: spring.datasource.username
-              newPropertyKey: quarkus.datasource.username
+              newPropertyKey: '%prod.quarkus.datasource.username'
           - org.openrewrite.properties.ChangePropertyKey:
               oldPropertyKey: spring.datasource.password
-              newPropertyKey: quarkus.datasource.password
+              newPropertyKey: '%prod.quarkus.datasource.password'
           - org.openrewrite.properties.ChangePropertyKey:
               oldPropertyKey: spring.datasource.driver-class-name
               newPropertyKey: quarkus.datasource.jdbc.driver
