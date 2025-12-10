@@ -39,24 +39,6 @@ jobs:
           mvn clean install -ntp -DskipTests
           echo "Maven build exit code: $?"
 
-      - name: Initialize git under the TODO application to revert changes
-        run: |
-          cd ./applications/spring-boot-todo-app
-          if [ ! -d ".git" ]; then
-            git init
-            git config user.name "GitHub Actions e2e"
-            git config user.email "e2e-actions@github.com"
-            git add .
-            git commit -m "Initial commit for e2e testing"
-            echo "✅ Initialized git repository"
-          else
-            echo "✅ Git repository already exists"
-          fi
-
-          # Create transform branch
-          git checkout -b transform 2>/dev/null || git checkout transform
-          echo "✅ Created/switched to transform branch"
-
       - name: Upload built artifacts
         uses: actions/upload-artifact@v5
         with:
@@ -160,12 +142,8 @@ jobs:
         run: |
           echo "🔄 Starting transformation with quarkus-spring rules..."
 
-          # Set environment variables for transformation
-          export ANALYZER_RULES_PATH="$(pwd)/cookbook/rules"
-
           # Switch to transform branch
           cd ./applications/spring-boot-todo-app
-          git checkout transform
 
           # Run transformation using the uber jar
           timeout 300 java -jar ../../migration-cli/target/quarkus-app/quarkus-run.jar transform . -p openrewrite || {
@@ -174,36 +152,6 @@ jobs:
             ls -la
             exit 1
           }
-
-          # Show what changed
-          echo "✅ Transformation completed. Changes made:"
-          git diff HEAD --name-only || true
-          git status
-
-      - name: Upload transformed application
-        uses: actions/upload-artifact@v5
-        if: always()
-        with:
-          name: transformed-application
-          path: ./applications/spring-boot-todo-app/
-          retention-days: 1
-
-  test_quarkus:
-    name: "Test transformed Quarkus application"
-    needs: transform
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Download transformed application
-        uses: actions/download-artifact@v6
-        with:
-          name: transformed-application
-          path: ./applications/
 
       - name: Build and run Quarkus application
         run: |
@@ -265,63 +213,20 @@ jobs:
 
   reporting:
     name: "Tests result summary"
-    needs: [analyse, transform, test_quarkus]
+    needs: [analyse, transform]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Download built artifacts
-        uses: actions/download-artifact@v6
-        with:
-          name: built-migration-cli
-        continue-on-error: true
-
       - name: Download analysis results
         uses: actions/download-artifact@v6
         with:
           name: analysis-results
         continue-on-error: true
 
-      - name: Download transformed application
-        uses: actions/download-artifact@v6
-        with:
-          name: transformed-application
-        continue-on-error: true
-
-      - name: Summary of E2E test results
-        run: |
-          echo "📊 E2E Test Results Summary:"
-          echo "=================================="
-
-          # Check analysis results
-          echo "🔍 Analysis Phase:"
-          ANALYSIS_RESULTS=$(find . -name "analysing-*-report_*.json" -type f 2>/dev/null)
-          if [ -n "$ANALYSIS_RESULTS" ]; then
-            echo "✅ Analysis: PASSED - Analysis report generated"
-            echo "   Found: $ANALYSIS_RESULTS"
-          else
-            echo "❌ Analysis: FAILED - No analysis report found"
-          fi
-
-          echo ""
-          echo "🔄 Transformation Phase:"
-          if [ -d "./applications/spring-boot-todo-app" ] || [ -d "./spring-boot-todo-app" ]; then
-            echo "✅ Transform: PASSED - Application transformed"
-          else
-            echo "❌ Transform: FAILED - No transformed application found"
-          fi
-
-          echo ""
-          echo "🚀 Quarkus Test Phase:"
-          # This will be determined by the success/failure of the test_quarkus job
-          # Since this runs with if: always(), we can check the job conclusions
-          echo "   Quarkus test results depend on the test_quarkus job outcome"
-          echo "   Check the test_quarkus job logs for detailed results"
-
       - name: Upload analysis reports
         uses: actions/upload-artifact@v5
         with:
           name: e2e-analysis-results
           path: |
-            analysing-*-report_*.json
             ./applications/spring-boot-todo-app/analysing-*-report_*.json
           retention-days: 7
