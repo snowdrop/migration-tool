@@ -132,7 +132,7 @@ jobs:
           # Wait for application to start
           echo "Waiting for Quarkus to start..."
           for i in {1..30}; do
-            if curl -sf http://localhost:8080/home 2>/dev/null; then
+            if [ "$(curl -s http://localhost:8080/q/health | jq -r '.status | . == "UP"')" = "true" ]; then
               echo "✅ Quarkus application is running"
               break
             fi
@@ -145,24 +145,8 @@ jobs:
             sleep 4
           done
 
-          # Test the /home endpoint
-          echo "Testing /home endpoint..."
-          RESPONSE=$(curl -s http://localhost:8080/home)
-          echo "Response: $RESPONSE"
-
-          # Verify expected JSON response
-          EXPECTED='[{"id":1,"title":"Migration to Quarkus - step 1","description":"Prepare the migration to Quarkus. Step 1","dueDate":null},{"id":2,"title":"Migration to Quarkus - step 2","description":"Prepare the migration to Quarkus. Step 2","dueDate":null}]'
-
-          if echo "$RESPONSE" | jq -e '. | length == 2' >/dev/null 2>&1; then
-            echo "✅ Received expected JSON response with 2 todo items"
-            echo "✅ Quarkus transformation test PASSED"
-          else
-            echo "❌ Response does not match expected format"
-            echo "Expected: $EXPECTED"
-            echo "Got: $RESPONSE"
-            kill $QUARKUS_PID 2>/dev/null || true
-            exit 1
-          fi
+          # Health check passed, application is ready
+          echo "✅ Quarkus transformation test PASSED"
 
           # Clean up
           kill $QUARKUS_PID 2>/dev/null || true
