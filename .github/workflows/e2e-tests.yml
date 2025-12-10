@@ -96,7 +96,7 @@ jobs:
           echo "Using scanner: $SCANNER"
 
           # Set environment variables for the analysis
-          export ANALYZER_RULES_PATH="$(pwd)/cookbook/rules"
+          export ANALYZER_RULES_PATH="$(pwd)/cookbook/rules/quarkus-spring"
 
           # Set JDT-LS specific environment variables only if using jdtls
           if [[ "$SCANNER" == "jdtls" ]]; then
