@@ -130,7 +130,7 @@ jobs:
           cd ./applications/spring-boot-todo-app
 
           # Run transformation using the uber jar
-          timeout 300 java -jar ../../migration-cli/target/quarkus-app/quarkus-run.jar transform . -p openrewrite || {
+          timeout 300 java -jar ../../migration-cli/target/quarkus-app/quarkus-run.jar transform . -p openrewrite --verbose || {
             echo "❌ Transformation failed or timed out"
             echo "Current directory contents:"
             ls -la
