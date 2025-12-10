@@ -1,4 +1,4 @@
-package dev.snowdrop.model;
+package dev.snowdrop.parser;
 
 import java.util.Map;
 

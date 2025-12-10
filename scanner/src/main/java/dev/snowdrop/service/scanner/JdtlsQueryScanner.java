@@ -1,12 +1,4 @@
-package dev.snowdrop.analyze.services.scanners;
-
-import dev.snowdrop.analyze.Config;
-import dev.snowdrop.analyze.JdtLsClient;
-import dev.snowdrop.analyze.model.Match;
-import dev.snowdrop.analyze.model.ScannerType;
-import dev.snowdrop.model.Query;
-import org.eclipse.lsp4j.SymbolInformation;
-import org.jboss.logging.Logger;
+package dev.snowdrop.service.scanner;
 
 import java.util.ArrayList;
 import java.util.List;

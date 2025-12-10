@@ -2,7 +2,6 @@ package dev.snowdrop.parser;
 
 import dev.snowdrop.parser.antlr.QueryBaseVisitor;
 import dev.snowdrop.parser.antlr.QueryParser;
-import dev.snowdrop.model.Query;
 
 import java.util.*;
 import java.util.stream.Collectors;

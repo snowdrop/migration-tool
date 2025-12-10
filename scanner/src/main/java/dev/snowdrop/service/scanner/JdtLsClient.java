@@ -1,15 +1,10 @@
-package dev.snowdrop.analyze;
+package dev.snowdrop.service.scanner;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import dev.snowdrop.analyze.model.Rule;
-import dev.snowdrop.analyze.utils.LSClient;
-import dev.snowdrop.model.Query;
-import dev.snowdrop.parser.QueryUtils;
-import dev.snowdrop.parser.QueryVisitor;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.InitializeParams;
@@ -41,10 +36,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
-import static dev.snowdrop.analyze.utils.JdtLsUtils.getLocationCode;
-import static dev.snowdrop.analyze.utils.JdtLsUtils.getLocationName;
 
 public class JdtLsClient {
 	private static final Logger logger = Logger.getLogger(JdtLsClient.class);
@@ -81,7 +72,7 @@ public class JdtLsClient {
 		InitializeParams p = new InitializeParams();
 		p.setProcessId((int) ProcessHandle.current().pid());
 		// The path to the application to be scanned should be created as URI (file:///) !!
-		p.setRootUri(resolvePath(config.appPath()).toUri().toString());
+		p.setRootUri(FileUtils.resolvePath(config.appPath()).toUri().toString());
 		p.setCapabilities(new ClientCapabilities());
 
 		String bundlePath = String.format("[\"%s\"]", Paths.get(config.jdtLsPath(), "java-analyzer-bundle",
@@ -204,7 +195,7 @@ public class JdtLsClient {
 	@Deprecated
 	public List<SymbolInformation> executeCommand(Config config, Query query) {
 
-		String location = getLocationCode(query.symbol());
+		String location = JdtLsUtils.getLocationCode(query.symbol());
 		if (location == null || location.equals("0")) {
 			throw new IllegalStateException(String.format(
 					"The language server's location code don't exist using the when condition of the query: %s-%s",
@@ -320,7 +311,7 @@ public class JdtLsClient {
 			} else {
 				Map<String, Object> args = (Map<String, Object>) arguments.get(0);
 				logger.infof("==== CLIENT: Found %s usage(s) of symbol: %s, name: %s", symbolInformationList.size(),
-						getLocationName(args.get("location").toString()), args.get("query"));
+						JdtLsUtils.getLocationName(args.get("location").toString()), args.get("query"));
 				for (SymbolInformation si : symbolInformationList) {
 					logger.debugf("==== CLIENT: Found %s at line %s, char: %s - %s within the file: %s)", si.getName(),
 							si.getLocation().getRange().getStart().getLine() + 1,
@@ -409,7 +400,7 @@ public class JdtLsClient {
 	private List<SymbolInformation> executeCommandForCondition(JdtLsClient client, Rule rule,
 			Rule.JavaReferenced javaReferenced) {
 		var paramsMap = Map.of("project", "java", // hard coded value to java within the analyzer java external-provider
-				"location", getLocationCode(javaReferenced.location()), "query", javaReferenced.pattern(), // pattern
+				"location", JdtLsUtils.getLocationCode(javaReferenced.location()), "query", javaReferenced.pattern(), // pattern
 				// from the
 				// rule
 				"analysisMode", "source-only" // 2 modes are supported: source-only and full

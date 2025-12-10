@@ -1,5 +1,6 @@
 package dev.snowdrop.analyze;
 
+import dev.snowdrop.analyze.model.Config;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.analyze.services.CodeScannerService;

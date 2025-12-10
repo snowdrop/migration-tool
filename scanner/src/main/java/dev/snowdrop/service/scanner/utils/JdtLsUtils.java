@@ -1,4 +1,4 @@
-package dev.snowdrop.analyze.utils;
+package dev.snowdrop.service.scanner.utils;
 
 import org.jboss.logging.Logger;
 

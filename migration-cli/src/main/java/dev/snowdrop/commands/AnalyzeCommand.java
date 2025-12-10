@@ -1,6 +1,6 @@
 package dev.snowdrop.commands;
 
-import dev.snowdrop.analyze.Config;
+import dev.snowdrop.analyze.model.Config;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.analyze.services.AnalyzeService;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
+import static dev.snowdrop.service.scanner.utils.FileUtils.resolvePath;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.filterRules;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFile;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;

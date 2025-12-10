@@ -1,4 +1,4 @@
-package dev.snowdrop.analyze.services.scanners;
+package dev.snowdrop.service.scanner;
 
 import dev.snowdrop.analyze.model.FilePath;
 import dev.snowdrop.analyze.model.MatchLocation;

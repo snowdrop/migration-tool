@@ -1,8 +1,8 @@
-package dev.snowdrop.analyze.services.scanners;
+package dev.snowdrop.service.scanner;
 
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;
-import dev.snowdrop.model.Query;
+import dev.snowdrop.parser.Query;
 
 import java.util.List;
 import java.util.Set;

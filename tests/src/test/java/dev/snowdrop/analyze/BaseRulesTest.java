@@ -1,5 +1,7 @@
 package dev.snowdrop.analyze;
 
+import dev.snowdrop.analyze.model.Config;
+
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.*;

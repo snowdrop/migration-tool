@@ -1,10 +1,9 @@
-package dev.snowdrop.analyze.services.scanners;
+package dev.snowdrop.service.scanner;
 
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.MavenGav;
-import dev.snowdrop.analyze.model.ScannerType;
-import dev.snowdrop.model.Query;
+import dev.snowdrop.parser.Query;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.InputLocation;
 import org.apache.maven.model.Model;

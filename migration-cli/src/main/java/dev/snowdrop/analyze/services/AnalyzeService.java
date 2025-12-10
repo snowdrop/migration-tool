@@ -1,6 +1,6 @@
 package dev.snowdrop.analyze.services;
 
-import dev.snowdrop.analyze.Config;
+import dev.snowdrop.analyze.model.Config;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;

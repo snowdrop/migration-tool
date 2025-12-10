@@ -1,4 +1,4 @@
-package dev.snowdrop.model;
+package dev.snowdrop.analyze;
 
 import java.util.Map;
 

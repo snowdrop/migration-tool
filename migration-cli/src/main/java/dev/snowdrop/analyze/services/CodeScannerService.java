@@ -1,9 +1,9 @@
 package dev.snowdrop.analyze.services;
 
-import dev.snowdrop.analyze.Config;
+import dev.snowdrop.analyze.model.Config;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.Rule;
-import dev.snowdrop.model.Query;
+import dev.snowdrop.parser.Query;
 import dev.snowdrop.parser.QueryUtils;
 import dev.snowdrop.parser.QueryVisitor;
 import org.jboss.logging.Logger;

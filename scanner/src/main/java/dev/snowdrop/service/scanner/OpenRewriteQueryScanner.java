@@ -1,4 +1,4 @@
-package dev.snowdrop.analyze.services.scanners;
+package dev.snowdrop.service.scanner;
 
 import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -6,7 +6,7 @@ import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.CsvRecord;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.ScannerType;
-import dev.snowdrop.model.Query;
+import dev.snowdrop.parser.Query;
 import dev.snowdrop.transform.model.CompositeRecipe;
 import org.jboss.logging.Logger;
 

@@ -1,4 +1,4 @@
-package dev.snowdrop.analyze.services.scanners;
+package dev.snowdrop.service.scanner;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Parent;

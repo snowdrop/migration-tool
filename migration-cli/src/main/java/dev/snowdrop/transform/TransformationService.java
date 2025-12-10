@@ -2,7 +2,6 @@ package dev.snowdrop.transform;
 
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.transform.provider.ProviderFactory;
-import dev.snowdrop.transform.provider.ai.Assistant;
 import dev.snowdrop.transform.provider.model.ExecutionContext;
 import dev.snowdrop.transform.provider.model.ExecutionResult;
 import org.jboss.logging.Logger;
