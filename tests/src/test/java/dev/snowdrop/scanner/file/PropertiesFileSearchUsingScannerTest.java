@@ -1,12 +1,12 @@
 package dev.snowdrop.scanner.file;
 
 import dev.snowdrop.analyze.BaseRulesTest;
-import dev.snowdrop.analyze.model.Config;
+import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.analyze.services.CodeScannerService;
 import dev.snowdrop.analyze.services.ScanCommandExecutor;
-import dev.snowdrop.analyze.services.scanners.FileSearch;
+import dev.snowdrop.service.scanner.file.FileSearch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;

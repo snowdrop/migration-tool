@@ -1,4 +1,4 @@
-package dev.snowdrop.service.scanner;
+package dev.snowdrop.service.scanner.jdtls;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -17,6 +17,14 @@ import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jboss.logging.Logger;
+
+import dev.snowdrop.analyze.Config;
+import dev.snowdrop.parser.Query;
+import dev.snowdrop.analyze.model.Rule;
+import dev.snowdrop.service.scanner.utils.FileUtils;
+import dev.snowdrop.service.scanner.utils.JdtLsUtils;
+import dev.snowdrop.parser.QueryVisitor;
+import dev.snowdrop.parser.QueryUtils;
 
 import java.io.File;
 import java.io.IOException;

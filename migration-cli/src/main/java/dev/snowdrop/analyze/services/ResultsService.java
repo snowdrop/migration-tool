@@ -6,7 +6,7 @@ import com.github.freva.asciitable.AsciiTable;
 import com.github.freva.asciitable.Column;
 import com.github.freva.asciitable.HorizontalAlign;
 import com.github.freva.asciitable.Styler;
-import dev.snowdrop.analyze.model.Config;
+import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.html.Cell;

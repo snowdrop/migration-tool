@@ -16,8 +16,8 @@
     <dependencies>
         <!-- Logging -->
         <dependency>
-            <groupId>org.jboss.logmanager</groupId>
-            <artifactId>jboss-logmanager</artifactId>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
         </dependency>
 
         <!-- lsp4j -->

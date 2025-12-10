@@ -1,6 +1,6 @@
 package dev.snowdrop.analyze;
 
-import dev.snowdrop.analyze.model.Config;
+import dev.snowdrop.analyze.Config;
 
 import java.io.IOException;
 import java.net.URL;

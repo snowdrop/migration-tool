@@ -1,10 +1,11 @@
-package dev.snowdrop.service.scanner;
+package dev.snowdrop.service.scanner.file;
 
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.FilePath;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.MatchLocation;
 import dev.snowdrop.parser.Query;
+import dev.snowdrop.service.scanner.QueryScanner;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
