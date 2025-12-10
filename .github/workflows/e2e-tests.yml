@@ -39,32 +39,6 @@ jobs:
           mvn clean install -ntp -DskipTests
           echo "Maven build exit code: $?"
 
-      - name: Upload built artifacts
-        uses: actions/upload-artifact@v5
-        with:
-          name: built-migration-cli
-          path: |
-            migration-cli/target/quarkus-app/
-            applications/
-            cookbook/rules/
-          retention-days: 1
-
-  analyse:
-    name: "Scan an application and generate the migration report"
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Download built artifacts
-        uses: actions/download-artifact@v6
-        with:
-          name: built-migration-cli
-
       - name: Install konveyor jdt-ls
         if: ${{ inputs.analysis_tool == 'jdtls' || github.event_name != 'workflow_dispatch' }}
         run: |
@@ -197,7 +171,6 @@ jobs:
 
   reporting:
     name: "Tests result summary"
-    needs: [analyse]
     if: always()
     runs-on: ubuntu-latest
     steps:
