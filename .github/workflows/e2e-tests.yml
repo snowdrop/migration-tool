@@ -132,7 +132,7 @@ jobs:
           # Wait for application to start
           echo "Waiting for Quarkus to start..."
           for i in {1..30}; do
-            if curl -sf http://localhost:8080/q/arc 2>/dev/null; then
+            if curl -sf http://localhost:8080/home 2>/dev/null; then
               echo "✅ Quarkus application is running"
               break
             fi
