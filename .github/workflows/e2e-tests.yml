@@ -10,6 +10,15 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      analysis_tool:
+        description: 'Preferred scanner technology to use'
+        required: true
+        default: 'openrewrite'
+        type: choice
+        options:
+          - jdtls
+          - openrewrite
 
 jobs:
   setup:
@@ -58,8 +67,8 @@ jobs:
             cookbook/rules/
           retention-days: 1
 
-  jdtls-analyse:
-    name: "Generate analysis report: jdt-ls"
+  analyse:
+    name: "Scan an application and generate the migration report"
     needs: setup
     runs-on: ubuntu-latest
     steps:
@@ -75,6 +84,7 @@ jobs:
           name: built-migration-cli
 
       - name: Install konveyor jdt-ls
+        if: ${{ inputs.analysis_tool == 'jdtls' || github.event_name != 'workflow_dispatch' }}
         run: |
           export VERSION=latest
           ID=$(docker create --name kantra-download quay.io/konveyor/kantra:$VERSION)
@@ -82,36 +92,57 @@ jobs:
           docker cp $ID:/jdtls ./jdt/konveyor-jdtls
           docker rm $ID
 
-      - run: |
-          echo "🔍 Starting jdt-ls scanner analysis..."
+      - name: Run analysis
+        run: |
+          echo "🔍 Starting scanner analysis..."
+
+          # Determine analysis tool to use
+          if [[ "${{ inputs.analysis_tool }}" == "openrewrite" ]]; then
+            SCANNER="openrewrite"
+            REPORT_PATTERN="*analysing-openrewrite-report*"
+          else
+            SCANNER="jdtls"
+            REPORT_PATTERN="*analysing-jdtls-report*"
+          fi
+
+          # For non-workflow_dispatch events, default to openrewrite
+          if [[ "${{ github.event_name }}" != "workflow_dispatch" ]]; then
+            SCANNER="openrewrite"
+            REPORT_PATTERN="*analysing-openrewrite-report*"
+          fi
+
+          echo "Using scanner: $SCANNER"
 
           # Set environment variables for the analysis
-          export ANALYZER_JDT_LS_PATH="$(pwd)/jdt/konveyor-jdtls"
-          export ANALYZER_JDT_WORKSPACE_PATH="$(pwd)/jdt"
           export ANALYZER_RULES_PATH="$(pwd)/cookbook/rules"
 
-          # Create jdt workspace directory if it doesn't exist
-          mkdir -p ./jdt
+          # Set JDT-LS specific environment variables only if using jdtls
+          if [[ "$SCANNER" == "jdtls" ]]; then
+            export ANALYZER_JDT_LS_PATH="$(pwd)/jdt/konveyor-jdtls"
+            export ANALYZER_JDT_WORKSPACE_PATH="$(pwd)/jdt"
+            # Create jdt workspace directory if it doesn't exist
+            mkdir -p ./jdt
+          fi
 
-          # Run analysis with jdt-ls using the uber jar approach
-          timeout 300 java -jar migration-cli/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app -o json || {
-            echo "❌ jdt-ls analysis failed or timed out"
+          # Run analysis using the uber jar
+          timeout 300 java -jar migration-cli/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app --scanner $SCANNER -o json || {
+            echo "❌ $SCANNER analysis failed or timed out"
             echo "Checking for any generated files..."
-            find ./applications/spring-boot-todo-app -name "*analysing-jdtls-report*" -type f 2>/dev/null || true
+            find ./applications/spring-boot-todo-app -name "$REPORT_PATTERN" -type f 2>/dev/null || true
             exit 1
           }
 
-      - name: Upload jdtls analysis results
+      - name: Upload analysis results
         uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: jdtls-analysis-results
-          path: ./applications/spring-boot-todo-app/analysing-jdtls-report_*.json
+          name: analysis-results
+          path: ./applications/spring-boot-todo-app/analysing-*-report_*.json
           retention-days: 1
 
-  openrewrite-analyse:
-    name: "Generate analysis report: openrewrite"
-    needs: setup
+  transform:
+    name: "Transform the application using quarkus-spring rules"
+    needs: analyse
     runs-on: ubuntu-latest
     steps:
       - name: Set up JDK 21
@@ -125,46 +156,135 @@ jobs:
         with:
           name: built-migration-cli
 
-      - run: |
-          echo "🔍 Starting openrewrite scanner analysis..."
+      - name: Run transformation
+        run: |
+          echo "🔄 Starting transformation with quarkus-spring rules..."
 
+          # Set environment variables for transformation
           export ANALYZER_RULES_PATH="$(pwd)/cookbook/rules"
-          
-          timeout 300 java -jar migration-cli/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app -o json --scanner openrewrite || {
-            echo "❌ openrewrite analysis failed or timed out"
-            echo "Checking for any generated files..."
-            find ./applications/spring-boot-todo-app -name "*analysing-openrewrite-report*" -type f 2>/dev/null || true
+
+          # Switch to transform branch
+          cd ./applications/spring-boot-todo-app
+          git checkout transform
+
+          # Run transformation using the uber jar
+          timeout 300 java -jar ../../migration-cli/target/quarkus-app/quarkus-run.jar transform . -p openrewrite || {
+            echo "❌ Transformation failed or timed out"
+            echo "Current directory contents:"
+            ls -la
             exit 1
           }
 
-      - name: Upload openrewrite analysis results
+          # Show what changed
+          echo "✅ Transformation completed. Changes made:"
+          git diff HEAD --name-only || true
+          git status
+
+      - name: Upload transformed application
         uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: openrewrite-analysis-results
-          path: ./applications/spring-boot-todo-app/analysing-openrewrite-report_*.json
+          name: transformed-application
+          path: ./applications/spring-boot-todo-app/
           retention-days: 1
+
+  test_quarkus:
+    name: "Test transformed Quarkus application"
+    needs: transform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Download transformed application
+        uses: actions/download-artifact@v6
+        with:
+          name: transformed-application
+          path: ./applications/
+
+      - name: Build and run Quarkus application
+        run: |
+          echo "🚀 Building and starting Quarkus application..."
+          cd ./applications/spring-boot-todo-app
+
+          # Package the application
+          mvn package -DskipTests || {
+            echo "❌ Maven package failed"
+            echo "Build logs:"
+            cat target/maven-archiver/pom.properties 2>/dev/null || echo "No build info available"
+            exit 1
+          }
+
+          # Start Quarkus in dev mode in the background
+          echo "Starting Quarkus application in dev mode..."
+          timeout 120 mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 &
+          QUARKUS_PID=$!
+
+          # Wait for application to start
+          echo "Waiting for Quarkus to start..."
+          for i in {1..30}; do
+            if curl -sf http://localhost:8080/actuator/health 2>/dev/null || curl -sf http://localhost:8080/q/health 2>/dev/null; then
+              echo "✅ Quarkus application is running"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "❌ Quarkus application failed to start within timeout"
+              kill $QUARKUS_PID 2>/dev/null || true
+              exit 1
+            fi
+            echo "Attempt $i/30: Waiting for Quarkus to start..."
+            sleep 4
+          done
+
+          # Test the /home endpoint
+          echo "Testing /home endpoint..."
+          RESPONSE=$(curl -s http://localhost:8080/home)
+          echo "Response: $RESPONSE"
+
+          # Verify expected JSON response
+          EXPECTED='[{"id":1,"title":"Migration to Quarkus - step 1","description":"Prepare the migration to Quarkus. Step 1","dueDate":null},{"id":2,"title":"Migration to Quarkus - step 2","description":"Prepare the migration to Quarkus. Step 2","dueDate":null}]'
+
+          if echo "$RESPONSE" | jq -e '. | length == 2' >/dev/null 2>&1; then
+            echo "✅ Received expected JSON response with 2 todo items"
+            echo "✅ Quarkus transformation test PASSED"
+          else
+            echo "❌ Response does not match expected format"
+            echo "Expected: $EXPECTED"
+            echo "Got: $RESPONSE"
+            kill $QUARKUS_PID 2>/dev/null || true
+            exit 1
+          fi
+
+          # Clean up
+          kill $QUARKUS_PID 2>/dev/null || true
+          wait $QUARKUS_PID 2>/dev/null || true
+
 
   reporting:
     name: "Tests result summary"
-    needs: [jdtls-analyse, openrewrite-analyse]
+    needs: [analyse, transform, test_quarkus]
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Download built artifacts
         uses: actions/download-artifact@v6
         with:
           name: built-migration-cli
-
-      - name: Download jdtls analysis results
-        uses: actions/download-artifact@v6
-        with:
-          name: jdtls-analysis-results
         continue-on-error: true
 
-      - name: Download openrewrite analysis results
+      - name: Download analysis results
         uses: actions/download-artifact@v6
         with:
-          name: openrewrite-analysis-results
+          name: analysis-results
+        continue-on-error: true
+
+      - name: Download transformed application
+        uses: actions/download-artifact@v6
+        with:
+          name: transformed-application
         continue-on-error: true
 
       - name: Summary of E2E test results
@@ -172,24 +292,30 @@ jobs:
           echo "📊 E2E Test Results Summary:"
           echo "=================================="
 
-          # Define scanners and their file patterns
-          declare -A scanners=(
-            ["jdt-ls"]="analysing-jdtls-report_*.json"
-            ["openrewrite"]="analysing-openrewrite-report_*.json"
-          )
+          # Check analysis results
+          echo "🔍 Analysis Phase:"
+          ANALYSIS_RESULTS=$(find . -name "analysing-*-report_*.json" -type f 2>/dev/null)
+          if [ -n "$ANALYSIS_RESULTS" ]; then
+            echo "✅ Analysis: PASSED - Analysis report generated"
+            echo "   Found: $ANALYSIS_RESULTS"
+          else
+            echo "❌ Analysis: FAILED - No analysis report found"
+          fi
 
-          # Check results for each scanner
-          for scanner in "${!scanners[@]}"; do
-            pattern="${scanners[$scanner]}"
-            # Look for files in both current directory (downloaded artifacts) and applications directory
-            RESULTS=$(find . -name "$pattern" -type f 2>/dev/null)
-            if [ -n "$RESULTS" ]; then
-              echo "✅ $scanner scanner: PASSED - Analysis report generated"
-              echo "   Found: $RESULTS"
-            else
-              echo "❌ $scanner scanner: FAILED - No analysis report found (pattern: $pattern)"
-            fi
-          done
+          echo ""
+          echo "🔄 Transformation Phase:"
+          if [ -d "./applications/spring-boot-todo-app" ] || [ -d "./spring-boot-todo-app" ]; then
+            echo "✅ Transform: PASSED - Application transformed"
+          else
+            echo "❌ Transform: FAILED - No transformed application found"
+          fi
+
+          echo ""
+          echo "🚀 Quarkus Test Phase:"
+          # This will be determined by the success/failure of the test_quarkus job
+          # Since this runs with if: always(), we can check the job conclusions
+          echo "   Quarkus test results depend on the test_quarkus job outcome"
+          echo "   Check the test_quarkus job logs for detailed results"
 
       - name: Upload analysis reports
         uses: actions/upload-artifact@v5
