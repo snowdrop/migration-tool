@@ -415,7 +415,7 @@ If the AI responses are not accurate, then you will have to adapt the instructio
 
 ## Spring Boot Todo to Quarkus Application
 
-If you follow the instructions detailed hereafter, you will be able to migrate the [Spring Boot Todo Application](applications/spring-boot-todo-app) to Quarkus. Until now, it is only possible to use the Spring [JPA](https://quarkus.io/guides/spring-data-jpa), [Web/REST](https://quarkus.io/guides/spring-web) supported by Quarkus as Thymeleaf is a technology not available on Quarkus which is using Qute as [Web technology](https://quarkus.io/guides/web) !
+If you follow the instructions detailed hereafter, you will be able to migrate the [Spring Boot Todo Application](applications/spring-boot-todo-app) to Quarkus. Until now, it is only possible to use the modules [JPA](https://quarkus.io/guides/spring-data-jpa), [Web/REST](https://quarkus.io/guides/spring-web) supported by Quarkus as Thymeleaf is a technology not available on Quarkus which is using Qute as [Web technology](https://quarkus.io/guides/web) !
 
 To play with the migration-tool, git clone this project: https://github.com/snowdrop/migration-tool/ and compile it: `mvn clean package -DskipTests`.
 
