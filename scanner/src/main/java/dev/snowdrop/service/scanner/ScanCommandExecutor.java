@@ -32,7 +32,7 @@ public class ScanCommandExecutor {
 				scanner = optScanner.get();
 				logger.debugf("Using command configured scanner %s", scanner.getScannerType());
 			} else {
-				logger.infof("Scanner %s not found or not supporting this query %s.%s", config.scanner(),
+				logger.infof("Using %s as scanner for analysing code for query %s.%s", config.scanner(),
 						query.fileType(), query.symbol());
 				return Collections.emptyList();
 			}

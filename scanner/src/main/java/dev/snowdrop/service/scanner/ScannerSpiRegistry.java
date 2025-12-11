@@ -10,7 +10,6 @@ import java.util.ServiceLoader;
 
 public class ScannerSpiRegistry {
 
-	//	private final List<QueryScanner> scanners;
 	private static final Logger logger = Logger.getLogger(ScannerSpiRegistry.class);
 	private final Map<String, QueryScanner> scanners;
 
