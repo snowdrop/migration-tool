@@ -19,7 +19,7 @@
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.30.2</quarkus.platform.version>
+        <quarkus.platform.version>3.30.3</quarkus.platform.version>
 
         <openrewrite-recipe-bom.version>3.20.0</openrewrite-recipe-bom.version>
         <spring-boot.version>4.0.0</spring-boot.version>
