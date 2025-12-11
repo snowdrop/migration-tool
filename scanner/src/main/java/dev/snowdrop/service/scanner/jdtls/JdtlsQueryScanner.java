@@ -1,13 +1,11 @@
 package dev.snowdrop.service.scanner.jdtls;
 
-import dev.snowdrop.service.scanner.QueryScanner;
-import org.jboss.logging.Logger;
-
 import dev.snowdrop.analyze.Config;
-import dev.snowdrop.parser.Query;
 import dev.snowdrop.analyze.model.Match;
-import dev.snowdrop.analyze.model.ScannerType;
+import dev.snowdrop.parser.Query;
+import dev.snowdrop.service.scanner.QueryScanner;
 import org.eclipse.lsp4j.SymbolInformation;
+import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,12 +61,6 @@ public class JdtlsQueryScanner implements QueryScanner {
 
 	public List<Match> scansCodeFor(Config config, Query query) {
 		logger.infof("JDTLS scanner executing 1 query");
-
-		if (config.scanner() != null && !ScannerType.JDTLS.label().equals(config.scanner())) {
-			logger.warnf("Query %s.%s is configured for scanner '%s', not 'jdtls'. Skipping.", query.fileType(),
-					query.symbol(), config.scanner());
-			return new ArrayList<>();
-		}
 
 		List<Match> results = executeQuery(config, query);
 

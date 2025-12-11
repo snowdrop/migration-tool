@@ -7,6 +7,7 @@ import org.jboss.logging.Logger;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class ScanCommandExecutor {
 
@@ -24,16 +25,23 @@ public class ScanCommandExecutor {
 	}
 
 	public List<Match> executeCommandForQuery(Config config, Query query) {
-		QueryScanner scanner = spiRegistry.findScannerFor(query);
-		if (scanner != null) {
-			List<Match> scannerResults = scanner.scansCodeFor(config, query);
-			logger.infof("Scanner %s found %d matches", scanner.getScannerType(), scannerResults.size());
-			return scannerResults;
-		} else {
-			logger.warnf("No scanner implementation found for query: %s", query.fileType(), query.symbol());
+		QueryScanner scanner = spiRegistry.findScannerFor(query);;
+		if (config.scanner() != null) {
+			Optional<QueryScanner> optScanner = spiRegistry.findScanner(config.scanner());
+			if (optScanner.isPresent() && optScanner.get().supports(query)) {
+				scanner = optScanner.get();
+				logger.debugf("Using command configured scanner %s", scanner.getScannerType());
+			} else {
+				logger.infof("Scanner %s not found or not supporting this query %s.%s", config.scanner(),
+						query.fileType(), query.symbol());
+				return Collections.emptyList();
+			}
 		}
 
-		return Collections.emptyList();
+		List<Match> scannerResults = scanner.scansCodeFor(config, query);
+		logger.infof("Scanner %s found %d matches", scanner.getScannerType(), scannerResults.size());
+		return scannerResults;
+
 	}
 
 }
