@@ -1,4 +1,4 @@
-package dev.snowdrop.analyze.services;
+package dev.snowdrop.service.scanner;
 
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;

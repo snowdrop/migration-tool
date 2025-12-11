@@ -1,8 +1,7 @@
-package dev.snowdrop.analyze.services;
+package dev.snowdrop.service.scanner;
 
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;
-import dev.snowdrop.service.scanner.QueryScanner;
 import dev.snowdrop.parser.Query;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

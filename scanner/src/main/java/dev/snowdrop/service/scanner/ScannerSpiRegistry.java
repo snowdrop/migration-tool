@@ -1,6 +1,5 @@
-package dev.snowdrop.analyze.services;
+package dev.snowdrop.service.scanner;
 
-import dev.snowdrop.service.scanner.QueryScanner;
 import dev.snowdrop.parser.Query;
 
 import java.util.ArrayList;

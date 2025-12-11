@@ -1,4 +1,4 @@
-package dev.snowdrop.analyze.services;
+package dev.snowdrop.service.scanner;
 
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;
@@ -7,6 +7,7 @@ import dev.snowdrop.parser.Query;
 import dev.snowdrop.parser.QueryUtils;
 import dev.snowdrop.parser.QueryVisitor;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -22,10 +23,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 class CodeScannerServiceTest {
 
@@ -62,11 +61,12 @@ class CodeScannerServiceTest {
 		QueryVisitor queryVisitor = QueryUtils.parseAndVisit(rule.when().condition());
 		List<Match> matches = List.of(new Match("1", "openrewrite",
 				"2025-11-10_16-11-55-417/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:5|JAVA.ANNOTATION|org.springframework.boot.autoconfigure.SpringBootApplication"));
-		when(scanCommandExecutor.executeCommandForQuery(config, queryVisitor.getSimpleQueries().iterator().next()))
+		Mockito.when(
+				scanCommandExecutor.executeCommandForQuery(config, queryVisitor.getSimpleQueries().iterator().next()))
 				.thenReturn(matches);
 
 		ScanningResult scanningResult = codeScannerService.scan(rule);
-		assertTrue(scanningResult.isMatchSucceeded());
+		Assertions.assertTrue(scanningResult.isMatchSucceeded());
 		Map<String, List<Match>> result = scanningResult.getMatches();
 		assertNotNull(result);
 		assertTrue(result.containsKey("simple-condition-rule"));
@@ -97,11 +97,11 @@ class CodeScannerServiceTest {
 		Match getMapping = new Match("3", "openrewrite",
 				"2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:14|JAVA.ANNOTATION|org.springframework.web.bind.annotation.GetMapping");
 		List<Match> matches = List.of(controller, getMapping, autowired);
-		when(scanCommandExecutor.executeCommandForQuery(config, queryVisitor.getOrQueries().iterator().next()))
+		Mockito.when(scanCommandExecutor.executeCommandForQuery(config, queryVisitor.getOrQueries().iterator().next()))
 				.thenReturn(matches);
 
 		ScanningResult scanningResult = codeScannerService.scan(rule);
-		assertTrue(scanningResult.isMatchSucceeded());
+		Assertions.assertTrue(scanningResult.isMatchSucceeded());
 		Map<String, List<Match>> result = scanningResult.getMatches();
 		assertNotNull(result);
 		assertTrue(result.containsKey("or-condition-test"));
@@ -125,11 +125,12 @@ class CodeScannerServiceTest {
 		List<Match> matches = List.of(controller, autowired);
 		Query queryAutowired = new Query("java", "annotation", Map.of("name", "Autowired"));
 		Query queryController = new Query("java", "annotation", Map.of("name", "RestController"));
-		when(scanCommandExecutor.executeCommandForQuery(config, queryAutowired)).thenReturn(List.of(autowired));
-		when(scanCommandExecutor.executeCommandForQuery(config, queryController)).thenReturn(List.of(controller));
+		Mockito.when(scanCommandExecutor.executeCommandForQuery(config, queryAutowired)).thenReturn(List.of(autowired));
+		Mockito.when(scanCommandExecutor.executeCommandForQuery(config, queryController))
+				.thenReturn(List.of(controller));
 
 		ScanningResult scanningResult = codeScannerService.scan(rule);
-		assertTrue(scanningResult.isMatchSucceeded());
+		Assertions.assertTrue(scanningResult.isMatchSucceeded());
 		Map<String, List<Match>> result = scanningResult.getMatches();
 		assertNotNull(result);
 		assertTrue(result.containsKey("and-condition-test"));
@@ -150,7 +151,7 @@ class CodeScannerServiceTest {
 				"and-condition-test", null, when, Collections.emptyList(), 1, null);
 
 		ScanningResult scanningResult = codeScannerService.scan(rule);
-		assertFalse(scanningResult.isMatchSucceeded());
+		Assertions.assertFalse(scanningResult.isMatchSucceeded());
 		Map<String, List<Match>> result = scanningResult.getMatches();
 		assertNotNull(result);
 		assertTrue(result.containsKey("and-condition-test"));

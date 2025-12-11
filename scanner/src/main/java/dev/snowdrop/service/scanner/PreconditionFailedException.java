@@ -1,4 +1,4 @@
-package dev.snowdrop.analyze.services;
+package dev.snowdrop.service.scanner;
 
 /**
  * Exception thrown when a rule's precondition is not met during scanning.
