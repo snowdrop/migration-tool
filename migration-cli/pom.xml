@@ -51,12 +51,6 @@
             <artifactId>quarkus-picocli</artifactId>
         </dependency>
 
-        <!-- TODO: To be removed when PR 145 will be merged  -->
-        <dependency>
-            <groupId>org.openrewrite</groupId>
-            <artifactId>rewrite-java</artifactId>
-        </dependency>
-
         <!-- CSV parsing -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
