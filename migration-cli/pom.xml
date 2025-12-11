@@ -17,7 +17,6 @@
     <name>Migration Tool :: Client</name>
 
     <properties>
-        <maven.version>3.9.11</maven.version>
         <jreleaser.version>1.21.0</jreleaser.version>
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
@@ -28,7 +27,17 @@
     <dependencies>
         <dependency>
             <groupId>dev.snowdrop</groupId>
+            <artifactId>model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.snowdrop</groupId>
             <artifactId>parser</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.snowdrop</groupId>
+            <artifactId>scanner</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -42,61 +51,16 @@
             <artifactId>quarkus-picocli</artifactId>
         </dependency>
 
-        <!-- Openrewrite -->
+        <!-- TODO: To be removed when PR 145 will be merged  -->
         <dependency>
             <groupId>org.openrewrite</groupId>
             <artifactId>rewrite-java</artifactId>
-        </dependency>
-
-        <!-- Search maven dependency -->
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model</artifactId>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model-builder</artifactId>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-resolver-provider</artifactId>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-impl</artifactId>
-            <version>1.9.24</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-connector-basic</artifactId>
-            <version>2.0.13</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-transport-http</artifactId>
-            <version>1.9.24</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.14</version>
         </dependency>
 
         <!-- CSV parsing -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-csv</artifactId>
-        </dependency>
-
-        <!-- OpenCSV for better CSV parsing and object binding -->
-        <dependency>
-            <groupId>com.opencsv</groupId>
-            <artifactId>opencsv</artifactId>
-            <version>5.12.0</version>
         </dependency>
 
         <!-- ASCII Table for better table formatting -->
@@ -117,16 +81,6 @@
             <groupId>org.eclipse.lsp4j</groupId>
             <artifactId>org.eclipse.lsp4j</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.lsp4j</groupId>
-            <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5-mockito</artifactId>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>

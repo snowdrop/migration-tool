@@ -4,6 +4,9 @@ import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;
+import dev.snowdrop.service.scanner.CodeScannerService;
+import dev.snowdrop.service.scanner.ScanCommandExecutor;
+import dev.snowdrop.service.scanner.ScanningResult;
 
 import java.util.Collections;
 import java.util.HashMap;

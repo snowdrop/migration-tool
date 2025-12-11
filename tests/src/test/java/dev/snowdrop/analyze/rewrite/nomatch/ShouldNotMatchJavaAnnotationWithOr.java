@@ -1,11 +1,11 @@
-package dev.snowdrop.analyze.rewrite;
+package dev.snowdrop.analyze.rewrite.nomatch;
 
 import dev.snowdrop.analyze.BaseRulesTest;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.Rule;
-import dev.snowdrop.analyze.services.CodeScannerService;
-import dev.snowdrop.analyze.services.ScanCommandExecutor;
+import dev.snowdrop.service.scanner.CodeScannerService;
+import dev.snowdrop.service.scanner.ScanCommandExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;

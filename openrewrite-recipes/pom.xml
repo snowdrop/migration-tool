@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>openrewrite-recipes</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
     <description>Openrewrite recipes to migrate Spring Boot to the Quarkus runtime</description>
     <name>Migration Tool :: Openrewrite recipes</name>
 

@@ -12,7 +12,6 @@ import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.html.Cell;
 import dev.snowdrop.analyze.model.html.Row;
 import dev.snowdrop.analyze.utils.TerminalUtils;
-import dev.snowdrop.commands.AnalyzeCommand;
 import dev.snowdrop.transform.model.MigrationTasksExport;
 import io.quarkus.qute.*;
 import org.eclipse.lsp4j.SymbolInformation;

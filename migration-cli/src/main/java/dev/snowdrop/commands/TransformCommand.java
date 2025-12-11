@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
+import static dev.snowdrop.service.scanner.utils.FileUtils.resolvePath;
 
 @CommandLine.Command(name = "transform", description = "Transform a java application")
 public class TransformCommand implements Runnable {

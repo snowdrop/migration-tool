@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static dev.snowdrop.analyze.utils.FileUtils.resolvePath;
+import static dev.snowdrop.service.scanner.utils.FileUtils.resolvePath;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.filterRules;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFile;
 import static dev.snowdrop.analyze.utils.YamlRuleParser.parseRulesFromFolder;

@@ -10,7 +10,6 @@ import dev.snowdrop.transform.model.CompositeRecipe;
 import dev.snowdrop.transform.provider.MigrationProvider;
 import dev.snowdrop.transform.provider.model.ExecutionContext;
 import dev.snowdrop.transform.provider.model.ExecutionResult;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import java.io.BufferedReader;

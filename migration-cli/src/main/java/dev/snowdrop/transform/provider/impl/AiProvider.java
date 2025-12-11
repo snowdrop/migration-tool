@@ -3,11 +3,8 @@ package dev.snowdrop.transform.provider.impl;
 import dev.snowdrop.analyze.model.MigrationTask;
 import dev.snowdrop.analyze.model.Rule;
 import dev.snowdrop.transform.provider.MigrationProvider;
-import dev.snowdrop.transform.provider.ai.Assistant;
 import dev.snowdrop.transform.provider.model.ExecutionContext;
 import dev.snowdrop.transform.provider.model.ExecutionResult;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 
 import java.io.Console;

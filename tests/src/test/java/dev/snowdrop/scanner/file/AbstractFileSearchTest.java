@@ -1,6 +1,6 @@
 package dev.snowdrop.scanner.file;
 
-import dev.snowdrop.analyze.services.scanners.FileSearch;
+import dev.snowdrop.service.scanner.file.FileSearch;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 

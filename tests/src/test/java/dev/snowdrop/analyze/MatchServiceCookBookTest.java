@@ -2,8 +2,8 @@ package dev.snowdrop.analyze;
 
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.analyze.model.Rule;
-import dev.snowdrop.analyze.services.CodeScannerService;
-import dev.snowdrop.analyze.services.ScanCommandExecutor;
+import dev.snowdrop.service.scanner.CodeScannerService;
+import dev.snowdrop.service.scanner.ScanCommandExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
