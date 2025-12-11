@@ -1,24 +1,39 @@
 package dev.snowdrop.service.scanner;
 
 import dev.snowdrop.parser.Query;
+import org.jboss.logging.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.ServiceLoader;
 
 public class ScannerSpiRegistry {
 
-	private final List<QueryScanner> scanners;
+	private static final Logger logger = Logger.getLogger(ScannerSpiRegistry.class);
+	private final Map<String, QueryScanner> scanners;
 
 	public ScannerSpiRegistry() {
-		this.scanners = new ArrayList<>();
-		ServiceLoader.load(QueryScanner.class).forEach(scanners::add);
+		this.scanners = new HashMap<>();
+		ServiceLoader<QueryScanner> loaded = ServiceLoader.load(QueryScanner.class);
+
+		for (QueryScanner scanner : loaded) {
+			String name = scanner.getScannerType();
+			scanners.put(name, scanner);
+		}
+		if (scanners.isEmpty()) {
+			logger.warn("No QueryScanners found via SPI");
+		}
 	}
 
 	public QueryScanner findScannerFor(Query query) {
-		return scanners.stream().filter(queryScanner -> queryScanner.supports(query)).findFirst()
+		return scanners.values().stream().filter(queryScanner -> queryScanner.supports(query)).findFirst()
 				.orElseThrow(() -> new IllegalArgumentException(
 						"No scanner supports query: " + query.fileType() + "." + query.symbol()));
+	}
+
+	public Optional<QueryScanner> findScanner(String name) {
+		return Optional.ofNullable(scanners.get(name));
 	}
 
 }
