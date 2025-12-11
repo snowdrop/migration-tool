@@ -62,15 +62,6 @@ public class MavenQueryScanner implements QueryScanner {
 	public List<Match> scansCodeFor(Config config, Query query) {
 		logger.infof("Maven scanner executing for query %s.%s", query.fileType(), query.symbol());
 
-		// TODO: To be discussed with Aurea as we should be able to use it even if the default is jdtls, openrewrite
-		/*
-		if (config.scanner() != null && !ScannerType.MAVEN.label().equals(config.scanner())) {
-			logger.warnf("Query %s.%s is configured for scanner '%s', not 'maven'. Skipping.", query.fileType(),
-					query.symbol(), config.scanner());
-			return new ArrayList<>();
-		}
-		*/
-
 		List<Match> results = executeSingleQuery(config, query);
 
 		logger.debugf("Found %d matches for query %s.%s ", results.size(), query.fileType(), query.symbol());
