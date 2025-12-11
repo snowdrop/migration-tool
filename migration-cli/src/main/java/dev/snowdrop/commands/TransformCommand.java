@@ -121,7 +121,7 @@ public class TransformCommand implements Runnable {
 	 */
 	private Optional<Path> findLatestAnalysingReportJson(Path projectPath) {
 		FileSystem fs = FileSystems.getDefault();
-		PathMatcher matcher = fs.getPathMatcher("glob:analysing-*-report_*");
+		PathMatcher matcher = fs.getPathMatcher("glob:analysing-*-report_*.json");
 
 		try (Stream<Path> stream = Files.list(projectPath)) {
 			return stream.filter(Files::isRegularFile).filter(path -> matcher.matches(path.getFileName()))

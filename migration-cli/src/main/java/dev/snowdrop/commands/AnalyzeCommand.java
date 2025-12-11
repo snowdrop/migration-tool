@@ -164,13 +164,16 @@ public class AnalyzeCommand implements Runnable {
 				config.targetTechnology());
 		resultsService.showCsvTable(tableData);
 
-		// Export rules, results and migration instructions
-		String output = Objects.requireNonNullElse(config.output(), "json");
+		// Always generate the json report as it is needed to perform the transformation step
+		resultsService.exportAsJson(config, tasks);
 
-		switch (output) {
-			case "html" -> resultsService.exportAsHtml(config, tableData);
-			case "csv" -> resultsService.exportAsCsv(config, tableData);
-			default -> resultsService.exportAsJson(config, tasks);
+		// Export also the report using the selected format if the user used the option: -o, --output.
+		if (config.output() != null && !config.output().isEmpty()) {
+			switch (output) {
+				case "html" -> resultsService.exportAsHtml(config, tableData);
+				case "csv" -> resultsService.exportAsCsv(config, tableData);
+				default -> logger.warnf("The format selected to export the report is unknown: %s", output);
+			}
 		}
 
 		logger.infof("⏳ Waiting for commands to complete...");
