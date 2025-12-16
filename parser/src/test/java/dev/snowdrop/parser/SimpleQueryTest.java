@@ -1,5 +1,7 @@
 package dev.snowdrop.parser;
 
+import dev.snowdrop.mtool.model.parser.Query;
+import dev.snowdrop.mtool.parser.QueryVisitor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.wildfly.common.Assert;

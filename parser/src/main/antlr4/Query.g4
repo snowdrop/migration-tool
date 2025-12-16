@@ -1,7 +1,7 @@
 grammar Query;
 
 @header {
-package dev.snowdrop.parser.antlr;
+package dev.snowdrop.mtool.parser.antlr;
 }
 
 // Structure of the language

@@ -1,0 +1,63 @@
+package dev.snowdrop.mtool.model.analyze;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
+
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public record Rule(String category, @JsonProperty("customVariables") List<String> customVariables, String description,
+		int effort, List<String> labels, List<String> links, String message, String ruleID, String lsCmd, When when,
+		@Deprecated @JsonProperty("actions") List<String> actions, int order, Instruction instructions) {
+
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	public record Instruction(Ai[] ai, Manual[] manual, Openrewrite[] openrewrite) {
+	}
+
+	public record Ai(@Deprecated String promptMessage, List<String> tasks) {
+	}
+
+	public record Manual(String todo) {
+	}
+
+	public record Openrewrite(String name, String description, Precondition[] preconditions, List<Object> recipeList,
+			String[] gav) {
+	}
+
+	public record Precondition(String name, String groupIdPattern, String artifactIdPattern, String version) {
+	}
+
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	public record When(@JsonProperty("java.referenced") JavaReferenced javaReferenced,
+			@JsonProperty("or") List<Condition> or, @JsonProperty("and") List<Condition> and,
+
+			// New field added to allow to use the new query language which can be defined as one string line
+			@JsonProperty("condition") String condition,
+
+			// Precondition that must be satisfied before processing the main condition
+			@JsonProperty(value = "precondition") String precondition) {
+	}
+
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	public record Condition(@JsonProperty("java.dependency") JavaDependency javaDependency,
+
+			@JsonProperty("java.referenced") JavaReferenced javaReferenced, String as, String from, String not,
+			String ignore) {
+	}
+
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	public record JavaReferenced(String location, String pattern, String filepaths, String annotated) {
+	}
+
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	public record Annotated(String pattern, List<Element> elements) {
+	}
+
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	public record Element(String name, String value) {
+	}
+
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	public record JavaDependency(String lowerbound, String upperbound, String name, String nameregex) {
+	}
+}

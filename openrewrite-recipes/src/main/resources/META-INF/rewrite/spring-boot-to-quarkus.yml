@@ -14,9 +14,9 @@ preconditions:
       artifactIdPattern: spring-boot-starter-parent
       version: 3.x
 recipeList:
-  - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
+  - dev.snowdrop.mtool.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
   - org.openrewrite.java.RemoveMethodInvocations:
       methodPattern: "org.springframework.boot.SpringApplication run(..)"
-  - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
-  - dev.snowdrop.openrewrite.recipe.spring.CreateJavaClassFromTemplate:
+  - dev.snowdrop.mtool.openrewrite.recipe.spring.AddQuarkusRun
+  - dev.snowdrop.mtool.openrewrite.recipe.java.CreateJavaClassFromTemplate:
       classTemplate: "package %s;\n\n%sclass %s {\n}"

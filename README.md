@@ -113,7 +113,7 @@ As presented hereafter, we have introduced different new fields part of the Rule
             version: '[3.5,)'
         recipeList:
           - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
-          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
+          - spring.recipe.dev.snowdrop.mtool.openrewrite.AddQuarkusRun
         gav:
           - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
 ```
@@ -492,7 +492,7 @@ Instead of changing the code, you can use the dryrun goal to get a patch
 cd applications/spring-boot-todo-app
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
    -Drewrite.recipeArtifactCoordinates=dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT \
-   -Drewrite.activeRecipes=dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation  
+   -Drewrite.activeRecipes=spring.recipe.dev.snowdrop.mtool.openrewrite.ReplaceSpringBootApplicationWithQuarkusMainAnnotation  
 ```
 When done, open the diff patch generated: `/PATH/TO/spring-boot-todo-app/target/rewrite/rewrite.patch`
 

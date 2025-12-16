@@ -1,6 +1,8 @@
 package dev.snowdrop.parser;
 
-import dev.snowdrop.parser.antlr.QueryLexer;
+import dev.snowdrop.mtool.parser.QueryVisitor;
+import dev.snowdrop.mtool.parser.antlr.QueryLexer;
+import dev.snowdrop.mtool.parser.antlr.QueryParser;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -12,7 +14,7 @@ public abstract class AbstractQueryParser {
 			QueryLexer lexer = new QueryLexer(input);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-			dev.snowdrop.parser.antlr.QueryParser parser = new dev.snowdrop.parser.antlr.QueryParser(tokens);
+			QueryParser parser = new QueryParser(tokens);
 			ParseTree tree = parser.searchQuery();
 
 			// Create and use the visitor

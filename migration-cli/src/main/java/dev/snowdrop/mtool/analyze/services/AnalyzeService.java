@@ -1,0 +1,51 @@
+package dev.snowdrop.mtool.analyze.services;
+
+import dev.snowdrop.mtool.model.analyze.Config;
+import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.MigrationTask;
+import dev.snowdrop.mtool.model.analyze.Rule;
+import dev.snowdrop.mtool.scanner.CodeScannerService;
+import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
+import dev.snowdrop.mtool.scanner.ScanningResult;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class AnalyzeService {
+
+	private final Config config;
+	private final CodeScannerService codeScannerService;
+
+	public AnalyzeService(Config config) {
+		this.config = config;
+		this.codeScannerService = new CodeScannerService(config, new ScanCommandExecutor());
+	}
+
+	/**
+	 * Analyzes code from rules using dynamic scanner selection.
+	 * Unlike analyzeCodeFromRule, this method doesn't select a scanner upfront.
+	 * Instead, it dynamically selects the appropriate scanner for each query
+	 * during iteration based on the query-scanner mapping configuration.
+	 *
+	 * @param rules the migration rules to analyze
+	 * @return map of rule ID to migration tasks with analysis results
+	 */
+	public Map<String, MigrationTask> analyze(List<Rule> rules) {
+		Map<String, MigrationTask> tasks = new HashMap<>();
+
+		for (Rule rule : rules) {
+			ScanningResult scanningResult = codeScannerService.scan(rule);
+			Map<String, List<Match>> results = scanningResult.isMatchSucceeded()
+					? scanningResult.getMatches()
+					: Collections.emptyMap();
+
+			tasks.put(rule.ruleID(), new MigrationTask().withRule(rule).withMatchResults(results.get(rule.ruleID()))
+					.withInstruction(rule.instructions()));
+		}
+
+		return tasks;
+	}
+
+}
