@@ -107,7 +107,7 @@ jobs:
         run: mvn -ntp -B --file pom.xml -Pdist package -DskipTests -pl migration-cli
 
       - name: 'Upload build artifact'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: migration-cli-${{ runner.os }}-${{ runner.arch }}
           path: |
