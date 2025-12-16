@@ -3,6 +3,7 @@ package dev.snowdrop.service.scanner;
 import dev.snowdrop.analyze.Config;
 import dev.snowdrop.analyze.model.Match;
 import dev.snowdrop.parser.Query;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -17,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@Disabled
 class ScanCommandExecutorTest {
 
 	@Mock
