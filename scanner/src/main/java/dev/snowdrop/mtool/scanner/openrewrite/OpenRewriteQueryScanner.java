@@ -145,8 +145,9 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		String annotationName = query.keyValues().get("name");
 		String matchId = UUID.randomUUID().toString();
 
-		Map<String, Map<String, String>> recipe = Map.of("dev.snowdrop.openrewrite.java.search.FindAnnotations", Map
-				.of("pattern", annotationName, "matchId", matchId, "matchOnMetaAnnotations", Boolean.FALSE.toString()));
+		Map<String, Map<String, String>> recipe = Map.of("dev.snowdrop.mtool.openrewrite.java.search.FindAnnotations",
+				Map.of("pattern", annotationName, "matchId", matchId, "matchOnMetaAnnotations",
+						Boolean.FALSE.toString()));
 
 		CompositeRecipe composite = new CompositeRecipe("specs.openrewrite.org/v1beta/recipe",
 				OPENREWRITE_MATCH_CONDITIONS, "Try to match a resource", "Try to match a resource", List.of(recipe));

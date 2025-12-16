@@ -22,15 +22,15 @@
       - name: SpringBoot to Quarkus
         description: Adapt the REST GET /home endpoint as we don't support Model view of Spring Boot
         recipeList:
-          - dev.snowdrop.openrewrite.recipe.spring.ReplaceMethodBodyContent:
+          - dev.snowdrop.mtool.openrewrite.recipe.ReplaceMethodBodyContent:
               methodPattern: "com.todo.app.controller.TaskController viewIndexPage(..)"
               replacement: |
                 return RestResponse.temporaryRedirect(new URI("/home"));
               newImports: java.net.URI
-          - dev.snowdrop.openrewrite.recipe.spring.ChangeMethodReturnType:
+          - dev.snowdrop.mtool.openrewrite.recipe.ChangeMethodReturnType:
               methodPattern: "com.todo.app.controller.TaskController viewIndexPage(..)"
               newReturnType: "org.jboss.resteasy.reactive.RestResponse<String>"
-          - dev.snowdrop.openrewrite.recipe.spring.AddThrowMethodException:
+          - dev.snowdrop.mtool.openrewrite.recipe.AddThrowMethodException:
               methodPattern: "com.todo.app.controller.TaskController viewIndexPage(..)"
               newException: java.net.URISyntaxException
         gav:

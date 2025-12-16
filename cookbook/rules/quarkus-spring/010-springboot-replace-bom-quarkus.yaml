@@ -45,7 +45,7 @@
               artifactId: "*"
               newVersion: 3.5.8
               overrideManagedVersion: "true"
-          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusMavenPlugin
+          - dev.snowdrop.mtool.openrewrite.recipe.spring.AddQuarkusMavenPlugin
           - org.openrewrite.quarkus.spring.RemoveSpringBootParent
         gav:
           - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT

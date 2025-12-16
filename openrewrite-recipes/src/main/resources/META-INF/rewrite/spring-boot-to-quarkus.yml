@@ -1,6 +1,6 @@
 ---
 type: specs.openrewrite.org/v1beta/recipe
-name: dev.snowdrop.openrewrite.recipe.spring.SpringBootToQuarkus
+name: dev.snowdrop.mtool.openrewrite.recipe.SpringBootToQuarkus
 displayName: Migrate Spring Boot to Quarkus
 description: Migrate Spring Boot to Quarkus.
 tags:
