@@ -3,10 +3,7 @@ package dev.snowdrop.mtool.scanner;
 import dev.snowdrop.mtool.model.parser.Query;
 import org.jboss.logging.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ServiceLoader;
+import java.util.*;
 
 public class ScannerSpiRegistry {
 
@@ -36,4 +33,7 @@ public class ScannerSpiRegistry {
 		return Optional.ofNullable(scanners.get(name));
 	}
 
+	public Map<String, QueryScanner> getScanners() {
+		return scanners;
+	}
 }
