@@ -159,7 +159,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download analysis results
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: analysis-results
         continue-on-error: true
