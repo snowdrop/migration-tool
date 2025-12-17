@@ -6,7 +6,6 @@ import dev.snowdrop.mtool.model.parser.Query;
 import org.jboss.logging.Logger;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +39,7 @@ public class ScanCommandExecutor {
 			}
 		}*/
 
-		QueryScanner scanner = resolveScannerForQuery(query, config, spiRegistry);
+		QueryScanner scanner = resolveScannerForQuery(query, config);
 		List<Match> scannerResults = scanner.scansCodeFor(config, query);
 		logger.infof("Scanner %s found %d matches", scanner.getScannerType(), scannerResults.size());
 		return scannerResults;
@@ -57,7 +56,7 @@ public class ScanCommandExecutor {
 	 * @return The resolved QueryScanner.
 	 * @throws IllegalArgumentException if no scanner can be found that supports the query.
 	 */
-	public QueryScanner resolveScannerForQuery(Query query, Config config, ScannerSpiRegistry spiRegistry) {
+	public QueryScanner resolveScannerForQuery(Query query, Config config) {
 		String configuredScannerName = config.scanner();
 
 		// --- Priority 1: Scanner defined as config parameter
