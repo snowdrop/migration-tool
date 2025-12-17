@@ -22,14 +22,14 @@
       - name: SpringBoot to Quarkus
         description: Adapt the REST GET /home endpoint as we don't support Model view of Spring Boot
         recipeList:
-          - dev.snowdrop.openrewrite.recipe.spring.RemoveMethodParameters:
+          - dev.snowdrop.mtool.openrewrite.recipe.RemoveMethodParameters:
               methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
-          - dev.snowdrop.openrewrite.recipe.spring.ReplaceMethodBodyContent:
+          - dev.snowdrop.mtool.openrewrite.recipe.ReplaceMethodBodyContent:
               methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
               replacement: |
                 List<Task> tasks = taskService.getAllTasks();
                 return ResponseEntity.ok(tasks);
-          - dev.snowdrop.openrewrite.recipe.spring.ChangeMethodReturnType:
+          - dev.snowdrop.mtool.openrewrite.recipe.ChangeMethodReturnType:
               methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
               newReturnType: "org.springframework.http.ResponseEntity<List<Task>>"
         gav:

@@ -43,7 +43,7 @@
           - org.openrewrite.maven.RemovePlugin:
               groupId: org.springframework.boot
               artifactId: spring-boot-maven-plugin
-          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusMavenPlugin
+          - dev.snowdrop.mtool.openrewrite.recipe.AddQuarkusMavenPlugin
         gav:
           - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
           - org.openrewrite:rewrite-maven:8.62.4

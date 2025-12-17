@@ -112,8 +112,8 @@ As presented hereafter, we have introduced different new fields part of the Rule
             artifactIdPattern: spring-boot
             version: '[3.5,)'
         recipeList:
-          - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
-          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
+          - dev.snowdrop.mtool.openrewrite.recipe.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
+          - spring.recipe.dev.snowdrop.mtool.openrewrite.AddQuarkusRun
         gav:
           - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
 ```
@@ -420,17 +420,17 @@ If you follow the instructions detailed hereafter, you will be able to migrate t
 To play with the migration-tool, git clone this project: https://github.com/snowdrop/migration-tool/ and compile it: `mvn clean package -DskipTests`.
 
 Next, analyze the project to migrate to generate the json migration report
-```
+```shell
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -r ../cookbook/rules/quarkus-spring --scanner openrewrite"
 ```
 
 Transform the project (dry-run mode) and check the content of the `./target` directory (see rewrite folders and patch files)
-```
+```shell
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app -p openrewrite --dry-run"
 ```
 
 Finally migrate the Spring Boot Todo code to Quarkus
-```
+```shell
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app -p openrewrite"
 ```
 
@@ -492,7 +492,7 @@ Instead of changing the code, you can use the dryrun goal to get a patch
 cd applications/spring-boot-todo-app
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
    -Drewrite.recipeArtifactCoordinates=dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT \
-   -Drewrite.activeRecipes=dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation  
+   -Drewrite.activeRecipes=spring.recipe.dev.snowdrop.mtool.openrewrite.ReplaceSpringBootApplicationWithQuarkusMainAnnotation  
 ```
 When done, open the diff patch generated: `/PATH/TO/spring-boot-todo-app/target/rewrite/rewrite.patch`
 

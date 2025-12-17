@@ -28,7 +28,7 @@
       - name: Add a Quarkus class from class template"
         description: Add a Quarkus class from class template
         recipeList:
-          - dev.snowdrop.openrewrite.recipe.spring.CreateJavaClassFromTemplate:
+          - dev.snowdrop.mtool.openrewrite.recipe.CreateJavaClassFromTemplate:
               className: "TodoApplication"
               modifier: "public"
               packageName: "com.todo.app"

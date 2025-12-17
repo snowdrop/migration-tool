@@ -13,6 +13,10 @@
     <description>Openrewrite recipes to migrate Spring Boot to the Quarkus runtime</description>
     <name>Migration Tool :: Openrewrite recipes</name>
 
+    <properties>
+        <rewrite-maven-plugin.version>6.25.0</rewrite-maven-plugin.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.openrewrite</groupId>
@@ -42,4 +46,32 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+    <profile>
+        <id>typetable</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.openrewrite.maven</groupId>
+                    <artifactId>rewrite-maven-plugin</artifactId>
+                    <version>${rewrite-maven-plugin.version}</version>
+                    <configuration>
+                        <recipeArtifactCoordinates>
+                            io.quarkus:quarkus-core:3.29.0
+                        </recipeArtifactCoordinates>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>typetable</goal>
+                            </goals>
+                            <phase>generate-resources</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+    </profiles>
 </project>

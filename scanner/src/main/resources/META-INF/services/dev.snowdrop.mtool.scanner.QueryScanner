@@ -1,0 +1,4 @@
+dev.snowdrop.mtool.scanner.jdtls.JdtlsQueryScanner
+dev.snowdrop.mtool.scanner.maven.MavenQueryScanner
+dev.snowdrop.mtool.scanner.openrewrite.OpenRewriteQueryScanner
+dev.snowdrop.mtool.scanner.file.FileSearchQueryScanner

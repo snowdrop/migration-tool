@@ -157,7 +157,7 @@ public class TodoApplication implements QuarkusApplication {
           - org.openrewrite.maven.RemovePlugin:
               groupId: org.springframework.boot
               artifactId: spring-boot-maven-plugin
-          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusMavenPlugin
+          - spring.recipe.dev.snowdrop.mtool.openrewrite.AddQuarkusMavenPlugin
         gav:
           - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
           - org.openrewrite:rewrite-maven:8.62.4
@@ -194,10 +194,10 @@ public class TodoApplication implements QuarkusApplication {
             artifactIdPattern: spring-boot
             version: '[3.5,)'
         recipeList:
-          - dev.snowdrop.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
+          - spring.recipe.dev.snowdrop.mtool.openrewrite.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
           - org.openrewrite.java.RemoveMethodInvocations:
               methodPattern: "org.springframework.boot.SpringApplication run(..)"
-          - dev.snowdrop.openrewrite.recipe.spring.AddQuarkusRun
+          - spring.recipe.dev.snowdrop.mtool.openrewrite.AddQuarkusRun
         gav:
           - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
 ```
@@ -227,7 +227,7 @@ public class TodoApplication implements QuarkusApplication {
       - name: Add a Quarkus class from class template"
         description: Add a Quarkus class from class template
         recipeList:
-          - dev.snowdrop.openrewrite.recipe.spring.CreateJavaClassFromTemplate:
+          - spring.recipe.dev.snowdrop.mtool.openrewrite.CreateJavaClassFromTemplate:
               className: "TodoApplication"
               modifier: "public"
               packageName: "com.todo.app"
