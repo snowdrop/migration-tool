@@ -60,7 +60,7 @@ public class ScannerSpiRegistry {
 
 			if (optConfiguredScanner.isPresent() && optConfiguredScanner.get().supports(query)) {
 				QueryScanner configuredScanner = optConfiguredScanner.get();
-				logger.debugf("Using the scanner %s configured for query %s.%s", configuredScanner.getScannerType(),
+				logger.infof("Using the scanner %s configured for query %s.%s", configuredScanner.getScannerType(),
 						query.fileType(), query.symbol());
 				return configuredScanner;
 			}
@@ -76,7 +76,7 @@ public class ScannerSpiRegistry {
 
 		if (fallbackScanner.isPresent()) {
 			QueryScanner resolvedScanner = fallbackScanner.get();
-			logger.debugf("Using fallback scanner %s for query %s.%s (P2)", resolvedScanner.getScannerType(),
+			logger.infof("Using fallback scanner %s for query %s.%s (P2)", resolvedScanner.getScannerType(),
 					query.fileType(), query.symbol());
 			return resolvedScanner;
 		}
