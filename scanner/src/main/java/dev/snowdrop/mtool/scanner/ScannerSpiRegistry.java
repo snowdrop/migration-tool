@@ -1,5 +1,6 @@
 package dev.snowdrop.mtool.scanner;
 
+import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.parser.Query;
 import org.jboss.logging.Logger;
 
