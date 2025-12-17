@@ -52,7 +52,6 @@ public class ScanCommandExecutor {
 	 *
 	 * @param query The query (fileType and symbol) to check support for.
 	 * @param config The application configuration containing the default scanner name.
-	 * @param spiRegistry The registry containing all available scanners.
 	 * @return The resolved QueryScanner.
 	 * @throws IllegalArgumentException if no scanner can be found that supports the query.
 	 */
@@ -65,7 +64,7 @@ public class ScanCommandExecutor {
 
 			if (optConfiguredScanner.isPresent() && optConfiguredScanner.get().supports(query)) {
 				QueryScanner configuredScanner = optConfiguredScanner.get();
-				logger.debugf("Using command configured scanner %s for query %s.%s", configuredScanner.getScannerType(),
+				logger.debugf("Using the scanner %s configured for query %s.%s", configuredScanner.getScannerType(),
 						query.fileType(), query.symbol());
 				return configuredScanner;
 			}
@@ -78,6 +77,9 @@ public class ScanCommandExecutor {
 				// Exclude the config scanner (as already processed)
 				.filter(qs -> configuredScannerName == null || !qs.getScannerType().equals(configuredScannerName))
 				.filter(qs -> qs.supports(query)).findFirst();
+
+        logger.debugf("Using the scanner %s configured for query %s.%s", fallbackScanner.ifPresent(QueryScanner::getScannerType),
+            query.fileType(), query.symbol());
 
 		return fallbackScanner.orElseThrow(() -> new IllegalArgumentException("No scanner supports query: "
 				+ query.fileType() + "." + query.symbol()
