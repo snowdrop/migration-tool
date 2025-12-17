@@ -14,7 +14,7 @@
     <name>Migration Tool :: Openrewrite recipes</name>
 
     <properties>
-        <rewrite-maven-plugin.version>6.25.0</rewrite-maven-plugin.version>
+        <rewrite-maven-plugin.version>6.26.0</rewrite-maven-plugin.version>
     </properties>
 
     <dependencies>
