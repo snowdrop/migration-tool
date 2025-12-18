@@ -1,6 +1,7 @@
 package dev.snowdrop.mtool.scanner;
 
 import dev.snowdrop.mtool.model.analyze.Config;
+import dev.snowdrop.mtool.model.analyze.ScannerType;
 import dev.snowdrop.mtool.model.parser.Query;
 import org.jboss.logging.Logger;
 
@@ -28,12 +29,6 @@ public class ScannerSpiRegistry {
 		}
 	}
 
-	public QueryScanner findScannerFor(Query query) {
-		return scanners.values().stream().filter(queryScanner -> queryScanner.supports(query)).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException(
-						"No scanner supports query: " + query.fileType() + "." + query.symbol()));
-	}
-
 	public Optional<QueryScanner> findScanner(String name) {
 		return Optional.ofNullable(scanners.get(name));
 	}
@@ -47,12 +42,13 @@ public class ScannerSpiRegistry {
 	 * 1. The default scanner (config.scanner) if it has been defined and if it supports the query.
 	 * 2. Any other scanner supporting the query (excluding the default one).
 	 *
-	 * @param query The query (fileType and symbol) to check support for.
 	 * @param config The application configuration containing the default scanner name.
+	 * @param query  The query (fileType and symbol) to check support for.
 	 * @return The resolved QueryScanner.
 	 * @throws IllegalArgumentException if no scanner can be found that supports the query.
 	 */
-	public QueryScanner resolveScannerForQuery(Query query, Config config) {
+	public QueryScanner resolveScannerForQuery(Config config, Query query) {
+		String fallbackScannerName = ScannerType.OPENREWRITE.label();
 		String configuredScannerName = config.scanner();
 
 		// --- Priority 1: Scanner defined as config parameter
@@ -81,6 +77,7 @@ public class ScannerSpiRegistry {
 					query.fileType(), query.symbol());
 			return resolvedScanner;
 		}
+		fallbackScanner = findScanner(fallbackScannerName);
 
 		return fallbackScanner.orElseThrow(() -> new IllegalArgumentException("No scanner supports query: "
 				+ query.fileType() + "." + query.symbol()

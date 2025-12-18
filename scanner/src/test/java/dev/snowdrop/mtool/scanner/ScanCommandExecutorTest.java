@@ -3,7 +3,6 @@ package dev.snowdrop.mtool.scanner;
 import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.analyze.Match;
 import dev.snowdrop.mtool.model.parser.Query;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@Disabled
+//@Disabled
 class ScanCommandExecutorTest {
 
 	@Mock
@@ -40,7 +39,7 @@ class ScanCommandExecutorTest {
 		List<Match> expectedResults = List.of(new Match("file1", "openrewrite", Collections.emptyList()),
 				new Match("file2", "maven", Collections.emptyList()));
 
-		when(spiRegistry.findScannerFor(query)).thenReturn(scanner);
+		when(spiRegistry.resolveScannerForQuery(config, query)).thenReturn(scanner);
 		when(scanner.scansCodeFor(config, query)).thenReturn(expectedResults);
 
 		// When
@@ -49,15 +48,13 @@ class ScanCommandExecutorTest {
 		// Then
 		assertEquals(expectedResults, result);
 		verify(scanner).scansCodeFor(config, query);
-		verify(spiRegistry).findScannerFor(query);
+		verify(spiRegistry).resolveScannerForQuery(config, query);
 	}
 
 	@Test
 	void executeCommandForQuery_returnsEmptyListWhenNoScannerFound() {
 		ScanCommandExecutor executor = new ScanCommandExecutor(spiRegistry);
 		Query query = new Query("java", "interface", Collections.emptyMap());
-
-		when(spiRegistry.findScannerFor(query)).thenReturn(null);
 
 		List<Match> result = executor.executeCommandForQuery(config, query);
 

@@ -57,7 +57,7 @@ public class AnalyzeCommand implements Runnable {
 	private String output;
 
 	@CommandLine.Option(names = {
-			"--scanner"}, description = "Scanner tool to be used to analyse the code: jdtls, openrewrite", defaultValue = "jdtls")
+			"--scanner"}, description = "Scanner tool to be used to analyse the code: jdtls, openrewrite", defaultValue = "openrewrite")
 	public String scanner;
 
 	@Override
