@@ -17,7 +17,7 @@
     <name>Migration Tool :: Client</name>
 
     <properties>
-        <jreleaser.version>1.21.0</jreleaser.version>
+        <jreleaser.version>1.22.0</jreleaser.version>
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
         <distribution.directory>${project.build.directory}/distributions</distribution.directory>
