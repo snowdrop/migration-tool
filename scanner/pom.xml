@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>dev.snowdrop</groupId>
+        <groupId>dev.snowdrop.mtool</groupId>
         <artifactId>migration-tool-parent</artifactId>
         <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
@@ -19,12 +19,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>dev.snowdrop</groupId>
+            <groupId>dev.snowdrop.mtool</groupId>
             <artifactId>model</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>dev.snowdrop</groupId>
+            <groupId>dev.snowdrop.mtool</groupId>
             <artifactId>parser</artifactId>
             <version>${project.version}</version>
         </dependency>

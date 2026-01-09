@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>dev.snowdrop</groupId>
+        <groupId>dev.snowdrop.mtool</groupId>
         <artifactId>migration-tool-parent</artifactId>
         <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
