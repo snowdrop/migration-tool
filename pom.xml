@@ -74,6 +74,13 @@
         </license>
     </licenses>
 
+    <scm>
+        <url>https://github.com/snowdrop</url>
+        <connection>scm:git:https://github.com/snowdrop/migration-tool.git</connection>
+        <developerConnection>scm:git:git:@github.com:snowdrop/migration-tool.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
