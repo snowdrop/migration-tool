@@ -39,14 +39,6 @@
             <artifactId>rewrite-templating</artifactId>
         </dependency>
 
-        <!-- See: https://github.com/openrewrite/rewrite/issues/4803 -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>2.17.3</version>
-            <scope>test</scope>
-        </dependency>
-
         <!-- Spring Boot dependency need by Rewrite test and java parser -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

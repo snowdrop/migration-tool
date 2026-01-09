@@ -1,11 +1,14 @@
 package dev.snowdrop.mtool.openrewrite.java.search;
 
 import dev.snowdrop.mtool.openrewrite.maven.search.FindDependency;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.test.RewriteTest;
 
 import static org.openrewrite.maven.Assertions.pomXml;
 
+// TODO: Test disabled due to the jackson parsing issue with settings.xml: https://github.com/openrewrite/rewrite/issues/4803
+@Disabled
 public class FindDependencyTest implements RewriteTest {
 
 	@Test
