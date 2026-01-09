@@ -1,0 +1,39 @@
+project:
+  # JReleaser will fill these from Maven automatically:
+  # name: ${project.artifactId}
+  # version: ${project.version}
+  # description: Openrewrite client to apply recipes
+  # longDescription: Openrewrite client to apply recipes
+  # authors: [ "snowdrop" ]
+  # license: Apache-2.0
+  links:
+    homepage: https://github.com/snowdrop/rewrite-client
+
+release:
+  github:
+    enabled: true
+    tagName: "{{projectVersion}}"
+    releaseName: "{{tagName}}"
+    overwrite: true
+    changelog:
+      formatted: ALWAYS
+      links: true
+      preset: conventional-commits
+      contributors:
+        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'
+
+distributions:
+  openrewrite-cli:
+    type: SINGLE_JAR
+    artifacts:
+      - path: 'migration-cli/target/migration-cli-{{projectVersion}}-runner.jar'
+
+#packagers:
+#  # https://jreleaser.org/guide/latest/reference/packagers/jbang.html
+#  jbang:
+#    active: ALWAYS
+#    alias: openrewrite
+#    repository:
+#      active: ALWAYS
+#      owner: snowdrop
+#      name: rewrite-client

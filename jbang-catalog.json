@@ -1,0 +1,10 @@
+{
+  "catalogs": {},
+  "aliases": {
+    "hal": {
+      "description": "Migration tool client to migrate Java applications",
+      "script-ref": "https://github.com/snowdrop/migration-tool/releases/download/early-access/migration-cli-1.0.0-SNAPSHOT-runner.jar"
+    }
+  },
+  "templates": {}
+}
