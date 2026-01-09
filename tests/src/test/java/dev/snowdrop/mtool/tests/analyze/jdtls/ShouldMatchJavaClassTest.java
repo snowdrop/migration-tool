@@ -29,6 +29,7 @@ class ShouldMatchJavaClassTest extends BaseRulesTest {
 	private CodeScannerService codeScannerService;
 	private Config config;
 
+    // TODO: Find a better way to handle: java.nio.file.DirectoryNotEmptyException: /tmp/junit-7245911607764761866
     @TempDir(cleanup = CleanupMode.NEVER)
 	Path tempDir;
 
