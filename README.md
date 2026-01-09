@@ -216,13 +216,24 @@ The poc has been designed using the following technology:
 
 ## Setup
 
-First git clone this project and compile it.
+Install the tool using the [jbang](https://jbang.dev) tool and the following command:
+```shell
+jbang app install mtool@snowdrop/migration-tool
+```
+
+> [!NOTE]
+> To install a released version, append the version
+```shell
+jbang app install mtool@snowdrop/migration-tool/1.0.0
+```
+
+Otherwise, if you plan to contribute to the project, git clone and compile it 
 
 ```shell
 mvn clean install -DskipTests
 ```
 
-## Konveyor jdt-ls
+## Konveyor jdt-ls (optional)
 
 Download the [konveyor language server](https://github.com/konveyor/java-analyzer-bundle) using the image packaging it:
 ```shell
@@ -235,16 +246,16 @@ podman cp $ID:/jdtls ./jdt/konveyor-jdtls
 > [!NOTE]
 > If you're using bash and not fishell, remember to export the environment variables too!
 
-## Hal client's commands
+## mtool client's commands
 
-Our Migration Tool client (aka hal) proposes 2 commands: 
+Our Migration Tool client (aka mtool) proposes 2 commands: 
 
 - **[analyze](#scan-and-analyze)**: Scan the code source using the rules matching conditions and generate a JSON report augmented with the provider's instructions.
 - **[transform](#transform-your-application)**: Apply the transformation's instructions using as input the JSON report by using the chosen provider
 
 ```shell
-Usage: hal [COMMAND]
-Quarkus Hal client able to scan, analyze and migrate a java application using
+Usage: mtool [COMMAND]
+Quarkus mtool client able to scan, analyze and migrate a java application using
 instructions
 Commands:
   analyze    Analyze a project for migration
@@ -252,14 +263,11 @@ Commands:
   help       Display help information about the specified command.
 ```
 
-> [!NOTE]
-> The name of the tool hal - Heuristically Programmed Algorithmic Computer is coming from the AI that control the systems of the spacecraft of the movie`s Space Odyssey of Stanley Kubrick - https://en.wikipedia.org/wiki/HAL_9000.
-
 ### Scan and analyze
 
 To analyze and generate the migration plan report (optional), execute this `analyze` command 
 ```shell
-Usage: hal analyze [-v] [--jdt-ls-path=<jdtLsPath>]
+Usage: mtool analyze [-v] [--jdt-ls-path=<jdtLsPath>]
                    [--jdt-workspace=<jdtWorkspace>] [-o=<output>]
                    [-r=<rulesPath>] [-s=<source>] [--scanner=<scanner>]
                    [-t=<target>] <appPath>
@@ -295,8 +303,8 @@ __  ____  __  _____   ___  __ ____  ______
 2025-11-26 11:51:41,797 INFO  [io.quarkus] (main) migration-cli 1.0.0-SNAPSHOT on JVM (powered by Quarkus 3.29.4) started in 0.309s. 
 2025-11-26 11:51:41,797 INFO  [io.quarkus] (main) Profile prod activated. 
 2025-11-26 11:51:41,797 INFO  [io.quarkus] (main) Installed features: [cdi, langchain4j, langchain4j-anthropic, picocli, qute, rest-client, rest-client-jackson, smallrye-context-propagation, vertx]
-Usage: hal [COMMAND]
-Quarkus Hal client able to scan, analyze and migrate a java application using
+Usage: mtool [COMMAND]
+Quarkus mtool client able to scan, analyze and migrate a java application using
 instructions
 Commands:
   analyze    Analyze a project for migration
@@ -332,7 +340,7 @@ A scanner can be defined you launch the `analyze` command with the option `--sca
 Now that we have a migration plan containing the of the instructions to be executed by a provider, we can perform the transformation using the command `transform` where we pass as parameter the provider to be used.
 
 ```shell
-Usage: hal transform [-dv] [-p=<provider>] <appPath>
+Usage: mtool transform [-dv] [-p=<provider>] <appPath>
 Transform a java application
       <appPath>   Path to the Java project to transform
   -d, --dry-run   Execute OpenRewrite in dry-run mode (preview changes without
