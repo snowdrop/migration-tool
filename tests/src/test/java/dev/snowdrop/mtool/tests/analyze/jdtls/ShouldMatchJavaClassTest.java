@@ -8,6 +8,8 @@ import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -27,7 +29,7 @@ class ShouldMatchJavaClassTest extends BaseRulesTest {
 	private CodeScannerService codeScannerService;
 	private Config config;
 
-	@TempDir
+    @TempDir(cleanup = CleanupMode.NEVER)
 	Path tempDir;
 
 	Path rulesPath;
