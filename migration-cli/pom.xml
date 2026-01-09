@@ -22,6 +22,8 @@
         <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
         <distribution.directory>${project.build.directory}/distributions</distribution.directory>
         <executable-suffix />
+
+        <quarkus.package.type>uber-jar</quarkus.package.type>
     </properties>
 
     <dependencies>
