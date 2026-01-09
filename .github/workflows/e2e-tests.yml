@@ -1,4 +1,4 @@
-name: "e2e tests"
+name: "CI - e2e tests"
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
 
       - name: Build project with Maven
         run: |
-          mvn clean install -ntp -DskipTests
+          mvn clean install -ntp -DskipTests -Dquarkus.package.type=fast-jar
           echo "Maven build exit code: $?"
 
       - name: Install konveyor jdt-ls
