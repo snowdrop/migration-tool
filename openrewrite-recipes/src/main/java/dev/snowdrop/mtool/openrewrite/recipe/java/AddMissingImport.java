@@ -13,6 +13,13 @@ import org.openrewrite.java.tree.J;
 
 import java.util.List;
 
+/**
+ * OpenRewrite recipe that adds missing import statements to Java classes.
+ *
+ * <p>This recipe identifies method calls that match a specified pattern and automatically
+ * adds the corresponding import statements to the class. This is useful for migration
+ * scenarios where new dependencies or packages need to be imported.</p>
+ */
 @Value
 @EqualsAndHashCode(callSuper = false)
 public class AddMissingImport extends Recipe {
