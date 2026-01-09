@@ -1,0 +1,116 @@
+name: CI - Early Access
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  JAVA_VERSION: '21'
+  JAVA_DISTRO: 'temurin'
+
+jobs:
+  precheck:
+    if: github.repository == 'snowdrop/migration-tool' && startsWith(github.event.head_commit.message, 'Releasing version') != true
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.vars.outputs.VERSION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Cancel previous run
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRO }}
+          cache: maven
+
+      - name: Version
+        id: vars
+        shell: bash
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "VERSION=$(echo $VERSION)" >> $GITHUB_OUTPUT
+
+  release:
+    needs: [ precheck ]
+    if: endsWith(${{ needs.precheck.outputs.VERSION }}, '-SNAPSHOT')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRO }}
+          cache: maven
+          #server-id: central
+          #server-username: MAVEN_USERNAME # Sonatype "snowdrop-team" usertoken: username
+          #server-password: MAVEN_PASSWORD # Sonatype "snowdrop-team" usertoken: password
+          #gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
+          #gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: Configure git user and email
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "Github Action"
+
+      - name: Build the uber-jar of the migration-cli
+        run: |
+          mvn -ntp -B clean install -DskipTests -Dquarkus.package.jar.type=uber-jar
+
+      - name: Update jBang catalog for snapshot
+        if: github.ref == 'refs/heads/main'
+        run: |
+          SNAPSHOT_URL="https://github.com/${{ github.repository }}/releases/download/early-access/migration-cli-${{ needs.precheck.outputs.VERSION }}-runner.jar"
+          jq --arg url "$SNAPSHOT_URL" '.aliases.hal."script-ref" = $url' jbang-catalog.json > tmp.json && mv tmp.json jbang-catalog.json
+
+      - name: Commit the changes
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes detected in jbang-catalog.json. Skipping commit."
+          else
+            echo "Changes detected. Committing version ${VERSION}..."
+            git commit -m "update jbang catalog script-ref: ${VERSION}"
+            git push origin main
+          fi
+
+      - name: Release the project and publish the uber-jar as early access release
+        run: |
+          mvn -ntp -B jreleaser:full-release -N
+        env:
+          JRELEASER_PROJECT_VERSION: ${{ needs.precheck.outputs.VERSION }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      #- name: Deploy the maven GAV on central
+      #  run: |
+      #    mvn -B deploy -Prelease -DskipTests
+      #  env:
+      #    MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      #    MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+      #    MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: JReleaser output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jreleaser-release
+          path: |
+            target/jreleaser/trace.log
+            target/jreleaser/output.properties
