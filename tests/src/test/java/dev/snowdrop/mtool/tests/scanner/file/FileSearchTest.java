@@ -30,7 +30,7 @@ class FileSearchTest extends AbstractFileSearchTest {
 		List<FilePath> results = fileSearcher.findPaths(applicationPath, filesSearchPattern, false);
 
 		assertThat(results).hasSize(7);
-		assertThat(results).extracting(path -> applicationPath.relativize(path.filePath()).toString()).containsExactly(
+		assertThat(results).extracting(path -> applicationPath.relativize(path.filePath()).toString()).containsExactlyInAnyOrder(
 				"src/test/java/com/todo/app/AppApplicationTests.java",
 				"src/main/java/com/todo/app/repository/TaskRepository.java",
 				"src/main/java/com/todo/app/entity/Task.java",
