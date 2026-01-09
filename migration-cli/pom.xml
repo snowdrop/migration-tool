@@ -5,12 +5,12 @@
     <parent>
         <groupId>dev.snowdrop</groupId>
         <artifactId>migration-tool-parent</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>migration-cli</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <description>Quarkus CLI tool to migrate Java applications</description>
     <name>Migration Tool :: Client</name>
     <inceptionYear>2025</inceptionYear>
