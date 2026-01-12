@@ -110,7 +110,7 @@ jobs:
           cd ./applications/spring-boot-todo-app
 
           # Run transformation using the uber jar
-          timeout 300 mtool transform . -p openrewrite || {
+          timeout 300 mtool transform -p openrewrite -v . || {
             echo "❌ Transformation failed or timed out"
             echo "Current directory contents:"
             ls -la
