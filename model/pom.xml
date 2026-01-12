@@ -13,6 +13,11 @@
     <artifactId>model</artifactId>
     <name>Migration Tool :: Model</name>
 
+    <properties>
+        <!-- Skip to execute quarkus maven plugin -->
+        <quarkus.build.skip>true</quarkus.build.skip>
+    </properties>
+
     <dependencies>
         <!-- Logging -->
         <dependency>

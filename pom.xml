@@ -20,6 +20,7 @@
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.version>3.30.6</quarkus.platform.version>
+        <quarkus.build.skip>false</quarkus.build.skip>
 
         <openrewrite-recipe-bom.version>3.22.0</openrewrite-recipe-bom.version>
         <spring-boot.version>4.0.1</spring-boot.version>
@@ -43,6 +44,7 @@
         <central-publishing-maven-plugin.version>0.9.0</central-publishing-maven-plugin.version>
 
         <skipITs>true</skipITs>
+        <formatterStyleFile>${project.parent.basedir}/formatter-config.xml</formatterStyleFile>
 
     </properties>
 
@@ -207,6 +209,9 @@
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
                 <version>${quarkus.platform.version}</version>
+                <configuration>
+                    <skip>${quarkus.build.skip}</skip>
+                </configuration>
                 <extensions>true</extensions>
                 <executions>
                     <execution>
@@ -247,7 +252,7 @@
                 <artifactId>formatter-maven-plugin</artifactId>
                 <version>${maven-formatter-plugin.version}</version>
                 <configuration>
-                    <configFile>${maven.multiModuleProjectDirectory}/formatter-config.xml</configFile>
+                    <configFile>${formatterStyleFile}</configFile>
                 </configuration>
                 <executions>
                     <execution>

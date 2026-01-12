@@ -15,6 +15,9 @@
 
     <properties>
         <maven.version>3.9.12</maven.version>
+
+        <!-- Skip to execute quarkus maven plugin -->
+        <quarkus.build.skip>true</quarkus.build.skip>
     </properties>
 
     <dependencies>

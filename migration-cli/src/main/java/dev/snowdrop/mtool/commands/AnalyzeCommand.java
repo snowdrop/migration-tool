@@ -122,8 +122,12 @@ public class AnalyzeCommand implements Runnable {
 				.orElseThrow(() -> new RuntimeException(
 						"Command to be executed against the LS server is required but not configured"));
 
+		String openRewriteMavenPluginVersion = Optional
+				.ofNullable(ConfigProvider.getConfig().getValue("openrewrite.maven-plugin.version", String.class))
+				.orElseThrow(() -> new RuntimeException("Openrewrite maven plugin version not define"));
+
 		Config config = new Config(appPathString, rulesPath, sourceTechnology, targetTechnology, jdtLsPathString,
-				jdtWksString, lsCmd, verbose, output, scanner);
+				jdtWksString, lsCmd, verbose, output, scanner, openRewriteMavenPluginVersion);
 
 		// Log resolved paths for debugging
 		logger.infof("📋 Jdt-ls path: %s", jdtLsPath);
@@ -132,6 +136,7 @@ public class AnalyzeCommand implements Runnable {
 		logger.infof("📋 Application path: %s", appPath);
 		logger.infof("📋 Source technology: %s", sourceTechnology);
 		logger.infof("📋 Target technology: %s", targetTechnology);
+		logger.infof("📋 Openrewrite maven plugin version: %s", openRewriteMavenPluginVersion);
 		return config;
 	}
 

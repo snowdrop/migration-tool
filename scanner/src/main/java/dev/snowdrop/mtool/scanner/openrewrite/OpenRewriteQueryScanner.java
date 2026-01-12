@@ -73,7 +73,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		logger.debugf("Recipe generated: %s", yamlRecipe);
 
 		// Execute the maven rewrite goal command
-		boolean succeed = execOpenrewriteMvnPlugin(config.appPath(), true, yamlRecipe);
+		boolean succeed = execOpenrewriteMvnPlugin(config, true, yamlRecipe);
 		if (!succeed) {
 			logger.warnf("Failed to execute the maven command");
 			return new ArrayList<>();
@@ -188,10 +188,10 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		return yaml.toString();
 	}
 
-	private boolean execOpenrewriteMvnPlugin(String appProjectPath, boolean verbose, String yamlRecipe) {
+	private boolean execOpenrewriteMvnPlugin(Config config, boolean verbose, String yamlRecipe) {
 		// Copy the rewrite yaml file under the project to scan
 		String rewriteYamlName = "rewrite.yml";
-		Path path = Paths.get(appProjectPath);
+		Path path = Paths.get(config.appPath());
 		Path yamlFilePath = path.resolve(rewriteYamlName);
 
 		try {
@@ -215,7 +215,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 			command.add("-B");
 			command.add("-e");
 			command.add(String.format("%s:%s:%s:%s", MAVEN_OPENREWRITE_PLUGIN_GROUP, MAVEN_OPENREWRITE_PLUGIN_ARTIFACT,
-					"6.24.0", "dryRun"));
+					config.openRewriteMavenPluginVersion(), "dryRun"));
 			command.add(String.format("-Drewrite.activeRecipes=%s", "dev.snowdrop.openrewrite.MatchConditions"));
 			command.add("-Drewrite.recipeArtifactCoordinates=" + gavs);
 			command.add("-Drewrite.exportDatatables=true");
