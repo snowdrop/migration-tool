@@ -115,7 +115,7 @@ As presented hereafter, we have introduced different new fields part of the Rule
           - dev.snowdrop.mtool.openrewrite.recipe.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
           - spring.recipe.dev.snowdrop.mtool.openrewrite.AddQuarkusRun
         gav:
-          - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:1.0.2-SNAPSHOT
 ```
 The list of the AI's tasks will be executed one by one as user's chat message. When code is generated, the user will be able to accept or reject the proposition.
 
@@ -493,7 +493,7 @@ If you want to test separately the openrewrite recipes, then use the [openrewrit
 ```shell
 cd applications/spring-boot-todo-app
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:run \
-   -Drewrite.recipeArtifactCoordinates=dev.snowdrop:java-analyzer-quarkus:1.0.0-SNAPSHOT \
+   -Drewrite.recipeArtifactCoordinates=dev.snowdrop:java-analyzer-quarkus:1.0.2-SNAPSHOT \
    -Dorg.openrewrite.quarkus.spring.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
 ```
 
@@ -501,7 +501,7 @@ Instead of changing the code, you can use the dryrun goal to get a patch
 ```shell
 cd applications/spring-boot-todo-app
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
-   -Drewrite.recipeArtifactCoordinates=dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT \
+   -Drewrite.recipeArtifactCoordinates=dev.snowdrop.mtool:openrewrite-recipes:1.0.2-SNAPSHOT \
    -Drewrite.activeRecipes=spring.recipe.dev.snowdrop.mtool.openrewrite.ReplaceSpringBootApplicationWithQuarkusMainAnnotation  
 ```
 When done, open the diff patch generated: `/PATH/TO/spring-boot-todo-app/target/rewrite/rewrite.patch`
@@ -510,7 +510,7 @@ To execute several recipes aggregated in a yaml file placed at the root of the p
 ```shell
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
   -Drewrite.activeRecipes=dev.snowdrop.text.SearchText,dev.snowdrop.java.StandardJavaConventions,dev.snowdrop.java.spring.SearchSpringBootAnnotation \
-  -Drewrite.recipeArtifactCoordinates=org.openrewrite:rewrite-java:8.62.4,org.openrewrite.recipe:rewrite-java-dependencies:1.42.0,dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT \
+  -Drewrite.recipeArtifactCoordinates=org.openrewrite:rewrite-java:8.62.4,org.openrewrite.recipe:rewrite-java-dependencies:1.42.0,dev.snowdrop.mtool:openrewrite-recipes:1.0.2-SNAPSHOT \
   -Drewrite.exportDatatables=true \
   -Drewrite.configLocation=my-rewrite-1.yml
 ...
@@ -527,7 +527,7 @@ Command using another YAML example
 ```shell
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
   -Drewrite.activeRecipes=dev.snowdrop.java.spring.SearchSpringBootAnnotation \
-  -Drewrite.recipeArtifactCoordinates=org.openrewrite:rewrite-java:8.62.4,org.openrewrite.recipe:rewrite-java-dependencies:1.42.0,dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT \
+  -Drewrite.recipeArtifactCoordinates=org.openrewrite:rewrite-java:8.62.4,org.openrewrite.recipe:rewrite-java-dependencies:1.42.0,dev.snowdrop.mtool:openrewrite-recipes:1.0.2-SNAPSHOT \
   -Drewrite.exportDatatables=true \
   -Drewrite.configLocation=my-rewrite-2.yml
 ```
@@ -564,12 +564,12 @@ Here is the trick to do to add a bundle to the OSGI jdt-ls server. This step is 
 
 Edit the `config.ini` file corresponding to your architecture: mac, linux, mac_arm under the folder konveyor-jdtls/config_<ARCH>
 
-Modify within the config.ini file the `osgi.bundles` property and include after the `org.apache.commons.lang3...` jar the BundleSymbolicName of: java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar
+Modify within the config.ini file the `osgi.bundles` property and include after the `org.apache.commons.lang3...` jar the BundleSymbolicName of: java-analyzer-bundle.core-1.0.2-SNAPSHOT.jar
 ```text
-osgi.bundles=...org.apache.commons.lang3_3.14.0.jar@4,reference\:file\:java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar@2,...
+osgi.bundles=...org.apache.commons.lang3_3.14.0.jar@4,reference\:file\:java-analyzer-bundle.core-1.0.2-SNAPSHOT.jar@2,...
 ```
 
-Copy the java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar file from the path `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/` to the `plugins` folder
+Copy the java-analyzer-bundle.core-1.0.2-SNAPSHOT.jar file from the path `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/` to the `plugins` folder
 
 ### Download jdt-ls
 

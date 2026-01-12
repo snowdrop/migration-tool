@@ -159,7 +159,7 @@ public class TodoApplication implements QuarkusApplication {
               artifactId: spring-boot-maven-plugin
           - spring.recipe.dev.snowdrop.mtool.openrewrite.AddQuarkusMavenPlugin
         gav:
-          - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT
           - org.openrewrite:rewrite-maven:8.62.4
 ```
 
@@ -199,7 +199,7 @@ public class TodoApplication implements QuarkusApplication {
               methodPattern: "org.springframework.boot.SpringApplication run(..)"
           - spring.recipe.dev.snowdrop.mtool.openrewrite.AddQuarkusRun
         gav:
-          - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT
 ```
 **Step 4**
 ```yaml
@@ -243,6 +243,6 @@ public class TodoApplication implements QuarkusApplication {
                     }
                 }
         gav:
-          - dev.snowdrop:openrewrite-recipes:1.0.0-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT
 ```
 
