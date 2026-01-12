@@ -48,7 +48,7 @@ jobs:
           
           echo "Bump the yaml rules containing the snowdrop openrewrite recipes jar too"
           find cookbook/rules -name "*.yaml" -exec sed -i "s|dev.snowdrop.mtool:openrewrite-recipes:[0-9.]*\(-SNAPSHOT\)\{0,1\}|dev.snowdrop.mtool:openrewrite-recipes:$NEW_VERSION|g" {} +
-          find tests/src/test/rules -name "*.yaml" -exec sed -i "s|dev.snowdrop.mtool:openrewrite-recipes:[0-9.]*\(-SNAPSHOT\)\{0,1\}|dev.snowdrop.mtool:openrewrite-recipes:$NEW_VERSION|g" {} +
+          find tests/src/test/resources/cookbook -name "*.yaml" -exec sed -i "s|dev.snowdrop.mtool:openrewrite-recipes:[0-9.]*\(-SNAPSHOT\)\{0,1\}|dev.snowdrop.mtool:openrewrite-recipes:$NEW_VERSION|g" {} +
           
           git add .
           git commit -m "chore: Bump the project to version: $NEW_VERSION [skip ci]"
