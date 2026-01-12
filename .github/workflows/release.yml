@@ -47,7 +47,7 @@ jobs:
       - name: Set the maven version to the release version
         run: |
           VERSION=${{ github.event.inputs.version }}
-          mvn -ntp -B versions:set versions:commit -DprocessAllModules=true -DnewVersion=$VERSION
+          mvn -ntp -B versions:set versions:commit -DprocessAllModules=true -DprocessParent -DnewVersion=$VERSION
 
       - name: Update jbang-catalog.json
         run: |

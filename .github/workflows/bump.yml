@@ -42,12 +42,10 @@ jobs:
 
       - name: Bump to the next Snapshot
         run: |
-          # 1. Increment the version (e.g., 1.0.0 -> 1.0.1-SNAPSHOT)
-          mvn -ntp -B versions:set -DnextSnapshot=true -DprocessAllModules=true versions:commit
-          
+          mvn -ntp -B versions:set versions:commit -DnextSnapshot=true -DprocessAllModules=true -DprocessParent
+
           NEW_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           
-          # 2. Commit and Push
-          git add pom.xml
+          git add .
           git commit -m "chore: Bump the project to version: $NEW_VERSION [skip ci]"
           git push origin main
