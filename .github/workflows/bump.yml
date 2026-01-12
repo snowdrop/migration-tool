@@ -47,7 +47,7 @@ jobs:
           NEW_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           
           echo "Bump the yaml rules containing the snowdrop openrewrite recipes jar too"
-          find cookbook/rules -name "*.yaml" -exec sed -i "s|dev.snowdrop.mtool:openrewrite-recipes:[0-9.]*\(-SNAPSHOT\)\{0,1\}|dev.snowdrop.mtool:openrewrite-recipes:$VERSION|g" {} +
+          find cookbook/rules -name "*.yaml" -exec sed -i "s|dev.snowdrop.mtool:openrewrite-recipes:[0-9.]*\(-SNAPSHOT\)\{0,1\}|dev.snowdrop.mtool:openrewrite-recipes:$NEW_VERSION|g" {} +
           
           git add .
           git commit -m "chore: Bump the project to version: $NEW_VERSION [skip ci]"
