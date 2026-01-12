@@ -40,11 +40,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bump to the next Snapshot
+      - name: Bump to the next snapshot version
         run: |
+          echo "Bump the maven pom.xml version"
           mvn -ntp -B versions:set versions:commit -DnextSnapshot=true -DprocessAllModules=true -DprocessParent
-
           NEW_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          
+          echo "Bump the yaml rules containing the snowdrop openrewrite recipes jar too"
+          find cookbook/rules -name "*.yaml" -exec sed -i "" "s|dev.snowdrop.mtool:openrewrite-recipes:[0-9.]*\(-SNAPSHOT\)\{0,1\}|dev.snowdrop.mtool:openrewrite-recipes:$PROJECT_VERSION|g" {} +
           
           git add .
           git commit -m "chore: Bump the project to version: $NEW_VERSION [skip ci]"
