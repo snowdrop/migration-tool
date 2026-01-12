@@ -224,7 +224,7 @@ jbang app install mtool@snowdrop/migration-tool
 > [!NOTE]
 > To install a released version, append the version
 ```shell
-jbang app install mtool@snowdrop/migration-tool/1.0.0
+jbang app install mtool@snowdrop/migration-tool/1.0.4
 ```
 
 Otherwise, if you plan to contribute to the project, git clone and compile it 
@@ -288,20 +288,14 @@ Analyze a project for migration
   -v, --verbose             Enable verbose output
 ```
 
-using either the `quarkus:dev` goal or the jar file created from the previous maven command executed
+using either the `quarkus:dev` goal
 ```shell
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
+```
+or the `mtool` application
+```sheel
 
-or 
-
-❯ java -jar /PATH/TO/migration-tool-parent/migration-cli/target/quarkus-app/quarkus-run.jar analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
-Usage: mtool [COMMAND]
-Quarkus mtool client able to scan, analyze and migrate a java application using
-instructions
-Commands:
-  analyze    Analyze a project for migration
-  transform  Transform a java application
-  help       Display help information about the specified command.
+❯ mtool analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
 ```
 
 > [!TIP]
@@ -327,7 +321,7 @@ The tool supports different scanners able to scan the code source:
 - maven
 - file and content search
 
-A scanner can be defined you launch the `analyze` command with the option `--scanner`. In this case, the tool will select it as default to scan and match a condition but will revert to one of the alternative scanners if the default don't support to search about: `<type>.<symbol>` where <type> can be: pom, java, properties, etc. and `symbol`: dependency, key, annotation, etc.
+A scanner can be defined when you launch the `analyze` command with the option `--scanner`. In this case, the tool will select it as default to scan and match a condition but will revert to one of the alternative scanners if the default don't support to search about: `<type>.<symbol>` where <type> can be: pom, java, properties, etc. and `symbol`: dependency, key, annotation, etc.
 
 ## Transform your application
 
