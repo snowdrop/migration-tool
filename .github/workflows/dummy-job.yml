@@ -61,4 +61,4 @@ jobs:
         run: |
           git add .
           git status
-          git diff
+          cat cookbook/rules/quarkus-spring/010-springboot-replace-bom-quarkus.yaml
