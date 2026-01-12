@@ -45,7 +45,7 @@
               artifactId: spring-boot-maven-plugin
           - dev.snowdrop.mtool.openrewrite.recipe.AddQuarkusMavenPlugin
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.2-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:
           - org.openrewrite:rewrite-maven:8.62.4
 
 

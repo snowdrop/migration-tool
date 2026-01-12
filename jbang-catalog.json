@@ -3,7 +3,7 @@
   "aliases": {
     "mtool": {
       "description": "Migration tool client to migrate Java applications",
-      "script-ref": "https://github.com/snowdrop/migration-tool/releases/download/1.0.1/migration-cli-1.0.1-runner.jar"
+      "script-ref": "https://github.com/snowdrop/migration-tool/releases/download/1.0.2/migration-cli-1.0.2-runner.jar"
     }
   },
   "templates": {}
