@@ -36,7 +36,7 @@ jobs:
 
       - name: Build project with Maven
         run: |
-          mvn clean install -ntp -DskipTests -Dquarkus.package.type=fast-jar
+          mvn clean install -ntp -B -DskipTests -Dquarkus.package.type=fast-jar
           echo "Maven build exit code: $?"
 
       - name: Install konveyor jdt-ls
@@ -117,7 +117,7 @@ jobs:
           cd ./applications/spring-boot-todo-app
 
           # Package the application
-          mvn -B package -DskipTests || {
+          mvn -ntp -B package -DskipTests || {
             echo "❌ Maven package failed"
             echo "Build logs:"
             cat target/maven-archiver/pom.properties 2>/dev/null || echo "No build info available"
