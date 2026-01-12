@@ -34,10 +34,16 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Build project with Maven
+      - name: Install jbang
+        run: curl -Ls https://sh.jbang.dev | bash -s - app setup
+
+      - name: Build the project with Maven
         run: |
           mvn clean install -ntp -B -DskipTests -Dquarkus.package.type=fast-jar
           echo "Maven build exit code: $?"
+          
+          echo "Install the runner application using jbang"
+          jbang app install --name rewrite migration-cli/target/migration-cli-*-runner.jar
 
       - name: Install konveyor jdt-ls
         if: ${{ inputs.analysis_tool == 'jdtls' || github.event_name != 'workflow_dispatch' }}
@@ -81,7 +87,7 @@ jobs:
           fi
 
           # Run analysis using the uber jar
-          timeout 300 java -jar migration-cli/target/quarkus-app/quarkus-run.jar analyze ./applications/spring-boot-todo-app --scanner $SCANNER -o json || {
+          timeout 300 rewrite analyze ./applications/spring-boot-todo-app -r $ANALYZER_RULES_PATH --scanner $SCANNER -o json || {
             echo "❌ $SCANNER analysis failed or timed out"
             echo "Checking for any generated files..."
             find ./applications/spring-boot-todo-app -name "$REPORT_PATTERN" -type f 2>/dev/null || true
@@ -104,7 +110,7 @@ jobs:
           cd ./applications/spring-boot-todo-app
 
           # Run transformation using the uber jar
-          timeout 300 java -jar ../../migration-cli/target/quarkus-app/quarkus-run.jar transform . -p openrewrite || {
+          timeout 300 rewrite transform . -p openrewrite || {
             echo "❌ Transformation failed or timed out"
             echo "Current directory contents:"
             ls -la
