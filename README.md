@@ -1,5 +1,5 @@
-[![GitHub Actions :: Build status](<https://img.shields.io/github/actions/workflow/status/snowdrop/migration-tool/mvn-build.yml?branch=main&logo=GitHub&style=for-the-badge>)](https://github.com/snowdrop/migration-tool/actions/workflows/mvn-build.yml)
-[![GitHub Actions :: e2e status](<https://img.shields.io/github/actions/workflow/status/snowdrop/migration-tool/e2e-tests.yml?branch=main&logo=GitHub&style=for-the-badge>)](https://github.com/snowdrop/migration-tool/actions/workflows/e2e-tests.yml)
+[![GitHub Actions :: Build status](<https://img.shields.io/github/actions/workflow/status/snowdrop/migration-tool/mvn-build.yml?branch=main&logo=GitHub&style=for-the-badge&label=Compilation>)](https://github.com/snowdrop/migration-tool/actions/workflows/mvn-build.yml)
+[![GitHub Actions :: e2e status](<https://img.shields.io/github/actions/workflow/status/snowdrop/migration-tool/e2e-tests.yml?branch=main&logo=GitHub&style=for-the-badge&label=Integration-tests>)](https://github.com/snowdrop/migration-tool/actions/workflows/e2e-tests.yml)
 [![License](https://img.shields.io/github/license/snowdrop/migration-tool?style=for-the-badge&logo=apache)](https://www.apache.org/licenses/LICENSE-2.0)
 
 # Migration Tool project
