@@ -289,20 +289,12 @@ Analyze a project for migration
 ```
 
 using either the `quarkus:dev` goal or the jar file created from the previous maven command executed
-```
+```shell
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
 
 or 
 
 ❯ java -jar /PATH/TO/migration-tool-parent/migration-cli/target/quarkus-app/quarkus-run.jar analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
-__  ____  __  _____   ___  __ ____  ______ 
- --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
- -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
---\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
-2025-11-26 11:51:41,701 WARN  [io.qua.config] (main) Unrecognized configuration key "quarkus.langchain4j.anthropic.chat-model.model" was provided; it will be ignored; verify that the dependency extension for this configuration is set or that you did not make a typo
-2025-11-26 11:51:41,797 INFO  [io.quarkus] (main) migration-cli 1.0.0-SNAPSHOT on JVM (powered by Quarkus 3.29.4) started in 0.309s. 
-2025-11-26 11:51:41,797 INFO  [io.quarkus] (main) Profile prod activated. 
-2025-11-26 11:51:41,797 INFO  [io.quarkus] (main) Installed features: [cdi, langchain4j, langchain4j-anthropic, picocli, qute, rest-client, rest-client-jackson, smallrye-context-propagation, vertx]
 Usage: mtool [COMMAND]
 Quarkus mtool client able to scan, analyze and migrate a java application using
 instructions
@@ -316,13 +308,15 @@ Commands:
 > To avoid to pass all the parameters to the command, you can use the "defaults" [application.properties](src/main/resources/application.properties) and just pass the path of the application to be analyzed
 
 ```shell
+mtool analyze ../applications/spring-boot-todo-app
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app"
 ```
 
-If you want to populate an analysis report (aka migration plan) then pass the parameter `-o json` to the command. A json file having as name: `analysing-report_yyyy-mm-dd_hh:mm.json` will be generated within the project scanned !
+By default, the tool generates a json report file having as file name: `analysing-report_yyyy-mm-dd_hh:mm.json`. If you want to generate this analysis report using the html format, then use the option `-o html`. 
 
 ```shell
-mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -o json"
+mtool analyze ../applications/spring-boot-todo-app -o html
+mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -o html"
 ```
 
 #### Scanner
@@ -359,6 +353,8 @@ Transform a java application
 To use openrewrite, execute the following command with or without the `dryRun` mode. If you use the `--dry-run` parameter, then openrewrite will generate `rewrite.patch` file(s) under the folder: `target/rewrite` of the analyzed project instead of changing the code directly !
 
 ```shell
+mtool transform ../applications/spring-boot-todo-app -p openrewrite --dry-run
+or
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app -p openrewrite --dry-run"
 ```
 
@@ -390,18 +386,18 @@ QUARKUS_LANGCHAIN4J_ANTHROPIC_BASE_URL=<THE_ANTHROPIC_API_SERVER>
 QUARKUS_LANGCHAIN4J_ANTHROPIC_API_KEY=<YOUR_ANTHROPIC_API_KEY>
 QUARKUS_LANGCHAIN4J_ANTHROPIC_TIMEOUT=60
 ```
-Source the `.env` file and don't forget to generate the `analyze/migration plan` report before to perform the transformation
+Source the `.env` file. 
+
+Don't forget to generate first the `analysis migration plan` before to perform the transformation step
 ```shell
-mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/demo-spring-boot-todo-app -o json"
+mtool analyze ../applications/demo-spring-boot-todo-app"
 ```
 
-As it is needed to interact with AI, then we cannot use the command `mvn quarkus:dev` but instead the uber jar file.
-Execute the following command within a Spring Boot project to be analyzed and migrated where you pass the path of the uber jar file of the client `/PATH/TO/migration-cli/target/quarkus-app/quarkus-run.jar`
+You can now execute the following command within a Java application analyzed 
 
 ```shell
-pushd applications/demo-spring-boot-todo-app
-
-java -jar <MIGRATION_CLI_JAR_PATH> transform . -p ai
+pushd applications/spring-boot-todo-app
+mtool transform . -p ai
 popd
 ```
 Check the console to see the tasks executed and AI's reponses:
@@ -429,16 +425,22 @@ To play with the migration-tool, git clone this project: https://github.com/snow
 
 Next, analyze the project to migrate to generate the json migration report
 ```shell
+mtool analyze ../applications/spring-boot-todo-app -r ../cookbook/rules/quarkus-spring --scanner openrewrite
+or
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring-boot-todo-app -r ../cookbook/rules/quarkus-spring --scanner openrewrite"
 ```
 
 Transform the project (dry-run mode) and check the content of the `./target` directory (see rewrite folders and patch files)
 ```shell
+mtool transform ../applications/spring-boot-todo-app -p openrewrite --dry-run
+or
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app -p openrewrite --dry-run"
 ```
 
 Finally migrate the Spring Boot Todo code to Quarkus
 ```shell
+mtool transform ../applications/spring-boot-todo-app -p openrewrite
+or
 mvn -pl migration-cli quarkus:dev -Dquarkus.args="transform ../applications/spring-boot-todo-app -p openrewrite"
 ```
 
