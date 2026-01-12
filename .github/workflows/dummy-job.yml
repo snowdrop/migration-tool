@@ -61,4 +61,4 @@ jobs:
         run: |
           git add .
           git status
-          git diff cookbook/rules/quarkus-spring/*.yaml
+          git diff
