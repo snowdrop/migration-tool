@@ -46,7 +46,7 @@
           - dev.snowdrop.mtool.openrewrite.recipe.AddQuarkusMavenPlugin
         gav:
           - dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT
-          - org.openrewrite:rewrite-maven:8.62.4
+          - org.openrewrite:rewrite-maven:8.71.02.4
 
 
 
