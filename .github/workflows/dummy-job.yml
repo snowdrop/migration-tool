@@ -12,7 +12,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  release:
+  dummy-release:
     runs-on: ubuntu-latest
     outputs:
       VERSION: ${{ steps.vars.outputs.VERSION }}
@@ -61,3 +61,4 @@ jobs:
         run: |
           git add .
           git status
+          git diff cookbook/rules/quarkus-spring/*.yaml
