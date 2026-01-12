@@ -39,4 +39,4 @@
           - dev.snowdrop.mtool.openrewrite.recipe.AddQuarkusRun:
               quarkusApplicationClass: TodoApplication
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:
+          - dev.snowdrop.mtool:openrewrite-recipes:1.0.4-SNAPSHOT
