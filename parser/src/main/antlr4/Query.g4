@@ -18,7 +18,7 @@ operation
     ;
 
 clause: fileType ('.' symbol)? ('is' | '=') (value | '(' keyValuePair (',' keyValuePair)* ')');
-fileType: 'JAVA' | 'java' | 'POM' | 'pom' | 'TEXT' | 'text' | 'PROPERTY' | 'property' | 'YAML' | 'yaml' | 'JSON' | 'json';
+fileType: 'JAVA' | 'java' | 'POM' | 'pom' | 'TEXT' | 'text' | 'PROPERTY' | 'property' | 'PROPERTIES' | 'properties' | 'YAML' | 'yaml' | 'JSON' | 'json';
 symbol: ID;
 keyValuePair: key '=' value;
 key: QUOTED_STRING | ID;
