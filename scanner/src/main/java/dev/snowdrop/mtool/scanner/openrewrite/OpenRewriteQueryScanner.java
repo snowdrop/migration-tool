@@ -107,9 +107,9 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		}
 
 		// Recipe's jar files
-		String gavs = "org.openrewrite:rewrite-java:8.67.1,"
-				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.46.0,"
-				+ "dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT";
+		String gavs = "org.openrewrite:rewrite-java:8.71.0,"
+				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.49.0,"
+				+ "dev.snowdrop.mtool:openrewrite-recipes:1.0.5";
 		Map<String, Map<String, String>> recipeMap = (Map<String, Map<String, String>>) first;
 
 		return recipeMap.values().iterator().next();
