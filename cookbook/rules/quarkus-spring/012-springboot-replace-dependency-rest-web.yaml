@@ -45,7 +45,7 @@
               artifactId: quarkus-smallrye-health
               version: 3.26.4
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.2
+          - dev.snowdrop.mtool:openrewrite-recipes:
           - org.openrewrite:rewrite-maven:8.67.1
           - org.openrewrite:rewrite-java:8.67.1
           - org.openrewrite.recipe:rewrite-java-dependencies:1.46.0

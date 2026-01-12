@@ -34,5 +34,5 @@
               methodPattern: "com.todo.app.controller.TaskController viewIndexPage(..)"
               newException: java.net.URISyntaxException
         gav:
-        - dev.snowdrop.mtool:openrewrite-recipes:1.0.2
+        - dev.snowdrop.mtool:openrewrite-recipes:
         - org.openrewrite:rewrite-java:8.67.1
