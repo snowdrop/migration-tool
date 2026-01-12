@@ -60,7 +60,7 @@ jobs:
         run: |
           VERSION=${{ github.event.inputs.version }}
           echo "Bump the yaml rules containing the snowdrop openrewrite recipes jar too"
-          find cookbook/rules -name "*.yaml" -exec sed -i "s|dev.snowdrop.mtool:openrewrite-recipes:[0-9.]*\(-SNAPSHOT\)\{0,1\}|dev.snowdrop.mtool:openrewrite-recipes:$PROJECT_VERSION|g" {} +
+          find cookbook/rules -name "*.yaml" -exec sed -i "s|dev.snowdrop.mtool:openrewrite-recipes:[0-9.]*\(-SNAPSHOT\)\{0,1\}|dev.snowdrop.mtool:openrewrite-recipes:$VERSION|g" {} +
 
       - name: Commit the changes
         run: |
