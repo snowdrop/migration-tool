@@ -36,6 +36,6 @@ public class BaseRulesTest {
 	public Config createTestConfig(Path applicationToScan, Path rulesPath, String jdtls) {
 		return new Config(applicationToScan.toString(), rulesPath, "springboot", "quarkus",
 				Paths.get(jdtls, "konveyor-jdtls").toString(), jdtls, "io.konveyor.tackle.ruleEntry", false, "json",
-				null);
+				null, "6.27.0");
 	}
 }

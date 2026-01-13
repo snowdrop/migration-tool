@@ -15,6 +15,9 @@
 
     <properties>
         <rewrite-maven-plugin.version>6.27.0</rewrite-maven-plugin.version>
+
+        <!-- Skip to execute quarkus maven plugin -->
+        <quarkus.build.skip>true</quarkus.build.skip>
     </properties>
 
     <dependencies>

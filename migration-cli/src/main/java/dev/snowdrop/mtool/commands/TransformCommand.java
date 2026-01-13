@@ -48,7 +48,7 @@ public class TransformCommand implements Runnable {
 	@ConfigProperty(name = "migration.provider.openrewrite.composite-recipe-name")
 	private String compositeRecipeName;
 
-	@ConfigProperty(name = "migration.provider.openrewrite.plugin.version")
+	@ConfigProperty(name = "openrewrite.maven-plugin.version")
 	private String openRewriteMavenPluginVersion;
 
 	@Inject
