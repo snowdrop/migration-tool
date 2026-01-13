@@ -5,7 +5,6 @@ import dev.snowdrop.mtool.model.analyze.MigrationTask;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.analyze.services.AnalyzeService;
 import dev.snowdrop.mtool.analyze.services.ResultsService;
-import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 import picocli.CommandLine;
@@ -25,7 +24,6 @@ import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFile
 import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFolder;
 
 @CommandLine.Command(name = "analyze", description = "Analyze a project for migration")
-@ApplicationScoped
 public class AnalyzeCommand implements Runnable {
 	private static final Logger logger = Logger.getLogger(AnalyzeCommand.class);
 
