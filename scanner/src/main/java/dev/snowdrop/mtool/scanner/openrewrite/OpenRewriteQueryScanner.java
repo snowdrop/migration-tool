@@ -80,7 +80,6 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		}
 
 		String matchId = extractMatchId(openRewriteRecipe);
-
 		List<Match> results = findRecordsMatching(config.appPath(), matchId);
 
 		logger.debugf("Found %d matches for query %s.%s ", results.size(), query.fileType(), query.symbol());
@@ -135,6 +134,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 	private CompositeRecipe parse(Query query) {
 		return switch (query.symbol()) {
 			case "annotation" -> buildAnnotationRecipe(query);
+			case "file" -> buildFindSourceFilesRecipe(query);
 			//			case "class" -> buildClassRecipe(query);
 			//			case "method" -> buildMethodRecipe(query);
 			default -> throw new IllegalArgumentException("Unsupported symbol: " + query.symbol());
@@ -155,6 +155,21 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		return composite;
 	}
 
+	private CompositeRecipe buildFindSourceFilesRecipe(Query query) {
+		String filePattern = query.keyValues().get("value");
+		String matchId = UUID.randomUUID().toString();
+
+		Map<String, Map<String, String>> recipe = Map.of("dev.snowdrop.mtool.openrewrite.file.search.FindSourceFiles",
+				Map.of("filePattern", filePattern, "matchId", matchId));
+
+		CompositeRecipe composite = new CompositeRecipe("specs.openrewrite.org/v1beta/recipe",
+				"dev.snowdrop.openrewrite.MatchConditions",
+				"Find files by source path. Paths are always interpreted as relative to the repository root.",
+				"Try to match a resource", List.of(recipe));
+
+		return composite;
+	}
+
 	@Override
 	public String getScannerType() {
 		return "openrewrite";
@@ -164,7 +179,8 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 	public boolean supports(Query query) {
 		String symbol = query.symbol();
 		String fileType = query.fileType();
-		return fileType.contains("java") && symbol.contains("annotation");
+		return (fileType.contains("java") && symbol.contains("annotation"))
+				|| (fileType.contains("source") && symbol.contains("file"));
 	}
 
 	public String toYaml(CompositeRecipe recipe) {
@@ -205,7 +221,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		// Recipe's jar files
 		String gavs = "org.openrewrite:rewrite-java:8.65.0,"
 				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.44.0,"
-				+ "dev.snowdrop.mtool:openrewrite-recipes:1.0.4";
+				+ "dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT";
 
 		try {
 			List<String> command = new ArrayList<>();

@@ -1,0 +1,22 @@
+- category: mandatory
+  description: Format the Java code to respect best practices formating conventions
+  effort: 1
+  labels:
+    - konveyor.io/source=java
+    - konveyor.io/target=code-formated
+  message: "Automatic format the Java code"
+  ruleID: 000-java-format
+  when:
+    precondition: source.file is '**/*.java'
+    #- org.openrewrite.java.search.HasJavaVersion:
+    #  version: "[25,)"
+    #- org.openrewrite.FindSourceFiles:
+    #    filePattern: '**/beans.java'
+  instructions:
+    openrewrite:
+      - name: Format Java code using a standard comprehensive set of Java formatting recipes
+        description: Format Java code using a standard comprehensive set of Java formatting recipes.
+        recipeList:
+          - org.openrewrite.java.format.AutoFormat
+        gav:
+          - dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT
