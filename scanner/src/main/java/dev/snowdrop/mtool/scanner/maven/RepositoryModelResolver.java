@@ -13,15 +13,11 @@ import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
-import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
-import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResult;
-import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
-import org.eclipse.aether.spi.connector.transport.TransporterFactory;
-import org.eclipse.aether.transport.http.HttpTransporterFactory;
+import org.eclipse.aether.supplier.RepositorySystemSupplier;
 
 import java.util.List;
 
@@ -91,10 +87,12 @@ public class RepositoryModelResolver implements ModelResolver {
 	}
 
 	private RepositorySystem newRepositorySystem() {
-		DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
+		/*DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
 		locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
 		locator.addService(TransporterFactory.class, HttpTransporterFactory.class);
-		return locator.getService(RepositorySystem.class);
+		return locator.getService(RepositorySystem.class);*/
+		RepositorySystemSupplier supplier = new RepositorySystemSupplier();
+		return supplier.get();
 	}
 
 	private DefaultRepositorySystemSession newRepositorySystemSession(RepositorySystem system) {
