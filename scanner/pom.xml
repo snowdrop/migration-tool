@@ -68,6 +68,11 @@
             <artifactId>opencsv</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>dev.snowdrop.openrewrite</groupId>
+            <artifactId>rewrite-client</artifactId>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>io.quarkus</groupId>
