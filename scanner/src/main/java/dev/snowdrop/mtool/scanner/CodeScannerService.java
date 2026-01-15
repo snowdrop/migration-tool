@@ -37,6 +37,7 @@ public class CodeScannerService {
 
 			if (preconditionResult.isMatchSucceeded()) {
 				logger.warnf("Precondition matched for rule %s: %s", rule.ruleID(), rule.when().precondition());
+				return preconditionResult;
 			}
 
 			if (!preconditionResult.isMatchSucceeded()) {
