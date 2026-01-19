@@ -7,9 +7,15 @@ import dev.snowdrop.mtool.model.analyze.CsvRecord;
 import dev.snowdrop.mtool.model.analyze.Match;
 import dev.snowdrop.mtool.model.analyze.ScannerType;
 import dev.snowdrop.mtool.model.parser.Query;
-import dev.snowdrop.mtool.scanner.QueryScanner;
 import dev.snowdrop.mtool.model.transform.CompositeRecipe;
+import dev.snowdrop.mtool.scanner.QueryScanner;
+import dev.snowdrop.openrewrite.cli.RewriteService;
+import dev.snowdrop.openrewrite.cli.model.ResultsContainer;
+import dev.snowdrop.openrewrite.cli.model.RewriteConfig;
 import org.jboss.logging.Logger;
+import org.openrewrite.DataTable;
+import org.openrewrite.RecipeRun;
+import org.openrewrite.table.SearchResults;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -22,6 +28,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -59,6 +66,11 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
 	@Override
 	public List<Match> scansCodeFor(Config config, Query query) {
+		return scansCode(config);
+	}
+
+	@Deprecated
+	private List<Match> oldMethodToGetMatches(Config config, Query query) {
 		logger.infof("OpenRewrite scanner executing 1 query");
 
 		if (config.scanner() != null && !ScannerType.OPENREWRITE.label().equals(config.scanner())) {
@@ -86,6 +98,71 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
 		logger.infof("OpenRewrite scanner completed. Total matches found: %d", results.size());
 		return results;
+	}
+
+	/****
+	 * New method using the RewriteClient.
+	 * @param config
+	 * @return
+	 */
+	private List<Match> scansCode(Config config) {
+		logger.infof("OpenRewrite scanner executing 1 query");
+
+		if (config.scanner() != null && !ScannerType.OPENREWRITE.label().equals(config.scanner())) {
+			return new ArrayList<>();
+		}
+
+		List<String> recipes = getRecipesToApply();
+
+		List<Match> matches = applyRecipes(config, recipes);
+
+		// Execute the maven rewrite goal command
+		if (!matches.isEmpty()) {
+			logger.warnf("No results found");
+			return new ArrayList<>();
+		}
+		return matches;
+
+	}
+
+	//TODO this method needs to be adapted, for the moment respects the existent needs to display data
+	List<Match> findMatchsFromResults(ResultsContainer resultsContainer, List<String> recipes) {
+		List<Match> results = new ArrayList<>();
+		for (String recipeName : recipes) {
+			RecipeRun run = resultsContainer.getRecipeRuns().get(recipeName);
+			Optional<Map.Entry<DataTable<?>, List<?>>> resultMap = run.getDataTables().entrySet().stream()
+					.filter(entry -> entry.getKey().getName().contains("SearchResults")).findFirst();
+
+			if (resultMap.isPresent()) {
+
+				List<SearchResults.Row> rows = (List<SearchResults.Row>) resultMap.get().getValue();
+				for (SearchResults.Row row : rows) {
+					String sourcePath = row.getSourcePath();
+					String description = row.getDescription();
+					String recipe = row.getRecipe();
+
+					String result = String.format("%s/%s:%d|%s.%s|%s", "parentFolderName", "csvFileName", 42,
+							sourcePath, description, recipe);
+					results.add(new Match("toBeDone", getScannerType(), result));
+
+				}
+
+			}
+		}
+		return results;
+	}
+
+	private List<Match> applyRecipes(Config config, List<String> recipes) {
+		RewriteConfig cfg = new RewriteConfig();
+		cfg.setAppPath(Paths.get(config.appPath()));
+
+		cfg.setActiveRecipes(recipes);
+
+		RewriteService svc = new RewriteService(cfg);
+		svc.init();
+		ResultsContainer run = svc.run();
+		return findMatchsFromResults(run, recipes);
+
 	}
 
 	private String extractMatchId(CompositeRecipe composite) {
@@ -139,6 +216,11 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 			//			case "method" -> buildMethodRecipe(query);
 			default -> throw new IllegalArgumentException("Unsupported symbol: " + query.symbol());
 		};
+	}
+
+	private List<String> getRecipesToApply() {
+		return List.of("org.openrewrite.java.search.FindAnnotations");
+
 	}
 
 	private CompositeRecipe buildAnnotationRecipe(Query query) {
