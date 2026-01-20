@@ -18,6 +18,21 @@ public class RecipeHolder {
 	// The list of recipes held by this "Recipe"
 	private List<RecipeDefinition> recipesList;
 
+	public RecipeHolder withName(String name) {
+		this.name = name;
+		return this;
+	}
+
+	public RecipeHolder withDisplayName(String displayName) {
+		this.displayName = displayName;
+		return this;
+	}
+
+	public RecipeHolder withDescription(String description) {
+		this.description = description;
+		return this;
+	}
+
 	public String getApiVersion() {
 		return ApiVersion;
 	}
