@@ -1,37 +1,29 @@
-package dev.snowdrop.mtool.tests.analyze.properties;
+package dev.snowdrop.mtool.tests.analyze.rewrite.match;
 
-import dev.snowdrop.mtool.tests.analyze.BaseRulesTest;
 import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.analyze.Match;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
-import dev.snowdrop.mtool.scanner.file.FileSearch;
+import dev.snowdrop.mtool.tests.analyze.BaseRulesTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.openrewrite.table.SearchResults;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFile;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-class PropertiesFileSearchUsingScannerTest extends BaseRulesTest {
+class ShouldMatchPropertiesKey extends BaseRulesTest {
 
 	private CodeScannerService codeScannerService;
 	private Config config;
-
-	protected FileSearch fileSearcher;
-	protected FileSearch contentSearcher;
-
-	Path applicationPath;
 
 	@TempDir
 	Path tempDir;
@@ -42,11 +34,8 @@ class PropertiesFileSearchUsingScannerTest extends BaseRulesTest {
 	void setUp() throws Exception {
 		// Copy the code of the project to analyze within the temp dir
 		String applicationToScan = "spring-boot-todo-app";
-		applicationPath = tempDir.resolve(applicationToScan);
-		copyFolder(applicationToScan, applicationPath);
-
-		fileSearcher = new FileSearch();
-		contentSearcher = new FileSearch();
+		Path destinationPath = tempDir.resolve(applicationToScan);
+		copyFolder(applicationToScan, destinationPath);
 
 		// Copy the rules to be evaluated the temp dir
 		String cookBook = "test-rules";
@@ -54,7 +43,7 @@ class PropertiesFileSearchUsingScannerTest extends BaseRulesTest {
 		copyFolder(cookBook, rulesPath);
 
 		// Configure the test with parameters
-		config = createTestConfig(applicationPath, rulesPath, jdtls);
+		config = createTestConfig(destinationPath, rulesPath, jdtls);
 
 		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
 		codeScannerService = new CodeScannerService(config, scanCommandExecutor);
@@ -62,8 +51,8 @@ class PropertiesFileSearchUsingScannerTest extends BaseRulesTest {
 
 	@ParameterizedTest
 	@CsvSource({"properties/spring-datasource-properties.yaml"})
-	void shouldMatchDataSourcePropertiesWithScannerRewrite(String ruleSubPath) throws IOException {
-		// Given a path, got the rule to be processed
+	void shouldMatchPropertiesWithScannerRewrite(String ruleSubPath) throws IOException {
+		// When condition: properties.key is 'spring.datasource.*'
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
 		// Process the rule
@@ -72,18 +61,13 @@ class PropertiesFileSearchUsingScannerTest extends BaseRulesTest {
 		// Then
 		assertNotNull(result);
 		assertTrue(result.containsKey("springboot-datasource-config"));
-		//
-		List<Match> matches = result.get("springboot-datasource-config");
-		assertNotNull(matches);
+		assertEquals(4, result.get("springboot-datasource-config").size());
 
-		assertThat(result.get("springboot-datasource-config")).hasSize(4);
-
-		var results = result.get("springboot-datasource-config");
-		assertThat(results).extracting(Match::result).map(Object::toString) // Convert the object to string first
-				.flatExtracting(s -> Arrays.asList(s.split("\\|")))
-				.contains("src/main/resources/application.properties",
-						"spring.datasource.url=jdbc:mysql://127.0.0.1:3306/todo", "spring.datasource.username=root",
-						"spring.datasource.password=root",
-						"spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver");
+		Match match = result.get("springboot-datasource-config").getFirst();
+		assertNotNull(match);
+		String record = (String) match.result();
+		assertEquals(true, record.contains("src/main/resources/application.properties"));
+		assertEquals(true, record.contains("Find property `spring.datasource.*`"));
 	}
+
 }

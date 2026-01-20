@@ -10,7 +10,7 @@
   ruleID: springboot-datasource-config
   when:
     condition: |
-      properties.key is 'spring.datasource'
+      properties.key is 'spring.datasource.*'
   order: 5
   instructions:
     ai:
