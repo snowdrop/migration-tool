@@ -76,8 +76,9 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 		assertNotNull(result);
 		assertTrue(result.containsKey("000-springboot-annotation-notfound"));
 
-		Path rewriteYml = tempDir.resolve(Path.of(appName, "rewrite.yml"));
-		assertTrue(Files.exists(rewriteYml));
+        // The following code is not needed anymore as we don't create a rewrite.yaml file using the rewrite client !
+		// Path rewriteYml = tempDir.resolve(Path.of(appName, "rewrite.yml"));
+		// assertTrue(Files.exists(rewriteYml));
 	}
 
 	@ParameterizedTest
