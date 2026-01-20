@@ -6,7 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import dev.snowdrop.mtool.model.analyze.MigrationTask;
 import dev.snowdrop.mtool.model.analyze.Rule;
-import dev.snowdrop.mtool.model.transform.CompositeRecipe;
+import dev.snowdrop.mtool.model.openrewrite.CompositeRecipe;
 import dev.snowdrop.mtool.transform.provider.MigrationProvider;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionContext;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionResult;

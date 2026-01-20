@@ -6,8 +6,10 @@ import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.analyze.CsvRecord;
 import dev.snowdrop.mtool.model.analyze.Match;
 import dev.snowdrop.mtool.model.analyze.ScannerType;
+import dev.snowdrop.mtool.model.openrewrite.RecipeDefinition;
+import dev.snowdrop.mtool.model.openrewrite.RecipeHolder;
 import dev.snowdrop.mtool.model.parser.Query;
-import dev.snowdrop.mtool.model.transform.CompositeRecipe;
+import dev.snowdrop.mtool.model.openrewrite.CompositeRecipe;
 import dev.snowdrop.mtool.scanner.QueryScanner;
 import dev.snowdrop.openrewrite.cli.RewriteService;
 import dev.snowdrop.openrewrite.cli.model.ResultsContainer;
@@ -35,256 +37,253 @@ import java.util.stream.Stream;
  */
 public class OpenRewriteQueryScanner implements QueryScanner {
 
-    private static final Logger logger = Logger.getLogger(OpenRewriteQueryScanner.class);
-    public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
-    public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
-    public static final String OPENREWRITE_MATCH_CONDITIONS = "dev.snowdrop.openrewrite.MatchConditions";
-    private static final String KEY_VALUE_DELIMITER = "=";
+	private static final Logger logger = Logger.getLogger(OpenRewriteQueryScanner.class);
+	public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
+	public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
+	public static final String OPENREWRITE_MATCH_CONDITIONS = "dev.snowdrop.openrewrite.MatchConditions";
+	private static final String KEY_VALUE_DELIMITER = "=";
 
-    @Deprecated
-    @Override
-    public List<Match> executeQueries(Config config, Set<Query> queries) {
-        logger.infof("OpenRewrite scanner executing %d queries", queries.size());
+	@Deprecated
+	@Override
+	public List<Match> executeQueries(Config config, Set<Query> queries) {
+		logger.infof("OpenRewrite scanner executing %d queries", queries.size());
 
-        List<Match> allResults = new ArrayList<>();
+		List<Match> allResults = new ArrayList<>();
 
-        for (Query q : queries) {
-            List<Match> partial = scansCodeFor(config, q);
+		for (Query q : queries) {
+			List<Match> partial = scansCodeFor(config, q);
 
-            if (partial != null && !partial.isEmpty()) {
-                allResults.addAll(partial);
-            }
-        }
+			if (partial != null && !partial.isEmpty()) {
+				allResults.addAll(partial);
+			}
+		}
 
-        logger.infof("OpenRewrite scanner completed. Total matches found: %d", allResults.size());
-        return allResults;
-    }
+		logger.infof("OpenRewrite scanner completed. Total matches found: %d", allResults.size());
+		return allResults;
+	}
 
-    @Override
-    public List<Match> scansCodeFor(Config config, Query query) {
-        return scansCode(config, query);
-    }
+	@Override
+	public List<Match> scansCodeFor(Config config, Query query) {
+		return scansCode(config, query);
+	}
 
-    @Deprecated
-    private List<Match> oldMethodToGetMatches(Config config, Query query) {
-        logger.infof("OpenRewrite scanner executing 1 query");
+	@Deprecated
+	private List<Match> oldMethodToGetMatches(Config config, Query query) {
+		logger.infof("OpenRewrite scanner executing 1 query");
 
-        if (config.scanner() != null && !ScannerType.OPENREWRITE.label().equals(config.scanner())) {
-            logger.warnf("Query %s.%s is configured for scanner '%s', not 'openrewrite'. Skipping.", query.fileType(),
-                query.symbol(), config.scanner());
-            return new ArrayList<>();
-        }
+		if (config.scanner() != null && !ScannerType.OPENREWRITE.label().equals(config.scanner())) {
+			logger.warnf("Query %s.%s is configured for scanner '%s', not 'openrewrite'. Skipping.", query.fileType(),
+					query.symbol(), config.scanner());
+			return new ArrayList<>();
+		}
 
-        CompositeRecipe openRewriteRecipe = oldPparse(query);
+		CompositeRecipe openRewriteRecipe = oldPparse(query);
 
-        String yamlRecipe = toYaml(openRewriteRecipe);
-        logger.debugf("Recipe generated: %s", yamlRecipe);
+		String yamlRecipe = toYaml(openRewriteRecipe);
+		logger.debugf("Recipe generated: %s", yamlRecipe);
 
-        // Execute the maven rewrite goal command
-        boolean succeed = execOpenrewriteMvnPlugin(config, true, yamlRecipe);
-        if (!succeed) {
-            logger.warnf("Failed to execute the maven command");
-            return new ArrayList<>();
-        }
+		// Execute the maven rewrite goal command
+		boolean succeed = execOpenrewriteMvnPlugin(config, true, yamlRecipe);
+		if (!succeed) {
+			logger.warnf("Failed to execute the maven command");
+			return new ArrayList<>();
+		}
 
-        String matchId = extractMatchId(openRewriteRecipe);
-        List<Match> results = findRecordsMatching(config.appPath(), matchId);
+		String matchId = extractMatchId(openRewriteRecipe);
+		List<Match> results = findRecordsMatching(config.appPath(), matchId);
 
-        logger.debugf("Found %d matches for query %s.%s ", results.size(), query.fileType(), query.symbol());
+		logger.debugf("Found %d matches for query %s.%s ", results.size(), query.fileType(), query.symbol());
 
-        logger.infof("OpenRewrite scanner completed. Total matches found: %d", results.size());
-        return results;
-    }
+		logger.infof("OpenRewrite scanner completed. Total matches found: %d", results.size());
+		return results;
+	}
 
-    /****
-     * New method using the RewriteClient.
-     * @param config
-     * @return
-     */
-    private List<Match> scansCode(Config config, Query q) {
-        logger.infof("OpenRewrite scanner executing 1 query");
+	/****
+	 * New method using the RewriteClient.
+	 * @param config
+	 * @return
+	 */
+	private List<Match> scansCode(Config config, Query q) {
+		logger.infof("OpenRewrite scanner executing 1 query");
 
-        if (config.scanner() != null && !ScannerType.OPENREWRITE.label().equals(config.scanner())) {
-            return new ArrayList<>();
-        }
+		if (config.scanner() != null && !ScannerType.OPENREWRITE.label().equals(config.scanner())) {
+			return new ArrayList<>();
+		}
 
 		/*
 		   Create from the query its corresponding Recipe
 		   The CompositeRecipe handles the definition of the Recipe like the list of the recipes
 		   to be executed. this is similar to a YAML Recipes file
 		 */
-        RecipeHolder recipeHolder = parse(q);
+		RecipeHolder recipeHolder = parse(q);
 
-        List<Match> matches = null;
-        try {
-            matches = applyRecipes(config, recipeHolder);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+		List<Match> matches = null;
+		try {
+			matches = applyRecipes(config, recipeHolder);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 
-        // Execute the maven rewrite goal command
-        if (!matches.isEmpty()) {
-            logger.warnf("No results found");
-            return new ArrayList<>();
-        }
-        return matches;
+		// Execute the maven rewrite goal command
+		if (!matches.isEmpty()) {
+			logger.warnf("No results found");
+			return new ArrayList<>();
+		}
+		return matches;
 
-    }
+	}
 
-    //TODO this method needs to be adapted, for the moment respects the existent needs to display data
-    List<Match> findMatchsFromResults(ResultsContainer resultsContainer, RecipeDefinition recipeDefinition) {
-        List<Match> results = new ArrayList<>();
+	//TODO this method needs to be adapted, for the moment respects the existent needs to display data
+	List<Match> findMatchsFromResults(ResultsContainer resultsContainer, RecipeDefinition recipeDefinition) {
+		List<Match> results = new ArrayList<>();
 
-        if (!resultsContainer.isNotEmpty()) {
-            return results;
-        }
+		if (!resultsContainer.isNotEmpty()) {
+			return results;
+		}
 
-        RecipeRun run = resultsContainer.getRecipeRuns().get(recipeDefinition.getFqName());
-        Optional<Map.Entry<DataTable<?>, List<?>>> resultMap = run.getDataTables().entrySet().stream()
-            .filter(entry -> entry.getKey().getName().contains("SearchResults")).findFirst();
+		RecipeRun run = resultsContainer.getRecipeRuns().get(recipeDefinition.getFqName());
+		Optional<Map.Entry<DataTable<?>, List<?>>> resultMap = run.getDataTables().entrySet().stream()
+				.filter(entry -> entry.getKey().getName().contains("SearchResults")).findFirst();
 
-        if (resultMap.isPresent()) {
+		if (resultMap.isPresent()) {
 
-            List<SearchResults.Row> rows = (List<SearchResults.Row>) resultMap.get().getValue();
-            for (SearchResults.Row row : rows) {
-                String sourcePath = row.getSourcePath();
-                String description = row.getDescription();
-                String recipe = row.getRecipe();
+			List<SearchResults.Row> rows = (List<SearchResults.Row>) resultMap.get().getValue();
+			for (SearchResults.Row row : rows) {
+				String sourcePath = row.getSourcePath();
+				String description = row.getDescription();
+				String recipe = row.getRecipe();
 
-                String result = String.format("%s/%s:%d|%s.%s|%s", "parentFolderName", "csvFileName", 42,
-                    sourcePath, description, recipe);
-                results.add(new Match("toBeDone", getScannerType(), result));
+				String result = String.format("%s/%s:%d|%s.%s|%s", "parentFolderName", "csvFileName", 42, sourcePath,
+						description, recipe);
+				results.add(new Match("toBeDone", getScannerType(), result));
 
-            }
+			}
 
-        }
-        return results;
-    }
+		}
+		return results;
+	}
 
-    private List<Match> applyRecipes(Config config, RecipeHolder recipeHolder) throws Exception {
-        RewriteConfig cfg = new RewriteConfig();
-        cfg.setAppPath(Paths.get(config.appPath()));
+	private List<Match> applyRecipes(Config config, RecipeHolder recipeHolder) throws Exception {
+		RewriteConfig cfg = new RewriteConfig();
+		cfg.setAppPath(Paths.get(config.appPath()));
 
-        // Configure the RewriteConfig using the RecipeHolder
-        // The fqName corresponds to the fully qualify name of the Java Recipe class to be executed
-        RecipeDefinition rd = recipeHolder.getRecipesList().getFirst();
-        cfg.setFqNameRecipe(rd.getFqName());
+		// Configure the RewriteConfig using the RecipeHolder
+		// The fqName corresponds to the fully qualify name of the Java Recipe class to be executed
+		RecipeDefinition rd = recipeHolder.getRecipesList().getFirst();
+		cfg.setFqNameRecipe(rd.getFqName());
 
-        // Set the parameters needed to configure the fields of the Java Recipe Class
-        cfg.setRecipeOptions(convertMapParametersToKeyValueSet(rd.getFieldMappings()));
+		// Set the parameters needed to configure the fields of the Java Recipe Class
+		cfg.setRecipeOptions(convertMapParametersToKeyValueSet(rd.getFieldMappings()));
 
-        RewriteService svc = new RewriteService(cfg);
-        svc.init();
-        ResultsContainer run = svc.run();
+		RewriteService svc = new RewriteService(cfg);
+		svc.init();
+		ResultsContainer run = svc.run();
 
-        return findMatchsFromResults(run, rd);
-    }
+		return findMatchsFromResults(run, rd);
+	}
 
-    /**
-     * Converts a Map of field parameter and value into a Set of "k=v" strings.
-     */
-    public Set<String> convertMapParametersToKeyValueSet(Map<String, String> fieldsByName) {
-        if (fieldsByName == null || fieldsByName.isEmpty()) {
-            return Set.of();
-        }
+	/**
+	 * Converts a Map of field parameter and value into a Set of "k=v" strings.
+	 */
+	public Set<String> convertMapParametersToKeyValueSet(Map<String, String> fieldsByName) {
+		if (fieldsByName == null || fieldsByName.isEmpty()) {
+			return Set.of();
+		}
 
-        return fieldsByName.entrySet().stream()
-            .map(entry -> entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue())
-            .collect(Collectors.toSet());
-    }
+		return fieldsByName.entrySet().stream().map(entry -> entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue())
+				.collect(Collectors.toSet());
+	}
 
-    public Map<String, String> convertKeyValueToFieldParameters(Set<String> rawEntries) {
-        return rawEntries.stream()
-            // Filter out any strings that don't contain '=' to avoid errors
-            .filter(s -> s != null && s.contains("="))
-            .collect(Collectors.toMap(
-                s -> s.substring(0, s.indexOf("=")).trim(), // Key
-                s -> s.substring(s.indexOf("=") + 1).trim(), // Value
-                // Merge function: in case of duplicate keys, keep the existing one
-                (existing, replacement) -> existing
-            ));
-    }
+	public Map<String, String> convertKeyValueToFieldParameters(Set<String> rawEntries) {
+		return rawEntries.stream()
+				// Filter out any strings that don't contain '=' to avoid errors
+				.filter(s -> s != null && s.contains("="))
+				.collect(Collectors.toMap(s -> s.substring(0, s.indexOf("=")).trim(), // Key
+						s -> s.substring(s.indexOf("=") + 1).trim(), // Value
+						// Merge function: in case of duplicate keys, keep the existing one
+						(existing, replacement) -> existing));
+	}
 
-    private String extractMatchId(CompositeRecipe composite) {
-        Object first = composite.recipeList().get(0);
+	private String extractMatchId(CompositeRecipe composite) {
+		Object first = composite.recipeList().get(0);
 
-        Map<String, Map<String, String>> recipeMap = (Map<String, Map<String, String>>) first;
+		Map<String, Map<String, String>> recipeMap = (Map<String, Map<String, String>>) first;
 
-        Map<String, String> inner = recipeMap.values().iterator().next();
+		Map<String, String> inner = recipeMap.values().iterator().next();
 
-        return inner.get("matchId");
-    }
+		return inner.get("matchId");
+	}
 
-    private Map<String, String> extractParams(CompositeRecipe composite) {
-        Object first = composite.recipeList().get(0);
+	private Map<String, String> extractParams(CompositeRecipe composite) {
+		Object first = composite.recipeList().get(0);
 
-        if (!(first instanceof Map<?, ?> rawMap)) {
-            throw new IllegalStateException("recipeList must contain rawMap");
-        }
+		if (!(first instanceof Map<?, ?> rawMap)) {
+			throw new IllegalStateException("recipeList must contain rawMap");
+		}
 
-        // Recipe's jar files
-        String gavs = "org.openrewrite:rewrite-java:8.71.0,"
-            + "org.openrewrite.recipe:rewrite-java-dependencies:1.49.0,"
-            + "dev.snowdrop.mtool:openrewrite-recipes:1.0.4";
-        Map<String, Map<String, String>> recipeMap = (Map<String, Map<String, String>>) first;
+		// Recipe's jar files
+		String gavs = "org.openrewrite:rewrite-java:8.71.0,"
+				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.49.0,"
+				+ "dev.snowdrop.mtool:openrewrite-recipes:1.0.4";
+		Map<String, Map<String, String>> recipeMap = (Map<String, Map<String, String>>) first;
 
-        return recipeMap.values().iterator().next();
+		return recipeMap.values().iterator().next();
 
-    }
+	}
 
-    private String extractEntryKey(CompositeRecipe recipe) {
-        Object first = recipe.recipeList().get(0);
+	private String extractEntryKey(CompositeRecipe recipe) {
+		Object first = recipe.recipeList().get(0);
 
-        if (!(first instanceof Map<?, ?> rawMap)) {
-            throw new IllegalStateException("recipeList must contain rawMap");
-        }
+		if (!(first instanceof Map<?, ?> rawMap)) {
+			throw new IllegalStateException("recipeList must contain rawMap");
+		}
 
-        Map<String, Map<String, String>> recipeMap = rawMap.entrySet().stream()
-            .collect(Collectors.toMap(e -> (String) e.getKey(), e -> (Map<String, String>) e.getValue()));
+		Map<String, Map<String, String>> recipeMap = rawMap.entrySet().stream()
+				.collect(Collectors.toMap(e -> (String) e.getKey(), e -> (Map<String, String>) e.getValue()));
 
-        var entry = recipeMap.entrySet().iterator().next();
+		var entry = recipeMap.entrySet().iterator().next();
 
-        return entry.getKey();
+		return entry.getKey();
 
-    }
+	}
 
-    private RecipeHolder parse(Query query) {
-        return switch (query.symbol()) {
-            case "annotation" -> buildSearchAnnotationRecipe(query);
-            // TODO : case "file" -> buildFindSourceFilesRecipe(query);
-            default -> throw new IllegalArgumentException("Unsupported symbol: " + query.symbol());
-        };
-    }
+	private RecipeHolder parse(Query query) {
+		return switch (query.symbol()) {
+			case "annotation" -> buildSearchAnnotationRecipe(query);
+			// TODO : case "file" -> buildFindSourceFilesRecipe(query);
+			default -> throw new IllegalArgumentException("Unsupported symbol: " + query.symbol());
+		};
+	}
 
-    // OLD METHODS DEPRECATED !!!
-    private CompositeRecipe oldPparse(Query query) {
-        return switch (query.symbol()) {
-            case "annotation" -> oldBuildAnnotationRecipe(query);
-            // TODO : case "file" -> buildFindSourceFilesRecipe(query);
-            default -> throw new IllegalArgumentException("Unsupported symbol: " + query.symbol());
-        };
-    }
+	// OLD METHODS DEPRECATED !!!
+	private CompositeRecipe oldPparse(Query query) {
+		return switch (query.symbol()) {
+			case "annotation" -> oldBuildAnnotationRecipe(query);
+			// TODO : case "file" -> buildFindSourceFilesRecipe(query);
+			default -> throw new IllegalArgumentException("Unsupported symbol: " + query.symbol());
+		};
+	}
 
-    private List<String> getRecipesToApply() {
-        return List.of("org.openrewrite.java.search.FindAnnotations");
-    }
+	private List<String> getRecipesToApply() {
+		return List.of("org.openrewrite.java.search.FindAnnotations");
+	}
 
-    private CompositeRecipe oldBuildAnnotationRecipe(Query query) {
-        String annotationName = query.keyValues().get("name");
-        String matchId = UUID.randomUUID().toString();
+	private CompositeRecipe oldBuildAnnotationRecipe(Query query) {
+		String annotationName = query.keyValues().get("name");
+		String matchId = UUID.randomUUID().toString();
 
-        Map<String, Map<String, String>> recipe = Map.of("dev.snowdrop.mtool.openrewrite.java.search.FindAnnotations",
-            Map.of("pattern", annotationName, "matchId", matchId, "matchOnMetaAnnotations",
-                Boolean.FALSE.toString()));
+		Map<String, Map<String, String>> recipe = Map.of("dev.snowdrop.mtool.openrewrite.java.search.FindAnnotations",
+				Map.of("pattern", annotationName, "matchId", matchId, "matchOnMetaAnnotations",
+						Boolean.FALSE.toString()));
 
-        CompositeRecipe composite = new CompositeRecipe("specs.openrewrite.org/v1beta/recipe",
-            OPENREWRITE_MATCH_CONDITIONS, "Try to match a resource", "Try to match a resource", List.of(recipe));
+		CompositeRecipe composite = new CompositeRecipe("specs.openrewrite.org/v1beta/recipe",
+				OPENREWRITE_MATCH_CONDITIONS, "Try to match a resource", "Try to match a resource", List.of(recipe));
 
-        return composite;
-    }
+		return composite;
+	}
 
-    private RecipeHolder buildSearchAnnotationRecipe(Query query) {
-        String annotationName = query.keyValues().get("name");
+	private RecipeHolder buildSearchAnnotationRecipe(Query query) {
+		String annotationName = query.keyValues().get("name");
 
 		/*
 		Map<String, Map<String, String>> recipeMap = Map.of("dev.snowdrop.mtool.openrewrite.java.search.FindAnnotations",
@@ -296,189 +295,189 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
 		 */
 
-        RecipeHolder recipeHolder = new RecipeHolder();
-        recipeHolder.setName("dev.snowdrop.mtool.openrewrite.ConditionToMatch");
-        recipeHolder.setDisplayName("Search a Java annotation");
-        recipeHolder.setDescription("Search a Java annotation.");
+		RecipeHolder recipeHolder = new RecipeHolder();
+		recipeHolder.setName("dev.snowdrop.mtool.openrewrite.ConditionToMatch");
+		recipeHolder.setDisplayName("Search a Java annotation");
+		recipeHolder.setDescription("Search a Java annotation.");
 
-        HashMap<String, String> fieldMappings = new HashMap<>();
-        fieldMappings.put("annotationPattern", annotationName);
-        fieldMappings.put("matchMetaAnnotations", Boolean.FALSE.toString());
+		HashMap<String, String> fieldMappings = new HashMap<>();
+		fieldMappings.put("annotationPattern", annotationName);
+		fieldMappings.put("matchMetaAnnotations", Boolean.FALSE.toString());
 
-        recipeHolder.setRecipesList(List.of(new RecipeDefinition()
-            .withFullyQualifyRecipeName("org.openrewrite.java.search.FindAnnotations")
-            .withFieldMappings(fieldMappings)));
+		recipeHolder.setRecipesList(
+				List.of(new RecipeDefinition().withFullyQualifyRecipeName("org.openrewrite.java.search.FindAnnotations")
+						.withFieldMappings(fieldMappings)));
 
-        return recipeHolder;
-    }
+		return recipeHolder;
+	}
 
-    private CompositeRecipe buildFindSourceFilesRecipe(Query query) {
-        String filePattern = query.keyValues().get("value");
-        String matchId = UUID.randomUUID().toString();
+	private CompositeRecipe buildFindSourceFilesRecipe(Query query) {
+		String filePattern = query.keyValues().get("value");
+		String matchId = UUID.randomUUID().toString();
 
-        Map<String, Map<String, String>> recipe = Map.of("dev.snowdrop.mtool.openrewrite.file.search.FindSourceFiles",
-            Map.of("filePattern", filePattern, "matchId", matchId));
+		Map<String, Map<String, String>> recipe = Map.of("dev.snowdrop.mtool.openrewrite.file.search.FindSourceFiles",
+				Map.of("filePattern", filePattern, "matchId", matchId));
 
-        CompositeRecipe composite = new CompositeRecipe("specs.openrewrite.org/v1beta/recipe",
-            "dev.snowdrop.openrewrite.MatchConditions",
-            "Find files by source path. Paths are always interpreted as relative to the repository root.",
-            "Try to match a resource", List.of(recipe));
+		CompositeRecipe composite = new CompositeRecipe("specs.openrewrite.org/v1beta/recipe",
+				"dev.snowdrop.openrewrite.MatchConditions",
+				"Find files by source path. Paths are always interpreted as relative to the repository root.",
+				"Try to match a resource", List.of(recipe));
 
-        return composite;
-    }
+		return composite;
+	}
 
-    @Override
-    public String getScannerType() {
-        return "openrewrite";
-    }
+	@Override
+	public String getScannerType() {
+		return "openrewrite";
+	}
 
-    @Override
-    public boolean supports(Query query) {
-        String symbol = query.symbol();
-        String fileType = query.fileType();
-        return (fileType.contains("java") && symbol.contains("annotation"))
-            || (fileType.contains("source") && symbol.contains("file"));
-    }
+	@Override
+	public boolean supports(Query query) {
+		String symbol = query.symbol();
+		String fileType = query.fileType();
+		return (fileType.contains("java") && symbol.contains("annotation"))
+				|| (fileType.contains("source") && symbol.contains("file"));
+	}
 
-    public String toYaml(CompositeRecipe recipe) {
-        StringBuilder yaml = new StringBuilder();
-        yaml.append("type: ").append("\"").append(recipe.type()).append("\"").append("\n");
-        yaml.append("name: ").append("\"").append(recipe.name()).append("\"").append("\n");
-        yaml.append("displayName: ").append("\"").append(recipe.displayName()).append("\"").append("\n");
-        yaml.append("description: ").append("\"").append(recipe.description()).append("\"").append("\n");
-        yaml.append("recipeList:\n");
+	public String toYaml(CompositeRecipe recipe) {
+		StringBuilder yaml = new StringBuilder();
+		yaml.append("type: ").append("\"").append(recipe.type()).append("\"").append("\n");
+		yaml.append("name: ").append("\"").append(recipe.name()).append("\"").append("\n");
+		yaml.append("displayName: ").append("\"").append(recipe.displayName()).append("\"").append("\n");
+		yaml.append("description: ").append("\"").append(recipe.description()).append("\"").append("\n");
+		yaml.append("recipeList:\n");
 
-        String entryKey = extractEntryKey(recipe);
-        yaml.append("  - ").append(entryKey).append(":\n");
+		String entryKey = extractEntryKey(recipe);
+		yaml.append("  - ").append(entryKey).append(":\n");
 
-        extractParams(recipe).forEach((key, value) -> {
-            yaml.append("      ").append(key).append(": ");
-            yaml.append("\"").append(value).append("\"");
-            yaml.append("\n");
-        });
-        logger.debugf("Recipe generated: %s", yaml.toString());
+		extractParams(recipe).forEach((key, value) -> {
+			yaml.append("      ").append(key).append(": ");
+			yaml.append("\"").append(value).append("\"");
+			yaml.append("\n");
+		});
+		logger.debugf("Recipe generated: %s", yaml.toString());
 
-        return yaml.toString();
-    }
+		return yaml.toString();
+	}
 
-    private boolean execOpenrewriteMvnPlugin(Config config, boolean verbose, String yamlRecipe) {
-        // Copy the rewrite yaml file under the project to scan
-        String rewriteYamlName = "rewrite.yml";
-        Path path = Paths.get(config.appPath());
-        Path yamlFilePath = path.resolve(rewriteYamlName);
+	private boolean execOpenrewriteMvnPlugin(Config config, boolean verbose, String yamlRecipe) {
+		// Copy the rewrite yaml file under the project to scan
+		String rewriteYamlName = "rewrite.yml";
+		Path path = Paths.get(config.appPath());
+		Path yamlFilePath = path.resolve(rewriteYamlName);
 
-        try {
-            Files.write(yamlFilePath, yamlRecipe.getBytes(), StandardOpenOption.CREATE,
-                StandardOpenOption.TRUNCATE_EXISTING);
-        } catch (IOException e) {
-            logger.errorf("Error writing rewrite YAML file: %s", e.getMessage());
-            return false;
-        }
+		try {
+			Files.write(yamlFilePath, yamlRecipe.getBytes(), StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			logger.errorf("Error writing rewrite YAML file: %s", e.getMessage());
+			return false;
+		}
 
-        // Recipe's jar files
-        String gavs = "org.openrewrite:rewrite-java:8.65.0,"
-            + "org.openrewrite.recipe:rewrite-java-dependencies:1.44.0,"
-            + "dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT";
+		// Recipe's jar files
+		String gavs = "org.openrewrite:rewrite-java:8.65.0,"
+				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.44.0,"
+				+ "dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT";
 
-        try {
-            List<String> command = new ArrayList<>();
-            String outputDirectoryRewriteName = rewriteYamlName.substring(0, rewriteYamlName.lastIndexOf('.'));
+		try {
+			List<String> command = new ArrayList<>();
+			String outputDirectoryRewriteName = rewriteYamlName.substring(0, rewriteYamlName.lastIndexOf('.'));
 
-            command.add("mvn");
-            command.add("-B");
-            command.add("-e");
-            command.add(String.format("%s:%s:%s:%s", MAVEN_OPENREWRITE_PLUGIN_GROUP, MAVEN_OPENREWRITE_PLUGIN_ARTIFACT,
-                config.openRewriteMavenPluginVersion(), "dryRun"));
-            command.add(String.format("-Drewrite.activeRecipes=%s", "dev.snowdrop.openrewrite.MatchConditions"));
-            command.add("-Drewrite.recipeArtifactCoordinates=" + gavs);
-            command.add("-Drewrite.exportDatatables=true");
-            command.add(String.format("-DreportOutputDirectory=target/%s", outputDirectoryRewriteName));
-            command.add(String.format("-Drewrite.configLocation=%s", rewriteYamlName));
+			command.add("mvn");
+			command.add("-B");
+			command.add("-e");
+			command.add(String.format("%s:%s:%s:%s", MAVEN_OPENREWRITE_PLUGIN_GROUP, MAVEN_OPENREWRITE_PLUGIN_ARTIFACT,
+					config.openRewriteMavenPluginVersion(), "dryRun"));
+			command.add(String.format("-Drewrite.activeRecipes=%s", "dev.snowdrop.openrewrite.MatchConditions"));
+			command.add("-Drewrite.recipeArtifactCoordinates=" + gavs);
+			command.add("-Drewrite.exportDatatables=true");
+			command.add(String.format("-DreportOutputDirectory=target/%s", outputDirectoryRewriteName));
+			command.add(String.format("-Drewrite.configLocation=%s", rewriteYamlName));
 
-            String commandStr = String.join(" ", command);
-            logger.infof("Executing OpenRewrite command: %s", commandStr);
+			String commandStr = String.join(" ", command);
+			logger.infof("Executing OpenRewrite command: %s", commandStr);
 
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
-            processBuilder.directory(path.toFile());
-            processBuilder.redirectErrorStream(true);
+			ProcessBuilder processBuilder = new ProcessBuilder(command);
+			processBuilder.directory(path.toFile());
+			processBuilder.redirectErrorStream(true);
 
-            Process process = processBuilder.start();
+			Process process = processBuilder.start();
 
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (verbose) {
-                        logger.infof("      %s", line);
-                    }
-                }
-            }
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					if (verbose) {
+						logger.infof("      %s", line);
+					}
+				}
+			}
 
-            int exitCode = process.waitFor();
-            return exitCode == 0;
+			int exitCode = process.waitFor();
+			return exitCode == 0;
 
-        } catch (IOException | InterruptedException e) {
-            logger.errorf("Failed to execute OpenRewrite maven command: %s", e.getMessage());
-            return false;
-        }
-    }
+		} catch (IOException | InterruptedException e) {
+			logger.errorf("Failed to execute OpenRewrite maven command: %s", e.getMessage());
+			return false;
+		}
+	}
 
-    private List<Match> findRecordsMatching(String projectPath, String matchIdToSearch) {
-        List<Match> results = new ArrayList<>();
-        Path openRewriteCsvPath = Paths.get(projectPath, "target", "rewrite", "datatables");
+	private List<Match> findRecordsMatching(String projectPath, String matchIdToSearch) {
+		List<Match> results = new ArrayList<>();
+		Path openRewriteCsvPath = Paths.get(projectPath, "target", "rewrite", "datatables");
 
-        try {
-            if (!Files.exists(openRewriteCsvPath)) {
-                logger.warnf("Datatables directory does not exist: %s", openRewriteCsvPath);
-                return results;
-            }
+		try {
+			if (!Files.exists(openRewriteCsvPath)) {
+				logger.warnf("Datatables directory does not exist: %s", openRewriteCsvPath);
+				return results;
+			}
 
-            try (Stream<Path> directories = Files.list(openRewriteCsvPath).filter(Files::isDirectory)) {
-                directories.forEach(dateTimeDir -> {
-                    String parentFolderName = dateTimeDir.getFileName().toString();
+			try (Stream<Path> directories = Files.list(openRewriteCsvPath).filter(Files::isDirectory)) {
+				directories.forEach(dateTimeDir -> {
+					String parentFolderName = dateTimeDir.getFileName().toString();
 
-                    try {
-                        try (Stream<Path> csvFiles = Files.list(dateTimeDir).filter(Files::isRegularFile)
-                            .filter(path -> path.toString().endsWith(".csv"))) {
+					try {
+						try (Stream<Path> csvFiles = Files.list(dateTimeDir).filter(Files::isRegularFile)
+								.filter(path -> path.toString().endsWith(".csv"))) {
 
-                            csvFiles.forEach(csvFile -> {
-                                String csvFileName = csvFile.getFileName().toString();
+							csvFiles.forEach(csvFile -> {
+								String csvFileName = csvFile.getFileName().toString();
 
-                                try (CSVReader csvReader = new CSVReader(new FileReader(csvFile.toFile()))) {
-                                    List<CsvRecord> records = new CsvToBeanBuilder<CsvRecord>(csvReader)
-                                        .withType(CsvRecord.class).withSkipLines(2).build().parse();
+								try (CSVReader csvReader = new CSVReader(new FileReader(csvFile.toFile()))) {
+									List<CsvRecord> records = new CsvToBeanBuilder<CsvRecord>(csvReader)
+											.withType(CsvRecord.class).withSkipLines(2).build().parse();
 
-                                    for (int i = 0; i < records.size(); i++) {
-                                        CsvRecord record = records.get(i);
+									for (int i = 0; i < records.size(); i++) {
+										CsvRecord record = records.get(i);
 
-                                        if (record.getMatchId() != null
-                                            && record.getMatchId().equals(matchIdToSearch)) {
-                                            String fileType = record.getType();
-                                            String symbolType = record.getSymbol();
-                                            String pattern = record.getPattern() != null ? record.getPattern() : "N/A";
+										if (record.getMatchId() != null
+												&& record.getMatchId().equals(matchIdToSearch)) {
+											String fileType = record.getType();
+											String symbolType = record.getSymbol();
+											String pattern = record.getPattern() != null ? record.getPattern() : "N/A";
 
-                                            String result = String.format("%s/%s:%d|%s.%s|%s", parentFolderName,
-                                                csvFileName, i + 3, pattern, symbolType, fileType);
+											String result = String.format("%s/%s:%d|%s.%s|%s", parentFolderName,
+													csvFileName, i + 3, pattern, symbolType, fileType);
 
-                                            // TODO: Deprecated the field name as we will use only the result
-                                            results.add(new Match(matchIdToSearch, getScannerType(), result));
-                                            logger.infof("Found match in %s at record %d: %s", csvFile, i + 1, result);
-                                        }
-                                    }
-                                } catch (IOException e) {
-                                    logger.errorf("Error parsing CSV file %s: %s", csvFile, e.getMessage());
-                                }
-                            });
-                        }
-                    } catch (IOException e) {
-                        logger.errorf("Error listing CSV files in directory %s: %s", dateTimeDir, e.getMessage());
-                    }
-                });
-            }
-        } catch (IOException e) {
-            logger.errorf("Error searching for CSV files: %s", e.getMessage());
-            throw new RuntimeException(e);
-        }
+											// TODO: Deprecated the field name as we will use only the result
+											results.add(new Match(matchIdToSearch, getScannerType(), result));
+											logger.infof("Found match in %s at record %d: %s", csvFile, i + 1, result);
+										}
+									}
+								} catch (IOException e) {
+									logger.errorf("Error parsing CSV file %s: %s", csvFile, e.getMessage());
+								}
+							});
+						}
+					} catch (IOException e) {
+						logger.errorf("Error listing CSV files in directory %s: %s", dateTimeDir, e.getMessage());
+					}
+				});
+			}
+		} catch (IOException e) {
+			logger.errorf("Error searching for CSV files: %s", e.getMessage());
+			throw new RuntimeException(e);
+		}
 
-        return results;
-    }
+		return results;
+	}
 }

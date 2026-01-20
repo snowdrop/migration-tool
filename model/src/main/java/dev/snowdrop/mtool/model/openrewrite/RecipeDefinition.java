@@ -1,4 +1,4 @@
-package dev.snowdrop.mtool.scanner.openrewrite;
+package dev.snowdrop.mtool.model.openrewrite;
 
 import java.util.Map;
 

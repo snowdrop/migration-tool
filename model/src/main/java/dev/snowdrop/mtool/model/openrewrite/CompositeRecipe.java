@@ -1,4 +1,4 @@
-package dev.snowdrop.mtool.model.transform;
+package dev.snowdrop.mtool.model.openrewrite;
 
 import java.util.List;
 
