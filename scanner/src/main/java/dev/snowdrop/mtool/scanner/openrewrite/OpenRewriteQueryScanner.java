@@ -111,13 +111,25 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		}
 
 		/*
-		   Create from the query its corresponding Recipe
-		   The CompositeRecipe handles the definition of the Recipe like the list of the recipes
-		   to be executed. this is similar to a YAML Recipes file
+		   Create from the query its corresponding Openrewrite Recipe
+		   The RecipeHolder handles the definition of the Recipe like the list of the Java Recipe class
+		   to be executed.
+
+		   Remark: This is similar to a YAML Recipes file
+
+           type: specs.openrewrite.org/v1beta/recipe
+           name: dev.snowdrop.mtool.openrewrite.ConditionToMatch
+           displayName: Search a Java annotation
+           description: Search a Java annotation.
+           recipeList:
+             - org.openrewrite.java.search.FindAnnotations:
+                 annotationPattern:
+                 matchMetaAnnotations: false
+
 		 */
 		RecipeHolder recipeHolder = parse(q);
 
-		List<Match> matches = null;
+		List<Match> matches;
 		try {
 			matches = applyRecipes(config, recipeHolder);
 		} catch (Exception e) {
