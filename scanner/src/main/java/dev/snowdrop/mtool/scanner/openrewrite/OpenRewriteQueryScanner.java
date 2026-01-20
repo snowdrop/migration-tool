@@ -117,14 +117,14 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
 		   Remark: This is similar to a YAML Recipes file
 
-           type: specs.openrewrite.org/v1beta/recipe
-           name: dev.snowdrop.mtool.openrewrite.ConditionToMatch
-           displayName: Search a Java annotation
-           description: Search a Java annotation.
-           recipeList:
-             - org.openrewrite.java.search.FindAnnotations:
-                 annotationPattern:
-                 matchMetaAnnotations: false
+		   type: specs.openrewrite.org/v1beta/recipe
+		   name: dev.snowdrop.mtool.openrewrite.ConditionToMatch
+		   displayName: Search a Java annotation
+		   description: Search a Java annotation.
+		   recipeList:
+		     - org.openrewrite.java.search.FindAnnotations:
+		         annotationPattern:
+		         matchMetaAnnotations: false
 
 		 */
 		RecipeHolder recipeHolder = parse(q);
@@ -160,14 +160,25 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
 			List<SearchResults.Row> rows = (List<SearchResults.Row>) resultMap.get().getValue();
 			for (SearchResults.Row row : rows) {
+
+				// The source path of the file with the search result markers present.
 				String sourcePath = row.getSourcePath();
-				String description = row.getDescription();
+
+				// A recipe may modify the source path. This is the path after the run. null when a source file was deleted during the run.
+				// TODO: Do we need it when we do a search ?
+				String afterSourcePath = row.getAfterSourcePath();
+
+				// The specific recipe that added the Search marker.
 				String recipe = row.getRecipe();
 
-				String result = String.format("%s/%s:%d|%s.%s|%s", "parentFolderName", "csvFileName", 42, sourcePath,
-						description, recipe);
-				results.add(new Match("toBeDone", getScannerType(), result));
+				// The content of the description of the marker.
+				String description = row.getRecipe();
 
+				// The trimmed printed tree of the LST element that the marker is attached to.
+				String result = row.getResult();
+
+				String formatedResult = String.format("%s|%s|%s|%s", sourcePath, result, description, recipe);
+				results.add(new Match("toBeDone", getScannerType(), formatedResult));
 			}
 
 		}
@@ -261,12 +272,62 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 	private RecipeHolder parse(Query query) {
 		return switch (query.symbol()) {
 			case "annotation" -> buildSearchAnnotationRecipe(query);
-			// TODO : case "file" -> buildFindSourceFilesRecipe(query);
+			case "file" -> buildFindSourceFilesRecipe(query);
+			case "key" -> buildFindProperties(query);
 			default -> throw new IllegalArgumentException("Unsupported symbol: " + query.symbol());
 		};
 	}
 
-	// OLD METHODS DEPRECATED !!!
+	private RecipeHolder buildFindProperties(Query query) {
+		String propertyKey = query.keyValues().get("value");
+
+		RecipeHolder recipeHolder = new RecipeHolder().withName("dev.snowdrop.mtool.openrewrite.ConditionToMatch")
+				.withDisplayName("Search an application property").withDescription("Search an application property.");
+
+		HashMap<String, String> fieldMappings = new HashMap<>();
+		fieldMappings.put("propertyKey", propertyKey);
+
+		recipeHolder.setRecipesList(List.of(
+				new RecipeDefinition().withFullyQualifyRecipeName("org.openrewrite.properties.search.FindProperties")
+						.withFieldMappings(fieldMappings)));
+
+		return recipeHolder;
+	}
+
+	private RecipeHolder buildSearchAnnotationRecipe(Query query) {
+		String annotationName = query.keyValues().get("name");
+
+		RecipeHolder recipeHolder = new RecipeHolder().withName("dev.snowdrop.mtool.openrewrite.ConditionToMatch")
+				.withDisplayName("Search a Java annotation").withDescription("Search a Java annotation.");
+
+		HashMap<String, String> fieldMappings = new HashMap<>();
+		fieldMappings.put("annotationPattern", annotationName);
+		fieldMappings.put("matchMetaAnnotations", Boolean.FALSE.toString());
+
+		recipeHolder.setRecipesList(
+				List.of(new RecipeDefinition().withFullyQualifyRecipeName("org.openrewrite.java.search.FindAnnotations")
+						.withFieldMappings(fieldMappings)));
+
+		return recipeHolder;
+	}
+
+	private RecipeHolder buildFindSourceFilesRecipe(Query query) {
+		String filePattern = query.keyValues().get("value");
+
+		RecipeHolder recipeHolder = new RecipeHolder().withName("dev.snowdrop.mtool.openrewrite.ConditionToMatch")
+				.withDisplayName("Find files within the code source").withDescription(
+						"Find files within the code source. Paths are always interpreted as relative to the repository root.");
+
+		HashMap<String, String> fieldMappings = new HashMap<>();
+		fieldMappings.put("filePattern", filePattern);
+
+		recipeHolder.setRecipesList(List.of(new RecipeDefinition()
+				.withFullyQualifyRecipeName("org.openrewrite.FindSourceFiles").withFieldMappings(fieldMappings)));
+
+		return recipeHolder;
+	}
+
+	@Deprecated
 	private CompositeRecipe oldPparse(Query query) {
 		return switch (query.symbol()) {
 			case "annotation" -> oldBuildAnnotationRecipe(query);
@@ -275,10 +336,12 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		};
 	}
 
+	@Deprecated
 	private List<String> getRecipesToApply() {
 		return List.of("org.openrewrite.java.search.FindAnnotations");
 	}
 
+	@Deprecated
 	private CompositeRecipe oldBuildAnnotationRecipe(Query query) {
 		String annotationName = query.keyValues().get("name");
 		String matchId = UUID.randomUUID().toString();
@@ -293,36 +356,8 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		return composite;
 	}
 
-	private RecipeHolder buildSearchAnnotationRecipe(Query query) {
-		String annotationName = query.keyValues().get("name");
-
-		/*
-		Map<String, Map<String, String>> recipeMap = Map.of("dev.snowdrop.mtool.openrewrite.java.search.FindAnnotations",
-		    Map.of("pattern", annotationName, "matchOnMetaAnnotations",
-		        Boolean.FALSE.toString()));
-
-		CompositeRecipe composite = new CompositeRecipe("specs.openrewrite.org/v1beta/recipe",
-		    OPENREWRITE_MATCH_CONDITIONS, "Search a Java annotation", "Search a Java annotation.", List.of(recipeMap));
-
-		 */
-
-		RecipeHolder recipeHolder = new RecipeHolder();
-		recipeHolder.setName("dev.snowdrop.mtool.openrewrite.ConditionToMatch");
-		recipeHolder.setDisplayName("Search a Java annotation");
-		recipeHolder.setDescription("Search a Java annotation.");
-
-		HashMap<String, String> fieldMappings = new HashMap<>();
-		fieldMappings.put("annotationPattern", annotationName);
-		fieldMappings.put("matchMetaAnnotations", Boolean.FALSE.toString());
-
-		recipeHolder.setRecipesList(
-				List.of(new RecipeDefinition().withFullyQualifyRecipeName("org.openrewrite.java.search.FindAnnotations")
-						.withFieldMappings(fieldMappings)));
-
-		return recipeHolder;
-	}
-
-	private CompositeRecipe buildFindSourceFilesRecipe(Query query) {
+	@Deprecated
+	private CompositeRecipe oldBuildFindSourceFilesRecipe(Query query) {
 		String filePattern = query.keyValues().get("value");
 		String matchId = UUID.randomUUID().toString();
 
@@ -347,6 +382,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		String symbol = query.symbol();
 		String fileType = query.fileType();
 		return (fileType.contains("java") && symbol.contains("annotation"))
+				|| (fileType.contains("properties") && symbol.contains("key"))
 				|| (fileType.contains("source") && symbol.contains("file"));
 	}
 
