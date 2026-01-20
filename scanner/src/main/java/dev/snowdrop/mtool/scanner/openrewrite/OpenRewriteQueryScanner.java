@@ -124,8 +124,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 			throw new RuntimeException(e);
 		}
 
-		// Execute the maven rewrite goal command
-		if (!matches.isEmpty()) {
+		if (matches.isEmpty()) {
 			logger.warnf("No results found");
 			return new ArrayList<>();
 		}
