@@ -66,7 +66,7 @@ class ShouldMatchPreconditionTest extends BaseRulesTest {
 		assertNotNull(match);
 
 		String dependencyResult = (String) match.result();
-		assertEquals(true, dependencyResult.contains("org.springframework.boot:spring-boot-starter-web"));
+		assertTrue(dependencyResult.contains("org.springframework.boot:spring-boot-starter-parent:3.5.3"));
 	}
 
 }
