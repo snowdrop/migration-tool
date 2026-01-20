@@ -72,59 +72,61 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 		// When
 		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
 
-		// Then
+		// The recipe has been executed as we got a result having a key but the result is empty as no match succeeded to search about the annotation
 		assertNotNull(result);
 		assertTrue(result.containsKey("000-springboot-annotation-notfound"));
-
-		// The following code is not needed anymore as we don't create a rewrite.yaml file using the rewrite client !
-		// Path rewriteYml = tempDir.resolve(Path.of(appName, "rewrite.yml"));
-		// assertTrue(Files.exists(rewriteYml));
+		assertTrue(result.get("000-springboot-annotation-notfound").isEmpty());
 	}
 
 	@ParameterizedTest
 	@CsvSource({"quarkus/001-springboot-replace-bom-quarkus.yaml"})
 	void testRule001_ReplaceBomQuarkus(String ruleSubPath) throws IOException {
-		// Given
+		// We are searching about the following annotation:
+		// java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
-		// When
+		// Against the project: spring-boot-todo-app
 		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
 
-		// Then
-		assertNotNull(result);
-		assertTrue(result.containsKey("001-springboot-replace-bom-quarkus"));
 		assertEquals(1, rules.getFirst().order());
 		assertEquals("mandatory", rules.getFirst().category());
+
+		// We should get a match against the following Java class: src/main/java/com/todo/app/AppApplication.java
+		assertNotNull(result);
+		assertTrue(result.containsKey("001-springboot-replace-bom-quarkus"));
+		assertEquals(1, result.get("001-springboot-replace-bom-quarkus").size());
 	}
 
 	@ParameterizedTest
 	@CsvSource({"quarkus/002-springboot-add-class-quarkus.yaml"})
 	void testRule002_AddQuarkusClass(String ruleSubPath) throws IOException {
-		// Given
+		// We are searching about the following annotation:
+		// java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
-		// When
+		// Against the project: spring-boot-todo-app
 		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
 
-		// Then
+		// We should get a match against the following Java class: src/main/java/com/todo/app/AppApplication.java
 		assertNotNull(result);
 		assertTrue(result.containsKey("002-springboot-add-class-quarkus"));
-		assertEquals(2, rules.getFirst().order());
+		assertEquals(1, result.get("002-springboot-add-class-quarkus").size());
 	}
 
 	@ParameterizedTest
 	@CsvSource({"quarkus/003-springboot-to-quarkus-main-annotation.yaml"})
 	void testRule003_QuarkusMainAnnotation(String ruleSubPath) throws IOException {
-		// Given
+		// We are searching about the following annotation:
+		// java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
-		// When
+		// Against the project: spring-boot-todo-app
 		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
 
-		// Then
+		// We should get a match against the following Java class: src/main/java/com/todo/app/AppApplication.java
 		assertNotNull(result);
 		assertTrue(result.containsKey("003-springboot-to-quarkus-main-annotation"));
-		assertEquals(3, rules.getFirst().order());
+		assertEquals(1, result.get("003-springboot-to-quarkus-main-annotation").size());
 	}
 
 	@ParameterizedTest
@@ -143,38 +145,33 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 	}
 
 	@ParameterizedTest
-	@CsvSource({"quarkus/001-springboot-replace-bom-quarkus.yaml,spring-boot-todo-app"})
-	void testExecuteRewriteCmd_WithDependencyCondition(String ruleSubPath, String appName) throws IOException {
-		// Given
-		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
-
-		// When
-		codeScannerService.scan(rules.getFirst()).getMatches();
-
-		// Then
-		Path rewriteYml = tempDir.resolve(Path.of(appName, "rewrite.yml"));
-		String content = Files.readString(rewriteYml);
-
-		assertTrue(content.contains("dev.snowdrop.openrewrite.MatchConditions"));
-		assertFalse(content.isEmpty());
-	}
-
-	@ParameterizedTest
 	@CsvSource({"quarkus/004-springboot-to-quarkus-rest-annotations.yaml,spring-boot-todo-app"})
 	void testExecuteRewriteCmd_WithComplexOrConditions(String ruleSubPath, String appName) throws IOException {
-		// Given
+		/*
+		 We are searching about the following annotations:
+		 java.annotation is 'org.springframework.stereotype.Controller' OR
+		 java.annotation is 'org.springframework.beans.factory.annotation.Autowired' OR
+		 java.annotation is 'org.springframework.web.bind.annotation.GetMapping' OR
+		 java.annotation is 'org.springframework.web.bind.annotation.DeleteMapping' OR
+		 java.annotation is 'org.springframework.web.bind.annotation.PathVariable' OR
+		 java.annotation is 'org.springframework.web.bind.annotation.PostMapping' OR
+		 java.annotation is 'org.springframework.web.bind.annotation.RequestBody' OR
+		 java.annotation is 'org.springframework.web.bind.annotation.ResponseBody'
+		*/
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
-		// When
-		codeScannerService.scan(rules.getFirst()).getMatches();
+		// Against the project: spring-boot-todo-app
+		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
 
-		// Then
-		Path rewriteYml = tempDir.resolve(Path.of(appName, "rewrite.yml"));
-		assertTrue(Files.exists(rewriteYml));
-
-		String content = Files.readString(rewriteYml);
-		assertTrue(content.contains("specs.openrewrite.org/v1beta/recipe"));
-		assertTrue(content.contains("recipeList:"));
+		// Then, we got as result
+		assertNotNull(result);
+		assertTrue(result.containsKey("004-springboot-to-quarkus-rest-annotations"));
+		/*
+		  We should get a match against the following Java classes
+		  src/main/java/com/todo/app/controller/TaskController.java
+		  src/main/java/com/todo/app/service/TaskServiceImpl.java
+		 */
+		assertTrue(result.get("004-springboot-to-quarkus-rest-annotations").size() == 13);
 	}
 
 	@Test
