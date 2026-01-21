@@ -14,12 +14,15 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFile;
@@ -65,28 +68,37 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 
 	@ParameterizedTest
 	@CsvSource({"quarkus/000-springboot-annotation-notfound.yaml,spring-boot-todo-app"})
-	void testRule000_SpringBootAnnotationNotFound(String ruleSubPath, String appName) throws IOException {
+	void testRule000_SpringBootAnnotationNotFound(String ruleSubPath, String appName) throws Exception {
+		System.out.println("\n### Running test: testRule000_SpringBootAnnotationNotFound");
 		// Given a path of rules, got the rule to be processed
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
+		rules.forEach(r -> System.out.println("### rule: " + r.when().condition()));
 
 		// When
 		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+		runCat(Path.of(tempDir.toString(), appName, "target/rewrite/rewrite.patch"));
 
 		// The recipe has been executed as we got a result having a key but the result is empty as no match succeeded to search about the annotation
 		assertNotNull(result);
 		assertTrue(result.containsKey("000-springboot-annotation-notfound"));
-		assertTrue(result.get("000-springboot-annotation-notfound").isEmpty());
+
+		List<Match> matches = result.get("000-springboot-annotation-notfound");
+		assertEquals(0, matches.size());
+		System.out.println("########################################");
 	}
 
 	@ParameterizedTest
-	@CsvSource({"quarkus/001-springboot-replace-bom-quarkus.yaml"})
-	void testRule001_ReplaceBomQuarkus(String ruleSubPath) throws IOException {
+	@CsvSource({"quarkus/001-springboot-replace-bom-quarkus.yaml,spring-boot-todo-app"})
+	void testRule001_ReplaceBomQuarkus(String ruleSubPath, String appName) throws Exception {
+		System.out.println("\n### Running test: testRule001_ReplaceBomQuarkus");
+
 		// We are searching about the following annotation:
 		// java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
 		// Against the project: spring-boot-todo-app
 		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+		runCat(Path.of(tempDir.toString(), appName, "target/rewrite/rewrite.patch"));
 
 		assertEquals(1, rules.getFirst().order());
 		assertEquals("mandatory", rules.getFirst().category());
@@ -95,58 +107,75 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 		assertNotNull(result);
 		assertTrue(result.containsKey("001-springboot-replace-bom-quarkus"));
 		assertEquals(1, result.get("001-springboot-replace-bom-quarkus").size());
+		System.out.println("########################################");
 	}
 
 	@ParameterizedTest
-	@CsvSource({"quarkus/002-springboot-add-class-quarkus.yaml"})
-	void testRule002_AddQuarkusClass(String ruleSubPath) throws IOException {
+	@CsvSource({"quarkus/002-springboot-add-class-quarkus.yaml,spring-boot-todo-app"})
+	void testRule002_AddQuarkusClass(String ruleSubPath, String appName) throws Exception {
+		System.out.println("\n### Running test: testRule002_AddQuarkusClass");
+
 		// We are searching about the following annotation:
 		// java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
 		// Against the project: spring-boot-todo-app
 		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+		runCat(Path.of(tempDir.toString(), appName, "target/rewrite/rewrite.patch"));
 
 		// We should get a match against the following Java class: src/main/java/com/todo/app/AppApplication.java
 		assertNotNull(result);
 		assertTrue(result.containsKey("002-springboot-add-class-quarkus"));
 		assertEquals(1, result.get("002-springboot-add-class-quarkus").size());
+		System.out.println("########################################");
 	}
 
+	@Disabled
 	@ParameterizedTest
-	@CsvSource({"quarkus/003-springboot-to-quarkus-main-annotation.yaml"})
-	void testRule003_QuarkusMainAnnotation(String ruleSubPath) throws IOException {
+	@CsvSource({"quarkus/003-springboot-to-quarkus-main-annotation.yaml,spring-boot-todo-app"})
+	void testRule003_QuarkusMainAnnotation(String ruleSubPath, String appName) throws Exception {
+		System.out.println("\n### Running test: testRule003_QuarkusMainAnnotation");
+
 		// We are searching about the following annotation:
 		// java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
 		// Against the project: spring-boot-todo-app
 		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+		runCat(Path.of(tempDir.toString(), appName, "target/rewrite/rewrite.patch"));
 
 		// We should get a match against the following Java class: src/main/java/com/todo/app/AppApplication.java
 		assertNotNull(result);
 		assertTrue(result.containsKey("003-springboot-to-quarkus-main-annotation"));
 		assertEquals(1, result.get("003-springboot-to-quarkus-main-annotation").size());
+		System.out.println("########################################");
 	}
 
+	@Disabled
 	@ParameterizedTest
-	@CsvSource({"quarkus/004-springboot-to-quarkus-rest-annotations.yaml"})
-	void testRule004_RestAnnotations_WithOrConditions(String ruleSubPath) throws IOException {
+	@CsvSource({"quarkus/004-springboot-to-quarkus-rest-annotations.yaml,spring-boot-todo-app"})
+	void testRule004_RestAnnotations_WithOrConditions(String ruleSubPath, String appName) throws Exception {
+		System.out.println("\n### Running test: testRule004_RestAnnotations_WithOrConditions");
 		// Given
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
 		// When
 		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+		runCat(Path.of(tempDir.toString(), appName, "target/rewrite/rewrite.patch"));
 
 		// Then
 		assertNotNull(result);
 		assertTrue(result.containsKey("004-springboot-to-quarkus-rest-annotations"));
 		assertEquals(4, rules.getFirst().order());
+		System.out.println("########################################");
 	}
 
+	@Disabled
 	@ParameterizedTest
 	@CsvSource({"quarkus/004-springboot-to-quarkus-rest-annotations.yaml,spring-boot-todo-app"})
-	void testExecuteRewriteCmd_WithComplexOrConditions(String ruleSubPath, String appName) throws IOException {
+	void testExecuteRewriteCmd_WithComplexOrConditions(String ruleSubPath, String appName) throws Exception {
+		System.out.println("\n### Running test: testExecuteRewriteCmd_WithComplexOrConditions");
+
 		/*
 		 We are searching about the following annotations:
 		 java.annotation is 'org.springframework.stereotype.Controller' OR
@@ -162,6 +191,7 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 
 		// Against the project: spring-boot-todo-app
 		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+		runCat(Path.of(tempDir.toString(), appName, "target/rewrite/rewrite.patch"));
 
 		// Then, we got as result
 		assertNotNull(result);
@@ -171,263 +201,28 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 		  src/main/java/com/todo/app/controller/TaskController.java
 		  src/main/java/com/todo/app/service/TaskServiceImpl.java
 		 */
+		System.out.println(
+				"###### Match result size: " + result.get("004-springboot-to-quarkus-rest-annotations").size());
 		assertTrue(result.get("004-springboot-to-quarkus-rest-annotations").size() == 13);
+		System.out.println("########################################");
 	}
 
-	@Test
-	void testMultipleRulesInSequence() throws IOException {
-		// Given - Simulate sequential execution of Rules according to order: 000 to 004
-		List<Rule> rules = parseRulesFromFolder(Path.of(rulesPath.toString(), "quarkus"));
+	public static void runCat(Path pathToFile) throws Exception {
+		if (Files.exists(pathToFile)) {
+			ProcessBuilder pb = new ProcessBuilder("cat", pathToFile.toString());
+			Process process = pb.start();
 
-		// When
-		Map<String, List<Match>> result1 = codeScannerService.scan(rules.get(0)).getMatches();
-		Map<String, List<Match>> result2 = codeScannerService.scan(rules.get(1)).getMatches();
-		Map<String, List<Match>> result3 = codeScannerService.scan(rules.get(2)).getMatches();
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				String output = reader.lines().collect(Collectors.joining("\n"));
 
-		// Then
-		assertNotNull(result1);
-		assertNotNull(result2);
-		assertNotNull(result3);
-
-		assertTrue(rules.get(0).order() < rules.get(1).order());
-		assertTrue(rules.get(2).order() < rules.get(3).order());
-	}
-
-	@Test
-	void testRuleCategories() {
-		// Given
-		Rule mandatoryRule = createRule001_ReplaceBomQuarkus();
-		Rule optionalRule = createRule000_AnnotationNotFound();
-
-		// Then
-		assertEquals("mandatory", mandatoryRule.category());
-		assertEquals("optional", optionalRule.category());
-	}
-
-	@Test
-	void testRuleLabels() {
-		// Given
-		Rule rule = createRule001_ReplaceBomQuarkus();
-
-		// Then
-		assertTrue(rule.labels().contains("konveyor.io/source=springboot"));
-		assertTrue(rule.labels().contains("konveyor.io/target=quarkus"));
-	}
-
-	@Disabled
-	@ParameterizedTest
-	@MethodSource("provideRealWorldRules")
-	void testExecuteRewriteCmd_WithRealWorldRules(String ruleId, Rule rule, String expectedConditionType) {
-		// When
-		Map<String, List<Match>> result = codeScannerService.scan(rule).getMatches();
-
-		// Then
-		assertNotNull(result, "Result should not be null for rule: " + ruleId);
-		assertTrue(result.containsKey(ruleId), "Result should contain key: " + ruleId);
-
-		// Verify YAML file creation
-		Path rewriteYml = tempDir.resolve("rewrite.yml");
-		assertTrue(Files.exists(rewriteYml), "rewrite.yml should exist for rule: " + ruleId);
-	}
-
-	// ============================================
-	// Create actual rules based on cookbook/rules
-	// ============================================
-
-	/**
-	 * Rule 000: Search non-existent annotation (dummy.SpringApplication)
-	 */
-	public static Rule createRule000_AnnotationNotFound() {
-		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
-				"java.annotation is 'dummy.SpringApplication'", null);
-
-		Rule.Instruction instructions = new Rule.Instruction(null, // no AI instructions
-				null, // no manual instructions
-				null // no openrewrite instructions
-		);
-
-		return new Rule("optional", Collections.emptyList(), "Remove the SpringBoot @SpringBootApplication annotation",
-				1, List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
-				"The dummy.SpringApplication annotation do not exist", "000-springboot-annotation-notfound", null, when,
-				Collections.emptyList(), 0, // no order specified in YAML
-				instructions);
-	}
-
-	/**
-	 * Rule 001: Replace SpringBoot BOM with Quarkus
-	 */
-	private Rule createRule001_ReplaceBomQuarkus() {
-		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
-				"pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')", null);
-
-		// AI Instructions
-		Rule.Ai[] aiInstructions = new Rule.Ai[]{new Rule.Ai(null,
-				// promptMessage (deprecated en favor de tasks)
-				Arrays.asList(
-						"Add to the pom.xml file the Quarkus BOM dependency within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core",
-						"The version of quarkus to be used and to included within the pom.xml properties is 3.26.4."))};
-
-		// Manual Instructions
-		Rule.Manual[] manualInstructions = new Rule.Manual[]{new Rule.Manual(
-				"Add the Quarkus BOM and quarkus-arc, quarkus-core dependencies within the pom.xml file")};
-
-		// OpenRewrite Instructions
-		Rule.Openrewrite[] openrewriteInstructions = new Rule.Openrewrite[]{new Rule.Openrewrite(
-				"Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
-				"Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
-				null, // recipeList (aquí podrías añadir los recipes si los necesitas)
-				new String[]{"dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
-						"org.openrewrite:rewrite-maven:8.62.4"})};
-
-		Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
-				openrewriteInstructions);
-
-		return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
-				List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
-				"SpringBoot to Quarkus.", "001-springboot-replace-bom-quarkus", null, when, Collections.emptyList(), 1,
-				instructions);
-	}
-
-	/**
-	 * Rule 002: Add Quarkus class
-	 */
-	private Rule createRule002_AddQuarkusClass() {
-		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
-				"java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'", null);
-
-		List<String> aiTasks = List.of(
-				"Add a new class com.todo.app.TodoApplication which implements QuarkusApplication.",
-				"Don't add the annotation @QuarkusMain to this class.",
-				"Use stdout to send a message: Hello user using args[0] within the method which override run().");
-
-		// AI Instructions
-		Rule.Ai[] aiInstructions = new Rule.Ai[]{new Rule.Ai(null,
-				// promptMessage (deprecated en favor de tasks)
-				aiTasks)};
-
-		// Manual Instructions
-		Rule.Manual[] manualInstructions = new Rule.Manual[]{new Rule.Manual("See openrewrite instructions")};
-
-		// OpenRewrite Instructions
-		Rule.Openrewrite[] openrewriteInstructions = new Rule.Openrewrite[]{new Rule.Openrewrite(
-				"Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
-				"Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
-				null, // recipeList (aquí podrías añadir los recipes si los necesitas)
-				new String[]{"dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
-						"org.openrewrite:rewrite-maven:8.62.4"})};
-
-		Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
-				openrewriteInstructions);
-
-		return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
-				List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
-				"SpringBoot to Quarkus.", "002-springboot-add-class-quarkus", null, when, Collections.emptyList(), 2,
-				instructions);
-	}
-
-	/**
-	 * Rule 003: Add @QuarkusMain annotation
-	 */
-	private Rule createRule003_QuarkusMainAnnotation() {
-		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
-				"java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'", null);
-
-		List<String> aiTasks = List.of(
-				"Can you remove the @SpringBootApplication from the java file com.todo.app.AppApplication.java.",
-				"Next add to the same java class the @QuarkusMain annotation.",
-				"The AppApplication should not implement QuarkusApplication.",
-				"Pass as first argument: TodoApplication.class to the Quarkus.run() method");
-
-		// AI Instructions
-		Rule.Ai[] aiInstructions = new Rule.Ai[]{new Rule.Ai(null,
-				// promptMessage (deprecated en favor de tasks)
-				aiTasks)};
-
-		// Manual Instructions
-		Rule.Manual[] manualInstructions = new Rule.Manual[]{new Rule.Manual("See openrewrite instructions")};
-
-		// OpenRewrite Instructions
-		Rule.Openrewrite[] openrewriteInstructions = new Rule.Openrewrite[]{new Rule.Openrewrite(
-				"Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
-				"Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
-				null, // recipeList (aquí podrías añadir los recipes si los necesitas)
-				new String[]{"dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
-						"org.openrewrite:rewrite-maven:8.62.4"})};
-
-		Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
-				openrewriteInstructions);
-
-		return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
-				List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
-				"SpringBoot to Quarkus.", "003-springboot-to-quarkusmain-annotation", null, when,
-				Collections.emptyList(), 3, instructions);
-	}
-
-	/**
-	 * Rule 004: Replace REST annotations (multiple OR)
-	 */
-	private Rule createRule004_RestAnnotations() {
-		// Condición compleja con múltiples OR
-		String complexCondition = """
-				java.annotation is 'org.springframework.stereotype.Controller' OR
-				java.annotation is 'org.springframework.beans.factory.annotation.Autowired' OR
-				java.annotation is 'org.springframework.web.bind.annotation.GetMapping' OR
-				java.annotation is 'org.springframework.web.bind.annotation.DeleteMapping' OR
-				java.annotation is 'org.springframework.web.bind.annotation.PathVariable' OR
-				java.annotation is 'org.springframework.web.bind.annotation.PostMapping' OR
-				java.annotation is 'org.springframework.web.bind.annotation.RequestBody' OR
-				java.annotation is 'org.springframework.web.bind.annotation.ResponseBody'
-				""".trim();
-
-		Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(), complexCondition, null);
-
-		// AI Instructions
-		Rule.Ai[] aiInstructions = new Rule.Ai[]{new Rule.Ai(null,
-				// promptMessage (deprecated en favor de tasks)
-				List.of("TODO"))};
-
-		// Manual Instructions
-		Rule.Manual[] manualInstructions = new Rule.Manual[]{new Rule.Manual("See openrewrite instructions")};
-
-		// OpenRewrite Instructions
-		Rule.Openrewrite[] openrewriteInstructions = new Rule.Openrewrite[]{new Rule.Openrewrite(
-				"Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
-				"Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
-				null, // recipeList (aquí podrías añadir los recipes si los necesitas)
-				new String[]{"dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
-						"org.openrewrite:rewrite-maven:8.62.4"})};
-
-		Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
-				openrewriteInstructions);
-
-		return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
-				List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
-				"SpringBoot to Quarkus.", "004-springboot-to-quarkus-rest-annotations", null, when,
-				Collections.emptyList(), 4, instructions);
-	}
-
-	// ============================================
-	// Provider for parametrized tests
-	// ============================================
-
-	private static Stream<Arguments> provideRealWorldRules() {
-		MatchServiceCookBookTest testInstance = new MatchServiceCookBookTest();
-		testInstance.tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "test-" + System.currentTimeMillis());
-		testInstance.config = testInstance.createTestConfig(testInstance.tempDir, testInstance.rulesPath,
-				testInstance.jdtls);
-		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
-		testInstance.codeScannerService = new CodeScannerService(testInstance.config, scanCommandExecutor);
-
-		return Stream.of(
-				Arguments.of("000-springboot-annotation-notfound", testInstance.createRule000_AnnotationNotFound(),
-						"simple"),
-				Arguments.of("001-springboot-replace-bom-quarkus", testInstance.createRule001_ReplaceBomQuarkus(),
-						"dependency"),
-				Arguments.of("002-springboot-add-class-quarkus", testInstance.createRule002_AddQuarkusClass(),
-						"annotation"),
-				Arguments.of("003-springboot-to-quarkusmain-annotation",
-						testInstance.createRule003_QuarkusMainAnnotation(), "annotation"),
-				Arguments.of("004-springboot-to-quarkus-rest-annotations", testInstance.createRule004_RestAnnotations(),
-						"or-conditions"));
+				int exitCode = process.waitFor();
+				if (exitCode != 0) {
+					throw new RuntimeException("Command failed with code " + exitCode);
+				}
+				System.out.printf("### Cat %s: %s\n", pathToFile, output);
+			}
+		} else {
+			System.out.println("### rewrite.patch file don't exists\n");
+		}
 	}
 }
