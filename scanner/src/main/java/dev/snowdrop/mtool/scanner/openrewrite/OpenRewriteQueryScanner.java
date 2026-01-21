@@ -270,10 +270,10 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 	}
 
 	private RecipeHolder parse(Query query) {
-		return switch (query.symbol()) {
-			case "annotation" -> buildSearchAnnotationRecipe(query);
-			case "file" -> buildFindSourceFilesRecipe(query);
-			case "key" -> buildFindProperties(query);
+		return switch (query.fileType() + "." + query.symbol()) {
+			case "java.annotation" -> buildSearchAnnotationRecipe(query);
+			case "source.file" -> buildFindSourceFilesRecipe(query);
+			case "properties.key" -> buildFindProperties(query);
 			default -> throw new IllegalArgumentException("Unsupported symbol: " + query.symbol());
 		};
 	}
