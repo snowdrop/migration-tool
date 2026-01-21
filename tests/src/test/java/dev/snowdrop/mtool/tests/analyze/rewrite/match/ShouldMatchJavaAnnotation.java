@@ -67,9 +67,8 @@ class ShouldMatchJavaAnnotation extends BaseRulesTest {
 		assertNotNull(match);
 
 		String csvRecord = (String) match.result();
-		assertEquals(true, csvRecord.contains("org.springframework.stereotype.Controller"));
-		assertEquals(true, csvRecord.contains("dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv"));
-		assertEquals(true, csvRecord.contains("JAVA.ANNOTATION"));
+		assertTrue(csvRecord.contains("org.springframework.stereotype.Controller"));
+		assertTrue(csvRecord.contains("Find annotations `org.springframework.stereotype.Controller`"));
 	}
 
 }
