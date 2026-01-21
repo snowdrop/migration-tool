@@ -6,10 +6,10 @@ import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.analyze.CsvRecord;
 import dev.snowdrop.mtool.model.analyze.Match;
 import dev.snowdrop.mtool.model.analyze.ScannerType;
+import dev.snowdrop.mtool.model.openrewrite.CompositeRecipe;
 import dev.snowdrop.mtool.model.openrewrite.RecipeDefinition;
 import dev.snowdrop.mtool.model.openrewrite.RecipeHolder;
 import dev.snowdrop.mtool.model.parser.Query;
-import dev.snowdrop.mtool.model.openrewrite.CompositeRecipe;
 import dev.snowdrop.mtool.scanner.QueryScanner;
 import dev.snowdrop.openrewrite.cli.RewriteService;
 import dev.snowdrop.openrewrite.cli.model.ResultsContainer;
@@ -42,6 +42,9 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 	public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
 	public static final String OPENREWRITE_MATCH_CONDITIONS = "dev.snowdrop.openrewrite.MatchConditions";
 	private static final String KEY_VALUE_DELIMITER = "=";
+
+	private static boolean resourcesLoaded = false;
+	private static RewriteService rewriteServiceInstance;
 
 	@Deprecated
 	@Override
@@ -149,6 +152,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		List<Match> results = new ArrayList<>();
 
 		if (!resultsContainer.isNotEmpty()) {
+			System.out.println("### No match found for: " + recipeDefinition.getFqName());
 			return results;
 		}
 
@@ -178,6 +182,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 				String result = row.getResult();
 
 				String formatedResult = String.format("%s|%s|%s|%s", sourcePath, result, description, recipe);
+				System.out.println("### Match result: " + formatedResult);
 				results.add(new Match("toBeDone", getScannerType(), formatedResult));
 			}
 
@@ -197,11 +202,34 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		// Set the parameters needed to configure the fields of the Java Recipe Class
 		cfg.setRecipeOptions(convertMapParametersToKeyValueSet(rd.getFieldMappings()));
 
-		RewriteService svc = new RewriteService(cfg);
-		svc.init();
+		System.out.println("### Running recipe for : " + cfg.getFqNameRecipe());
+		System.out.println("###                with : " + cfg.getRecipeOptions());
+
+		RewriteService svc = initRewriteServiceInstance(cfg);
+		// As the RewriteService is managed as a singleton, we must update its config, otherwise
+		// it will  continue to use the previous
+		// TODO: To be improved
+		svc.updateConfig(cfg);
 		ResultsContainer run = svc.run();
 
 		return findMatchsFromResults(run, rd);
+	}
+
+	public static RewriteService initRewriteServiceInstance(RewriteConfig cfg) {
+		if (rewriteServiceInstance == null) {
+			System.out.println("### Return rewriteService: NEW");
+			RewriteService svc = new RewriteService(cfg);
+			svc.init();
+
+			if (svc.isSourceSetInitialized()) {
+				rewriteServiceInstance = svc;
+			} else {
+				throw new IllegalStateException(
+						"Openrewrite SourceSet is not initialized from the application scanned!");
+			}
+		}
+		System.out.println("### Return rewriteService: EXISTING");
+		return rewriteServiceInstance;
 	}
 
 	/**
