@@ -10,7 +10,7 @@
   ruleID: 030-springboot-to-quarkus-add-sql
   when:
     condition: |
-      properties.key is 'spring.datasource' OR properties.key is 'spring.jpa'
+      properties.key is 'spring.datasource.*' OR properties.key is 'spring.jpa.*'
   order: 5
   instructions:
     ai:

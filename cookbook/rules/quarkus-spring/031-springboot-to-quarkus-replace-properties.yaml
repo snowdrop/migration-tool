@@ -10,7 +10,7 @@
   ruleID: 031-springboot-to-quarkus-replace-properties
   when:
     condition: |
-      properties.key is 'spring.datasource'
+      properties.key is 'spring.datasource.*'
   order: 6
   instructions:
     ai:

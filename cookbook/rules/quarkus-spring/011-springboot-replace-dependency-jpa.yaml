@@ -10,7 +10,7 @@
   ruleID: 011-springboot-replace-dependency-jpa
   when:
     condition: |
-      properties.key is 'spring.jpa' AND pom.dependency is (gavs="org.springframework.boot:spring-boot-starter-data-jpa")
+      properties.key is 'spring.jpa.*' AND pom.dependency is (gavs="org.springframework.boot:spring-boot-starter-data-jpa")
   order: 2
   instructions:
     ai:
