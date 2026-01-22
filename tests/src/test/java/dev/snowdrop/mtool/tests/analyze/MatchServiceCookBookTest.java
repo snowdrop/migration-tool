@@ -206,23 +206,4 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 		assertTrue(result.get("004-springboot-to-quarkus-rest-annotations").size() == 13);
 		System.out.println("########################################");
 	}
-
-	public static void runCat(Path pathToFile) throws Exception {
-		if (Files.exists(pathToFile)) {
-			ProcessBuilder pb = new ProcessBuilder("cat", pathToFile.toString());
-			Process process = pb.start();
-
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-				String output = reader.lines().collect(Collectors.joining("\n"));
-
-				int exitCode = process.waitFor();
-				if (exitCode != 0) {
-					throw new RuntimeException("Command failed with code " + exitCode);
-				}
-				System.out.printf("### Cat %s: %s\n", pathToFile, output);
-			}
-		} else {
-			System.out.println("### rewrite.patch file don't exists\n");
-		}
-	}
 }
