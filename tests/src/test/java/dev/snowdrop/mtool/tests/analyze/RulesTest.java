@@ -246,7 +246,7 @@ class RulesTest extends BaseRulesTest {
 	 * Rule 004: Replace REST annotations (multiple OR)
 	 */
 	private Rule createRule004_RestAnnotations() {
-		// Condición compleja con múltiples OR
+		// Complex condition with multiple OR
 		String complexCondition = """
 				java.annotation is 'org.springframework.stereotype.Controller' OR
 				java.annotation is 'org.springframework.beans.factory.annotation.Autowired' OR
