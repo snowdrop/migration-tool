@@ -185,7 +185,8 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 				System.out.println("### Match result: " + formatedResult);
 				results.add(new Match("toBeDone", getScannerType(), formatedResult));
 			}
-
+		} else {
+			System.out.println("### No SearchResults DataTable found for: " + recipeDefinition.getFqName());
 		}
 		return results;
 	}
@@ -205,30 +206,40 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		System.out.println("### Running recipe for : " + cfg.getFqNameRecipe());
 		System.out.println("###                with : " + cfg.getRecipeOptions());
 
-		RewriteService svc = initRewriteServiceInstance(cfg);
-		// As the RewriteService is managed as a singleton, we must update its config, otherwise
-		// it will  continue to use the previous
-		// TODO: To be improved
-		svc.updateConfig(cfg);
-		ResultsContainer run = svc.run();
+		/*
+		  Previous code which has been replaced with the RewriteService singleton
 
+		  This code works as for each recipe we parse the code, create the sourceSet and reset the DataTables, etc every time
+		  RewriteService svc = new RewriteService(cfg);
+		  svc.init();
+		 */
+
+		// Create a singleton instance of the RewriteService to allow to load only one time all the resources of a project to scan
+		RewriteService svc = createRewriteServiceInstance(cfg);
+		/*
+		   If the SourceSet (= Tree of openrewrite J* classes) has been created, then that means that the RewriteService
+		   has been also initialized, that a Context and Environment exist too.
+		   It is only need in this case to update the config as we are processing a new recipe
+		   and to create a new Context to reset the Map of the DataTables otherwise the Context will continue to aggregate them
+		   See: https://github.com/snowdrop/migration-tool/issues/212
+		*/
+		if (svc.isSourceSetInitialized()) {
+			svc.createExecutionContext();
+			svc.updateConfig(cfg);
+		} else {
+			svc.init();
+		}
+
+		ResultsContainer run = svc.run();
 		return findMatchsFromResults(run, rd);
 	}
 
-	public static RewriteService initRewriteServiceInstance(RewriteConfig cfg) {
+	public static RewriteService createRewriteServiceInstance(RewriteConfig cfg) {
 		if (rewriteServiceInstance == null) {
-			System.out.println("### Return rewriteService: NEW");
-			RewriteService svc = new RewriteService(cfg);
-			svc.init();
-
-			if (svc.isSourceSetInitialized()) {
-				rewriteServiceInstance = svc;
-			} else {
-				throw new IllegalStateException(
-						"Openrewrite SourceSet is not initialized from the application scanned!");
-			}
+			System.out.println("### Return RewriteService: NEW");
+			rewriteServiceInstance = new RewriteService(cfg);
 		}
-		System.out.println("### Return rewriteService: EXISTING");
+		System.out.println("### Return RewriteService: EXISTING");
 		return rewriteServiceInstance;
 	}
 
