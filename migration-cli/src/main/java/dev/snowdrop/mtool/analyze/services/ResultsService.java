@@ -355,29 +355,27 @@ public class ResultsService {
 		}
 	}
 
+	/**
+	 *        Get and format the Match result string using the new format defined part of the DataTable SearchResults:
+	 * 		  sourcePath | result | description | recipe
+	 * <p>
+	 * 		  where
+	 * <p>
+	 * 		  sourcePath: The source path of the file with the search result markers present.
+	 * 		  recipe: The recipe that added the Search marker.
+	 *        result: The trimmed printed tree of the LST element that the marker is attached to.
+	 * <p>
+	 *        Remark: We don't show the following fields:
+	 *        afterSourcePath: A recipe may modify the source path. This is the path after the run. null when a source file was deleted during the run.
+	 *        description: The content of the description of the marker.
+	 *
+	 * @param match - the Match result to format
+	 * @return the formated match result string
+	 */
 	private static String formatRewrite(Match match) {
-		String name = (String) match.result();
-
-		// Parse the name format: parentFolderName/csvFileName:line_number|pattern.symbol|type
-		if (name.contains("/") && name.contains(":") && name.contains("|")) {
-			try {
-				String[] pathAndRest = name.split(":", 2);
-				String path = pathAndRest[0];
-				String[] lineAndDetails = pathAndRest[1].split("\\|", 3);
-				String lineNumber = lineAndDetails[0];
-				String patternSymbol = lineAndDetails.length > 1 ? lineAndDetails[1] : "N/A";
-				String type = lineAndDetails.length > 2 ? lineAndDetails[2] : "N/A";
-
-				return String.format("File: %s\nLine: %s\nPattern: %s\nType: %s\nMatch ID: %s", path, lineNumber,
-						patternSymbol, type, match.matchId());
-			} catch (Exception e) {
-				// Fallback if parsing fails
-				return String.format("Rewrite match: %s (ID: %s)", (String) match.result(), match.matchId());
-			}
-		} else {
-			// Fallback for unexpected format
-			return String.format("Rewrite match: %s (ID: %s)", (String) match.result(), match.matchId());
-		}
+		String matchResult = (String) match.result();
+		String[] parts = matchResult.split("\\|");
+		return String.format("Find '%s' in file: %s using the recipe: \"%s\"", parts[1], parts[0], parts[2]);
 	}
 
 	private static StringBuilder formatSymbolInformation(SymbolInformation si) {
