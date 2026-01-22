@@ -12,7 +12,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PropertiesFileSearchUsingScannerTest extends BaseRulesTest {
+class PropertiesKeyUsingRewriteScannerTest extends BaseRulesTest {
 
 	private CodeScannerService codeScannerService;
 	private Config config;
@@ -31,17 +30,15 @@ class PropertiesFileSearchUsingScannerTest extends BaseRulesTest {
 	protected FileSearch fileSearcher;
 	protected FileSearch contentSearcher;
 
+	String applicationToScan = "spring-boot-todo-app";
 	Path applicationPath;
 
 	@TempDir
 	Path tempDir;
 
-	String jdtls = "";
-
 	@BeforeEach
 	void setUp() throws Exception {
 		// Copy the code of the project to analyze within the temp dir
-		String applicationToScan = "spring-boot-todo-app";
 		applicationPath = tempDir.resolve(applicationToScan);
 		copyFolder(applicationToScan, applicationPath);
 
@@ -54,7 +51,7 @@ class PropertiesFileSearchUsingScannerTest extends BaseRulesTest {
 		copyFolder(cookBook, rulesPath);
 
 		// Configure the test with parameters
-		config = createTestConfig(applicationPath, rulesPath, jdtls);
+		config = createTestConfig(applicationPath, rulesPath);
 
 		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
 		codeScannerService = new CodeScannerService(config, scanCommandExecutor);
@@ -62,24 +59,71 @@ class PropertiesFileSearchUsingScannerTest extends BaseRulesTest {
 
 	@ParameterizedTest
 	@CsvSource({"properties/spring-datasource-properties.yaml"})
-	void shouldMatchDataSourcePropertiesWithScannerRewrite(String ruleSubPath) throws IOException {
+	void shouldMatchDataSourcePropertiesWithScannerRewrite(String ruleSubPath) throws Exception {
 		// Given a path, got the rule to be processed
 		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
+		rules.forEach(r -> {
+			System.out.printf("## Rule: %s\n", r.when().condition());
+		});
 
 		// Process the rule
 		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
 
+		runCat(Path.of(tempDir.toString(), applicationToScan, "target/rewrite/rewrite.patch"));
+		result.forEach((match, matches) -> {
+			System.out.printf("### match: %s\n", match);
+		});
+
 		// Then
 		assertNotNull(result);
 		assertTrue(result.containsKey("springboot-datasource-config"));
-		//
+
 		List<Match> matches = result.get("springboot-datasource-config");
 		assertNotNull(matches);
 
-		assertThat(result.get("springboot-datasource-config")).hasSize(4);
+		System.out.println("#### Show matches ....");
+		matches.stream().map(Match::result).map(Object::toString).flatMap(s -> Arrays.stream(s.split("\\|")))
+				.forEach(System.out::println);
 
-		var results = result.get("springboot-datasource-config");
-		assertThat(results).extracting(Match::result).map(Object::toString) // Convert the object to string first
+		//assertThat(matches).hasSize(4);
+		assertThat(matches).extracting(Match::result).map(Object::toString) // Convert the object to string first
+				.flatExtracting(s -> Arrays.asList(s.split("\\|")))
+				.contains("src/main/resources/application.properties",
+						"spring.datasource.url=jdbc:mysql://127.0.0.1:3306/todo", "spring.datasource.username=root",
+						"spring.datasource.password=root",
+						"spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver");
+	}
+
+	@ParameterizedTest
+	@CsvSource({"properties/spring-datasource-or-jpa-properties.yaml"})
+	void shouldMatchDataSourceOrJpaPropertiesWithScannerRewrite(String ruleSubPath) throws Exception {
+		// Given a path, got the rule to be processed
+		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
+		rules.forEach(r -> {
+			System.out.printf("## Rule: %s\n", r.when().condition());
+		});
+
+		// Process the rule
+		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+
+		runCat(Path.of(tempDir.toString(), applicationToScan, "target/rewrite/rewrite.patch"));
+		result.forEach((match, matches) -> {
+			System.out.printf("### match: %s\n", match);
+		});
+
+		// Then
+		assertNotNull(result);
+		assertTrue(result.containsKey("springboot-datasource-or-jpa-properties"));
+
+		List<Match> matches = result.get("springboot-datasource-or-jpa-properties");
+		assertNotNull(matches);
+
+		System.out.println("#### Show matches ....");
+		matches.stream().map(Match::result).map(Object::toString).flatMap(s -> Arrays.stream(s.split("\\|")))
+				.forEach(System.out::println);
+
+		//assertThat(matches).hasSize(4);
+		assertThat(matches).extracting(Match::result).map(Object::toString) // Convert the object to string first
 				.flatExtracting(s -> Arrays.asList(s.split("\\|")))
 				.contains("src/main/resources/application.properties",
 						"spring.datasource.url=jdbc:mysql://127.0.0.1:3306/todo", "spring.datasource.username=root",

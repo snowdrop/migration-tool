@@ -7,7 +7,8 @@
     - konveyor.io/target=quarkus
   links: []
   message: "Spring Boot DataSource configuration found. Needs migration to Quarkus datasource properties."
-  ruleID: springboot-datasource-config
+  ruleID: springboot-datasource-or-jpa-properties
   when:
     condition: |
-      properties.key is 'spring.datasource.*'
+      properties.key is 'spring.datasource.*' OR
+      properties.key is 'spring.jpa.*'
