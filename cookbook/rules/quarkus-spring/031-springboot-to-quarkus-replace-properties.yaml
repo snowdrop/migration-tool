@@ -22,7 +22,7 @@
       - name: SpringBoot to Quarkus
         description: Replace the Spring properties with Quarkus equivalent
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:1.0.5
           - org.openrewrite:rewrite-java:8.71.0
         recipeList:
           - org.openrewrite.properties.ChangePropertyKey:

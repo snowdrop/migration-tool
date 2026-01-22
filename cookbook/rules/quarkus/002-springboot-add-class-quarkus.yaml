@@ -44,4 +44,4 @@
                     }
                 }
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:1.0.5
