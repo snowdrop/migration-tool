@@ -507,7 +507,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		}
 	}
 
-    @Deprecated
+	@Deprecated
 	private List<Match> findRecordsMatching(String projectPath, String matchIdToSearch) {
 		List<Match> results = new ArrayList<>();
 		Path openRewriteCsvPath = Paths.get(projectPath, "target", "rewrite", "datatables");
