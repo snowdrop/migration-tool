@@ -1,0 +1,28 @@
+- category: optional
+  customVariables: []
+  description: Adopt RESTEasy Reactive response types
+  effort: 2
+  labels:
+    - konveyor.io/source=quarkus
+    - konveyor.io/target=quarkus
+  links: []
+  message: "Replace JAX-RS Response with RESTEasy Reactive RestResponse for type-safe responses."
+  ruleID: 020-update-jaxrs-response
+  when:
+    condition: java.annotation is 'jakarta.ws.rs.Path'
+  order: 2
+  instructions:
+    ai:
+      - tasks:
+          - "Replace usages of jakarta.ws.rs.core.Response with org.jboss.resteasy.reactive.RestResponse for type-safe REST responses. For example, the create() method should return RestResponse<Book> instead of Response, using RestResponse.status(RestResponse.Status.CREATED, book). The delete() method should return RestResponse<Void> with RestResponse.noContent(). Update the imports accordingly. Write the updated file."
+    manual:
+      - todo: "Replace jakarta.ws.rs.core.Response with org.jboss.resteasy.reactive.RestResponse for type-safe responses. Update create() to return RestResponse<Book> and delete() to return RestResponse<Void>."
+    openrewrite:
+      - name: Replace JAX-RS Response with RESTEasy Reactive RestResponse
+        description: Adopt type-safe RestResponse from RESTEasy Reactive.
+        recipeList:
+          - org.openrewrite.java.ChangeType:
+              oldFullyQualifiedTypeName: jakarta.ws.rs.core.Response
+              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.RestResponse
+        gav:
+          - org.openrewrite:rewrite-java:8.71.0
