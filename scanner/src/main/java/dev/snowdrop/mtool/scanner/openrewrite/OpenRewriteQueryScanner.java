@@ -153,7 +153,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		List<Match> results = new ArrayList<>();
 
 		if (!resultsContainer.isNotEmpty()) {
-			System.out.println("### No match found for: " + recipeDefinition.getFqName());
+			logger.warnf("No match found for the recipe: %s%n",recipeDefinition.getFqName());
 			return results;
 		}
 
@@ -183,11 +183,11 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 				String result = row.getResult();
 
 				String formatedResult = String.format("%s|%s|%s|%s", sourcePath, result, description, recipe);
-				System.out.println("### Match result: " + formatedResult);
+				logger.debugf("Match's recipe: %s datatable result: %s%n", recipe, formatedResult);
 				results.add(new Match("toBeDone", getScannerType(), formatedResult));
 			}
 		} else {
-			System.out.println("### No SearchResults DataTable found for: " + recipeDefinition.getFqName());
+			logger.warnf("No SearchResults DataTable found for: %s%n",recipeDefinition.getFqName());
 		}
 		return results;
 	}
@@ -204,8 +204,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		// Set the parameters needed to configure the fields of the Java Recipe Class
 		cfg.setRecipeOptions(convertMapParametersToKeyValueSet(rd.getFieldMappings()));
 
-		System.out.println("### Running recipe for : " + cfg.getFqNameRecipe());
-		System.out.println("###                with : " + cfg.getRecipeOptions());
+		logger.debugf("Running recipe: %s with options: %s%n",cfg.getFqNameRecipe(),cfg.getRecipeOptions());
 
 		/*
 		  Previous code which has been replaced with the RewriteService singleton
@@ -237,11 +236,11 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
 	public static RewriteService createRewriteServiceInstance(RewriteConfig cfg) {
 		if (rewriteServiceInstance == null) {
-			System.out.println("### Return RewriteService: NEW");
+			logger.debug("Set a new instance of the RewriteService.");
 			rewriteServiceInstance = new RewriteService(cfg);
 			rewriteServiceInstance.setLogger(new LoggingService());
 		}
-		System.out.println("### Return RewriteService: EXISTING");
+		logger.debug("Reuse an instance of the RewriteService.");
 		return rewriteServiceInstance;
 	}
 
