@@ -1,0 +1,34 @@
+- category: mandatory
+  customVariables: []
+  description: Rename RESTEasy Classic properties to RESTEasy Reactive equivalents
+  effort: 1
+  labels:
+    - konveyor.io/source=quarkus
+    - konveyor.io/target=quarkus
+  links: []
+  message: "Rename quarkus.resteasy.* properties to quarkus.rest.* equivalents."
+  ruleID: 030-update-properties
+  when:
+    condition: properties.key is 'quarkus.resteasy.*'
+  order: 3
+  instructions:
+    ai:
+      - tasks:
+          - "Read the file src/main/resources/application.properties. Rename all properties starting with quarkus.resteasy to their quarkus.rest equivalents: quarkus.resteasy.path becomes quarkus.rest.path, quarkus.resteasy.gzip.enabled becomes quarkus.rest.gzip.enabled, quarkus.resteasy.gzip.max-input becomes quarkus.rest.gzip.max-input. Write the updated file."
+    manual:
+      - todo: "In application.properties, rename quarkus.resteasy.path to quarkus.rest.path, quarkus.resteasy.gzip.enabled to quarkus.rest.gzip.enabled, and quarkus.resteasy.gzip.max-input to quarkus.rest.gzip.max-input."
+    openrewrite:
+      - name: Rename RESTEasy Classic properties to RESTEasy Reactive
+        description: Convert quarkus.resteasy.* configuration properties to quarkus.rest.* equivalents.
+#        recipeList:
+#          - org.openrewrite.properties.ChangePropertyKey:
+#              oldPropertyKey: quarkus.resteasy.path
+#              newPropertyKey: quarkus.rest.path
+#          - org.openrewrite.properties.ChangePropertyKey:
+#              oldPropertyKey: quarkus.resteasy.gzip.enabled
+#              newPropertyKey: quarkus.rest.gzip.enabled
+#          - org.openrewrite.properties.ChangePropertyKey:
+#              oldPropertyKey: quarkus.resteasy.gzip.max-input
+#              newPropertyKey: quarkus.rest.gzip.max-input
+        gav:
+          - org.openrewrite:rewrite-java:8.71.0

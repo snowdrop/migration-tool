@@ -1,0 +1,32 @@
+- category: optional
+  customVariables: []
+  description: Adopt RESTEasy Reactive response types
+  effort: 2
+  labels:
+    - konveyor.io/source=quarkus
+    - konveyor.io/target=quarkus
+  links: []
+  message: "Replace Resteasy classic PathParam annotations."
+  ruleID: 020-update-jaxrs-response
+  when:
+    condition: java.annotation is 'org.jboss.resteasy.annotations.jaxrs.PathParam'
+#    condition: java.annotation is 'jakarta.ws.rs.GET'
+  order: 2
+  instructions:
+    ai:
+      - tasks:
+          - "Replace usages of org.jboss.resteasy.annotations.jaxrs.PathParam with org.jboss.resteasy.reactive.RestPath. Update the imports accordingly. Write the updated file."
+    manual:
+      - todo: "Replace usages of org.jboss.resteasy.annotations.jaxrs.PathParam with org.jboss.resteasy.reactive.RestPath."
+    openrewrite:
+      - name: Replace Resteasy classic PathParam annotations
+        description: Adopt the new RestPath Quarkus REST annotation from RESTEasy Reactive.
+        recipeList:
+          - org.openrewrite.java.ChangeType:
+              oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.jaxrs.PathParam
+              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.RestPath
+#          - org.openrewrite.java.ChangeType:
+#              oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.jaxrs.QueryParam
+#              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.RestQuery
+        gav:
+          - org.openrewrite:rewrite-java:8.71.0
