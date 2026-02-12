@@ -15,7 +15,7 @@
   instructions:
     ai:
       - tasks:
-          - "TODO"
+          - "Read the file src/main/java/com/todo/app/controller/TaskController.java. Replace the @Controller annotation with @RestController. The import org.springframework.stereotype.Controller should be changed to org.springframework.web.bind.annotation.RestController. Write the updated file."
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:

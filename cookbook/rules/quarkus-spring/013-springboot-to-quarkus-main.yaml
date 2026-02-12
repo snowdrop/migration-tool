@@ -1,0 +1,29 @@
+- category: mandatory
+  customVariables: []
+  description: Replace @SpringBootApplication with @QuarkusMain and SpringApplication.run() with Quarkus.run()
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "Replace Spring Boot main class annotations and bootstrap code with Quarkus equivalents."
+  ruleID: 013-springboot-to-quarkus-main
+  when:
+    condition: java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
+  order: 3
+  instructions:
+    ai:
+      - tasks:
+          - "In the main application class (src/main/java/com/todo/app/AppApplication.java), replace the @SpringBootApplication annotation with @QuarkusMain. Update the imports: remove org.springframework.boot.autoconfigure.SpringBootApplication and org.springframework.boot.SpringApplication, add io.quarkus.runtime.annotations.QuarkusMain and io.quarkus.runtime.Quarkus."
+          - "In the same main application class, replace the body of the main() method: remove SpringApplication.run(AppApplication.class, args) and replace it with Quarkus.run(args)."
+    manual:
+      - todo: "Replace @SpringBootApplication with @QuarkusMain annotation in the main class. Replace SpringApplication.run() with Quarkus.run() in the main method. Update imports accordingly."
+    openrewrite:
+      - name: Replace @SpringBootApplication with @QuarkusMain and SpringApplication.run() with Quarkus.run()
+        description: Convert the Spring Boot main class to use Quarkus bootstrap annotations and runtime.
+        recipeList:
+          - dev.snowdrop.mtool.openrewrite.recipe.spring.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
+          - dev.snowdrop.mtool.openrewrite.recipe.spring.AddQuarkusRun
+        gav:
+          - dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT
+          - org.openrewrite:rewrite-java:8.71.0

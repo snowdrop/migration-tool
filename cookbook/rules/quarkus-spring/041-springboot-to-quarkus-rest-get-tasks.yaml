@@ -15,7 +15,7 @@
   instructions:
     ai:
       - tasks:
-          - "TODO"
+          - "Read the file src/main/java/com/todo/app/controller/TaskController.java. Modify the viewHome() method: remove the Model parameter, change the return type from String to ResponseEntity<List<Task>>, and replace the method body with: List<Task> tasks = taskService.getAllTasks(); return ResponseEntity.ok(tasks); This converts the Spring MVC view-based endpoint into a REST API endpoint that returns JSON. Write the updated file."
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:

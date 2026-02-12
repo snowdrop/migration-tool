@@ -14,12 +14,10 @@
   order: 3
   instructions:
     ai:
-      #- promptMessage: "Can you add to the pom.xml file the Quarkus BOM dependency within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core. The version of quarkus to be used and to included within the pom.xml properties is 3.26.4."
       - tasks:
-          - "Add to the pom.xml file the Quarkus BOM dependency within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core"
-          - "The version of quarkus to be used and to included within the pom.xml properties is 3.26.4."
+          - "Read the pom.xml file. Add the following Quarkus dependencies to replace the Spring Web stack: io.quarkus:quarkus-spring-web (version 3.26.4), io.quarkus:quarkus-spring-data-rest (version 3.26.4), io.quarkus:quarkus-rest (version 3.26.4), io.quarkus:quarkus-rest-jackson (version 3.26.4), and io.quarkus:quarkus-smallrye-health (version 3.26.4). These provide the Quarkus Spring Web compatibility layer, RESTEasy Reactive, and health check endpoints. Write the updated pom.xml."
     manual:
-      - todo: "Add the Quarkus BOM and quarkus-arc, quarkus-core dependencies within the pom.xml file"
+      - todo: "Add quarkus-spring-web, quarkus-spring-data-rest, quarkus-rest, quarkus-rest-jackson, and quarkus-smallrye-health dependencies to the pom.xml to replace the Spring Web stack"
     openrewrite:
       - name: Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file
         description: Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.

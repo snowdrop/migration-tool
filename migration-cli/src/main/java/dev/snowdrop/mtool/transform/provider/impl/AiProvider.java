@@ -7,7 +7,6 @@ import dev.snowdrop.mtool.transform.provider.model.ExecutionContext;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionResult;
 import org.jboss.logging.Logger;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -88,17 +87,12 @@ public class AiProvider implements MigrationProvider {
 	private boolean execAiCmd(ExecutionContext ctx, List<String> tasks, List<String> details) {
 		logger.info("Hello! I'm your AI migration assistant.");
 
-		Console console = System.console();
-
-		// TODO: To be improved
-		if (console == null) {
-			details.add("Java console not available.");
-			return false;
-		}
+		String projectContext = "The project is located at: " + ctx.projectPath().toAbsolutePath() + ". ";
 
 		tasks.forEach(t -> {
+			String messageWithContext = projectContext + t;
 			logger.infof("============= Sending user message");
-			String response = ctx.assistant().chat(t);
+			String response = ctx.assistant().chat(messageWithContext);
 			logger.infof("============= Claude response: %s", response);
 		});
 

@@ -20,15 +20,15 @@
     openrewrite:
       - name: Rename RESTEasy Classic properties to RESTEasy Reactive
         description: Convert quarkus.resteasy.* configuration properties to quarkus.rest.* equivalents.
-        recipeList:
-          - org.openrewrite.properties.ChangePropertyKey:
-              oldPropertyKey: quarkus.resteasy.path
-              newPropertyKey: quarkus.rest.path
-          - org.openrewrite.properties.ChangePropertyKey:
-              oldPropertyKey: quarkus.resteasy.gzip.enabled
-              newPropertyKey: quarkus.rest.gzip.enabled
-          - org.openrewrite.properties.ChangePropertyKey:
-              oldPropertyKey: quarkus.resteasy.gzip.max-input
-              newPropertyKey: quarkus.rest.gzip.max-input
+#        recipeList:
+#          - org.openrewrite.properties.ChangePropertyKey:
+#              oldPropertyKey: quarkus.resteasy.path
+#              newPropertyKey: quarkus.rest.path
+#          - org.openrewrite.properties.ChangePropertyKey:
+#              oldPropertyKey: quarkus.resteasy.gzip.enabled
+#              newPropertyKey: quarkus.rest.gzip.enabled
+#          - org.openrewrite.properties.ChangePropertyKey:
+#              oldPropertyKey: quarkus.resteasy.gzip.max-input
+#              newPropertyKey: quarkus.rest.gzip.max-input
         gav:
           - org.openrewrite:rewrite-java:8.71.0

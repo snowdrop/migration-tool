@@ -15,7 +15,7 @@
   instructions:
     ai:
       - tasks:
-          - "TODO"
+          - "Read the file src/main/java/com/todo/app/controller/TaskController.java. Modify the viewIndexPage() method: change the return type from String to RestResponse<String> (from org.jboss.resteasy.reactive.RestResponse), replace the method body with: return RestResponse.temporaryRedirect(new URI(\"/home\")); Add the throws URISyntaxException clause to the method signature. Add the necessary imports: java.net.URI, java.net.URISyntaxException, org.jboss.resteasy.reactive.RestResponse. Write the updated file."
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:

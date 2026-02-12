@@ -15,7 +15,7 @@
   instructions:
     ai:
       - tasks:
-          - "TODO"
+          - "Read the file src/main/resources/application.properties. Convert the Spring Boot properties to Quarkus equivalents: rename spring.datasource.url to %prod.quarkus.datasource.jdbc.url, spring.datasource.username to %prod.quarkus.datasource.username, spring.datasource.password to %prod.quarkus.datasource.password, spring.datasource.driver-class-name to quarkus.datasource.jdbc.driver. Add new properties: quarkus.datasource.db-kind=mysql, quarkus.hibernate-orm.schema-management.strategy=drop-and-create, quarkus.hibernate-orm.log.sql=true. Remove all remaining spring.* properties (spring.jpa.*, server.port, etc.). Write the updated file."
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:

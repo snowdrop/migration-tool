@@ -15,10 +15,9 @@
   instructions:
     ai:
       - tasks:
-          - "Add to the pom.xml file the Quarkus BOM dependency within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core"
-          - "The version of quarkus to be used and to included within the pom.xml properties is 3.26.4."
+          - "Read the pom.xml file. Add the following Quarkus dependencies to replace the Spring Data JPA stack: io.quarkus:quarkus-spring-data-jpa (version 3.26.4) and io.quarkus:quarkus-jdbc-mysql (version 3.26.4). These provide the Quarkus Spring Data JPA compatibility layer and the MySQL JDBC driver. Write the updated pom.xml."
     manual:
-      - todo: "Add the Quarkus BOM and quarkus-arc, quarkus-core dependencies within the pom.xml file"
+      - todo: "Add quarkus-spring-data-jpa and quarkus-jdbc-mysql dependencies to the pom.xml to replace the Spring Data JPA stack"
     openrewrite:
       - name: Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file
         description: Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.

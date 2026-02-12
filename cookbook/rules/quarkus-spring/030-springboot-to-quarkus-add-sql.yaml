@@ -15,7 +15,7 @@
   instructions:
     ai:
       - tasks:
-          - "TODO"
+          - "Create a new file at src/main/resources/import.sql with the following SQL seed data for the Quarkus Hibernate ORM import mechanism:\nINSERT INTO tasks(id, title, description) VALUES (1, 'Migration to Quarkus - step 1', 'Prepare the migration to Quarkus. Step 1');\nINSERT INTO tasks(id, title, description) VALUES (2, 'Migration to Quarkus - step 2', 'Prepare the migration to Quarkus. Step 2');"
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:
