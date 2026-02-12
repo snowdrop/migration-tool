@@ -11,6 +11,7 @@ import dev.snowdrop.mtool.model.openrewrite.RecipeDefinition;
 import dev.snowdrop.mtool.model.openrewrite.RecipeHolder;
 import dev.snowdrop.mtool.model.parser.Query;
 import dev.snowdrop.mtool.scanner.QueryScanner;
+import dev.snowdrop.logging.LoggingService;
 import dev.snowdrop.openrewrite.cli.RewriteService;
 import dev.snowdrop.openrewrite.cli.model.ResultsContainer;
 import dev.snowdrop.openrewrite.cli.model.RewriteConfig;
@@ -238,6 +239,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		if (rewriteServiceInstance == null) {
 			System.out.println("### Return RewriteService: NEW");
 			rewriteServiceInstance = new RewriteService(cfg);
+			rewriteServiceInstance.setLogger(new LoggingService());
 		}
 		System.out.println("### Return RewriteService: EXISTING");
 		return rewriteServiceInstance;
