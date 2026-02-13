@@ -65,7 +65,7 @@ Pom.xml updated
                         <dependency>
                                 <groupId>io.quarkus.platform</groupId>
                                 <artifactId>quarkus-bom</artifactId>
-                                <version>3.26.4</version>
+                                <version>3.31.3</version>
                                 <type>pom</type>
                                 <scope>import</scope>
                         </dependency>
@@ -142,18 +142,18 @@ public class TodoApplication implements QuarkusApplication {
           - org.openrewrite.maven.AddManagedDependency:
               groupId: io.quarkus.platform
               artifactId: quarkus-bom
-              version: 3.26.4
+              version: 3.31.3
               type: pom
               scope: import
               addToRootPom: false
           - org.openrewrite.maven.AddDependency:
               groupId: io.quarkus
               artifactId: quarkus-core
-              version: 3.26.4
+              version: 3.31.3
           - org.openrewrite.maven.AddDependency:
               groupId: io.quarkus
               artifactId: quarkus-arc
-              version: 3.26.4
+              version: 3.31.3
           - org.openrewrite.maven.RemovePlugin:
               groupId: org.springframework.boot
               artifactId: spring-boot-maven-plugin

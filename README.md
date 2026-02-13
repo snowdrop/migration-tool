@@ -405,12 +405,12 @@ Check the console to see the tasks executed and AI's reponses:
 ```shell
 2025-10-08 13:28:56,037 INFO  [dev.sno.com.TransformCommand] (main) 🔄 Processing migration task: springboot-replace-bom-quarkus-0000
 2025-10-08 13:28:56,039 INFO  [dev.sno.tra.pro.imp.AiProvider] (main) Task: Add to the pom.xml file the Quarkus BOM dependency within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core
-2025-10-08 13:28:56,039 INFO  [dev.sno.tra.pro.imp.AiProvider] (main) Task: The version of quarkus to be used and to included within the pom.xml properties is 3.26.4.
+2025-10-08 13:28:56,039 INFO  [dev.sno.tra.pro.imp.AiProvider] (main) Task: The version of quarkus to be used and to included within the pom.xml properties is 3.31.3.
 2025-10-08 13:28:56,039 INFO  [dev.sno.tra.pro.imp.AiProvider] (main) Hello! I'm your AI migration assistant.
 2025-10-08 13:28:58,981 INFO  [dev.sno.tra.pro.ai.FileSystemTool] (main) Reading file: pom.xml
 2025-10-08 13:29:15,541 INFO  [dev.sno.tra.pro.imp.AiProvider] (main) ============= Claude response: Successfully added the Quarkus BOM dependency to the dependencyManagement section and included the quarkus-arc and quarkus-core dependencies. The Quarkus version property has also been added for version management.
 2025-10-08 13:29:18,549 INFO  [dev.sno.tra.pro.ai.FileSystemTool] (main) Reading file: pom.xml
-2025-10-08 13:29:33,810 INFO  [dev.sno.tra.pro.imp.AiProvider] (main) ============= Claude response: Successfully updated the Quarkus version to 3.26.4 in the properties section of the pom.xml file.
+2025-10-08 13:29:33,810 INFO  [dev.sno.tra.pro.imp.AiProvider] (main) ============= Claude response: Successfully updated the Quarkus version to 3.31.3 in the properties section of the pom.xml file.
 2025-10-08 13:29:33,811 INFO  [dev.sno.tra.TransformationService] (main) ✅ Task completed successfully:    ✅ ai execution completed successfully
 ...
 ```
