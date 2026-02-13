@@ -111,13 +111,19 @@ public class MavenQueryScanner implements QueryScanner {
 	}
 
 	private MavenGav parse(Query query) {
-		// "gavs=group:artifact:version"
-		if (query.keyValues().containsKey("gavs")) {
-			String[] parts = query.keyValues().get("gavs").split(":");
-			return new MavenGav(parts[0], parts[1], parts.length > 2 ? parts[2] : "");
+		String gavs = query.keyValues().get("gavs");
+		String[] parts = gavs.split(":");
+
+		if (parts.length < 2) {
+			throw new IllegalArgumentException(
+					"Invalid forma for 'gavs'. 'groupId:artifactId[:version]' expected. Received: " + gavs);
 		}
-		return new MavenGav(query.keyValues().get("groupId"), query.keyValues().get("artifactId"),
-				query.keyValues().getOrDefault("version", ""));
+
+		String groupId = parts[0];
+		String artifactId = parts[1];
+		String version = parts.length > 2 ? parts[2] : "";
+
+		return new MavenGav(groupId, artifactId, version);
 	}
 
 	public Optional<InputLocation> findDependencyLocation(String pomPath, String groupId, String artifactId,
