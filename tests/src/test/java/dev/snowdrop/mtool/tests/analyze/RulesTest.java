@@ -144,7 +144,7 @@ class RulesTest extends BaseRulesTest {
 				// promptMessage (deprecated en favor de tasks)
 				Arrays.asList(
 						"Add to the pom.xml file the Quarkus BOM dependency within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core",
-						"The version of quarkus to be used and to included within the pom.xml properties is 3.26.4."))};
+						"The version of quarkus to be used and to included within the pom.xml properties is 3.31.3."))};
 
 		// Manual Instructions
 		Rule.Manual[] manualInstructions = new Rule.Manual[]{new Rule.Manual(
