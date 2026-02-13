@@ -9,8 +9,17 @@
   message: "Replace Resteasy classic PathParam annotations."
   ruleID: 020-update-jaxrs-response
   when:
-    condition: java.annotation is 'org.jboss.resteasy.annotations.jaxrs.PathParam'
-#    condition: java.annotation is 'jakarta.ws.rs.GET'
+    condition:  |
+      java.annotation is 'org.jboss.resteasy.annotations.jaxrs.PathParam' OR
+      java.annotation is 'org.jboss.resteasy.annotations.jaxrs.QueryParam' OR
+      java.annotation is 'org.jboss.resteasy.annotations.jaxrs.FormParam' OR
+      java.annotation is 'org.jboss.resteasy.annotations.jaxrs.HeaderParam' OR
+      java.annotation is 'org.jboss.resteasy.annotations.jaxrs.CookieParam' OR
+      java.annotation is 'org.jboss.resteasy.annotations.jaxrs.MatrixParam' OR
+      java.annotation is 'org.jboss.resteasy.annotations.cache.Cache' OR
+      java.annotation is 'org.jboss.resteasy.annotations.cache.NoCache' OR
+      java.annotation is 'org.jboss.resteasy.annotations.SseElementType' OR
+      java.annotation is 'org.jboss.resteasy.annotations.Separator'
   order: 2
   instructions:
     ai:
@@ -25,8 +34,32 @@
           - org.openrewrite.java.ChangeType:
               oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.jaxrs.PathParam
               newFullyQualifiedTypeName: org.jboss.resteasy.reactive.RestPath
-#          - org.openrewrite.java.ChangeType:
-#              oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.jaxrs.QueryParam
-#              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.RestQuery
+          - org.openrewrite.java.ChangeType:
+              oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.jaxrs.QueryParam
+              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.RestQuery
+          - org.openrewrite.java.ChangeType:
+              oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.jaxrs.FormParam
+              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.RestForm
+          - org.openrewrite.java.ChangeType:
+              oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.jaxrs.HeaderParam
+              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.RestHeader
+          - org.openrewrite.java.ChangeType:
+              oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.jaxrs.CookieParam
+              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.RestCookie
+          - org.openrewrite.java.ChangeType:
+              oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.jaxrs.MatrixParam
+              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.RestMatrix
+          - org.openrewrite.java.ChangeType:
+              oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.cache.Cache
+              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.Cache
+          - org.openrewrite.java.ChangeType:
+              oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.cache.NoCache
+              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.NoCache
+          - org.openrewrite.java.ChangeType:
+              oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.SseElementType
+              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.RestStreamElementType
+          - org.openrewrite.java.ChangeType:
+              oldFullyQualifiedTypeName: org.jboss.resteasy.annotations.Separator
+              newFullyQualifiedTypeName: org.jboss.resteasy.reactive.Separator
         gav:
           - org.openrewrite:rewrite-java:8.71.0

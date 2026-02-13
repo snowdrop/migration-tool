@@ -9,7 +9,11 @@
   message: "Migrate from RESTEasy Classic to RESTEasy Reactive (quarkus-rest)."
   ruleID: 010-replace-resteasy-deps
   when:
-    condition: pom.dependency is (gavs='io.quarkus:quarkus-resteasy')
+    condition: pom.dependency is (gavs='io.quarkus:quarkus-resteasy') OR
+     pom.dependency is (gavs='io.quarkus:quarkus-resteasy-jackson') OR
+     pom.dependency is (gavs='io.quarkus:quarkus-resteasy-jsonb') OR
+     pom.dependency is (gavs='io.quarkus:quarkus-resteasy-jaxb') OR
+     pom.dependency is (gavs='io.quarkus:quarkus-resteasy-qute')
   order: 1
   instructions:
     ai:

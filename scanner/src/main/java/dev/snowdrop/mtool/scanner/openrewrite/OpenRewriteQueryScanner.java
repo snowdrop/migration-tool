@@ -423,9 +423,11 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 	public boolean supports(Query query) {
 		String symbol = query.symbol();
 		String fileType = query.fileType();
+		// Check the configuration to see if this query should use the Maven scanner
 		return (fileType.contains("java") && symbol.contains("annotation"))
 				|| (fileType.contains("properties") && symbol.contains("key"))
-				|| (fileType.contains("source") && symbol.contains("file"));
+				|| (fileType.contains("source") && symbol.contains("file"))
+				|| (fileType.contains("pom") && symbol.contains("dependency"));
 	}
 
 	public String toYaml(CompositeRecipe recipe) {
