@@ -34,4 +34,4 @@
               newReturnType: "org.springframework.http.ResponseEntity<List<Task>>"
         gav:
         - dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT
-        - org.openrewrite:rewrite-java:8.71.0
+        - org.openrewrite:rewrite-java:8.73.0

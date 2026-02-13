@@ -38,13 +38,13 @@ public class BaseRulesTest {
 
 	public Config createTestConfig(Path applicationToScan, Path rulesPath) {
 		return new Config(applicationToScan.toString(), rulesPath, "springboot", "quarkus", "", "",
-				"io.konveyor.tackle.ruleEntry", false, "json", null, "6.27.0");
+				"io.konveyor.tackle.ruleEntry", false, "json", null, "6.29.0");
 	}
 
 	public Config createTestConfig(Path applicationToScan, Path rulesPath, String jdtls) {
 		return new Config(applicationToScan.toString(), rulesPath, "springboot", "quarkus",
 				Paths.get(jdtls, "konveyor-jdtls").toString(), jdtls, "io.konveyor.tackle.ruleEntry", false, "json",
-				null, "6.27.0");
+				null, "6.29.0");
 	}
 
 	public static void runCat(Path pathToFile) throws Exception {

@@ -283,9 +283,11 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 			throw new IllegalStateException("recipeList must contain rawMap");
 		}
 
-		// Recipe's jar files
-		String gavs = "org.openrewrite:rewrite-java:8.71.0,"
-				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.49.0,"
+		// Recipe's jar files declared within the openrewrite pom
+		// Bom of the recipe: https://repo.maven.apache.org/maven2/org/openrewrite/recipe/rewrite-recipe-bom/3.24.0/rewrite-recipe-bom-3.24.0.pom
+		// Bom of the modules of rewrite: https://repo.maven.apache.org/maven2/org/openrewrite/rewrite-bom/8.73.0/rewrite-bom-8.73.0.pom
+		String gavs = "org.openrewrite:rewrite-java:8.73.0,"
+				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.51.0,"
 				+ "dev.snowdrop.mtool:openrewrite-recipes:1.0.4";
 		Map<String, Map<String, String>> recipeMap = (Map<String, Map<String, String>>) first;
 
@@ -462,7 +464,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		}
 
 		// Recipe's jar files
-		String gavs = "org.openrewrite:rewrite-java:8.65.0,"
+		String gavs = "org.openrewrite:rewrite-java:8.73.0,"
 				+ "org.openrewrite.recipe:rewrite-java-dependencies:1.44.0,"
 				+ "dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT";
 

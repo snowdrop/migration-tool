@@ -23,7 +23,7 @@
         description: Add a SQL file to create records
         gav:
           - dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT
-          - org.openrewrite:rewrite-java:8.71.0
+          - org.openrewrite:rewrite-java:8.73.0
         recipeList:
           - org.openrewrite.text.CreateTextFile:
               relativeFileName: src/main/resources/import.sql

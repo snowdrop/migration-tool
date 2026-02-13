@@ -160,7 +160,7 @@ public class TodoApplication implements QuarkusApplication {
           - spring.recipe.dev.snowdrop.mtool.openrewrite.AddQuarkusMavenPlugin
         gav:
           - dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT
-          - org.openrewrite:rewrite-maven:8.62.4
+          - org.openrewrite:rewrite-maven:8.73.0
 ```
 
 **Steps: 1, 2 and 3**
