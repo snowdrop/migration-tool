@@ -1,0 +1,48 @@
+- category: mandatory
+  customVariables: []
+  description: Replace RESTEasy Classic dependencies with RESTEasy Reactive
+  effort: 1
+  labels:
+    - konveyor.io/source=quarkus
+    - konveyor.io/target=quarkus
+  links: []
+  message: "Migrate from RESTEasy Classic to RESTEasy Reactive (quarkus-rest)."
+  ruleID: 010-replace-resteasy-deps
+  when:
+    condition: pom.dependency is (gavs='io.quarkus:quarkus-resteasy')
+  order: 1
+  instructions:
+    ai:
+      - tasks:
+          - "Read the pom.xml file. Replace the dependency io.quarkus:quarkus-resteasy with io.quarkus:quarkus-rest. Replace io.quarkus:quarkus-resteasy-jackson with io.quarkus:quarkus-rest-jackson. Update the Quarkus platform version property from 3.18.4 to 3.31.2. Write the updated pom.xml."
+    manual:
+      - todo: "In pom.xml, replace quarkus-resteasy with quarkus-rest and quarkus-resteasy-jackson with quarkus-rest-jackson. Update Quarkus version to 3.31.2."
+    openrewrite:
+      - name: Replace RESTEasy Classic dependencies with RESTEasy Reactive
+        description: Swap RESTEasy Classic artifacts for their Reactive equivalents and upgrade Quarkus.
+        recipeList:
+          - org.openrewrite.maven.ChangeDependencyArtifactId:
+              groupId: io.quarkus
+              artifactId: quarkus-resteasy
+              newArtifactId: quarkus-rest
+          - org.openrewrite.maven.ChangeDependencyArtifactId:
+              groupId: io.quarkus
+              artifactId: quarkus-resteasy-jackson
+              newArtifactId: quarkus-rest-jackson
+          - org.openrewrite.maven.ChangeDependencyArtifactId:
+              groupId: io.quarkus
+              artifactId: quarkus-resteasy-jsonb
+              newArtifactId: quarkus-rest-jsonb
+          - org.openrewrite.maven.ChangeDependencyArtifactId:
+              groupId: io.quarkus
+              artifactId: quarkus-resteasy-jaxb
+              newArtifactId: quarkus-rest-jaxb
+          - org.openrewrite.maven.ChangeDependencyArtifactId:
+              groupId: io.quarkus
+              artifactId: quarkus-resteasy-qute
+              newArtifactId: quarkus-rest-qute
+          - org.openrewrite.maven.ChangePropertyValue:
+              key: quarkus.platform.version
+              newValue: 3.31.2
+        gav:
+          - org.openrewrite:rewrite-maven:8.71.0
