@@ -37,7 +37,7 @@ class CodeScannerServiceTest {
 	void setup() throws IOException {
 		tempDir = Files.createTempDirectory("rewrite-test");
 		config = new Config(tempDir.toString(), Paths.get("./rules"), "springboot", "quarkus", "./jdt/konveyor-jdtls",
-				"./jdt", "io.konveyor.tackle.ruleEntry", false, "json", "openrewrite", "6.27.0");
+				"./jdt", "io.konveyor.tackle.ruleEntry", false, "json", "openrewrite", "6.29.0");
 		scanCommandExecutor = Mockito.mock(ScanCommandExecutor.class);
 		codeScannerService = new CodeScannerService(config, scanCommandExecutor);
 	}

@@ -156,7 +156,7 @@ class RulesTest extends BaseRulesTest {
 				"Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
 				null, // recipeList (aquí podrías añadir los recipes si los necesitas)
 				new String[]{"dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
-						"org.openrewrite:rewrite-maven:8.62.4"})};
+						"org.openrewrite:rewrite-maven:8.73.0"})};
 
 		Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
 				openrewriteInstructions);
@@ -193,7 +193,7 @@ class RulesTest extends BaseRulesTest {
 				"Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
 				null, // recipeList (aquí podrías añadir los recipes si los necesitas)
 				new String[]{"dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
-						"org.openrewrite:rewrite-maven:8.62.4"})};
+						"org.openrewrite:rewrite-maven:8.73.0"})};
 
 		Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
 				openrewriteInstructions);
@@ -231,7 +231,7 @@ class RulesTest extends BaseRulesTest {
 				"Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
 				null, // recipeList (aquí podrías añadir los recipes si los necesitas)
 				new String[]{"dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
-						"org.openrewrite:rewrite-maven:8.62.4"})};
+						"org.openrewrite:rewrite-maven:8.73.0"})};
 
 		Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
 				openrewriteInstructions);
@@ -274,7 +274,7 @@ class RulesTest extends BaseRulesTest {
 				"Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
 				null, // recipeList (aquí podrías añadir los recipes si los necesitas)
 				new String[]{"dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
-						"org.openrewrite:rewrite-maven:8.62.4"})};
+						"org.openrewrite:rewrite-maven:8.73.0"})};
 
 		Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
 				openrewriteInstructions);
