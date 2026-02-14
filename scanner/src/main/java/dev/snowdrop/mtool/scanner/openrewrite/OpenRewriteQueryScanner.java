@@ -153,7 +153,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		List<Match> results = new ArrayList<>();
 
 		if (!resultsContainer.isNotEmpty()) {
-			logger.warnf("No match found for the recipe: %s%n",recipeDefinition.getFqName());
+			logger.warnf("No match found for the recipe: %s%n", recipeDefinition.getFqName());
 			return results;
 		}
 
@@ -187,7 +187,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 				results.add(new Match("toBeDone", getScannerType(), formatedResult));
 			}
 		} else {
-			logger.warnf("No SearchResults DataTable found for: %s%n",recipeDefinition.getFqName());
+			logger.warnf("No SearchResults DataTable found for: %s%n", recipeDefinition.getFqName());
 		}
 		return results;
 	}
@@ -204,7 +204,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		// Set the parameters needed to configure the fields of the Java Recipe Class
 		cfg.setRecipeOptions(convertMapParametersToKeyValueSet(rd.getFieldMappings()));
 
-		logger.debugf("Running recipe: %s with options: %s%n",cfg.getFqNameRecipe(),cfg.getRecipeOptions());
+		logger.debugf("Running recipe: %s with options: %s%n", cfg.getFqNameRecipe(), cfg.getRecipeOptions());
 
 		/*
 		  Previous code which has been replaced with the RewriteService singleton
