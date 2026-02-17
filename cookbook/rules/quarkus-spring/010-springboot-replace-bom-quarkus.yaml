@@ -37,6 +37,10 @@
               groupId: io.quarkus
               artifactId: quarkus-arc
               version: 3.31.3
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-smallrye-openapi
+              version: 3.31.3
           - org.openrewrite.maven.RemovePlugin:
               groupId: org.springframework.boot
               artifactId: spring-boot-maven-plugin

@@ -126,3 +126,31 @@ This project is licensed under the MIT License. Feel free to use it, modify it, 
 - [Adam Peer](https://github.com/adampeer)
 
 ---
+
+Here’s a concise section you can add to your README to set up the database using Podman:
+
+---
+
+## Running the MySQL Database
+
+This project requires a MySQL database named `todo`.
+A Dockerfile is available at the root path of the project. 
+You can easily run it with Docker or Podman:
+
+### 1. Build the image
+
+```bash
+docker build -f Dockerfile -t todo-mysql .
+```
+
+### 2. Start the container
+
+```bash
+podman run -d \
+  --name todo-mysql \
+  -p 3306:3306 \
+  todo-mysql
+```
+
+
+
