@@ -1,5 +1,6 @@
 package dev.snowdrop.mtool.transform.provider.ai;
 
+import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.jboss.logging.Logger;
@@ -15,7 +16,7 @@ public class FileSystemTool {
 	private static final Logger logger = Logger.getLogger(FileSystemTool.class.getName());
 
 	@Tool("Reads the full content of a specified file")
-	public String readFile(String path) {
+	public String readFile(@P("Path to the file to analyze") String path) {
 		try {
 			logger.info("Reading file: " + path);
 			return Files.readString(Paths.get(path));
@@ -25,7 +26,8 @@ public class FileSystemTool {
 	}
 
 	@Tool("Writes the content to the specified file, overwriting it if it exists")
-	public String writeFile(String path, String content) {
+	public String writeFile(@P("Path to the file where the content must be changed") String path,
+			@P("The content that you AI proposes to change") String content) {
 
 		logger.debugf("Writing file: %s", path);
 		logger.debugf("String content : %s", content);
