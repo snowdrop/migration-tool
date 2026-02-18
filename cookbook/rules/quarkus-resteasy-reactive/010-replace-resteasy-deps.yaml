@@ -9,7 +9,11 @@
   message: "Migrate from RESTEasy Classic to RESTEasy Reactive (quarkus-rest)."
   ruleID: 010-replace-resteasy-deps
   when:
-    condition: pom.dependency is (gavs='io.quarkus:quarkus-resteasy')
+    condition: pom.dependency is (gavs='io.quarkus:quarkus-resteasy') OR
+     pom.dependency is (gavs='io.quarkus:quarkus-resteasy-jackson') OR
+     pom.dependency is (gavs='io.quarkus:quarkus-resteasy-jsonb') OR
+     pom.dependency is (gavs='io.quarkus:quarkus-resteasy-jaxb') OR
+     pom.dependency is (gavs='io.quarkus:quarkus-resteasy-qute')
   order: 1
   instructions:
     ai:
@@ -21,25 +25,30 @@
       - name: Replace RESTEasy Classic dependencies with RESTEasy Reactive
         description: Swap RESTEasy Classic artifacts for their Reactive equivalents and upgrade Quarkus.
         recipeList:
-          - org.openrewrite.maven.ChangeDependencyArtifactId:
-              groupId: io.quarkus
-              artifactId: quarkus-resteasy
+          - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+              oldGroupId: io.quarkus
+              oldArtifactId: quarkus-resteasy
+              newGroupId: io.quarkus
               newArtifactId: quarkus-rest
-          - org.openrewrite.maven.ChangeDependencyArtifactId:
-              groupId: io.quarkus
-              artifactId: quarkus-resteasy-jackson
+          - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+              oldGroupId: io.quarkus
+              oldArtifactId: quarkus-resteasy-jackson
+              newGroupId: io.quarkus
               newArtifactId: quarkus-rest-jackson
-          - org.openrewrite.maven.ChangeDependencyArtifactId:
-              groupId: io.quarkus
-              artifactId: quarkus-resteasy-jsonb
+          - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+              oldGroupId: io.quarkus
+              oldArtifactId: quarkus-resteasy-jsonb
+              newGroupId: io.quarkus
               newArtifactId: quarkus-rest-jsonb
-          - org.openrewrite.maven.ChangeDependencyArtifactId:
-              groupId: io.quarkus
-              artifactId: quarkus-resteasy-jaxb
+          - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+              oldGroupId: io.quarkus
+              oldArtifactId: quarkus-resteasy-jaxb
+              newGroupId: io.quarkus
               newArtifactId: quarkus-rest-jaxb
-          - org.openrewrite.maven.ChangeDependencyArtifactId:
-              groupId: io.quarkus
-              artifactId: quarkus-resteasy-qute
+          - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+              oldGroupId: io.quarkus
+              oldArtifactId: quarkus-resteasy-qute
+              newGroupId: io.quarkus
               newArtifactId: quarkus-rest-qute
           - org.openrewrite.maven.ChangePropertyValue:
               key: quarkus.platform.version

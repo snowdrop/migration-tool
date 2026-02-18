@@ -5,6 +5,7 @@ import dev.snowdrop.mtool.model.analyze.MigrationTask;
 import dev.snowdrop.mtool.transform.TransformationService;
 import dev.snowdrop.mtool.model.transform.MigrationTasksExport;
 import dev.snowdrop.mtool.transform.provider.ai.Assistant;
+import dev.snowdrop.mtool.transform.provider.impl.OpenRewriteProvider;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionContext;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionResult;
 import jakarta.inject.Inject;
@@ -16,10 +17,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -162,13 +160,29 @@ public class TransformCommand implements Runnable {
 		ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider, aiAssistant,
 				openRewriteMavenPluginVersion, compositeRecipeName);
 
-		// Iterate over the list of the migration and tasks
-		for (Map.Entry<String, MigrationTask> entry : migrationTasks.entrySet()) {
-			String taskId = entry.getKey();
-			MigrationTask task = entry.getValue();
+		if ("openrewrite".equals(provider)) {
+			// Batch all OpenRewrite tasks into a single Maven execution
+			List<MigrationTask> openrewriteTasks = migrationTasks.values().stream()
+					.filter(task -> task.getRule().instructions() != null
+							&& task.getRule().instructions().openrewrite() != null)
+					.toList();
 
-			// Execute the task against the provider
-			executeTaskWithProvider(taskId, task, context);
+			if (openrewriteTasks.isEmpty()) {
+				logger.warn("⚠️  No tasks with OpenRewrite instructions found");
+			} else {
+				logger.infof("🔄 Batching %d OpenRewrite tasks into a single execution", openrewriteTasks.size());
+				OpenRewriteProvider openRewriteProvider = new OpenRewriteProvider();
+				ExecutionResult result = openRewriteProvider.executeBatch(openrewriteTasks, context);
+				TransformationService ts = new TransformationService();
+				ts.logExecutionResult(result, verbose);
+			}
+		} else {
+			// For other providers (ai, manual), execute tasks individually
+			for (Map.Entry<String, MigrationTask> entry : migrationTasks.entrySet()) {
+				String taskId = entry.getKey();
+				MigrationTask task = entry.getValue();
+				executeTaskWithProvider(taskId, task, context);
+			}
 		}
 
 		Instant finish = Instant.now();

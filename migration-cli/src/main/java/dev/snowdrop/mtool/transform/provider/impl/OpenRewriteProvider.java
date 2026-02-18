@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -32,6 +33,8 @@ public class OpenRewriteProvider implements MigrationProvider {
 	public static final String MAVEN_OPENREWRITE_PLUGIN_GROUP = "org.openrewrite.maven";
 	public static final String MAVEN_OPENREWRITE_PLUGIN_ARTIFACT = "rewrite-maven-plugin";
 
+	private static final String REWRITE_YAML_NAME = "rewrite.yml";
+
 	@Override
 	public String getProviderType() {
 		return "openrewrite";
@@ -39,28 +42,58 @@ public class OpenRewriteProvider implements MigrationProvider {
 
 	@Override
 	public ExecutionResult execute(MigrationTask task, ExecutionContext ctx) {
-		var rule = task.getRule();
+		return executeBatch(List.of(task), ctx);
+	}
 
-		if (rule.instructions() == null || rule.instructions().openrewrite() == null) {
-			return ExecutionResult
-					.failure(String.format("No OpenRewrite instructions found for the rule: %s", rule.ruleID()));
+	/**
+	 * Executes all OpenRewrite tasks in a single Maven invocation by merging their recipes and GAV dependencies.
+	 *
+	 * @param tasks
+	 *            the list of migration tasks containing OpenRewrite instructions
+	 * @param ctx
+	 *            the execution context
+	 *
+	 * @return execution result from the merged run
+	 */
+	public ExecutionResult executeBatch(List<MigrationTask> tasks, ExecutionContext ctx) {
+		List<Object> mergedRecipes = new ArrayList<>();
+		LinkedHashSet<String> mergedGavs = new LinkedHashSet<>();
+		String firstName = null;
+		String firstDescription = null;
+
+		for (MigrationTask task : tasks) {
+			var rule = task.getRule();
+
+			if (rule.instructions() == null || rule.instructions().openrewrite() == null) {
+				logger.warnf("No OpenRewrite instructions found for rule: %s, skipping", rule.ruleID());
+				continue;
+			}
+
+			for (Rule.Openrewrite openrewrite : rule.instructions().openrewrite()) {
+				if (openrewrite.recipeList() == null || openrewrite.recipeList().isEmpty()) {
+					continue;
+				}
+
+				if (firstName == null) {
+					firstName = openrewrite.name();
+					firstDescription = openrewrite.description();
+				}
+
+				mergedRecipes.addAll(openrewrite.recipeList());
+
+				if (openrewrite.gav() != null) {
+					mergedGavs.addAll(Arrays.asList(openrewrite.gav()));
+				}
+			}
 		}
 
-		// We only process until now only one openrewrite object/rule !!
-		var openrewrite = Arrays.stream(rule.instructions().openrewrite()).findFirst().orElse(null);
-
-		if (openrewrite.recipeList() == null || openrewrite.recipeList().isEmpty()) {
-			return ExecutionResult.failure("No recipes defined in OpenRewrite instruction, skipping", null);
+		if (mergedRecipes.isEmpty()) {
+			return ExecutionResult.failure("No recipes found across all OpenRewrite tasks");
 		}
 
 		try {
-			ExecutionResult result = executeOpenRewriteInstruction(ctx, openrewrite, rule);
-
-			if (!result.success()) {
-				return ExecutionResult.failure(result.message(), result.details(), null);
-			}
-
-			return ExecutionResult.success("OpenRewrite execution completed successfully", result.details());
+			return executeMergedInstruction(ctx, firstName, firstDescription, mergedRecipes,
+					new ArrayList<>(mergedGavs));
 		} catch (Exception e) {
 			logger.errorf("Error executing OpenRewrite instruction: %s", e.getMessage());
 			if (ctx.verbose()) {
@@ -70,53 +103,49 @@ public class OpenRewriteProvider implements MigrationProvider {
 		}
 	}
 
-	private ExecutionResult executeOpenRewriteInstruction(ExecutionContext ctx, Rule.Openrewrite openrewrite,
-			Rule rule) {
+	private ExecutionResult executeMergedInstruction(ExecutionContext ctx, String name, String description,
+			List<Object> recipes, List<String> gavs) {
 		List<String> details = new ArrayList<>();
 
 		// Generate YAML recipes
 		String yamlRecipesStr;
 		try {
-			yamlRecipesStr = populateYAMLRecipes(ctx, openrewrite);
+			yamlRecipesStr = populateYAMLRecipes(ctx, name, description, recipes);
 			details.add("Generated YAML recipes");
 		} catch (Exception e) {
 			return ExecutionResult.failure("Failed to generate YAML recipes", e);
 		}
 
 		// Write YAML file
-		String rewriteYamlName = String.format("rewrite-%d.yml", rule.order());
-		Path yamlFilePath = ctx.projectPath().resolve(rewriteYamlName);
+		Path yamlFilePath = ctx.projectPath().resolve(REWRITE_YAML_NAME);
 
 		try {
 			Files.write(yamlFilePath, yamlRecipesStr.getBytes(), StandardOpenOption.CREATE,
 					StandardOpenOption.TRUNCATE_EXISTING);
-			details.add("Created YAML file: " + rewriteYamlName);
+			details.add("Created YAML file: " + REWRITE_YAML_NAME);
 		} catch (IOException e) {
 			return ExecutionResult.failure("Failed to write YAML file", e);
 		}
 
 		// Execute Maven command
-		String gavs = String.join(",", openrewrite.gav());
-		boolean success = execMvnCmd(ctx, gavs, rewriteYamlName, details);
-		details.add("Maven cmd executed successfully");
+		String gavsStr = String.join(",", gavs);
+		boolean success = execMvnCmd(ctx, gavsStr, REWRITE_YAML_NAME, details);
 
 		if (success) {
-			return ExecutionResult.success("OpenRewrite instruction executed successfully", details);
+			details.add("Maven cmd executed successfully");
+			return ExecutionResult.success("OpenRewrite execution completed successfully", details);
 		} else {
 			return ExecutionResult.failure("Openrewrite's maven command execution failed", details, null);
 		}
 	}
 
-	private String populateYAMLRecipes(ExecutionContext ctx, Rule.Openrewrite openrewrite)
+	private String populateYAMLRecipes(ExecutionContext ctx, String name, String description, List<Object> recipes)
 			throws JsonProcessingException {
-		List<Object> recipes = openrewrite.recipeList();
-
 		if (recipes.isEmpty()) {
 			throw new IllegalStateException("No recipes defined in OpenRewrite instruction");
 		}
 
-		CompositeRecipe compositeRecipe = new CompositeRecipe(ctx.compositeRecipeName(), openrewrite.name(),
-				openrewrite.description(), recipes);
+		CompositeRecipe compositeRecipe = new CompositeRecipe(ctx.compositeRecipeName(), name, description, recipes);
 
 		ObjectMapper mapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
 
