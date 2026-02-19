@@ -15,7 +15,7 @@
   instructions:
     ai:
       - tasks:
-          - "TODO"
+          - "Change the spring annotation org.springframework.stereotype.Controller to org.springframework.web.bind.annotation.RestController and adapt the import"
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:

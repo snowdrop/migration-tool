@@ -15,7 +15,9 @@
   instructions:
     ai:
       - tasks:
-          - "TODO"
+          - "Remove from the following class: com.todo.app.controller.TaskController the parameters of the method: viewHome()"
+          - "Replace the body of the method viewHome() with List<Task> tasks = taskService.getAllTasks();\n return ResponseEntity.ok(tasks);"
+          - "Change the return type: org.springframework.http.ResponseEntity<List<Task>> of the method viewHome()"
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:
