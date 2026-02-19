@@ -17,7 +17,7 @@
           - "Add to the pom.xml file the Quarkus BOM dependency version 3.31.3 within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core and quarkus-smallrye-openapi"
           - "Remove next from the ôpm.xml the plugin org.springframework.boot:spring-boot-maven-plugin"
           - "Add to each spring boot dependency, the version 3.5.5 within the pom.xml"
-          - "Add the Quarkus Maven Plugin"
+          - "Add the Quarkus Maven Plugin and enable it by adding <extensions>true</extensions>"
           - "Finally remove the spring-boot-starter-parent"
           - "Remove the spring-snapshots, spring-milestones repositories as we just need maven central for quarkus"
     manual:

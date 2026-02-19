@@ -15,9 +15,7 @@
   instructions:
     ai:
       - tasks:
-          - "Create a SQL file under the following path locally: src/main/resources/import.sql"
-          - "Add a first record: INSERT INTO tasks(id, title, description) VALUES (1, 'Migration to Quarkus - step 1', 'Prepare the migration to Quarkus. Step 1');"
-          - "Add a new   record: INSERT INTO tasks(id, title, description) VALUES (2, 'Migration to Quarkus - step 2', 'Prepare the migration to Quarkus. Step 2');"
+          - "Nothing todo here"
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:

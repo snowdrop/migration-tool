@@ -15,10 +15,15 @@
   instructions:
     ai:
       - tasks:
-          - "Replace the spring.datasource.* properties defined within the file src/main/resources/Application.properties with their quarkus equivalent: quarkus.datasource.*"
+          - "Replace within the application.properties file: spring.datasource.url with quarkus.datasource.jdbc.url"
+          - "Replace within the application.properties file: spring.datasource.username with quarkus.datasource.username"
+          - "Replace within the application.properties file: spring.datasource.password with quarkus.datasource.password"
+          - "Replace within the application.properties file: spring.datasource.driver-class-name with quarkus.datasource.jdbc.driver"
           - "Add a new property: quarkus.datasource.db-kind=mysql"
           - "Add a new property: quarkus.hibernate-orm.log.sql=true"
-          - "Finally remove the spring properties from the application.properties file"
+          - "Add a new property: quarkus.hibernate-orm.schema-management.strategy=drop-and-create"
+          - "Remove all spring properties from the application.properties file"
+
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:
