@@ -15,7 +15,7 @@
   instructions:
     ai:
       - tasks:
-          - "Replace the spring.datasource.* properties defined within the file src/main/resources/Application.properties with their quarkus equivalent: %prod.quarkus.datasource.*"
+          - "Replace the spring.datasource.* properties defined within the file src/main/resources/Application.properties with their quarkus equivalent: quarkus.datasource.*"
           - "Add a new property: quarkus.datasource.db-kind=mysql"
           - "Add a new property: quarkus.hibernate-orm.log.sql=true"
           - "Finally remove the spring properties from the application.properties file"
