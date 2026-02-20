@@ -15,7 +15,8 @@
   instructions:
     ai:
       - tasks:
-          - "TODO"
+          - "Change within the class TaskController the annotation @Controller of org.springframework.stereotype.Controller defined on the class with the annotation @RestController (class org.springframework.web.bind.annotation..RestController)"
+          - "Clean up the import"
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:

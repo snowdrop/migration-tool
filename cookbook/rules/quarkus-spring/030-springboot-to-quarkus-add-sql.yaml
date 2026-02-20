@@ -15,7 +15,7 @@
   instructions:
     ai:
       - tasks:
-          - "TODO"
+          - "Nothing todo here"
     manual:
       - todo: "See openrewrite instructions"
     openrewrite:
