@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Migration of Applications - Demo</title>
+  <link rel="stylesheet" href="reveal.js/dist/reveal.css">
+  <link rel="stylesheet" href="reveal.js/dist/theme/white-contrast.css">
+  <link rel="stylesheet" href="reveal.js/plugin/highlight/monokai.css">
+  <style>
+    .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+    .reveal pre { width: 95%; font-size: 0.45em; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+    .reveal pre code { padding: 1em; max-height: 500px; }
+    .reveal ul { font-size: 0.85em; }
+    .reveal li { margin-bottom: 0.4em; }
+    .reveal .small { font-size: 0.7em; }
+    .reveal .highlight-red { color: #e74c3c; font-weight: bold; }
+    .reveal .highlight-green { color: #2ecc71; font-weight: bold; }
+    .reveal .highlight-blue { color: #3498db; font-weight: bold; }
+    .reveal section { text-align: left; }
+    .reveal section h1, .reveal section h2, .reveal section h3, .reveal section p { text-align: center; }
+    .demo-label {
+      background: #e74c3c;
+      color: white;
+      padding: 0.1em 0.5em;
+      border-radius: 4px;
+      font-size: 0.7em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- Slide 1: Title -->
+      <section>
+        <h1>Migration of Applications</h1>
+        <h2>From Spring Boot to Quarkus</h2>
+        <br/>
+        <p>Aurea Munoz Hernandez</p>
+        <p>Charles Moulliard</p>
+      </section>
+
+      <!-- Slide 2: Agenda -->
+      <section>
+        <h2>Agenda</h2>
+        <ul>
+          <li>OpenRewrite: Migration Swiss knife toolbox</li>
+          <li>Quarkus Rewrite Client</li>
+          <li>What about Migrating Applications</li>
+          <li>The Quarkus Migration Tool project</li>
+          <li>When we reach the limit: AI</li>
+          <li>Wrap-up &amp; Q/A</li>
+        </ul>
+      </section>
+
+      <section data-markdown>
+          <script type="text/template">
+              ## Titre du slide en Markdown
+              - Point 1
+              - Point 2
+              - **Texte en gras**
+          </script>
+      </section>
+
+      <!-- Section: OpenRewrite -->
+      <section>
+        <section>
+          <h2>OpenRewrite</h2>
+          <h3>Migration Swiss knife toolbox</h3>
+        </section>
+
+        <section>
+          <h3>What is OpenRewrite?</h3>
+          <ul>
+            <li>Huge collection of <strong>recipes</strong> = Java classes executed through the visitor pattern</li>
+            <li>Can be used to <span class="highlight-green">transform</span> OR <span class="highlight-blue">analyze</span></li>
+            <li>Supports <code>dryrun</code> or <code>run</code> mode</li>
+            <li>Executed using <strong>Maven</strong></li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>BUT... Limitations</h3>
+          <ul>
+            <li class="highlight-red">Slow when several <code>mvn</code> commands must be executed</li>
+            <li class="highlight-red">No easy way to design unit tests</li>
+            <li class="highlight-red">No API or Library</li>
+          </ul>
+        </section>
+      </section>
+
+      <!-- Section: Quarkus Rewrite Client -->
+      <section>
+        <section>
+          <h2>Quarkus Rewrite Client</h2>
+          <p>Client and Library designed around OpenRewrite</p>
+          <p>Bypasses most of the limitations described previously</p>
+        </section>
+
+        <section>
+          <h3>Installation</h3>
+          <p>Compile locally or install using <strong>jbang</strong></p>
+          <pre><code data-trim data-noescape class="language-bash">
+mvn clean install -DskipTests -Dquarkus.package.type=uber-jar
+jbang app install --force --catalog jbang-catalog-dev.json openrewrite
+          </code></pre>
+        </section>
+
+        <section>
+          <h3><span class="demo-label">Demo 1</span> Rewrite Client</h3>
+          <pre><code data-trim data-noescape class="language-bash">
+pushd test-project/simple
+
+# Dry run (default)
+openrewrite . -r org.openrewrite.java.format.AutoFormat
+
+# Run (apply changes)
+openrewrite . -r org.openrewrite.java.format.AutoFormat -d false
+
+# Using a rewrite.yml config
+openrewrite . -c rewrite.yml
+popd
+
+# Or specify path directly
+openrewrite test-project/simple -c rewrite.yml
+          </code></pre>
+        </section>
+
+        <section>
+          <h3><span class="demo-label">Demo 2</span> Test Cases</h3>
+          <pre><code data-trim data-noescape class="language-bash">
+Show some Test cases
+          </code></pre>
+        </section>
+      </section>
+
+      <!-- Section: What about Migrating Applications -->
+      <section>
+        <section>
+          <h2>What about Migrating Applications?</h2>
+        </section>
+
+        <section>
+          <h3>The Challenge</h3>
+          <ul>
+            <li>OpenRewrite tool &rArr; perfect to execute YAML recipes</li>
+            <li>Scenarios can be <strong>really complex</strong> even when migrating some REST annotations</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3><span class="demo-label">Demo 3</span> Complex Migration</h3>
+          <pre><code data-trim data-noescape class="language-bash">
+pushd rewrite-client/test-project/quarkus-resteasy-classic-app
+openrewrite . -c rewrite.yml
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>Pain Points</h3>
+          <ul>
+            <li class="highlight-red">YAML format is quite verbose, users will make errors</li>
+            <li>Users should be educated, trained, and ideally supported by a <strong>migration tool</strong></li>
+          </ul>
+        </section>
+      </section>
+
+      <!-- Section: mtool Project -->
+      <section>
+        <section>
+          <h2>The <code>mtool</code> Project</h2>
+          <p>Quarkus Client able to <span class="highlight-blue">analyze</span>,
+             <span class="highlight-green">generate a migration plan</span>,
+             and <span class="highlight-red">transform</span></p>
+        </section>
+
+        <section>
+          <h3><span class="demo-label">Demo 4</span> Migration Scenario</h3>
+          <p>Spring Boot Todo &rarr; Quarkus Todo</p>
+          <ul>
+            <li>Show 1-2 rules: <code>preconditions</code> and <code>when condition</code></li>
+            <li>Life becomes easier as Antlr can parse/process the <code>Query</code></li>
+          </ul>
+        </section>
+
+        <section>
+          <h3><span class="demo-label">Demo 4</span> Run Analysis</h3>
+          <pre><code data-trim data-noescape class="language-bash">
+# Analyze with precondition rules
+mtool analyze ./applications/spring-boot-todo-app \
+  -r ./cookbook/rules/quarkus-spring-precondition
+
+# Analyze with full rules
+mtool analyze ./applications/spring-boot-todo-app \
+  -r ./cookbook/rules/quarkus-spring
+          </code></pre>
+          <p class="small">A report = migration plan is generated, packaging instructions :-)</p>
+        </section>
+
+        <section>
+          <h3><span class="demo-label">Demo 4</span> Spring Boot Todo App</h3>
+          <pre><code data-trim data-noescape class="language-bash">
+# Show that the Spring Boot Todo app is working
+mvn clean package spring-boot:run
+firefox localhost:8081
+          </code></pre>
+        </section>
+
+        <section>
+          <h3><span class="demo-label">Demo 4</span> Transform</h3>
+          <pre><code data-trim data-noescape class="language-bash">
+# Dry run - generates patch files
+mtool transform ./applications/spring-boot-todo-app \
+  -p openrewrite --dry-run
+
+# Show patch files generated!
+
+# Apply transformation
+mtool transform ./applications/spring-boot-todo-app \
+  -p openrewrite
+          </code></pre>
+        </section>
+
+        <section>
+          <h3><span class="demo-label">Demo 4</span> Launch Quarkus Todo</h3>
+          <pre><code data-trim data-noescape class="language-bash">
+mvn clean package -DskipTests quarkus:dev
+firefox http://localhost:8080/q/dev-ui/extensions
+          </code></pre>
+          <pre><code data-trim data-noescape class="language-bash">
+# Test the API
+curl http://127.0.0.1:8080/home
+
+curl -X POST http://localhost:8080/home \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Prepare migration to Quarkus. Task 1",
+    "description": "Migrating Spring Boot TO DO to Quarkus. Task 1",
+    "dueDate": "2025-12-24"
+  }'
+
+curl -X POST http://localhost:8080/home \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Prepare migration to Quarkus. Task 2",
+    "description": "Migrating Spring Boot TO DO to Quarkus. Task 2",
+    "dueDate": "2025-12-24"
+  }'
+          </code></pre>
+        </section>
+      </section>
+
+      <!-- Section: AI -->
+      <section>
+        <section>
+          <h2>What Else?</h2>
+          <p>When we reach the limit of OpenRewrite or no recipes exist...</p>
+          <h3 class="highlight-green">Use AI</h3>
+        </section>
+
+        <section>
+          <h3><span class="demo-label">Demo 5</span> AI-Assisted Migration</h3>
+          <p>Run the video</p>
+        </section>
+      </section>
+
+      <!-- Wrap-up -->
+      <section>
+        <h2>Wrap-up &amp; Q/A</h2>
+        <p>Thank you!</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="reveal.js/dist/reveal.js"></script>
+  <script src="reveal.js/plugin/highlight/highlight.js"></script>
+  <script src="reveal.js/plugin/markdown/markdown.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      transition: 'slide',
+      plugins: [RevealHighlight, RevealMarkdown]
+    });
+  </script>
+</body>
+</html>
