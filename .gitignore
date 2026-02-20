@@ -18,3 +18,4 @@ applications/**/*.csv
 .classpath
 target
 
+/demo/reveal.js/
