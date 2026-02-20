@@ -1,5 +1,12 @@
 ## Demo scenario
 
+To present the slides, install reveal.js locally under the demo folder
+```bash
+cd demo
+git clone https://github.com/hakimel/reveal.js.git
+firefox quarkus-meeting-feb-2024.html
+```
+
 - Introduce speakers and purpose of the talk: Migration of applications
 - Agenda
 - OpenRewrite: Migration Swiss knife toolbox
