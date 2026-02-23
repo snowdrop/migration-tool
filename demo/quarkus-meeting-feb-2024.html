@@ -149,29 +149,44 @@
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 0</span> Installation</h3>
-                <p>Use <strong>jbang</strong></p>
+                <h3><span class="demo-label">Demo 0</span></h3>
+                <li>To install the client, simply ... use jbang !</li>
                 <pre><code data-trim data-noescape class="language-bash">
-jbang app install openrewrite@snowdrop/rewrite-client
+# Latest version
+jbang app install rewrite@snowdrop/rewrite-client
+
+# Specific version
+jbang app install rewrite@snowdrop/rewrite-client/0.2.9
+
+# When coding use your local catalog pointing to the uber jar
+jbang app install --catalog jbang-catalog-dev.json rewrite
           </code></pre>
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 1</span> Playing with Quarkus Rewrite Client</h3>
+                <h3><span class="demo-label">Demo 1</span></h3>
+                <li>Play with the Rewrite Client</li>
                 <pre><code data-trim data-noescape class="language-bash">
 pushd test-project/simple
 
-# Dry run (default)
+# Simple recipe in dryn or run mode
 rewrite . -r org.openrewrite.java.format.AutoFormat
 
-# Run (apply changes)
-rewrite . -r org.openrewrite.java.format.AutoFormat -d false
+# With Java recipe's fields to be set
+rewrite . \
+  -r org.openrewrite.java.search.FindAnnotations \
+  -o annotationPattern=@org.springframework.boot.autoconfigure.SpringBootApplication
+
+# With additional recipes jar files or GAVs
+rewrite /path/to/project --jar /path/to/recipes.jar -r com.example.MyRecipe
+
 popd
           </code></pre>
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 2</span> Use recipes</h3>
+                <h3><span class="demo-label">Demo 2</span></h3>
+                <li>Use recipes declared in a YAML</li>
                 <pre><code data-trim data-noescape class="language-bash">
 pushd test-project/simple
 rewrite . -c rewrite.yml
@@ -236,7 +251,8 @@ public class FindAnnotationTest extends BaseTest {
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 3</span> More complex Migration</h3>
+                <h3><span class="demo-label">Demo 3</span></h3>
+                <li>A more supposed simple Migration</li>
                 <pre><code data-trim data-noescape class="language-bash">
 pushd rewrite-client/test-project/quarkus-resteasy-classic-app
 rewrite . -c rewrite.yml
@@ -265,31 +281,25 @@ popd
             </section>
 
             <section>
-                <h2>Simplify the migration work</h2>
-                <p>Query language</p>
-                <p> ??? </p>
+                <h2>Use rules and instructions</h2>
+                <img src="./image/rule-1.png" alt="rule-1.png" width="100%"/>
             </section>
 
             <section>
-                <h2>Enrich the rules with instructions</h2>
-                <p> ??? </p>
-            </section>
-
-            <section>
-                <h3><span class="demo-label">Demo 4</span> Spring Boot Todo &rarr; Quarkus Todo</h3>
-                <li>Scan and analyse using (pre)conditions</li>
+                <h3><span class="demo-label">Demo 4</span></h3>
+                <li>Spring Boot Todo &rarr; Quarkus Todo</li>
                 <pre><code data-trim data-noescape class="language-bash">
+                    # Scan and analyse using (pre)conditions
                     mtool analyze ./applications/spring-boot-todo-app -r ./cookbook/rules/quarkus-spring-precondition
-                </code></pre>
-                <li>Visualize the matching's table generated</li>
-                <pre><code data-trim data-noescape class="language-bash">
                     mtool analyze ./applications/spring-boot-todo-app -r ./cookbook/rules/quarkus-spring
+
+                    # Visualize the matching's ascii table generated in the console
+                    # Quick review of the report = migration plan enerated with instructions
                 </code></pre>
-                <li>A report = migration plan is generated, packaging instructions !</li>
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 4</span> Next</h3>
+                <h3><span class="demo-label">Demo 4</span></h3>
                 <pre><code data-trim data-noescape class="language-bash">
 # Show that the Spring Boot Todo app is working
 
@@ -299,17 +309,12 @@ firefox localhost:8081
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 4</span> Dry run</h3>
+                <h3><span class="demo-label">Demo 4</span></h3>
                 <pre><code data-trim data-noescape class="language-bash">
 # Dry run - generates patch files
 mtool transform ./applications/spring-boot-todo-app \
   -p openrewrite --dry-run
-          </code></pre>
-            </section>
 
-            <section>
-                <h3><span class="demo-label">Demo 4</span> Run</h3>
-                <pre><code data-trim data-noescape class="language-bash">
 # Apply transformation
 mtool transform ./applications/spring-boot-todo-app \
   -p openrewrite
@@ -317,7 +322,8 @@ mtool transform ./applications/spring-boot-todo-app \
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 4</span> Launch Quarkus Todo</h3>
+                <h3><span class="demo-label">Demo 4</span></h3>
+                <li>Launch the migrated application </li>
                 <pre><code data-trim data-noescape class="language-bash">
 mvn clean package -DskipTests quarkus:dev
 firefox http://localhost:8080/q/dev-ui/extensions
@@ -350,15 +356,19 @@ curl -X POST http://localhost:8080/home \
                 <script type="text/template">
                 ## What Else ?
 
-                When we reach the limit of OpenRewrite as no recipes exist, what are the alternatives:
-                 - Do the migration manually
-                 - Use AI
+                Mtool is still a POC but could be improved a lot to:
+                - Generate the rules using a designer (aka Apache camel routes & https://kaoto.io/)
+                - Integrate a simple **orchestration engine** to better handle the instructions
+                - Be able to support to switch between modes instructions: openrewrite and/or AI
                 </script>
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 5</span> AI-Assisted Migration</h3>
-                <p>Run the video</p>
+                <h3><span class="demo-label">Demo 5</span></h3>
+                <li>AI-Assisted Migration</li>
+                <video controls>
+                    <source src="videos/demo.mp4" type="video/mp4">
+                </video>
             </section>
         </section>
 
