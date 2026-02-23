@@ -35,8 +35,8 @@
             font-size: 0.7em;
         }
 
-        .reveal .highlight-red {
-            color: #e7943c;
+        .reveal .highlight-yellow {
+            color: #eee600;
             font-weight: bold;
         }
 
@@ -129,12 +129,12 @@
             <section>
                 <h3>... Limitations</h3>
                 <ul>
-                    <li class="highlight-red">Process could become really slow when several <code>mvn</code> commands
+                    <li class="highlight-yellow">Process could become really slow when several <code>mvn</code> commands
                         must be executed
                     </li>
-                    <li class="highlight-red">No easy way to design integration tests</li>
-                    <li class="highlight-red">No API or Library</li>
-                    <li class="highlight-red">Fetching & analysing CSV files generated could be tedious</li>
+                    <li class="highlight-yellow">No easy way to design integration tests</li>
+                    <li class="highlight-yellow">No API or Library</li>
+                    <li class="highlight-yellow">Fetching & analysing CSV files generated could be tedious</li>
                 </ul>
             </section>
         </section>
@@ -150,10 +150,9 @@
 
             <section>
                 <h3><span class="demo-label">Demo 0</span> Installation</h3>
-                <p>Compile locally or install using <strong>jbang</strong></p>
+                <p>Use <strong>jbang</strong></p>
                 <pre><code data-trim data-noescape class="language-bash">
-mvn clean install -DskipTests -Dquarkus.package.type=uber-jar
-jbang app install --force --catalog jbang-catalog-dev.json openrewrite
+jbang app install openrewrite@snowdrop/rewrite-client
           </code></pre>
             </section>
 
@@ -231,8 +230,8 @@ public class FindAnnotationTest extends BaseTest {
                     - OpenRewrite tool &rArr; perfect to execute YAML recipes
                     - Scenarios can be **really complex** even when migrating some modules, REST annotations
                     - Examples
-                    - [Some modules of SpringBoot to Quarkus](https://github.com/openrewrite/rewrite-spring-to-quarkus/blob/main/src/main/resources/META-INF/rewrite/spring-boot-to-quarkus.yml)
-                    - [Starters](https://github.com/openrewrite/rewrite-spring-to-quarkus/blob/main/src/main/resources/META-INF/rewrite/boot-starters.yml)
+                      - [Some modules of SpringBoot to Quarkus](https://github.com/openrewrite/rewrite-spring-to-quarkus/blob/main/src/main/resources/META-INF/rewrite/spring-boot-to-quarkus.yml)
+                      - [Starters](https://github.com/openrewrite/rewrite-spring-to-quarkus/blob/main/src/main/resources/META-INF/rewrite/boot-starters.yml)
                 </script>
             </section>
 
@@ -248,7 +247,7 @@ popd
             <section>
                 <h3>Pain Points</h3>
                 <ul>
-                    <li class="highlight-red">YAML format is quite verbose, users will make errors</li>
+                    <li class="highlight-yellow">YAML format is quite verbose, users will make errors</li>
                     <li>Users should be trained and ideally supported by a <strong>migration
                         tool(s), orchestration engine</strong>
                     </li>
@@ -262,7 +261,7 @@ popd
                 <h2>The <code>Quarkus Migration Tool </code> Project - mtool</h2>
                 <p>Quarkus Client able to <span class="highlight-blue">analyze</span>,
                     <span class="highlight-green">generate a migration plan</span>,
-                    and <span class="highlight-red">transform</span></p>
+                    and <span class="highlight-yellow">transform</span></p>
             </section>
 
             <section>
@@ -346,12 +345,15 @@ curl -X POST http://localhost:8080/home \
             </section>
         </section>
 
-        <!-- Section: AI -->
         <section>
-            <section>
-                <h2>What Else?</h2>
-                <p>When we reach the limit of OpenRewrite as no recipes exist...</p>
-                <h3 class="highlight-green">Use AI</h3>
+            <section data-markdown>
+                <script type="text/template">
+                ## What Else ?
+
+                When we reach the limit of OpenRewrite as no recipes exist, what are the alternatives:
+                 - Do the migration manually
+                 - Use AI
+                </script>
             </section>
 
             <section>
