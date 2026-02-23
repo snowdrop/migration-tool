@@ -17,4 +17,3 @@ applications/**/*.csv
 .settings
 .classpath
 target
-
