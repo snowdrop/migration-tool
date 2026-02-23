@@ -1,9 +1,8 @@
 ## Demo scenario
 
-To present the slides, install reveal.js locally under the demo folder
+To present the slides, simply open the HTML revealjs file
 ```bash
 cd demo
-git clone https://github.com/hakimel/reveal.js.git
 firefox quarkus-meeting-feb-2024.html
 ```
 

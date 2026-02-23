@@ -17,5 +17,3 @@ applications/**/*.csv
 .settings
 .classpath
 target
-
-/demo/reveal.js/
