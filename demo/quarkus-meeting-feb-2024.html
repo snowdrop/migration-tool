@@ -162,10 +162,10 @@ jbang app install openrewrite@snowdrop/rewrite-client
 pushd test-project/simple
 
 # Dry run (default)
-openrewrite . -r org.openrewrite.java.format.AutoFormat
+rewrite . -r org.openrewrite.java.format.AutoFormat
 
 # Run (apply changes)
-openrewrite . -r org.openrewrite.java.format.AutoFormat -d false
+rewrite . -r org.openrewrite.java.format.AutoFormat -d false
 popd
           </code></pre>
             </section>
@@ -174,11 +174,11 @@ popd
                 <h3><span class="demo-label">Demo 2</span> Use recipes</h3>
                 <pre><code data-trim data-noescape class="language-bash">
 pushd test-project/simple
-openrewrite . -c rewrite.yml
+rewrite . -c rewrite.yml
 popd
 
 # Or specify path directly
-openrewrite test-project/simple -c rewrite.yml
+rewrite test-project/simple -c rewrite.yml
           </code></pre>
             </section>
 
@@ -239,7 +239,7 @@ public class FindAnnotationTest extends BaseTest {
                 <h3><span class="demo-label">Demo 3</span> More complex Migration</h3>
                 <pre><code data-trim data-noescape class="language-bash">
 pushd rewrite-client/test-project/quarkus-resteasy-classic-app
-openrewrite . -c rewrite.yml
+rewrite . -c rewrite.yml
 popd
           </code></pre>
             </section>

@@ -6,28 +6,27 @@ cd demo
 firefox quarkus-meeting-feb-2024.html
 ```
 
-DEMO 0 - install openrewrite (Charles)
+DEMO 0 - install rewrite client (Charles)
 ```bash
-mvn clean install -DskipTests -Dquarkus.package.type=uber-jar
-jbang app install --force --catalog jbang-catalog-dev.json openrewrite
+jbang app install --force rewrite@snowdrop/rewrite-client
 ```
 Demo 1 - Autoformat a java project with or without dryrun (Charles)
 ```bash
 pushd test-project/simple
-openrewrite . -r org.openrewrite.java.format.AutoFormat
-openrewrite . -r org.openrewrite.java.format.AutoFormat -d false
-openrewrite . -c rewrite.yml
+rewrite . -r org.openrewrite.java.format.AutoFormat
+rewrite . -r org.openrewrite.java.format.AutoFormat -d false
+rewrite . -c rewrite.yml
 popd
 ```
 Demo2 - Use Recipes YAML (Aurea)
 ```bash
 pushd test-project/simple
-openrewrite . -c rewrite.yml
+rewrite . -c rewrite.yml
 ```
 Demo 3 - A more complex migration (Aurea)
 ```bash
 pushd rewrite-client/test-project/quarkus-resteasy-classic-app
-openrewrite . -c rewrite.yml
+rewrite . -c rewrite.yml
 ```
 
 Demo 4 (Aurea)
