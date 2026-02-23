@@ -156,7 +156,7 @@
                 <h2>Quarkus Rewrite Client</h2>
                 <li><a href="https://github.com/snowdrop/rewrite-client">GitHub home of the project</a></li>
                 <li>Quarkus Picocli Client & Java Library designed around OpenRewrite</li>
-                <li>Bypasses most of the limitations described previously</li>
+                <li>Bypasses most of the limitations described</li>
             </section>
 
             <section>
@@ -169,7 +169,7 @@ jbang app install --force --catalog jbang-catalog-dev.json openrewrite
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 1</span> Rewrite Client</h3>
+                <h3><span class="demo-label">Demo 1</span> Playing with the Quarkus Rewrite Client</h3>
                 <pre><code data-trim data-noescape class="language-bash">
 pushd test-project/simple
 
@@ -189,66 +189,100 @@ openrewrite test-project/simple -c rewrite.yml
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 2</span> Test Cases</h3>
-                <pre><code data-trim data-noescape class="language-bash">
-Show some Test cases
+                <h3>Using the Java Library</h3>
+                <pre><code data-trim data-noescape class="language-java">
+import dev.snowdrop.openrewrite.RewriteService;
+import dev.snowdrop.openrewrite.Config;
+import dev.snowdrop.openrewrite.ResultsContainer;
+
+Config cfg = new Config();
+cfg.setAppPath(Paths.get("/path/to/your/project"));
+cfg.setRecipes(List.of("org.openrewrite.java.search.FindAnnotations"));
+cfg.setRecipeOptions(Set.of("annotationPattern=org.springframework.boot.autoconfigure.SpringBootApplication"));
+
+RewriteService scanner = new RewriteService(cfg);
+scanner.init();
+ResultsContainer results = scanner.run();
+
+// Access results
+RecipeRun run = results.getRecipeRuns().get("org.openrewrite.java.search.FindAnnotations");
+// Process datatables, changesets, etc.
+                </code></pre>
+            </section>
+
+            <section>
+                <h3>Client Test case</h3>
+                <pre><code data-trim data-noescape class="language-java">
+@QuarkusTest
+public class FindAnnotationTest extends BaseTest {
+
+    @Test
+    void shouldFindAnnotation() throws Exception {
+        List<SearchResults.Row> rows = findDataTableRows(run, "SearchResults", SearchResults.Row.class);
+        assertEquals(1, rows.size());
+
+        SearchResults.Row record = rows.getFirst();
+        assertEquals("src/main/java/com/todo/app/AppApplication.java", record.getSourcePath());
+        assertEquals("@SpringBootApplication", record.getResult());
+        assertEquals("Find annotations `org.springframework.boot.autoconfigure.SpringBootApplication`", record.getRecipe());
           </code></pre>
             </section>
-        </section>
 
-        <!-- Section: What about Migrating Applications -->
-        <section>
+            <!-- Section: What about Migrating Applications -->
             <section>
-                <h2>What about Migrating Applications?</h2>
-            </section>
+                <section>
+                    <h2>What about Migrating Applications?</h2>
+                </section>
 
-            <section>
-                <h3>The Challenge</h3>
-                <ul>
-                    <li>OpenRewrite tool &rArr; perfect to execute YAML recipes</li>
-                    <li>Scenarios can be <strong>really complex</strong> even when migrating some REST annotations</li>
-                </ul>
-            </section>
+                <section>
+                    <h3>The Challenge</h3>
+                    <ul>
+                        <li>OpenRewrite tool &rArr; perfect to execute YAML recipes</li>
+                        <li>Scenarios can be <strong>really complex</strong> even when migrating some REST annotations
+                        </li>
+                    </ul>
+                </section>
 
-            <section>
-                <h3><span class="demo-label">Demo 3</span> Complex Migration</h3>
-                <pre><code data-trim data-noescape class="language-bash">
+                <section>
+                    <h3><span class="demo-label">Demo 3</span> Complex Migration</h3>
+                    <pre><code data-trim data-noescape class="language-bash">
 pushd rewrite-client/test-project/quarkus-resteasy-classic-app
 openrewrite . -c rewrite.yml
           </code></pre>
+                </section>
+
+                <section>
+                    <h3>Pain Points</h3>
+                    <ul>
+                        <li class="highlight-red">YAML format is quite verbose, users will make errors</li>
+                        <li>Users should be educated, trained, and ideally supported by a <strong>migration
+                            tool</strong>
+                        </li>
+                    </ul>
+                </section>
             </section>
 
+            <!-- Section: mtool Project -->
             <section>
-                <h3>Pain Points</h3>
-                <ul>
-                    <li class="highlight-red">YAML format is quite verbose, users will make errors</li>
-                    <li>Users should be educated, trained, and ideally supported by a <strong>migration tool</strong>
-                    </li>
-                </ul>
-            </section>
-        </section>
+                <section>
+                    <h2>The <code>mtool</code> Project</h2>
+                    <p>Quarkus Client able to <span class="highlight-blue">analyze</span>,
+                        <span class="highlight-green">generate a migration plan</span>,
+                        and <span class="highlight-red">transform</span></p>
+                </section>
 
-        <!-- Section: mtool Project -->
-        <section>
-            <section>
-                <h2>The <code>mtool</code> Project</h2>
-                <p>Quarkus Client able to <span class="highlight-blue">analyze</span>,
-                    <span class="highlight-green">generate a migration plan</span>,
-                    and <span class="highlight-red">transform</span></p>
-            </section>
+                <section>
+                    <h3><span class="demo-label">Demo 4</span> Migration Scenario</h3>
+                    <p>Spring Boot Todo &rarr; Quarkus Todo</p>
+                    <ul>
+                        <li>Show 1-2 rules: <code>preconditions</code> and <code>when condition</code></li>
+                        <li>Life becomes easier as Antlr can parse/process the <code>Query</code></li>
+                    </ul>
+                </section>
 
-            <section>
-                <h3><span class="demo-label">Demo 4</span> Migration Scenario</h3>
-                <p>Spring Boot Todo &rarr; Quarkus Todo</p>
-                <ul>
-                    <li>Show 1-2 rules: <code>preconditions</code> and <code>when condition</code></li>
-                    <li>Life becomes easier as Antlr can parse/process the <code>Query</code></li>
-                </ul>
-            </section>
-
-            <section>
-                <h3><span class="demo-label">Demo 4</span> Run Analysis</h3>
-                <pre><code data-trim data-noescape class="language-bash">
+                <section>
+                    <h3><span class="demo-label">Demo 4</span> Run Analysis</h3>
+                    <pre><code data-trim data-noescape class="language-bash">
 # Analyze with precondition rules
 mtool analyze ./applications/spring-boot-todo-app \
   -r ./cookbook/rules/quarkus-spring-precondition
@@ -257,21 +291,21 @@ mtool analyze ./applications/spring-boot-todo-app \
 mtool analyze ./applications/spring-boot-todo-app \
   -r ./cookbook/rules/quarkus-spring
           </code></pre>
-                <p class="small">A report = migration plan is generated, packaging instructions :-)</p>
-            </section>
+                    <p class="small">A report = migration plan is generated, packaging instructions :-)</p>
+                </section>
 
-            <section>
-                <h3><span class="demo-label">Demo 4</span> Spring Boot Todo App</h3>
-                <pre><code data-trim data-noescape class="language-bash">
+                <section>
+                    <h3><span class="demo-label">Demo 4</span> Spring Boot Todo App</h3>
+                    <pre><code data-trim data-noescape class="language-bash">
 # Show that the Spring Boot Todo app is working
 mvn clean package spring-boot:run
 firefox localhost:8081
           </code></pre>
-            </section>
+                </section>
 
-            <section>
-                <h3><span class="demo-label">Demo 4</span> Transform</h3>
-                <pre><code data-trim data-noescape class="language-bash">
+                <section>
+                    <h3><span class="demo-label">Demo 4</span> Transform</h3>
+                    <pre><code data-trim data-noescape class="language-bash">
 # Dry run - generates patch files
 mtool transform ./applications/spring-boot-todo-app \
   -p openrewrite --dry-run
@@ -282,15 +316,15 @@ mtool transform ./applications/spring-boot-todo-app \
 mtool transform ./applications/spring-boot-todo-app \
   -p openrewrite
           </code></pre>
-            </section>
+                </section>
 
-            <section>
-                <h3><span class="demo-label">Demo 4</span> Launch Quarkus Todo</h3>
-                <pre><code data-trim data-noescape class="language-bash">
+                <section>
+                    <h3><span class="demo-label">Demo 4</span> Launch Quarkus Todo</h3>
+                    <pre><code data-trim data-noescape class="language-bash">
 mvn clean package -DskipTests quarkus:dev
 firefox http://localhost:8080/q/dev-ui/extensions
           </code></pre>
-                <pre><code data-trim data-noescape class="language-bash">
+                    <pre><code data-trim data-noescape class="language-bash">
 # Test the API
 curl http://127.0.0.1:8080/home
 
@@ -310,28 +344,28 @@ curl -X POST http://localhost:8080/home \
     "dueDate": "2025-12-24"
   }'
           </code></pre>
+                </section>
             </section>
-        </section>
 
-        <!-- Section: AI -->
-        <section>
+            <!-- Section: AI -->
             <section>
-                <h2>What Else?</h2>
-                <p>When we reach the limit of OpenRewrite or no recipes exist...</p>
-                <h3 class="highlight-green">Use AI</h3>
+                <section>
+                    <h2>What Else?</h2>
+                    <p>When we reach the limit of OpenRewrite or no recipes exist...</p>
+                    <h3 class="highlight-green">Use AI</h3>
+                </section>
+
+                <section>
+                    <h3><span class="demo-label">Demo 5</span> AI-Assisted Migration</h3>
+                    <p>Run the video</p>
+                </section>
             </section>
 
+            <!-- Wrap-up -->
             <section>
-                <h3><span class="demo-label">Demo 5</span> AI-Assisted Migration</h3>
-                <p>Run the video</p>
+                <h2>Wrap-up &amp; Q/A</h2>
+                <p>Thank you!</p>
             </section>
-        </section>
-
-        <!-- Wrap-up -->
-        <section>
-            <h2>Wrap-up &amp; Q/A</h2>
-            <p>Thank you!</p>
-        </section>
 
     </div>
 </div>
