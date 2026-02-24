@@ -13,9 +13,12 @@ jbang app install --force rewrite@snowdrop/rewrite-client/0.2.11
 Demo 1 - Autoformat a java project with or without dryrun (Charles)
 ```bash
 pushd test-project/simple
+
+mvn org.openrewrite.maven:rewrite-maven-plugin:dryRun \
+  -Drewrite.activeRecipes=org.openrewrite.java.format.AutoFormat
+  
 rewrite . -r org.openrewrite.java.format.AutoFormat
 rewrite . -r org.openrewrite.java.format.AutoFormat -d false
-rewrite . -c rewrite.yml
 popd
 ```
 Demo2 - Use Recipes YAML (Aurea)

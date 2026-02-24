@@ -80,7 +80,7 @@
             <p>Aurea Munoz Hernandez</p>
             <p>Charles Moulliard</p>
             </p>
-            <p>24-Feb-2026</p>
+            <p>Feb-24-2026</p>
         </section>
 
         <!-- Slide 2: Agenda -->
@@ -112,6 +112,7 @@
                     <li>Can be used to <span class="highlight-green">transform</span> OR <span class="highlight-blue">analyze</span>
                     </li>
                     <li>Supports <code>"dryRun"</code> or <code>"run"</code> mode</li>
+                    <li>Parsers available when project scanned: java, properties, YAML, json, etc</li>
                     <li>Executed using <strong>Maven/Gradle plugin</strong></li>
                 </ul>
             </section>
@@ -119,12 +120,8 @@
             <section>
                 <h3>Example</h3>
                 <pre><code data-trim data-noescape class="language-bash">
-                    mvn org.openrewrite.maven:rewrite-maven-plugin:dryRun \
-                      -Drewrite.activeRecipes=dev.snowdrop.openrewrite.java.SpringToQuarkus \
-                      -Drewrite.configLocation=rewrite-specific-springboot.yml \
-                      -Drewrite.recipeArtifactCoordinates=dev.snowdrop.mtool:openrewrite-recipes:1.0.5 \
-                      -Drewrite.recipeArtifactCoordinates=org.openrewrite.recipe:rewrite-spring-to-quarkus:0.4.4 \
-                      -Drewrite.recipeArtifactCoordinates=org.openrewrite.recipe:rewrite-java-dependencies:1.51.0
+mvn org.openrewrite.maven:rewrite-maven-plugin:dryRun \
+  -Drewrite.activeRecipes=org.openrewrite.java.format.AutoFormat
                 </code></pre>
             </section>
 
@@ -145,7 +142,7 @@
         <section>
             <section>
                 <h2>Quarkus Rewrite Client</h2>
-                <li><a href="https://github.com/snowdrop/rewrite-client">GitHub home of the project</a></li>
+                <li><a href="https://github.com/snowdrop/rewrite-client">https://github.com/snowdrop/rewrite-client</a></li>
                 <li>Quarkus Picocli Client & Java Library designed around OpenRewrite</li>
                 <li>Bypasses most of the limitations described</li>
             </section>
@@ -170,6 +167,10 @@ jbang app install --catalog jbang-catalog-dev.json rewrite
                 <li>Play with the Rewrite Client</li>
                 <pre><code data-trim data-noescape class="language-bash">
 pushd test-project/simple
+
+# Using mvn openrewrite
+mvn org.openrewrite.maven:rewrite-maven-plugin:dryRun \
+  -Drewrite.activeRecipes=org.openrewrite.java.format.AutoFormat
 
 # Simple recipe in dryn or run mode
 rewrite . -r org.openrewrite.java.format.AutoFormat
@@ -247,7 +248,7 @@ public class FindAnnotationTest extends BaseTest {
                     - OpenRewrite tool &rArr; perfect to execute YAML recipes
                     - Scenarios can be **really complex** even when migrating some modules, REST annotations
                     - Examples
-                      - [Quarkus RESTeasy migration](https://github.com/snowdrop/migration-tool/tree/main/cookbook/rules/quarkus-resteasy-reactive)
+                      - [Quarkus RESTeasy migration](https://github.com/snowdrop/rewrite-client/blob/f2b0a1be776aae9a36da09d898eb9974f0ec0a1d/test-project/quarkus-resteasy-classic-app/rewrite.yml)
                       - [Some modules of SpringBoot to Quarkus](https://github.com/openrewrite/rewrite-spring-to-quarkus/blob/main/src/main/resources/META-INF/rewrite/spring-boot-to-quarkus.yml)
                       - [Moving the Spring Boot starters to Quarkus](https://github.com/openrewrite/rewrite-spring-to-quarkus/blob/main/src/main/resources/META-INF/rewrite/boot-starters.yml)
                 </script>
@@ -257,11 +258,10 @@ public class FindAnnotationTest extends BaseTest {
                 <h3>Pain Points</h3>
                 <ul>
                     <li>Execute and hope it works</li>
-                    <li>Only automated transformations</li>
                     <li>No conditional logic</li>
                     <li>No eligibility validation</li>
-                    <li class="highlight-yellow">OpenRewrite is extremely powerful, but it's designed to execute transformations, not to orchestrate complex migrations. We add the intelligence layer that's missing.</strong>
-                    </li>
+                    <li class="highlight-yellow">OpenRewrite is extremely powerful, but it's designed to execute transformations, not to orchestrate complex migrations.</li>
+                    <li class="highlight-green">We need an intelligence layer !</li>
                 </ul>
             </section>
         </section>
@@ -270,9 +270,10 @@ public class FindAnnotationTest extends BaseTest {
         <section>
             <section>
                 <h2>The <code>Quarkus Migration Tool </code> Project - mtool</h2>
-                <p>Quarkus Client able to <span class="highlight-blue">analyze</span>,
+                <li>Quarkus Client able to <span class="highlight-blue">analyze</span>,
                     <span class="highlight-green">generate a migration plan</span>,
-                    and <span class="highlight-yellow">transform</span></p>
+                    and <span class="highlight-yellow">transform</span></li>
+                <li>This is still a PoC running the rewrite client but with new features </li>
             </section>
 
             <section>
@@ -290,8 +291,10 @@ public class FindAnnotationTest extends BaseTest {
                 <li>Spring Boot Todo &rarr; Quarkus Todo</li>
                 <pre><code data-trim data-noescape class="language-bash">
                     # Scan and analyse using (pre)conditions
-                    mtool analyze ./applications/spring-boot-todo-app -r ./cookbook/rules/quarkus-spring-precondition
-                    mtool analyze ./applications/spring-boot-todo-app -r ./cookbook/rules/quarkus-spring
+                    mtool analyze ./applications/spring-boot-todo-app \
+                          -r ./cookbook/rules/quarkus-spring-precondition
+                    mtool analyze ./applications/spring-boot-todo-app \
+                          -r ./cookbook/rules/quarkus-spring
 
                     # Visualize the matching's ascii table generated in the console
                     # Quick review of the report = migration plan enerated with instructions
