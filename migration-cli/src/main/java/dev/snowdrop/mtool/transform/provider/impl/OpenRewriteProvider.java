@@ -4,12 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import dev.snowdrop.logging.LoggingService;
 import dev.snowdrop.mtool.model.analyze.MigrationTask;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.model.openrewrite.CompositeRecipe;
 import dev.snowdrop.mtool.transform.provider.MigrationProvider;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionContext;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionResult;
+import dev.snowdrop.openrewrite.cli.RewriteService;
+import dev.snowdrop.openrewrite.cli.model.ResultsContainer;
+import dev.snowdrop.openrewrite.cli.model.RewriteConfig;
 import org.jboss.logging.Logger;
 
 import java.io.BufferedReader;
@@ -24,7 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
- * Provider implementation for executing OpenRewrite transformations via Maven plugin.
+ * Provider implementation for executing OpenRewrite transformations via rewrite-client.
  */
 public class OpenRewriteProvider implements MigrationProvider {
 
@@ -46,7 +50,7 @@ public class OpenRewriteProvider implements MigrationProvider {
 	}
 
 	/**
-	 * Executes all OpenRewrite tasks in a single Maven invocation by merging their recipes and GAV dependencies.
+	 * Executes all OpenRewrite tasks in a single invocation by merging their recipes and GAV dependencies.
 	 *
 	 * @param tasks
 	 *            the list of migration tasks containing OpenRewrite instructions
@@ -127,15 +131,13 @@ public class OpenRewriteProvider implements MigrationProvider {
 			return ExecutionResult.failure("Failed to write YAML file", e);
 		}
 
-		// Execute Maven command
-		String gavsStr = String.join(",", gavs);
-		boolean success = execMvnCmd(ctx, gavsStr, REWRITE_YAML_NAME, details);
+		// Execute via rewrite-client
+		boolean success = runRewriteService(ctx, REWRITE_YAML_NAME, details, gavs);
 
 		if (success) {
-			details.add("Maven cmd executed successfully");
 			return ExecutionResult.success("OpenRewrite execution completed successfully", details);
 		} else {
-			return ExecutionResult.failure("Openrewrite's maven command execution failed", details, null);
+			return ExecutionResult.failure("OpenRewrite execution failed", details, null);
 		}
 	}
 
@@ -150,6 +152,41 @@ public class OpenRewriteProvider implements MigrationProvider {
 		ObjectMapper mapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
 
 		return mapper.writeValueAsString(compositeRecipe);
+	}
+
+	private boolean runRewriteService(ExecutionContext ctx, String rewriteYamlName, List<String> details,
+			List<String> gavs) {
+		try {
+			RewriteConfig cfg = new RewriteConfig();
+			cfg.setAppPath(ctx.projectPath());
+			cfg.setYamlRecipesPath(rewriteYamlName);
+			cfg.setDryRun(ctx.dryRun());
+			cfg.setAdditionalJarPaths(gavs);
+
+			RewriteService svc = new RewriteService(cfg);
+			svc.setLogger(new LoggingService());
+			svc.init();
+
+			ResultsContainer results = svc.run();
+
+			details.add(String.format("Files modified: %d", results.getRefactoredInPlace().size()));
+			details.add(String.format("Files created: %d", results.getGenerated().size()));
+			details.add(String.format("Files deleted: %d", results.getDeleted().size()));
+			details.add(String.format("Files moved: %d", results.getMoved().size()));
+
+			if (results.getFirstException() != null) {
+				details.add("Exception: " + results.getFirstException().getMessage());
+				return false;
+			}
+			return true;
+		} catch (Exception e) {
+			logger.errorf("Failed to execute rewrite-client: %s", e.getMessage());
+			details.add("Error executing rewrite-client: " + e.getMessage());
+			if (ctx.verbose()) {
+				e.printStackTrace();
+			}
+			return false;
+		}
 	}
 
 	private boolean execMvnCmd(ExecutionContext ctx, String gavs, String rewriteYamlName, List<String> details) {
