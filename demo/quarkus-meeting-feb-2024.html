@@ -182,7 +182,6 @@ rewrite . \
 
 # With additional recipes jar files or GAVs
 rewrite /path/to/project --jar /path/to/recipes.jar -r com.example.MyRecipe
-
 popd
           </code></pre>
             </section>
@@ -191,12 +190,8 @@ popd
                 <h3><span class="demo-label">Demo 2</span></h3>
                 <li>Use recipes declared in a YAML</li>
                 <pre><code data-trim data-noescape class="language-bash">
-pushd test-project/simple
+# AutoFormat, NormalizeTabsOrSpaces & AddLicense
 rewrite . -c rewrite.yml
-popd
-
-# Or specify path directly
-rewrite test-project/simple -c rewrite.yml
           </code></pre>
             </section>
 
@@ -246,7 +241,7 @@ public class FindAnnotationTest extends BaseTest {
                 <script type="text/template">
                     ## What about Migrating Applications ?
                     - OpenRewrite tool &rArr; perfect to execute YAML recipes
-                    - Scenarios can be **really complex** even when migrating some modules, REST annotations
+                    - Scenarios can be **really complex** even when migrating some modules, REST annotations, etc
                     - Examples
                       - [Quarkus RESTeasy migration](https://github.com/snowdrop/rewrite-client/blob/f2b0a1be776aae9a36da09d898eb9974f0ec0a1d/test-project/quarkus-resteasy-classic-app/rewrite.yml)
                       - [Some modules of SpringBoot to Quarkus](https://github.com/openrewrite/rewrite-spring-to-quarkus/blob/main/src/main/resources/META-INF/rewrite/spring-boot-to-quarkus.yml)
