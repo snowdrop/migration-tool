@@ -356,7 +356,9 @@ curl -X POST http://localhost:8080/home \
             <li>A Quarkus to Quarkus Migration</li>
             <pre><code data-trim data-noescape class="language-bash">
                     # Scan and analyse using (pre)conditions
-                    mtool analyze ./applications/quarkus-resteasy-classic-app -r ./cookbook/rules/quarkus-resteasy-reactive -s quarkus -t quarkus
+                    mtool analyze ./applications/quarkus-resteasy-classic-app \
+                        -r ./cookbook/rules/quarkus-resteasy-reactive \
+                        -s quarkus -t quarkus
 
                     # Visualize the matching's ascii table generated in the console
                     # Quick review of the report = migration plan with instructions
