@@ -8,7 +8,7 @@ firefox quarkus-meeting-feb-2024.html
 
 DEMO 0 - install rewrite client (Charles)
 ```bash
-jbang app install --force rewrite@snowdrop/rewrite-client
+jbang app install --force rewrite@snowdrop/rewrite-client/0.2.11
 ```
 Demo 1 - Autoformat a java project with or without dryrun (Charles)
 ```bash
