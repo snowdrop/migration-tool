@@ -254,21 +254,13 @@ public class FindAnnotationTest extends BaseTest {
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 3</span></h3>
-                <li>A more supposed simple Migration</li>
-                <pre><code data-trim data-noescape class="language-bash">
-pushd rewrite-client/test-project/quarkus-resteasy-classic-app
-rewrite . -c rewrite.yml
-popd
-          </code></pre>
-            </section>
-
-            <section>
                 <h3>Pain Points</h3>
                 <ul>
-                    <li class="highlight-yellow">YAML format is quite verbose, users will make errors</li>
-                    <li>Users should be trained and ideally supported by a <strong>migration
-                        tool(s), orchestration engine</strong>
+                    <li>Execute and hope it works</li>
+                    <li>Only automated transformations</li>
+                    <li>No conditional logic</li>
+                    <li>No eligibility validation</li>
+                    <li class="highlight-yellow">OpenRewrite is extremely powerful, but it's designed to execute transformations, not to orchestrate complex migrations. We add the intelligence layer that's missing.</strong>
                     </li>
                 </ul>
             </section>
@@ -284,12 +276,17 @@ popd
             </section>
 
             <section>
+                <h2>Analyze → Review → Transform pipeline</h2>
+                <img src="./image/pipeline.png" alt="pipeline.png" width="60%" style="display: block; margin: 0 auto;"/>
+            </section>
+
+            <section>
                 <h2>Use rules and instructions</h2>
                 <img src="./image/rule-1.png" alt="rule-1.png" width="100%"/>
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 4</span></h3>
+                <h3><span class="demo-label">Demo 3</span></h3>
                 <li>Spring Boot Todo &rarr; Quarkus Todo</li>
                 <pre><code data-trim data-noescape class="language-bash">
                     # Scan and analyse using (pre)conditions
@@ -302,7 +299,7 @@ popd
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 4</span></h3>
+                <h3><span class="demo-label">Demo 3</span></h3>
                 <pre><code data-trim data-noescape class="language-bash">
 # Show that the Spring Boot Todo app is working
 
@@ -312,7 +309,7 @@ firefox localhost:8081
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 4</span></h3>
+                <h3><span class="demo-label">Demo 3</span></h3>
                 <pre><code data-trim data-noescape class="language-bash">
 # Dry run - generates patch files
 mtool transform ./applications/spring-boot-todo-app \
@@ -325,7 +322,7 @@ mtool transform ./applications/spring-boot-todo-app \
             </section>
 
             <section>
-                <h3><span class="demo-label">Demo 4</span></h3>
+                <h3><span class="demo-label">Demo 3</span></h3>
                 <li>Launch the migrated application </li>
                 <pre><code data-trim data-noescape class="language-bash">
 mvn clean package -DskipTests quarkus:dev
@@ -352,27 +349,82 @@ curl -X POST http://localhost:8080/home \
   }'
           </code></pre>
             </section>
+
+
+        <section>
+            <h3><span class="demo-label">Demo 4</span></h3>
+            <li>A Quarkus to Quarkus Migration</li>
+            <pre><code data-trim data-noescape class="language-bash">
+                    # Scan and analyse using (pre)conditions
+                    mtool analyze ./applications/quarkus-resteasy-classic-app -r ./cookbook/rules/quarkus-resteasy-reactive
+
+                    # Visualize the matching's ascii table generated in the console
+                    # Quick review of the report = migration plan with instructions
+                </code></pre>
         </section>
 
         <section>
+            <h3><span class="demo-label">Demo 4</span></h3>
+            <pre><code data-trim data-noescape class="language-bash">
+# Dry run - generates patch files
+mtool transform ./applications/quarkus-resteasy-classic-app \
+  -p openrewrite --dry-run
+
+# Apply transformation
+mtool transform ./applications/quarkus-resteasy-classic-app \
+  -p openrewrite
+          </code></pre>
+        </section>
+
+        <section>
+            <h3><span class="demo-label">Demo 4</span></h3>
+            <li>Launch the migrated application </li>
+            <pre><code data-trim data-noescape class="language-bash">
+mvn clean quarkus:dev
+firefox http://localhost:8080/q/dev-ui/extensions
+          </code></pre>
+            <pre><code data-trim data-noescape class="language-bash">
+# Test the API
+curl http://localhost:8080/books
+
+curl -X POST http://localhost:8080/books \
+  -H "Content-Type: application/json" \
+  -d '{
+  "title": "Quarkus in Action",
+  "author": "Martin Štefanko and Jan Martiška",
+  "dueDate": "2022-03-10",
+  "isbn": "9781633438958",
+  "publicationYear": 2025
+}'
+
+          </code></pre>
+        </section>
             <section data-markdown>
                 <script type="text/template">
-                ## What Else ?
+                    ## Why not just OpenRewrite?
 
-                Mtool is still a POC but could be improved a lot to:
-                - Generate the rules using a designer (aka Apache camel routes & https://kaoto.io/)
-                - Integrate a simple **orchestration engine** to better handle the instructions
-                - Be able to support to switch between modes instructions: openrewrite and/or AI
+                    OpenRewrite is excellent for code transformation but enterprise migrations need more.
+                    - mtool adds more flexibility.
+                    - OpenRewrite powers the automated transformations.
+
+                    <span class="highlight-yellow">We don't replace OpenRewrite. We complete it.</span>
                 </script>
             </section>
+            <section data-markdown>
+                <script type="text/template">
+                    ## What Else ?
 
+                    Mtool is still a POC but could be improved a lot to:
+                    - Generate the rules using a designer (aka Apache camel routes & https://kaoto.io/)
+                    - Integrate a simple **orchestration engine** to better handle the instructions
+                    - Be able to support to switch between modes instructions: openrewrite and/or AI
+                </script>
+            </section>
             <section>
                 <h3><span class="demo-label">Demo 5</span></h3>
                 <li>AI-Assisted Migration</li>
-                <video controls>
-                    <source src="videos/demo.mp4" type="video/mp4">
-                </video>
             </section>
+
         </section>
 
         <!-- Wrap-up -->
