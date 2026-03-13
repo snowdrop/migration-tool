@@ -11,10 +11,9 @@ import dev.snowdrop.mtool.model.openrewrite.RecipeDefinition;
 import dev.snowdrop.mtool.model.openrewrite.RecipeHolder;
 import dev.snowdrop.mtool.model.parser.Query;
 import dev.snowdrop.mtool.scanner.QueryScanner;
-import dev.snowdrop.logging.LoggingService;
-import dev.snowdrop.openrewrite.cli.RewriteService;
-import dev.snowdrop.openrewrite.cli.model.ResultsContainer;
-import dev.snowdrop.openrewrite.cli.model.RewriteConfig;
+import dev.snowdrop.rewrite.service.RewriteService;
+import dev.snowdrop.rewrite.ResultsContainer;
+import dev.snowdrop.rewrite.config.RewriteConfig;
 import org.jboss.logging.Logger;
 import org.openrewrite.DataTable;
 import org.openrewrite.RecipeRun;
@@ -230,7 +229,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 			svc.init();
 		}
 
-		ResultsContainer run = svc.run();
+		ResultsContainer run = svc.runScanner();
 		return findMatchsFromResults(run, rd);
 	}
 
@@ -238,7 +237,6 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 		if (rewriteServiceInstance == null) {
 			logger.debug("Set a new instance of the RewriteService.");
 			rewriteServiceInstance = new RewriteService(cfg);
-			rewriteServiceInstance.setLogger(new LoggingService());
 		}
 		logger.debug("Reuse an instance of the RewriteService.");
 		return rewriteServiceInstance;

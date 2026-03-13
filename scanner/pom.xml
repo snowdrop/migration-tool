@@ -70,7 +70,8 @@
 
         <dependency>
             <groupId>dev.snowdrop.openrewrite</groupId>
-            <artifactId>rewrite-client</artifactId>
+            <artifactId>service</artifactId>
+            <classifier>shaded</classifier>
         </dependency>
 
         <!-- Test -->
