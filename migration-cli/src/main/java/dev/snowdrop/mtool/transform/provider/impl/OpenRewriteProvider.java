@@ -4,16 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import dev.snowdrop.logging.LoggingService;
 import dev.snowdrop.mtool.model.analyze.MigrationTask;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.model.openrewrite.CompositeRecipe;
 import dev.snowdrop.mtool.transform.provider.MigrationProvider;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionContext;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionResult;
-import dev.snowdrop.openrewrite.cli.RewriteService;
-import dev.snowdrop.openrewrite.cli.model.ResultsContainer;
-import dev.snowdrop.openrewrite.cli.model.RewriteConfig;
+import dev.snowdrop.rewrite.service.RewriteService;
+import dev.snowdrop.rewrite.ResultsContainer;
+import dev.snowdrop.rewrite.config.RewriteConfig;
 import org.jboss.logging.Logger;
 
 import java.io.BufferedReader;
@@ -164,10 +163,9 @@ public class OpenRewriteProvider implements MigrationProvider {
 			cfg.setAdditionalJarPaths(gavs);
 
 			RewriteService svc = new RewriteService(cfg);
-			svc.setLogger(new LoggingService());
 			svc.init();
 
-			ResultsContainer results = svc.run();
+			ResultsContainer results = svc.runScanner();
 
 			details.add(String.format("Files modified: %d", results.getRefactoredInPlace().size()));
 			details.add(String.format("Files created: %d", results.getGenerated().size()));
