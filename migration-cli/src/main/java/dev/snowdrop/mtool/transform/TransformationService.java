@@ -26,9 +26,9 @@ public class TransformationService {
 	 */
 	public void logExecutionResult(ExecutionResult result, boolean verbose) {
 		if (result.success()) {
-			logger.infof("✅ Task completed successfully: %s", result.message());
+			logger.infof("Task completed successfully: %s", result.message());
 		} else {
-			logger.errorf("❌ Task failed: %s", result.message());
+			logger.errorf("Task failed: %s", result.message());
 			if (result.exception() != null && verbose) {
 				result.exception().printStackTrace();
 			}
@@ -60,10 +60,10 @@ public class TransformationService {
 		allDetails.addAll(result.details());
 
 		if (result.success()) {
-			return ExecutionResult.success(String.format("   ✅ %s execution completed successfully", ctx.provideType()),
+			return ExecutionResult.success(String.format("   %s execution completed successfully", ctx.provideType()),
 					allDetails);
 		} else {
-			return ExecutionResult.failure(String.format("   ❌ %s execution failed !", ctx.provideType()));
+			return ExecutionResult.failure(String.format("   %s execution failed !", ctx.provideType()));
 		}
 	}
 
