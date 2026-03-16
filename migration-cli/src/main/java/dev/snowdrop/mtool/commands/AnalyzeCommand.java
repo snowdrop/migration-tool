@@ -71,7 +71,7 @@ public class AnalyzeCommand implements Runnable {
 			displayResults(tasks, config);
 
 		} catch (Exception e) {
-			logger.errorf("❌ Error: %s", e.getMessage());
+			logger.errorf("Error: %s", e.getMessage());
 			if (verbose) {
 				e.printStackTrace();
 			}
@@ -128,13 +128,13 @@ public class AnalyzeCommand implements Runnable {
 				jdtWksString, lsCmd, verbose, output, scanner, openRewriteMavenPluginVersion);
 
 		// Log resolved paths for debugging
-		logger.infof("📋 Jdt-ls path: %s", jdtLsPath);
-		logger.infof("📋 Jdt-ls workspace: %s", jdtWksString);
-		logger.infof("📋 Language server command: %s", lsCmd);
-		logger.infof("📋 Application path: %s", appPath);
-		logger.infof("📋 Source technology: %s", sourceTechnology);
-		logger.infof("📋 Target technology: %s", targetTechnology);
-		logger.infof("📋 Openrewrite maven plugin version: %s", openRewriteMavenPluginVersion);
+		logger.infof("Jdt-ls path: %s", jdtLsPath);
+		logger.infof("Jdt-ls workspace: %s", jdtWksString);
+		logger.infof("Language server command: %s", lsCmd);
+		logger.infof("Application path: %s", appPath);
+		logger.infof("Source technology: %s", sourceTechnology);
+		logger.infof("Target technology: %s", targetTechnology);
+		logger.infof("Openrewrite maven plugin version: %s", openRewriteMavenPluginVersion);
 		return config;
 	}
 
@@ -178,7 +178,7 @@ public class AnalyzeCommand implements Runnable {
 			}
 		}
 
-		logger.infof("⏳ Waiting for commands to complete...");
+		logger.infof("Waiting for commands to complete...");
 		Thread.sleep(2000);
 	}
 

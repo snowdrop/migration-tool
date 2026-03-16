@@ -62,7 +62,7 @@ public class TransformCommand implements Runnable {
 		try {
 			startTransformation();
 		} catch (Exception e) {
-			logger.errorf("❌ Error: %s", e.getMessage());
+			logger.errorf("Error: %s", e.getMessage());
 			if (verbose) {
 				e.printStackTrace();
 			}
@@ -88,7 +88,7 @@ public class TransformCommand implements Runnable {
 			}
 
 			Path jsonFile = latestJsonFile.get();
-			logger.infof("📄 Loading migration tasks from: %s", jsonFile.getFileName());
+			logger.infof("Loading migration tasks from: %s", jsonFile.getFileName());
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			MigrationTasksExport export = objectMapper.readValue(jsonFile.toFile(), MigrationTasksExport.class);
@@ -143,18 +143,18 @@ public class TransformCommand implements Runnable {
 		Instant start = Instant.now();
 
 		Path projectPath = resolvePath(appPath);
-		logger.infof("✅ Starting transformation for project at: %s", projectPath);
-		logger.infof("🔧 Using provider: %s", provider);
+		logger.infof("Starting transformation for project at: %s", projectPath);
+		logger.infof("Using provider: %s", provider);
 
 		Map<String, MigrationTask> migrationTasks = loadLatestAnalysisReport(projectPath);
 
 		if (migrationTasks.isEmpty()) {
 			logger.warn(
-					"❌ No migration tasks found. Please run the analyze command first to generate a migration report.");
+					"No migration tasks found. Please run the analyze command first to generate a migration report.");
 			return;
 		}
 
-		logger.infof("📋 Found %d migration tasks to process", migrationTasks.size());
+		logger.infof("Found %d migration tasks to process", migrationTasks.size());
 
 		// Configure the Context with the information used by the Provider
 		ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider, aiAssistant,
@@ -168,9 +168,9 @@ public class TransformCommand implements Runnable {
 					.toList();
 
 			if (openrewriteTasks.isEmpty()) {
-				logger.warn("⚠️  No tasks with OpenRewrite instructions found");
+				logger.warn("No tasks with OpenRewrite instructions found");
 			} else {
-				logger.infof("🔄 Batching %d OpenRewrite tasks into a single execution", openrewriteTasks.size());
+				logger.infof("Batching %d OpenRewrite tasks into a single execution", openrewriteTasks.size());
 				OpenRewriteProvider openRewriteProvider = new OpenRewriteProvider();
 				ExecutionResult result = openRewriteProvider.executeBatch(openrewriteTasks, context);
 				TransformationService ts = new TransformationService();
@@ -196,7 +196,7 @@ public class TransformCommand implements Runnable {
 	 * Execute a specific migration task with the configured provider
 	 */
 	private void executeTaskWithProvider(String taskId, MigrationTask task, ExecutionContext context) {
-		logger.infof("🔄 Processing migration task: %s", taskId);
+		logger.infof("Processing migration task: %s", taskId);
 		if (verbose) {
 			logger.infof("   Description: %s", task.getRule().description());
 			logger.infof("   Category: %s", task.getRule().category());
@@ -213,7 +213,7 @@ public class TransformCommand implements Runnable {
 		};
 
 		if (!hasInstructions) {
-			logger.warnf("   ⚠️  No %s instructions found for task, skipping", provider);
+			logger.warnf("No %s instructions found for task, skipping", provider);
 			return;
 		}
 
