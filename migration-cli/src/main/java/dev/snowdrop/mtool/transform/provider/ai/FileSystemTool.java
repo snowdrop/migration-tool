@@ -15,11 +15,23 @@ import java.nio.file.Paths;
 public class FileSystemTool {
 	private static final Logger logger = Logger.getLogger(FileSystemTool.class.getName());
 
+	private Path basePath = Path.of(".");
+
+	public void setBasePath(Path basePath) {
+		this.basePath = basePath;
+	}
+
+	private Path resolve(String path) {
+		Path p = Paths.get(path);
+		return p.isAbsolute() ? p : basePath.resolve(p);
+	}
+
 	@Tool("Reads the full content of a specified file")
 	public String readFile(@P("Path to the file to analyze") String path) {
 		try {
-			logger.info("Reading file: " + path);
-			return Files.readString(Paths.get(path));
+			Path resolved = resolve(path);
+			logger.info("Reading file: " + resolved);
+			return Files.readString(resolved);
 		} catch (IOException e) {
 			return "Error reading file: " + e.getMessage();
 		}
@@ -49,7 +61,7 @@ public class FileSystemTool {
 		 */
 
 		try {
-			Path filePath = Paths.get(path);
+			Path filePath = resolve(path);
 			logger.debugf("File path is: %s", filePath);
 			Files.writeString(filePath, content);
 			return "File '" + path + "' written successfully.";
