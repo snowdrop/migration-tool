@@ -85,7 +85,7 @@ public class AiProvider implements MigrationProvider {
 	}
 
 	private boolean execAiCmd(ExecutionContext ctx, List<String> tasks, List<String> details) {
-		logger.info("Hello! I'm your AI migration assistant.");
+		logger.info("Hello! I'm your AI migration assistant and I will help you move your code");
 
 		tasks.forEach(t -> {
 			logger.infof("============= Sending user message");
