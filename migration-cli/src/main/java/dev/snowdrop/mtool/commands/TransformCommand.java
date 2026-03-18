@@ -5,6 +5,7 @@ import dev.snowdrop.mtool.model.analyze.MigrationTask;
 import dev.snowdrop.mtool.transform.TransformationService;
 import dev.snowdrop.mtool.model.transform.MigrationTasksExport;
 import dev.snowdrop.mtool.transform.provider.ai.Assistant;
+import dev.snowdrop.mtool.transform.provider.ai.FileSystemTool;
 import dev.snowdrop.mtool.transform.provider.impl.OpenRewriteProvider;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionContext;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionResult;
@@ -51,6 +52,9 @@ public class TransformCommand implements Runnable {
 
 	@Inject
 	Assistant aiAssistant;
+
+	@Inject
+	FileSystemTool fileSystemTool;
 
 	@Override
 	public void run() {
@@ -157,6 +161,7 @@ public class TransformCommand implements Runnable {
 		logger.infof("Found %d migration tasks to process", migrationTasks.size());
 
 		// Configure the Context with the information used by the Provider
+		fileSystemTool.setBasePath(projectPath);
 		ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider, aiAssistant,
 				openRewriteMavenPluginVersion, compositeRecipeName);
 
