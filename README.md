@@ -255,13 +255,20 @@ Our Migration Tool client (aka mtool) proposes 2 commands:
 - **[transform](#transform-your-application)**: Apply the transformation's instructions using as input the JSON report by using the chosen provider
 
 ```shell
-Usage: mtool [COMMAND]
+Usage: mtool [-hV] [COMMAND]
 Quarkus mtool client able to scan, analyze and migrate a java application using
 instructions
+  -h, --help      Show this help message and exit.
+  -V, --version   Print version information and exit.
 Commands:
   analyze    Analyze a project for migration
   transform  Transform a java application
   help       Display help information about the specified command.
+```
+
+To check the installed version:
+```shell
+mtool --version
 ```
 
 ### Scan and analyze
