@@ -1,0 +1,35 @@
+- category: mandatory
+  customVariables: []
+  description: Replace @SpringBootTest with @QuarkusTest
+  effort: 1
+  labels:
+    - konveyor.io/source=springboot
+    - konveyor.io/target=quarkus
+  links: []
+  message: "Replace @SpringBootTest with @QuarkusTest and add quarkus-junit5 test dependency."
+  ruleID: 050-springboot-to-quarkus-test-annotation
+  when:
+    condition: java.annotation is 'org.springframework.boot.test.context.SpringBootTest'
+  order: 4
+  instructions:
+    ai:
+      - tasks:
+          - "Add the dependency io.quarkus:quarkus-junit5 with scope test to the pom.xml file"
+          - "Replace the annotation @SpringBootTest (org.springframework.boot.test.context.SpringBootTest) with @QuarkusTest (io.quarkus.test.junit.QuarkusTest) in all test classes. Update the imports accordingly."
+    manual:
+      - todo: "Add quarkus-junit5 test dependency to pom.xml. Replace @SpringBootTest with @QuarkusTest in test classes."
+    openrewrite:
+      - name: Replace @SpringBootTest with @QuarkusTest
+        description: Add quarkus-junit5 test dependency and replace SpringBootTest annotation with QuarkusTest.
+        recipeList:
+          - org.openrewrite.maven.AddDependency:
+              groupId: io.quarkus
+              artifactId: quarkus-junit5
+              version: 3.31.3
+              scope: test
+          - org.openrewrite.java.ChangeType:
+              oldFullyQualifiedTypeName: org.springframework.boot.test.context.SpringBootTest
+              newFullyQualifiedTypeName: io.quarkus.test.junit.QuarkusTest
+        gav:
+          - org.openrewrite:rewrite-maven:8.73.0
+          - org.openrewrite:rewrite-java:8.73.0
