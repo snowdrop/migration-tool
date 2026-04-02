@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>dev.snowdrop.mtool</groupId>
-        <artifactId>migration-tool-parent</artifactId>
+        <artifactId>ai-providers-parent</artifactId>
         <version>1.0.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>ai</artifactId>
-    <name>Migration Tool :: AI providers</name>
+    <artifactId>vertex-ai-examples</artifactId>
+    <name>Migration Tool :: AI providers :: Vertex AI examples </name>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -44,13 +44,6 @@
             <version>2.1.0.Final</version>
         </dependency>
         -->
-        <!-- Google AI Platform
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-aiplatform</artifactId>
-            <version>3.88.0</version>
-        </dependency>
-        -->
         <!-- Quarkus & AI -->
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -66,18 +59,6 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-anthropic</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-open-ai</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-vertex-ai</artifactId>
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>

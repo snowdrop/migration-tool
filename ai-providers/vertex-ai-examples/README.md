@@ -8,6 +8,11 @@ the endpoint to be accessed using the Vertex AI API is rawPredict which is docum
 The jbang `VertexAIAnthropicWithScanner` and `VertexAIAnthropicChat.java` uses the `LangChain4j vertex-ai-anthropic` library to access the Google Cloud platform. 
 The protocol used to communicate with the platform is `gRPC`.  This module of langchain4j relies on the Google Cloud AI platform SDK.
 
+```bash
+jbang run ./src/main/java/VertexAIAnthropicChat.java
+jbang run ./src/main/java/VertexAIAnthropicWithScanner.java
+```
+
 Google documentation: 
 - https://docs.cloud.google.com/java/docs/reference/google-cloud-aiplatform/latest/overview
 - https://github.com/googleapis/google-cloud-java/tree/main/java-aiplatform#quickstart
