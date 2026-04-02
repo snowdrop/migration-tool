@@ -1,32 +1,40 @@
-# AI
+# Google Generative & Vertex AI
 
-Project created to test different model providers with their API
+This project has been created to test different Java LLM libraries to access Anthropic Claude running as partner model on Vertex AI.
+the endpoint to be accessed using the Vertex AI API is rawPredict which is documented here: https://docs.cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.endpoints/rawPredict
 
-## Google Vertex AI
+## Langchain4j - Vertex AI
 
 The jbang `VertexAIAnthropicWithScanner` and `VertexAIAnthropicChat.java` uses the `LangChain4j vertex-ai-anthropic` library to access the Google Cloud platform. 
-The protocol used to communicate with the platform is `gRPC` and is managed by the Google Cloud AI SDK. This module of langchain4j relies on the Google Cloud AI platform SDK.
+The protocol used to communicate with the platform is `gRPC`.  This module of langchain4j relies on the Google Cloud AI platform SDK.
 
 Google documentation: 
 - https://docs.cloud.google.com/java/docs/reference/google-cloud-aiplatform/latest/overview
 - https://github.com/googleapis/google-cloud-java/tree/main/java-aiplatform#quickstart
 
-## Quarkus Langchain4j - Vertex AI Models
+## Quarkus Langchain4j - Vertex AI
 
-### Quarkus dev
+### Quarkus Application
 
-You can play with the new module: `Quarkus Langchain4j - Vertex AI Models` using the Picocli `PoemCommand` command and the `MyAiservice` that quarkus
-CDI will register as Langchain4j AiServices.
+You can access the Vertex AI API and Anthropic model using the new module: `Quarkus Langchain4j - Vertex AI Models`. The Quarkus application
+runs a `CodeAssistantCommand` command, register an AI service able to chat with the model using your request/task provided as picocli argument 
+and if needed the model can request to read/write files locally using the registered tools: `readFile` and `writeFile`
+
+To use it, run the following command where you pass the task to be executed
 ```shell
-mvn quarkus:dev
+mvn quarkus:dev -Dquarkus.args="'Read the ./pom.xml file and tell me if it includes as quarkus extension vertex ai'"
 ```
 
-### jbang
+### jbang script
 
-The jbang `QuarkusVertexAIModels` is a Quarkus & Picocli example able to issue a query against the Google Cloud Vertex API (model gardens)
-using the new `Quarkus Vertex AI Models` module based on the QuarkusRestclient and accessing the Google API using the `rawPredict` endpoint:
-https://docs.cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.endpoints/rawPredict
+The jbang `QuarkusVertexAIModels` is also a Quarkus & Picocli example similar to the previous example but where we have coded some
+messages
+```java
+AiMessage aiMessage = new AiMessage("You are a java expert");
+UserMessage userMessage = new UserMessage("What is a Java Enum ?");
+```
 
+To launch it, execute this command:
 ```shell
 ❯ jbang run ./src/main/java/QuarkusVertexAIModels.java
 [jbang] Building jar for QuarkusVertexAIModels.java...
@@ -52,4 +60,34 @@ Starting AI ...
 - body: {"model":"claude-opus-4-6","id":"msg_vrtx_01JixAPaKzY8NJ3HE6GPE3ue","type":"message","role":"assistant","content":[{"type":"text","text":"Hi there! How are you doing today? Is there anything I can help you with? 😊"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":9,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":24}}                                                                                                                                                           
 2026-03-25 15:22:00,940 INFO  [io.quarkiverse.langchain4j.vertexai.runtime.models.VertexAiBaseChatModel] (main) Response: ChatResponse { aiMessage = AiMessage { text = "Hi there! How are you doing today? Is there anything I can help you with? 😊", thinking = null, toolExecutionRequests = [], attributes = {} }, metadata = ChatResponseMetadata{id='null', modelName='null', tokenUsage=null, finishReason=null} }                                                                                                                                                                                                          
 Hi there! How are you doing today? Is there anything I can help you with? 😊                              
+```
+
+## Example of curl requests
+
+You can curl the Vertex AI API and endpoint [rawPredict](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.endpoints/rawPredict) using curl with the following payload and headers:
+
+```bash
+export PROJECT_ID=itpc-gcp-cp-pe-eng-claude
+export LOCATION=europe-west1
+export MODEL_ID=claude-opus-4-6
+export MAX_TOKENS=1024
+export ANTHROPIC_VERSION=vertex-2023-10-16
+
+JSON_BODY=$(cat <<EOF
+{
+"anthropic_version": "$ANTHROPIC_VERSION",
+"messages": [
+{ "role": "user", "content": "What is a java record" },
+{ "role": "user", "content": "and also a Java enum ?" }
+],
+"max_tokens": $MAX_TOKENS
+}
+EOF
+)
+
+curl -sX POST \
+-H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json; charset=utf-8" \
+-d "$JSON_BODY" \
+"https://$LOCATION-aiplatform.googleapis.com/v1/projects/$PROJECT_ID/locations/$LOCATION/publishers/anthropic/models/$MODEL_ID:rawPredict" | jq
 ```
