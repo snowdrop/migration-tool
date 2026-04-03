@@ -68,8 +68,6 @@ public abstract class VertexAiBaseChatModel implements ChatModel {
                 .topK(getOrDefault(requestParameters.topK(), this.topK))
                 .topP(getOrDefault(requestParameters.topP(), this.topP));
 
-        VertexAiConfig vertexAiConfig = vertexAiConfigBuilder.build();
-
         if (logRequests) {
             log.info("Request: " + chatRequest.messages());
         }
