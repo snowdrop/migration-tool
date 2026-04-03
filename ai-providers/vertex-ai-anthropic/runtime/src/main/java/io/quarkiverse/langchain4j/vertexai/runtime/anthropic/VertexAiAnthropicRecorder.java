@@ -84,7 +84,7 @@ public class VertexAiAnthropicRecorder {
                 builder.topK(chatModelConfig.topK().getAsInt());
             }
 
-            builder.topK(chatModelConfig.maxOutputTokens());
+            builder.maxOutputTokens(chatModelConfig.maxOutputTokens());
 
             if (chatModelConfig.thinking().includeThoughts()) {
                 builder.includeThoughts(true);
