@@ -30,6 +30,7 @@ public abstract class VertexAiBaseChatModel implements ChatModel {
     protected final ToolChoice toolChoice;
     protected final Boolean logRequests;
     protected final Boolean logResponses;
+    protected final Boolean logCurl;
     protected final Duration timeout;
 
     // See: https://platform.claude.com/docs/en/api/messages#tool.strict
@@ -49,6 +50,7 @@ public abstract class VertexAiBaseChatModel implements ChatModel {
             ToolChoice toolChoice,
             Boolean logRequests,
             Boolean logResponses,
+            Boolean logCurl,
             Boolean strict,
             Duration timeout,
             boolean includeThoughts,
@@ -63,6 +65,7 @@ public abstract class VertexAiBaseChatModel implements ChatModel {
         this.toolChoice = toolChoice;
         this.logRequests = logRequests;
         this.logResponses = logResponses;
+        this.logCurl = logCurl;
         this.strict = strict;
         this.timeout = timeout;
         this.includeThoughts = includeThoughts;

@@ -64,10 +64,18 @@
         </dependency>
 
         <!-- AI -->
+        <!-- This client only works if we have an API_KEY to access the Anthropic Claude API !
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
             <artifactId>quarkus-langchain4j-anthropic</artifactId>
             <version>1.7.4</version>
+        </dependency>
+        -->
+        <!-- Using the Vertex AI Anthropic API able to access Anthropic on Google Cloud platform -->
+        <dependency>
+            <groupId>dev.snowdrop.mtool.ai</groupId>
+            <artifactId>vertex-ai-anthropic</artifactId>
+            <version>1.0.5-SNAPSHOT</version>
         </dependency>
 
         <!-- lsp4j -->
@@ -85,7 +93,30 @@
                 <version>${os-maven-plugin.version}</version>
             </extension>
         </extensions>
+
+        <plugins>
+            <plugin>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <configuration>
+                    <skip>${quarkus.build.skip}</skip>
+                </configuration>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>generate-code</goal>
+                            <goal>generate-code-tests</goal>
+                            <goal>native-image-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
+
 
     <profiles>
         <profile>
