@@ -7,7 +7,7 @@
         <version>1.0.5-SNAPSHOT</version>
     </parent>
     <artifactId>vertex-ai-anthropic</artifactId>
-    <name>Migration Tool :: AI providers :: Quarkus Langchain4j :: Vertex AI Anthropic - Runtime</name>
+    <name>Migration Tool :: AI :: Quarkus Langchain4j :: Vertex AI Anthropic - Runtime</name>
     <packaging>jar</packaging>
 
     <dependencies>

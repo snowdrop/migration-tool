@@ -12,7 +12,7 @@
     <groupId>dev.snowdrop.mtool.ai</groupId>
     <artifactId>ai-providers-parent</artifactId>
     <description>AI providers to access LLM</description>
-    <name>Migration Tool :: AI providers :: Parent</name>
+    <name>Migration Tool :: AI :: Parent</name>
     <packaging>pom</packaging>
 
     <modules>

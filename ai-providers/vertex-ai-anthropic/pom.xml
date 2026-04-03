@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>vertex-ai-anthropic-parent</artifactId>
-    <name>Migration Tool :: AI providers :: Quarkus LangChain4j :: Vertex AI Anthropic - Parent</name>
+    <name>Migration Tool :: AI :: Quarkus LangChain4j :: Vertex AI Anthropic - Parent</name>
     <description>Parent project to access the Anthropic model hosted on Google Cloud with Vertex AI - https://cloud.google.com/model-garden</description>
     <packaging>pom</packaging>
 

@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>vertex-ai-examples</artifactId>
-    <name>Migration Tool :: AI providers :: Vertex AI examples </name>
+    <name>Migration Tool :: AI :: Vertex AI examples </name>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
