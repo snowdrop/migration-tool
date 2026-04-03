@@ -16,26 +16,26 @@ import java.nio.file.Paths;
  */
 public abstract class AbstractFileSearchTest {
 
-	protected FileSearch fileSearcher;
-	protected FileSearch contentSearcher;
-	protected static Path applicationPath;
+    protected FileSearch fileSearcher;
+    protected FileSearch contentSearcher;
+    protected static Path applicationPath;
 
-	@BeforeAll
-	static void setUp() throws URISyntaxException {
-		applicationPath = applicationPath("spring-boot-todo-app");
-	}
+    @BeforeAll
+    static void setUp() throws URISyntaxException {
+        applicationPath = applicationPath("spring-boot-todo-app");
+    }
 
-	@BeforeEach
-	void setup() throws IOException {
-		fileSearcher = new FileSearch();
-		contentSearcher = new FileSearch();
-	}
+    @BeforeEach
+    void setup() throws IOException {
+        fileSearcher = new FileSearch();
+        contentSearcher = new FileSearch();
+    }
 
-	public static Path applicationPath(String appFolderName) throws URISyntaxException {
-		URL resourceUrl = AbstractFileSearchTest.class.getClassLoader().getResource(appFolderName);
-		if (resourceUrl == null) {
-			throw new RuntimeException("Application folder not found: " + appFolderName);
-		}
-		return Paths.get(resourceUrl.toURI());
-	}
+    public static Path applicationPath(String appFolderName) throws URISyntaxException {
+        URL resourceUrl = AbstractFileSearchTest.class.getClassLoader().getResource(appFolderName);
+        if (resourceUrl == null) {
+            throw new RuntimeException("Application folder not found: " + appFolderName);
+        }
+        return Paths.get(resourceUrl.toURI());
+    }
 }

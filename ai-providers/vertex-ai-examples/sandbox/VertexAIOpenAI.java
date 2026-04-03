@@ -1,6 +1,6 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
 //DEPS dev.langchain4j:langchain4j-open-ai:1.12.2
-//DEPS com.google.auth:google-auth-library-oauth2-http:1.23.0
+//DEPS com.google.auth:google-auth-library-oauth2-http:1.43.0
 //DEPS org.slf4j:slf4j-simple:2.0.17
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import com.google.auth.oauth2.GoogleCredentials;

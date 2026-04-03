@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>dev.snowdrop.mtool.ai</groupId>
+        <artifactId>ai-providers-parent</artifactId>
+        <version>1.0.5-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>vertex-ai-anthropic-parent</artifactId>
+    <name>Migration Tool :: AI :: Quarkus LangChain4j :: Vertex AI Anthropic - Parent</name>
+    <description>Parent project to access the Anthropic model hosted on Google Cloud with Vertex AI - https://cloud.google.com/model-garden</description>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>deployment</module>
+        <module>runtime</module>
+    </modules>
+
+</project>

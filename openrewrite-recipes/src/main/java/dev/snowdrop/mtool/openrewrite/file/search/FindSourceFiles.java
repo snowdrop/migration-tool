@@ -32,71 +32,71 @@ import java.util.stream.Stream;
 @Value
 @EqualsAndHashCode(callSuper = false)
 public class FindSourceFiles extends Recipe {
-	transient SourcesFiles results = new SourcesFiles(this);
+    transient SourcesFiles results = new SourcesFiles(this);
 
-	/**
-	 * ID of the matching tool needed to reconcile the records where a match took place
-	 */
-	@Option(displayName = "Match id", description = "ID of the matching tool needed to reconcile the records where a match took place", required = true)
-	public String matchId;
+    /**
+     * ID of the matching tool needed to reconcile the records where a match took place
+     */
+    @Option(displayName = "Match id", description = "ID of the matching tool needed to reconcile the records where a match took place", required = true)
+    public String matchId;
 
-	@Option(displayName = "File pattern", description = "A glob expression representing a file path to search for (relative to the project root). Blank/null matches all."
-			+ "Multiple patterns may be specified, separated by a semicolon `;`. "
-			+ "If multiple patterns are supplied any of the patterns matching will be interpreted as a match.", required = false, example = ".github/workflows/*.yml")
-	@Nullable
-	String filePattern;
+    @Option(displayName = "File pattern", description = "A glob expression representing a file path to search for (relative to the project root). Blank/null matches all."
+            + "Multiple patterns may be specified, separated by a semicolon `;`. "
+            + "If multiple patterns are supplied any of the patterns matching will be interpreted as a match.", required = false, example = ".github/workflows/*.yml")
+    @Nullable
+    String filePattern;
 
-	@Override
-	public String getDisplayName() {
-		return "Find files";
-	}
+    @Override
+    public String getDisplayName() {
+        return "Find files";
+    }
 
-	@Override
-	public String getDescription() {
-		return "Find files by source path. Paths are always interpreted as relative to the repository root.";
-	}
+    @Override
+    public String getDescription() {
+        return "Find files by source path. Paths are always interpreted as relative to the repository root.";
+    }
 
-	@Override
-	public TreeVisitor<?, ExecutionContext> getVisitor() {
-		return new TreeVisitor<Tree, ExecutionContext>() {
+    @Override
+    public TreeVisitor<?, ExecutionContext> getVisitor() {
+        return new TreeVisitor<Tree, ExecutionContext>() {
 
-			@Override
-			public @Nullable Tree visit(@Nullable Tree tree, ExecutionContext ctx) {
-				if (tree instanceof SourceFile) {
-					SourceFile sourceFile = (SourceFile) tree;
-					Path sourcePath = sourceFile.getSourcePath();
-					if (matches(sourcePath)) {
-						results.insertRow(ctx,
-								new SourcesFiles.Row(matchId, sourcePath.toString(), tree.getClass().getSimpleName(),
-										sourceFile instanceof Quark || sourceFile.getCharset() == null
-												? null
-												: sourceFile.getCharset().toString()));
-						return SearchResult.found(sourceFile);
-					}
-				}
-				return tree;
-			}
+            @Override
+            public @Nullable Tree visit(@Nullable Tree tree, ExecutionContext ctx) {
+                if (tree instanceof SourceFile) {
+                    SourceFile sourceFile = (SourceFile) tree;
+                    Path sourcePath = sourceFile.getSourcePath();
+                    if (matches(sourcePath)) {
+                        results.insertRow(ctx,
+                                new SourcesFiles.Row(matchId, sourcePath.toString(), tree.getClass().getSimpleName(),
+                                        sourceFile instanceof Quark || sourceFile.getCharset() == null
+                                                ? null
+                                                : sourceFile.getCharset().toString()));
+                        return SearchResult.found(sourceFile);
+                    }
+                }
+                return tree;
+            }
 
-			String @Nullable [] filePatterns;
+            String @Nullable [] filePatterns;
 
-			private boolean matches(Path sourcePath) {
-				if (filePatterns == null) {
-					filePatterns = Optional.ofNullable(filePattern).map(it -> it.split(";")).map(Arrays::stream)
-							.orElseGet(Stream::empty).map(String::trim).filter(StringUtils::isNotEmpty)
-							.map(FindSourceFiles::normalize).toArray(String[]::new);
-				}
-				return filePatterns.length == 0
-						|| Arrays.stream(filePatterns).anyMatch(pattern -> PathUtils.matchesGlob(sourcePath, pattern));
-			}
-		};
-	}
+            private boolean matches(Path sourcePath) {
+                if (filePatterns == null) {
+                    filePatterns = Optional.ofNullable(filePattern).map(it -> it.split(";")).map(Arrays::stream)
+                            .orElseGet(Stream::empty).map(String::trim).filter(StringUtils::isNotEmpty)
+                            .map(FindSourceFiles::normalize).toArray(String[]::new);
+                }
+                return filePatterns.length == 0
+                        || Arrays.stream(filePatterns).anyMatch(pattern -> PathUtils.matchesGlob(sourcePath, pattern));
+            }
+        };
+    }
 
-	private static String normalize(String filePattern) {
-		if (filePattern.startsWith("./") || filePattern.startsWith(".\\")) {
-			return filePattern.substring(2);
-		} else if (filePattern.startsWith("/") || filePattern.startsWith("\\")) {
-			return filePattern.substring(1);
-		}
-		return filePattern;
-	}
+    private static String normalize(String filePattern) {
+        if (filePattern.startsWith("./") || filePattern.startsWith(".\\")) {
+            return filePattern.substring(2);
+        } else if (filePattern.startsWith("/") || filePattern.startsWith("\\")) {
+            return filePattern.substring(1);
+        }
+        return filePattern;
+    }
 }

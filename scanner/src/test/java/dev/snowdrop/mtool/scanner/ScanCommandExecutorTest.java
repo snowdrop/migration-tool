@@ -20,45 +20,45 @@ import static org.mockito.Mockito.when;
 //@Disabled
 class ScanCommandExecutorTest {
 
-	@Mock
-	ScannerSpiRegistry spiRegistry;
+    @Mock
+    ScannerSpiRegistry spiRegistry;
 
-	@Mock
-	QueryScanner scanner;
+    @Mock
+    QueryScanner scanner;
 
-	@Mock
-	Config config;
+    @Mock
+    Config config;
 
-	@Test
-	void executeCommandForQuery_returnsScannerResults() {
-		// Given
-		ScanCommandExecutor executor = new ScanCommandExecutor(spiRegistry);
+    @Test
+    void executeCommandForQuery_returnsScannerResults() {
+        // Given
+        ScanCommandExecutor executor = new ScanCommandExecutor(spiRegistry);
 
-		Query query = new Query("java", "annotation", Collections.emptyMap());
+        Query query = new Query("java", "annotation", Collections.emptyMap());
 
-		List<Match> expectedResults = List.of(new Match("file1", "openrewrite", Collections.emptyList()),
-				new Match("file2", "maven", Collections.emptyList()));
+        List<Match> expectedResults = List.of(new Match("file1", "openrewrite", Collections.emptyList()),
+                new Match("file2", "maven", Collections.emptyList()));
 
-		when(spiRegistry.resolveScannerForQuery(config, query)).thenReturn(scanner);
-		when(scanner.scansCodeFor(config, query)).thenReturn(expectedResults);
+        when(spiRegistry.resolveScannerForQuery(config, query)).thenReturn(scanner);
+        when(scanner.scansCodeFor(config, query)).thenReturn(expectedResults);
 
-		// When
-		List<Match> result = executor.executeCommandForQuery(config, query);
+        // When
+        List<Match> result = executor.executeCommandForQuery(config, query);
 
-		// Then
-		assertEquals(expectedResults, result);
-		verify(scanner).scansCodeFor(config, query);
-		verify(spiRegistry).resolveScannerForQuery(config, query);
-	}
+        // Then
+        assertEquals(expectedResults, result);
+        verify(scanner).scansCodeFor(config, query);
+        verify(spiRegistry).resolveScannerForQuery(config, query);
+    }
 
-	@Test
-	void executeCommandForQuery_returnsEmptyListWhenNoScannerFound() {
-		ScanCommandExecutor executor = new ScanCommandExecutor(spiRegistry);
-		Query query = new Query("java", "interface", Collections.emptyMap());
+    @Test
+    void executeCommandForQuery_returnsEmptyListWhenNoScannerFound() {
+        ScanCommandExecutor executor = new ScanCommandExecutor(spiRegistry);
+        Query query = new Query("java", "interface", Collections.emptyMap());
 
-		List<Match> result = executor.executeCommandForQuery(config, query);
+        List<Match> result = executor.executeCommandForQuery(config, query);
 
-		assertTrue(result.isEmpty());
-	}
+        assertTrue(result.isEmpty());
+    }
 
 }

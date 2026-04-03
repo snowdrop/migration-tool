@@ -14,33 +14,33 @@ import java.util.Scanner;
 
 public class VertexAIAnthropicWithScanner {
 
-	private static final String PROJECT_ID = "itpc-gcp-cp-pe-eng-claude";
-	private static final String MODEL_NAME = "claude-opus-4-6";
-	private static final String LOCATION = "europe-west1";
+    private static final String PROJECT_ID = "itpc-gcp-cp-pe-eng-claude";
+    private static final String MODEL_NAME = "claude-opus-4-6";
+    private static final String LOCATION = "europe-west1";
 
-	interface Assistant {
-		String chat(String message);
-	}
+    interface Assistant {
+        String chat(String message);
+    }
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
 
-		ChatModel model = VertexAiAnthropicChatModel.builder().project(PROJECT_ID).location(LOCATION)
-				.modelName(MODEL_NAME).maxTokens(1000).logRequests(true).logResponses(true).build();
+        ChatModel model = VertexAiAnthropicChatModel.builder().project(PROJECT_ID).location(LOCATION)
+                .modelName(MODEL_NAME).maxTokens(1000).logRequests(true).logResponses(true).build();
 
-		Assistant assistant = AiServices.builder(Assistant.class).chatModel(model)
-				.chatMemory(MessageWindowChatMemory.withMaxMessages(10)).build();
+        Assistant assistant = AiServices.builder(Assistant.class).chatModel(model)
+                .chatMemory(MessageWindowChatMemory.withMaxMessages(10)).build();
 
-		Scanner scanner = new Scanner(System.in);
-		System.out.println("Chat started! Type 'exit' to quit.");
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Chat started! Type 'exit' to quit.");
 
-		while (true) {
-			System.out.print("User: ");
-			String input = scanner.nextLine();
-			if ("exit".equalsIgnoreCase(input))
-				break;
+        while (true) {
+            System.out.print("User: ");
+            String input = scanner.nextLine();
+            if ("exit".equalsIgnoreCase(input))
+                break;
 
-			String response = assistant.chat(input);
-			System.out.println("AI: " + response);
-		}
-	}
+            String response = assistant.chat(input);
+            System.out.println("AI: " + response);
+        }
+    }
 }

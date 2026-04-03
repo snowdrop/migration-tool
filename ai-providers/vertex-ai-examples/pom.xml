@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>dev.snowdrop.mtool</groupId>
+        <groupId>dev.snowdrop.mtool.ai</groupId>
         <artifactId>ai-providers-parent</artifactId>
         <version>1.0.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>vertex-ai-examples</artifactId>
-    <name>Migration Tool :: AI providers :: Vertex AI examples </name>
+    <name>Migration Tool :: AI :: Vertex AI examples </name>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -18,51 +18,29 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-bom</artifactId>
-                <version>1.12.2</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
-        <!-- Logging -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.17</version>
-        </dependency>
-        <!-- Slf4j and LogManager
-        <dependency>
-            <groupId>org.jboss.slf4j</groupId>
-            <artifactId>slf4j-jboss-logmanager</artifactId>
-            <version>2.1.0.Final</version>
-        </dependency>
-        -->
-        <!-- Quarkus & AI -->
+        <!-- Quarkus & Vertex AI Anthropic client-->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-picocli</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-vertex-ai-models</artifactId>
-            <version>999-SNAPSHOT</version>
+            <groupId>dev.snowdrop.mtool.ai</groupId>
+            <artifactId>vertex-ai-anthropic</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
-        <!-- AI -->
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j</artifactId>
-        </dependency>
+        <!-- Langchain4j -->
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-vertex-ai-anthropic</artifactId>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.17</version>
         </dependency>
     </dependencies>
 </project>

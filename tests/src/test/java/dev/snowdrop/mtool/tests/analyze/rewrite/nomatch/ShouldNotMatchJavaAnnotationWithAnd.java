@@ -21,54 +21,54 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ShouldNotMatchJavaAnnotationWithAnd extends BaseRulesTest {
 
-	private CodeScannerService codeScannerService;
-	private Config config;
+    private CodeScannerService codeScannerService;
+    private Config config;
 
-	@TempDir
-	Path tempDir;
+    @TempDir
+    Path tempDir;
 
-	Path rulesPath;
-	String jdtls = "";
+    Path rulesPath;
+    String jdtls = "";
 
-	@BeforeEach
-	void setUp() throws Exception {
-		// Copy the code of the project to analyze within the temp dir
-		String applicationToScan = "spring-boot-todo-app";
-		Path destinationPath = tempDir.resolve(applicationToScan);
-		copyFolder(applicationToScan, destinationPath);
+    @BeforeEach
+    void setUp() throws Exception {
+        // Copy the code of the project to analyze within the temp dir
+        String applicationToScan = "spring-boot-todo-app";
+        Path destinationPath = tempDir.resolve(applicationToScan);
+        copyFolder(applicationToScan, destinationPath);
 
-		// Copy the rules to be evaluated the temp dir
-		String cookBook = "test-rules";
-		rulesPath = tempDir.resolve(cookBook);
-		copyFolder(cookBook, rulesPath);
+        // Copy the rules to be evaluated the temp dir
+        String cookBook = "test-rules";
+        rulesPath = tempDir.resolve(cookBook);
+        copyFolder(cookBook, rulesPath);
 
-		// Configure the test with parameters
-		config = createTestConfig(destinationPath, rulesPath, jdtls);
+        // Configure the test with parameters
+        config = createTestConfig(destinationPath, rulesPath, jdtls);
 
-		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
-		codeScannerService = new CodeScannerService(config, scanCommandExecutor);
-	}
+        ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
+        codeScannerService = new CodeScannerService(config, scanCommandExecutor);
+    }
 
-	@ParameterizedTest
-	@CsvSource({"and-query/annotation-and-annotation-no_match.yaml"})
-	void shouldNotMatchJavaAnnotationWithAnd(String ruleSubPath) throws IOException {
-		// Given a path, got the rule to be processed
-		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
+    @ParameterizedTest
+    @CsvSource({ "and-query/annotation-and-annotation-no_match.yaml" })
+    void shouldNotMatchJavaAnnotationWithAnd(String ruleSubPath) throws IOException {
+        // Given a path, got the rule to be processed
+        List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
-		// Process the rule
-		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        // Process the rule
+        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
 
-		// Then
-		assertNotNull(result);
-		assertTrue(result.containsKey("annotation-and-annotation-no_match"));
+        // Then
+        assertNotNull(result);
+        assertTrue(result.containsKey("annotation-and-annotation-no_match"));
 
-		Match match = result.get("annotation-and-annotation-no_match").get(0);
-		assertNotNull(match);
+        Match match = result.get("annotation-and-annotation-no_match").get(0);
+        assertNotNull(match);
 
-		String csvRecord = (String) match.result();
-		assertEquals(true, csvRecord.contains("org.springframework.stereotype.Controller"));
-		assertEquals(true, csvRecord.contains("dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv"));
-		assertEquals(true, csvRecord.contains("JAVA.ANNOTATION"));
-	}
+        String csvRecord = (String) match.result();
+        assertEquals(true, csvRecord.contains("org.springframework.stereotype.Controller"));
+        assertEquals(true, csvRecord.contains("dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv"));
+        assertEquals(true, csvRecord.contains("JAVA.ANNOTATION"));
+    }
 
 }

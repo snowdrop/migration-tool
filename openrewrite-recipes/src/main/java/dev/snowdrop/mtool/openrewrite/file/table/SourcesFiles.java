@@ -22,22 +22,22 @@ import org.openrewrite.Recipe;
 
 public class SourcesFiles extends DataTable<SourcesFiles.Row> {
 
-	public SourcesFiles(Recipe recipe) {
-		super(recipe, "Source files that matched", "Source files that matched some criteria.");
-	}
+    public SourcesFiles(Recipe recipe) {
+        super(recipe, "Source files that matched", "Source files that matched some criteria.");
+    }
 
-	@Value
-	public static class Row {
-		@Column(displayName = "Match ID", description = "ID of the matching tool used to reconcile the information.")
-		String matchId;
+    @Value
+    public static class Row {
+        @Column(displayName = "Match ID", description = "ID of the matching tool used to reconcile the information.")
+        String matchId;
 
-		@Column(displayName = "Source path before the run", description = "The source path of the file before the run.")
-		String sourcePath;
+        @Column(displayName = "Source path before the run", description = "The source path of the file before the run.")
+        String sourcePath;
 
-		@Column(displayName = "LST type", description = "The LST model type that the file is parsed as.")
-		String type;
+        @Column(displayName = "LST type", description = "The LST model type that the file is parsed as.")
+        String type;
 
-		@Column(displayName = "Character encoding", description = "The detected character encoding of the file")
-		String encoding;
-	}
+        @Column(displayName = "Character encoding", description = "The detected character encoding of the file")
+        String encoding;
+    }
 }
