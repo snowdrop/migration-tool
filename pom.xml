@@ -34,6 +34,7 @@
         <quarkus-langchain4j-testing-internal.version>0.20.3</quarkus-langchain4j-testing-internal.version>
         <quarkus-langchain4j.version>1.8.4</quarkus-langchain4j.version>
         <quarkus.platform.version>3.31.3</quarkus.platform.version>
+        <quarkus-wiremock.version>1.6.1</quarkus-wiremock.version>
         <rewrite-client.version>0.3.4</rewrite-client.version>
         <spring-boot.version>4.0.2</spring-boot.version>
 
@@ -183,6 +184,11 @@
                 <groupId>io.quarkiverse.langchain4j</groupId>
                 <artifactId>quarkus-langchain4j-testing-internal</artifactId>
                 <version>${quarkus-langchain4j-testing-internal.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkiverse.wiremock</groupId>
+                <artifactId>quarkus-wiremock</artifactId>
+                <version>${quarkus-wiremock.version}</version>
             </dependency>
 
             <!-- Spring Boot -->

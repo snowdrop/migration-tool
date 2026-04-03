@@ -40,10 +40,10 @@
             <artifactId>quarkus-langchain4j-testing-internal</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Override the version of wiremock able to work with Quarkus 3.33 as the class : GlobalDevServicesConfig is now removed -->
         <dependency>
             <groupId>io.quarkiverse.wiremock</groupId>
             <artifactId>quarkus-wiremock</artifactId>
-            <version>1.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
