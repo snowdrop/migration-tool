@@ -2,12 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>dev.snowdrop.mtool</groupId>
+        <groupId>dev.snowdrop.mtool.ai</groupId>
         <artifactId>vertex-ai-anthropic-parent</artifactId>
         <version>1.0.5-SNAPSHOT</version>
     </parent>
     <artifactId>vertex-ai-anthropic</artifactId>
     <name>Migration Tool :: AI providers :: Quarkus Langchain4j :: Vertex AI Anthropic - Runtime</name>
+    <packaging>jar</packaging>
+
     <dependencies>
         <!-- Quarkus -->
         <dependency>
