@@ -84,6 +84,8 @@ public abstract class VertexAiBaseChatModel implements ChatModel {
                 .toolChoice(getOrDefault(this.toolChoice, chatRequest.toolChoice()))
                 .strict(getOrDefault(this.strict, false))
                 .includeThoughts(getOrDefault(this.includeThoughts, false))
+                .thinkingType(getOrDefault(this.thinkingType, "enabled"))
+                .thinkingBudgetTokens(getOrDefault(this.thinkingBudgetTokens, 1024))
                 .build();
 
         if (logRequests) {
