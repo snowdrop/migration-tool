@@ -26,66 +26,66 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ShouldMatchJavaClassTest extends BaseRulesTest {
 
-	private CodeScannerService codeScannerService;
-	private Config config;
+    private CodeScannerService codeScannerService;
+    private Config config;
 
-	// TODO: Find a better way to handle: java.nio.file.DirectoryNotEmptyException: /tmp/junit-7245911607764761866
-	@TempDir(cleanup = CleanupMode.NEVER)
-	Path tempDir;
+    // TODO: Find a better way to handle: java.nio.file.DirectoryNotEmptyException: /tmp/junit-7245911607764761866
+    @TempDir(cleanup = CleanupMode.NEVER)
+    Path tempDir;
 
-	Path rulesPath;
-	String jdtls;
+    Path rulesPath;
+    String jdtls;
 
-	@BeforeEach
-	void setUp() throws Exception {
-		// Copy the code of the project to analyze within the temp dir
-		String applicationToScan = "spring-boot-todo-app";
-		Path destinationPath = tempDir.resolve(applicationToScan);
-		copyFolder(applicationToScan, destinationPath);
+    @BeforeEach
+    void setUp() throws Exception {
+        // Copy the code of the project to analyze within the temp dir
+        String applicationToScan = "spring-boot-todo-app";
+        Path destinationPath = tempDir.resolve(applicationToScan);
+        copyFolder(applicationToScan, destinationPath);
 
-		// Copy the rules to be evaluated the temp dir
-		String cookBook = "test-rules";
-		rulesPath = tempDir.resolve(cookBook);
-		copyFolder(cookBook, rulesPath);
+        // Copy the rules to be evaluated the temp dir
+        String cookBook = "test-rules";
+        rulesPath = tempDir.resolve(cookBook);
+        copyFolder(cookBook, rulesPath);
 
-		// Copy the jdt-ls server
-		jdtls = "jdt/konveyor-jdtls";
-		copyFolder(jdtls, tempDir.resolve(jdtls));
+        // Copy the jdt-ls server
+        jdtls = "jdt/konveyor-jdtls";
+        copyFolder(jdtls, tempDir.resolve(jdtls));
 
-		// Configure the test with the parameters
-		String jdtls = tempDir.resolve("jdt").toString();
-		config = createTestConfig(destinationPath, rulesPath, jdtls);
+        // Configure the test with the parameters
+        String jdtls = tempDir.resolve("jdt").toString();
+        config = createTestConfig(destinationPath, rulesPath, jdtls);
 
-		ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
-		codeScannerService = new CodeScannerService(config, scanCommandExecutor);
-	}
+        ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
+        codeScannerService = new CodeScannerService(config, scanCommandExecutor);
+    }
 
-	@ParameterizedTest
-	@CsvSource({"simple-query/java-class-jdtls.yaml"})
-	void shouldMatchJavaClassWithScannerJdtLs(String ruleSubPath) throws IOException {
-		// Given a path, got the rule to be processed
-		List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
+    @ParameterizedTest
+    @CsvSource({ "simple-query/java-class-jdtls.yaml" })
+    void shouldMatchJavaClassWithScannerJdtLs(String ruleSubPath) throws IOException {
+        // Given a path, got the rule to be processed
+        List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
-		// Process the rule
-		Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        // Process the rule
+        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
 
-		// Then
-		assertNotNull(result);
-		// Should find from the CSV file the rule-id string
-		assertEquals(1, result.get("java-class-taskcontroller-found").size());
+        // Then
+        assertNotNull(result);
+        // Should find from the CSV file the rule-id string
+        assertEquals(1, result.get("java-class-taskcontroller-found").size());
 
-		Match match = result.get("java-class-taskcontroller-found").get(0);
-		assertNotNull(match);
+        Match match = result.get("java-class-taskcontroller-found").get(0);
+        assertNotNull(match);
 
-		@SuppressWarnings("unchecked")
-		List<SymbolInformation> symbols = (ArrayList<SymbolInformation>) match.result();
-		assertEquals(1, symbols.size());
+        @SuppressWarnings("unchecked")
+        List<SymbolInformation> symbols = (ArrayList<SymbolInformation>) match.result();
+        assertEquals(1, symbols.size());
 
-		SymbolInformation si = symbols.getFirst();
-		assertNotNull(si);
+        SymbolInformation si = symbols.getFirst();
+        assertNotNull(si);
 
-		assertEquals("TaskController", si.getName());
-		assertEquals("Class", si.getKind().name());
-	}
+        assertEquals("TaskController", si.getName());
+        assertEquals("Class", si.getKind().name());
+    }
 
 }

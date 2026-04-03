@@ -14,25 +14,29 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
         <maven.compiler.release>21</maven.compiler.release>
 
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.version>3.31.3</quarkus.platform.version>
         <quarkus.build.skip>false</quarkus.build.skip>
 
-        <openrewrite-recipe-bom.version>3.24.0</openrewrite-recipe-bom.version>
-        <spring-boot.version>4.0.2</spring-boot.version>
-        <org.eclipse.lsp4j.version>0.24.0</org.eclipse.lsp4j.version>
-        <lombok.version>1.18.42</lombok.version>
-        <gson.version>2.13.2</gson.version>
         <ascii-table.version>1.9.0</ascii-table.version>
+        <assertj.version>3.27.7</assertj.version>
+        <gson.version>2.13.2</gson.version>
         <jackson.version>2.18.0</jackson.version>
+        <langchain4j-anthropic.version>1.12.2</langchain4j-anthropic.version>
+        <lombok.version>1.18.42</lombok.version>
+        <org.eclipse.lsp4j.version>0.24.0</org.eclipse.lsp4j.version>
+        <openrewrite-recipe-bom.version>3.24.0</openrewrite-recipe-bom.version>
         <opencsv.version>5.12.0</opencsv.version>
+        <quarkus-langchain4j-testing-internal.version>0.20.3</quarkus-langchain4j-testing-internal.version>
+        <quarkus-langchain4j.version>1.8.4</quarkus-langchain4j.version>
+        <quarkus.platform.version>3.31.3</quarkus.platform.version>
         <rewrite-client.version>0.3.4</rewrite-client.version>
+        <spring-boot.version>4.0.2</spring-boot.version>
 
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-formatter-plugin.version>2.29.0</maven-formatter-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
@@ -44,8 +48,7 @@
         <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
 
         <skipITs>true</skipITs>
-        <formatterStyleFile>${project.parent.basedir}/formatter-config.xml</formatterStyleFile>
-
+        <formatterStyleFile>eclipse-format.xml</formatterStyleFile>
     </properties>
 
     <modules>
@@ -166,7 +169,7 @@
         <!-- Testing -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
+            <artifactId>quarkus-junit</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- The RewriteTest class needed for testing recipes -->
@@ -180,6 +183,18 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>net.revelc.code.formatter</groupId>
+                    <artifactId>formatter-maven-plugin</artifactId>
+                    <version>${maven-formatter-plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>io.quarkus</groupId>
+                            <artifactId>quarkus-ide-config</artifactId>
+                            <version>${quarkus.platform.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
                 <plugin>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>

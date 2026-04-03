@@ -27,91 +27,93 @@ import java.util.List;
  */
 public class RepositoryModelResolver implements ModelResolver {
 
-	private final RepositorySystem repoSystem;
-	private final DefaultRepositorySystemSession session;
-	private final List<RemoteRepository> repositories;
+    private final RepositorySystem repoSystem;
+    private final DefaultRepositorySystemSession session;
+    private final List<RemoteRepository> repositories;
 
-	public RepositoryModelResolver() {
-		this.repoSystem = newRepositorySystem();
-		this.session = newRepositorySystemSession(repoSystem);
-		this.repositories = List
-				.of(new RemoteRepository.Builder("central", "default", "https://repo.maven.apache.org/maven2").build());
-	}
+    public RepositoryModelResolver() {
+        this.repoSystem = newRepositorySystem();
+        this.session = newRepositorySystemSession(repoSystem);
+        this.repositories = List
+                .of(new RemoteRepository.Builder("central", "default", "https://repo.maven.apache.org/maven2").build());
+    }
 
-	// This is a "deep copy" constructor for the resolver
-	private RepositoryModelResolver(RepositoryModelResolver original) {
-		this.repoSystem = original.repoSystem;
-		this.session = original.session;
-		this.repositories = original.repositories;
-	}
+    // This is a "deep copy" constructor for the resolver
+    private RepositoryModelResolver(RepositoryModelResolver original) {
+        this.repoSystem = original.repoSystem;
+        this.session = original.session;
+        this.repositories = original.repositories;
+    }
 
-	@Override
-	public ModelSource resolveModel(String groupId, String artifactId, String version)
-			throws UnresolvableModelException {
-		try {
-			Artifact pomArtifact = new DefaultArtifact(groupId, artifactId, "pom", version);
-			ArtifactRequest request = new ArtifactRequest(pomArtifact, repositories, null);
-			ArtifactResult result = repoSystem.resolveArtifact(session, request);
-			return new FileModelSource(result.getArtifact().getFile());
-		} catch (Exception e) {
-			throw new UnresolvableModelException(e.getMessage(), groupId, artifactId, version, e);
-		}
-	}
+    @Override
+    public ModelSource resolveModel(String groupId, String artifactId, String version)
+            throws UnresolvableModelException {
+        try {
+            Artifact pomArtifact = new DefaultArtifact(groupId, artifactId, "pom", version);
+            ArtifactRequest request = new ArtifactRequest(pomArtifact, repositories, null);
+            ArtifactResult result = repoSystem.resolveArtifact(session, request);
+            return new FileModelSource(result.getArtifact().getFile());
+        } catch (Exception e) {
+            throw new UnresolvableModelException(e.getMessage(), groupId, artifactId, version, e);
+        }
+    }
 
-	@Override
-	public ModelSource resolveModel(Parent parent) throws UnresolvableModelException {
-		// This resolves the parent POM
-		return resolveModel(parent.getGroupId(), parent.getArtifactId(), parent.getVersion());
-	}
+    @Override
+    public ModelSource resolveModel(Parent parent) throws UnresolvableModelException {
+        // This resolves the parent POM
+        return resolveModel(parent.getGroupId(), parent.getArtifactId(), parent.getVersion());
+    }
 
-	@Override
-	public ModelSource resolveModel(Dependency dependency) throws UnresolvableModelException {
-		return null;
-	}
+    @Override
+    public ModelSource resolveModel(Dependency dependency) throws UnresolvableModelException {
+        return null;
+    }
 
-	// These methods are required by the interface but we don't need them
-	// for this simple case.
-	@Override
-	public void addRepository(Repository repository) throws InvalidRepositoryException {
-		// no-op
-	}
+    // These methods are required by the interface but we don't need them
+    // for this simple case.
+    @Override
+    public void addRepository(Repository repository) throws InvalidRepositoryException {
+        // no-op
+    }
 
-	@Override
-	public void addRepository(Repository repository, boolean replace) throws InvalidRepositoryException {
-		// no-op
-	}
+    @Override
+    public void addRepository(Repository repository, boolean replace) throws InvalidRepositoryException {
+        // no-op
+    }
 
-	@Override
-	public ModelResolver newCopy() {
-		return new RepositoryModelResolver(this);
-	}
+    @Override
+    public ModelResolver newCopy() {
+        return new RepositoryModelResolver(this);
+    }
 
-	private RepositorySystem newRepositorySystem() {
-		/*DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
-		locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
-		locator.addService(TransporterFactory.class, HttpTransporterFactory.class);
-		return locator.getService(RepositorySystem.class);*/
-		RepositorySystemSupplier supplier = new RepositorySystemSupplier();
-		return supplier.get();
-	}
+    private RepositorySystem newRepositorySystem() {
+        /*
+         * DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
+         * locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
+         * locator.addService(TransporterFactory.class, HttpTransporterFactory.class);
+         * return locator.getService(RepositorySystem.class);
+         */
+        RepositorySystemSupplier supplier = new RepositorySystemSupplier();
+        return supplier.get();
+    }
 
-	private DefaultRepositorySystemSession newRepositorySystemSession(RepositorySystem system) {
-		DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
-		String userHome = System.getProperty("user.home");
-		LocalRepository localRepo = new LocalRepository(userHome + "/.m2/repository");
-		session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
-		return session;
-	}
+    private DefaultRepositorySystemSession newRepositorySystemSession(RepositorySystem system) {
+        DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
+        String userHome = System.getProperty("user.home");
+        LocalRepository localRepo = new LocalRepository(userHome + "/.m2/repository");
+        session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
+        return session;
+    }
 
-	public RepositorySystem getRepoSystem() {
-		return repoSystem;
-	}
+    public RepositorySystem getRepoSystem() {
+        return repoSystem;
+    }
 
-	public DefaultRepositorySystemSession getSession() {
-		return session;
-	}
+    public DefaultRepositorySystemSession getSession() {
+        return session;
+    }
 
-	public List<RemoteRepository> getRepositories() {
-		return repositories;
-	}
+    public List<RemoteRepository> getRepositories() {
+        return repositories;
+    }
 }

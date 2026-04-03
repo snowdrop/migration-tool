@@ -1,6 +1,6 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
 //DEPS io.quarkus:quarkus-picocli:3.31.3
-//DEPS io.quarkiverse.langchain4j:quarkus-langchain4j-vertex-ai-models:999-SNAPSHOT
+//DEPS dev.snowdrop.mtool:vertex-ai-anthropic:1.0.5-SNAPSHOT
 
 import io.quarkiverse.langchain4j.vertexai.runtime.models.VertexAiChatModel;
 import picocli.CommandLine;

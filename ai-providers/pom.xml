@@ -14,11 +14,8 @@
     <name>Migration Tool :: AI providers :: Parent</name>
     <packaging>pom</packaging>
 
-    <properties>
-        <formatterStyleFile>${project.parent.basedir}/../formatter-config.xml</formatterStyleFile>
-    </properties>
-
     <modules>
+        <module>vertex-ai-anthropic</module>
         <module>vertex-ai-examples</module>
     </modules>
 

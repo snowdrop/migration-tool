@@ -50,9 +50,9 @@
             <artifactId>quarkus-picocli</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-vertex-ai-models</artifactId>
-            <version>999-SNAPSHOT</version>
+            <groupId>dev.snowdrop.mtool</groupId>
+            <artifactId>vertex-ai-anthropic</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- AI -->
