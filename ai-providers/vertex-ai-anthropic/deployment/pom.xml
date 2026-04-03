@@ -21,7 +21,6 @@
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
             <artifactId>quarkus-langchain4j-core-deployment</artifactId>
-            <version>${quarkus-langchain4j.version}</version>
         </dependency>
 
         <!-- Quarkus -->
@@ -39,13 +38,11 @@
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
             <artifactId>quarkus-langchain4j-testing-internal</artifactId>
-            <version>${quarkus-langchain4j-testing-internal.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

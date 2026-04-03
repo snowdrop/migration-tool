@@ -25,19 +25,16 @@
         <dependency>
             <groupId>com.google.auth</groupId>
             <artifactId>google-auth-library-oauth2-http</artifactId>
-            <version>1.43.0</version>
         </dependency>
 
         <!-- Quarkus and Langchain4j -->
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
             <artifactId>quarkus-langchain4j-core</artifactId>
-            <version>${quarkus-langchain4j.version}</version>
         </dependency>
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
             <artifactId>quarkus-langchain4j-jaxrs-client</artifactId>
-            <version>${quarkus-langchain4j.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -45,7 +42,6 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-anthropic</artifactId>
-            <version>${langchain4j-anthropic.version}</version>
         </dependency>
 
         <!-- testing -->
@@ -62,7 +58,6 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

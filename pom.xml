@@ -23,8 +23,10 @@
         <ascii-table.version>1.9.0</ascii-table.version>
         <assertj.version>3.27.7</assertj.version>
         <gson.version>2.13.2</gson.version>
+        <google-auth-library-oauth2-http.version>1.43.0</google-auth-library-oauth2-http.version>
         <jackson.version>2.18.0</jackson.version>
         <langchain4j-anthropic.version>1.12.2</langchain4j-anthropic.version>
+        <langchain4j-vertex-ai-anthropic.version>1.12.2-beta22</langchain4j-vertex-ai-anthropic.version>
         <lombok.version>1.18.42</lombok.version>
         <org.eclipse.lsp4j.version>0.24.0</org.eclipse.lsp4j.version>
         <openrewrite-recipe-bom.version>3.24.0</openrewrite-recipe-bom.version>
@@ -130,13 +132,13 @@
                 <artifactId>ascii-table</artifactId>
                 <version>${ascii-table.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>com.opencsv</groupId>
                 <artifactId>opencsv</artifactId>
                 <version>${opencsv.version}</version>
             </dependency>
 
+            <!-- Snowdrop openrewrite recipes -->
             <dependency>
                 <groupId>dev.snowdrop.openrewrite</groupId>
                 <artifactId>service</artifactId>
@@ -144,6 +146,46 @@
                 <version>${rewrite-client.version}</version>
             </dependency>
 
+            <!-- Google Cloud Auth -->
+            <dependency>
+                <groupId>com.google.auth</groupId>
+                <artifactId>google-auth-library-oauth2-http</artifactId>
+                <version>${google-auth-library-oauth2-http.version}</version>
+            </dependency>
+
+            <!-- Quarkus and Langchain4j -->
+            <dependency>
+                <groupId>io.quarkiverse.langchain4j</groupId>
+                <artifactId>quarkus-langchain4j-core</artifactId>
+                <version>${quarkus-langchain4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkiverse.langchain4j</groupId>
+                <artifactId>quarkus-langchain4j-core-deployment</artifactId>
+                <version>${quarkus-langchain4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkiverse.langchain4j</groupId>
+                <artifactId>quarkus-langchain4j-jaxrs-client</artifactId>
+                <version>${quarkus-langchain4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-anthropic</artifactId>
+                <version>${langchain4j-anthropic.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-vertex-ai-anthropic</artifactId>
+                <version>${langchain4j-vertex-ai-anthropic.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkiverse.langchain4j</groupId>
+                <artifactId>quarkus-langchain4j-testing-internal</artifactId>
+                <version>${quarkus-langchain4j-testing-internal.version}</version>
+            </dependency>
+
+            <!-- Spring Boot -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter</artifactId>
@@ -161,6 +203,13 @@
                 <artifactId>spring-boot-autoconfigure</artifactId>
                 <version>${spring-boot.version}</version>
                 <scope>test</scope>
+            </dependency>
+
+            <!-- Testing -->
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
