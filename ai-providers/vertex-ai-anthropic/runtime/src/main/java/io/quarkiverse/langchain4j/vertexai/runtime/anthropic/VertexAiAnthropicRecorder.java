@@ -16,7 +16,7 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.DisabledChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import io.quarkiverse.langchain4j.runtime.NamedConfigUtil;
-import io.quarkiverse.langchain4j.vertexai.runtime.anthropic.config.LangChain4jVertexAiConfig;
+import io.quarkiverse.langchain4j.vertexai.runtime.anthropic.config.VertexAiAnthropicConfig;
 import io.quarkus.arc.SyntheticCreationalContext;
 import io.quarkus.runtime.RuntimeValue;
 import io.quarkus.runtime.annotations.Recorder;
@@ -28,69 +28,68 @@ public class VertexAiAnthropicRecorder {
     private static final TypeLiteral<Instance<ChatModelListener>> CHAT_MODEL_LISTENER_TYPE_LITERAL = new TypeLiteral<>() {
     };
 
-    private final RuntimeValue<LangChain4jVertexAiConfig> runtimeConfig;
+    private final RuntimeValue<VertexAiAnthropicConfig> runtimeConfig;
 
-    public VertexAiAnthropicRecorder(RuntimeValue<LangChain4jVertexAiConfig> runtimeConfig) {
+    public VertexAiAnthropicRecorder(RuntimeValue<VertexAiAnthropicConfig> runtimeConfig) {
         this.runtimeConfig = runtimeConfig;
     }
 
     public Function<SyntheticCreationalContext<ChatModel>, ChatModel> chatModel(String configName) {
-        var vertexAiConfig = correspondingVertexAiConfig(configName);
+        var aiConfig = getDefaultOrNamedConfig(configName);
 
-        if (vertexAiConfig.enableIntegration()) {
-            var chatModelConfig = vertexAiConfig.chatModel();
+        if (aiConfig.enableIntegration()) {
+            var chatModelConfig = aiConfig.chatModel();
 
             // The base-url is calculated according to the location provided: https://<location>-aiplatform.googleapis.com
             // and should not be provided except for testing purposes
-            Optional<String> baseUrl = vertexAiConfig.baseUrl();
+            Optional<String> baseUrl = aiConfig.baseUrl();
 
-            String location = vertexAiConfig.location();
+            String location = aiConfig.location();
             if (location.isEmpty()) {
                 throw new ConfigValidationException(createConfigProblems("location", configName));
             }
 
-            String projectId = vertexAiConfig.projectId();
+            String projectId = aiConfig.projectId();
             if (projectId.isEmpty()) {
                 throw new ConfigValidationException(createConfigProblems("project-id", configName));
             }
 
-            String modelId = vertexAiConfig.modelId();
+            String modelId = aiConfig.modelId();
             if (modelId.isEmpty()) {
                 throw new ConfigValidationException(createConfigProblems("model-id", configName));
             }
 
-            var builder = VertexAiChatModel.builder()
+            var builder = VertexAiAnthropicChatModel.builder()
                     .baseUrl(baseUrl)
                     .projectId(projectId)
                     .location(location)
-                    .publisher(vertexAiConfig.publisher())
+                    .publisher(aiConfig.publisher())
                     .modelId(modelId)
-                    .maxOutputTokens(chatModelConfig.maxOutputTokens())
-                    .logRequests(firstOrDefault(false, chatModelConfig.logRequests(), vertexAiConfig.logRequests()))
-                    .logResponses(firstOrDefault(false, chatModelConfig.logResponses(), vertexAiConfig.logResponses()));
+                    .logRequests(firstOrDefault(false, aiConfig.logRequests()))
+                    .logResponses(firstOrDefault(false, aiConfig.logResponses()));
 
-            vertexAiConfig.proxyHost().ifPresent(host -> {
-                builder.proxy(new Proxy(
-                        Type.valueOf(vertexAiConfig.proxyType()),
-                        new InetSocketAddress(host, vertexAiConfig.proxyPort())));
-            });
+            if (aiConfig.timeout().isPresent()) {
+                builder.timeout(aiConfig.timeout().get());
+            }
 
             if (chatModelConfig.temperature().isPresent()) {
                 builder.temperature(chatModelConfig.temperature().getAsDouble());
             }
-            if (chatModelConfig.topK().isPresent()) {
-                builder.topK(chatModelConfig.topK().getAsInt());
-            }
+
             if (chatModelConfig.topP().isPresent()) {
                 builder.topP(chatModelConfig.topP().getAsDouble());
             }
-            if (chatModelConfig.timeout().isPresent()) {
-                builder.timeout(chatModelConfig.timeout().get());
+
+            if (chatModelConfig.topK().isPresent()) {
+                builder.topK(chatModelConfig.topK().getAsInt());
             }
+
+            builder.topK(chatModelConfig.maxOutputTokens());
 
             if (chatModelConfig.thinking().includeThoughts()) {
                 builder.includeThoughts(true);
-                builder.thinkingBudget(chatModelConfig.thinking().thinkingBudget().get());
+                builder.thinkingBudgetTokens(chatModelConfig.thinking().thinkingBudgetTokens().get());
+                builder.thinkingType(chatModelConfig.thinking().thinkingType());
             }
 
             return new Function<>() {
@@ -111,7 +110,7 @@ public class VertexAiAnthropicRecorder {
         }
     }
 
-    private LangChain4jVertexAiConfig.VertexAiConfig correspondingVertexAiConfig(String configName) {
+    private VertexAiAnthropicConfig.VertexAiConfig getDefaultOrNamedConfig(String configName) {
         return NamedConfigUtil.isDefault(configName) ? runtimeConfig.getValue().defaultConfig()
                 : runtimeConfig.getValue().namedConfig().get(configName);
     }

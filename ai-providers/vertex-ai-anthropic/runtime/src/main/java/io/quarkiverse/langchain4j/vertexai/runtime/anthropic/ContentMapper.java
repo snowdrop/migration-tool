@@ -5,6 +5,7 @@ import static io.quarkiverse.langchain4j.runtime.LangChain4jUtil.chatMessageToTe
 import java.util.*;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.agent.tool.ToolSpecifications;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.anthropic.internal.api.AnthropicCacheType;
 import dev.langchain4j.model.anthropic.internal.api.AnthropicThinking;
@@ -18,18 +19,32 @@ public class ContentMapper {
     private final static String ANTHROPIC_VERSION = "vertex-2023-10-16";
 
     /**
-     * Generate the Request from the list of the chat messages
+     * Generate the Request from the list of the chat messages and VertexAiconfig
      *
      * @param messages the Chat Messages
-     * @param max_tokens the number of max tokens to be used
+     * @param vertexAiConfig
      * @return the GenerateRequest
      */
     public static GenerateRequest map(
             List<ChatMessage> messages,
-            List<ToolSpecification> toolSpecifications,
-            AnthropicThinking thinking,
-            Integer max_tokens,
-            boolean strict) {
+            VertexAiAnthropicConfig vertexAiConfig) {
+
+        // Create the AnthropicThinking if the user requested to see the thoughts !
+        AnthropicThinking anthropicThinking = null;
+        if (vertexAiConfig.includeThoughts) {
+            if (vertexAiConfig.thinkingType != null || vertexAiConfig.thinkingBudgetTokens != null) {
+                anthropicThinking = AnthropicThinking.builder()
+                        .type(vertexAiConfig.thinkingType)
+                        .budgetTokens(vertexAiConfig.thinkingBudgetTokens)
+                        .build();
+            }
+        }
+
+        // Create the ToolSpecifications
+        List<ToolSpecification> toolSpecifications = List.of();
+        if (vertexAiConfig.toolSpecifications != null && !vertexAiConfig.toolSpecifications.isEmpty()) {
+            toolSpecifications = vertexAiConfig.toolSpecifications;
+        }
 
         List<GenerateRequest.Message> requestMessages = new ArrayList<>();
 
@@ -52,8 +67,12 @@ public class ContentMapper {
             }
         }
 
-        return new GenerateRequest(ANTHROPIC_VERSION, max_tokens, requestMessages, toTools(toolSpecifications, strict),
-                thinking);
+        return new GenerateRequest(
+                ANTHROPIC_VERSION,
+                vertexAiConfig.maxOutputTokens,
+                requestMessages,
+                toTools(toolSpecifications, vertexAiConfig.strict),
+                anthropicThinking);
     }
 
     public static List<AnthropicTool> toTools(List<ToolSpecification> toolSpecifications, boolean strict) {

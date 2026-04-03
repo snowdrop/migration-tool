@@ -26,14 +26,6 @@ public interface ChatModelConfig {
     OptionalDouble temperature();
 
     /**
-     * Maximum number of tokens that can be generated in the response. A token is approximately four characters. 100 tokens
-     * correspond to roughly 60-80 words.
-     * Specify a lower value for shorter responses and a higher value for potentially longer responses.
-     */
-    @WithDefault("8192")
-    Integer maxOutputTokens();
-
-    /**
      * Top-P changes how the model selects tokens for output. Tokens are selected from the most (see top-K) to least probable
      * until the sum of their probabilities equals the top-P value.
      * For example, if tokens A, B, and C have a probability of 0.3, 0.2, and 0.1 and the top-P value is 0.5, then the model
@@ -43,6 +35,7 @@ public interface ChatModelConfig {
      * <p>
      * Range: 0.0 - 1.0
      */
+    @WithDefault("${quarkus.langchain4j.top-p}")
     OptionalDouble topP();
 
     /**
@@ -57,26 +50,16 @@ public interface ChatModelConfig {
      * <p>
      * Range: 1-40
      */
+    @WithDefault("${quarkus.langchain4j.top-k}")
     OptionalInt topK();
 
     /**
-     * Whether chat model requests should be logged
+     * Maximum number of tokens that can be generated in the response. A token is approximately four characters. 100 tokens
+     * correspond to roughly 60-80 words.
+     * Specify a lower value for shorter responses and a higher value for potentially longer responses.
      */
-    @ConfigDocDefault("false")
-    Optional<Boolean> logRequests();
-
-    /**
-     * Whether chat model responses should be logged
-     */
-    @ConfigDocDefault("false")
-    Optional<Boolean> logResponses();
-
-    /**
-     * Global timeout for requests to Vertex AI APIs
-     */
-    @ConfigDocDefault("10s")
-    @WithDefault("${quarkus.langchain4j.vertexai.timeout}")
-    Optional<Duration> timeout();
+    @WithDefault("8192")
+    Integer maxOutputTokens();
 
     /**
      * Thought related configuration
@@ -102,7 +85,14 @@ public interface ChatModelConfig {
          * complexity of the request.
          */
         @WithDefault("1024")
-        Optional<Integer> thinkingBudget();
+        Optional<Integer> thinkingBudgetTokens();
+
+        /**
+         * Thinking type mode
+         * See : https://platform.claude.com/docs/en/build-with-claude/extended-thinking
+         */
+        @WithDefault("enabled")
+        String thinkingType();
     }
 
 }

@@ -17,8 +17,8 @@ import io.smallrye.config.WithDefaults;
 import io.smallrye.config.WithParentName;
 
 @ConfigRoot(phase = RUN_TIME)
-@ConfigMapping(prefix = "quarkus.langchain4j.vertexai")
-public interface LangChain4jVertexAiConfig {
+@ConfigMapping(prefix = "quarkus.langchain4j.vertexai.anthropic")
+public interface VertexAiAnthropicConfig {
     /**
      * Default model config
      */
@@ -79,23 +79,6 @@ public interface LangChain4jVertexAiConfig {
         Boolean enableIntegration();
 
         /**
-         * The Proxy type
-         */
-        @WithDefault("HTTP")
-        String proxyType();
-
-        /**
-         * The Proxy host
-         */
-        Optional<String> proxyHost();
-
-        /**
-         * The Proxy port
-         */
-        @WithDefault("3128")
-        Integer proxyPort();
-
-        /**
          * Whether the Vertex AI client should log requests
          */
         @ConfigDocDefault("false")
@@ -110,8 +93,9 @@ public interface LangChain4jVertexAiConfig {
         Optional<Boolean> logResponses();
 
         /**
-         * Timeout for HTTP requests issued to the Vertex AI API
+         * Global timeout for requests to Vertex AI APIs
          */
+        @ConfigDocDefault("10s")
         @WithDefault("${quarkus.langchain4j.timeout}")
         Optional<Duration> timeout();
 

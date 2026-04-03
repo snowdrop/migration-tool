@@ -10,27 +10,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.model.chat.request.ToolChoice;
 import org.jboss.resteasy.reactive.client.api.LoggingScope;
 
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import io.quarkus.rest.client.reactive.QuarkusRestClientBuilder;
 
-public class VertexAiChatModel extends VertexAiBaseChatModel {
+public class VertexAiAnthropicChatModel extends VertexAiBaseChatModel {
 
     private final VertexAiRestApi.ApiMetadata apiMetadata;
     private final VertexAiRestApi restApi;
 
-    public VertexAiChatModel(Builder builder) {
+    public VertexAiAnthropicChatModel(Builder builder) {
         super(builder.temperature,
-                builder.maxOutputTokens,
-                builder.topK,
                 builder.topP,
+                builder.topK,
+                builder.maxOutputTokens,
+                builder.stopSequences,
+                builder.toolSpecifications,
+                builder.toolChoice,
                 builder.logRequests,
                 builder.logResponses,
                 builder.strict,
                 builder.timeout,
                 builder.includeThoughts,
-                builder.thinkingBudget);
+                builder.thinkingBudgetTokens,
+                builder.thinkingType);
 
         this.apiMetadata = VertexAiRestApi.ApiMetadata
                 .builder()
@@ -45,17 +51,6 @@ public class VertexAiChatModel extends VertexAiBaseChatModel {
                     .baseUri(new URI(baseUrl))
                     .connectTimeout(builder.timeout.toSeconds(), TimeUnit.SECONDS)
                     .readTimeout(builder.timeout.toSeconds(), TimeUnit.SECONDS);
-
-            if (builder.proxy != null) {
-                if (builder.proxy.type() != Proxy.Type.HTTP) {
-                    throw new IllegalArgumentException("Only HTTP type proxy is supported");
-                }
-                if (!(builder.proxy.address() instanceof InetSocketAddress)) {
-                    throw new IllegalArgumentException("Unsupported proxy type");
-                }
-                InetSocketAddress socketAddress = (InetSocketAddress) builder.proxy.address();
-                restApiBuilder.proxyAddress(socketAddress.getHostName(), socketAddress.getPort());
-            }
 
             if (builder.logRequests || builder.logResponses) {
                 restApiBuilder.loggingScope(LoggingScope.REQUEST_RESPONSE);
@@ -86,18 +81,24 @@ public class VertexAiChatModel extends VertexAiBaseChatModel {
         private String location;
         private String modelId;
         private String publisher;
+
         private Double temperature;
-        private Integer maxOutputTokens;
-        private Integer topK;
         private Double topP;
+        private Integer topK;
+        private Integer maxOutputTokens;
+        public List<String> stopSequences;
+        public List<ToolSpecification> toolSpecifications;
+        public ToolChoice toolChoice;
+
         private Duration timeout = Duration.ofSeconds(10);
         private Boolean logRequests = false;
         private Boolean logResponses = false;
         private List<ChatModelListener> listeners = Collections.emptyList();
-        private Proxy proxy;
         private Boolean strict = false;
+
         private Boolean includeThoughts = false;
-        private Integer thinkingBudget;
+        private Integer thinkingBudgetTokens;
+        private String thinkingType;
 
         public Builder baseUrl(Optional<String> baseUrl) {
             this.baseUrl = baseUrl;
@@ -129,8 +130,8 @@ public class VertexAiChatModel extends VertexAiBaseChatModel {
             return this;
         }
 
-        public Builder maxOutputTokens(Integer maxOutputTokens) {
-            this.maxOutputTokens = maxOutputTokens;
+        public Builder topP(Double topP) {
+            this.topP = topP;
             return this;
         }
 
@@ -139,8 +140,23 @@ public class VertexAiChatModel extends VertexAiBaseChatModel {
             return this;
         }
 
-        public Builder topP(Double topP) {
-            this.topP = topP;
+        public Builder maxOutputTokens(Integer maxOutputTokens) {
+            this.maxOutputTokens = maxOutputTokens;
+            return this;
+        }
+
+        public Builder stopSequences(List<String> stopSequences) {
+            this.stopSequences = stopSequences;
+            return this;
+        }
+
+        public Builder toolSpecifications(List<ToolSpecification> toolSpecifications) {
+            this.toolSpecifications = toolSpecifications;
+            return this;
+        }
+
+        public Builder toolChoice(ToolChoice toolChoice) {
+            this.toolChoice = toolChoice;
             return this;
         }
 
@@ -169,8 +185,13 @@ public class VertexAiChatModel extends VertexAiBaseChatModel {
             return this;
         }
 
-        public Builder thinkingBudget(Integer thinkingBudget) {
-            this.thinkingBudget = thinkingBudget;
+        public Builder thinkingBudgetTokens(Integer thinkingBudgetTokens) {
+            this.thinkingBudgetTokens = thinkingBudgetTokens;
+            return this;
+        }
+
+        public Builder thinkingType(String thinkingType) {
+            this.thinkingType = thinkingType;
             return this;
         }
 
@@ -179,13 +200,8 @@ public class VertexAiChatModel extends VertexAiBaseChatModel {
             return this;
         }
 
-        public Builder proxy(Proxy proxy) {
-            this.proxy = proxy;
-            return this;
-        }
-
-        public VertexAiChatModel build() {
-            return new VertexAiChatModel(this);
+        public VertexAiAnthropicChatModel build() {
+            return new VertexAiAnthropicChatModel(this);
         }
     }
 }

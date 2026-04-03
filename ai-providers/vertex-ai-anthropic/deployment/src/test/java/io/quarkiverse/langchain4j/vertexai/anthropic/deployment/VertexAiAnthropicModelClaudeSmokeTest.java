@@ -24,7 +24,7 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import io.quarkiverse.langchain4j.auth.ModelAuthProvider;
 import io.quarkiverse.langchain4j.testing.internal.WiremockAware;
-import io.quarkiverse.langchain4j.vertexai.runtime.anthropic.VertexAiChatModel;
+import io.quarkiverse.langchain4j.vertexai.runtime.anthropic.VertexAiAnthropicChatModel;
 import io.quarkus.arc.ClientProxy;
 import io.quarkus.test.QuarkusUnitTest;
 
@@ -36,17 +36,17 @@ public class VertexAiAnthropicModelClaudeSmokeTest extends WiremockAware {
     @RegisterExtension
     static final QuarkusUnitTest unitTest = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class))
-            .overrideRuntimeConfigKey("quarkus.langchain4j.vertexai.base-url", WiremockAware.wiremockUrlForConfig())
-            .overrideRuntimeConfigKey("quarkus.langchain4j.vertexai.log-requests", "true")
-            .overrideRuntimeConfigKey("quarkus.langchain4j.vertexai.chat-model.location", "dummy")
-            .overrideRuntimeConfigKey("quarkus.langchain4j.vertexai.chat-model.project-id", "dummy");
+            .overrideRuntimeConfigKey("quarkus.langchain4j.log-requests", "true")
+            .overrideRuntimeConfigKey("quarkus.langchain4j.vertexai.anthropic.base-url", WiremockAware.wiremockUrlForConfig())
+            .overrideRuntimeConfigKey("quarkus.langchain4j.vertexai.anthropic.location", "dummy")
+            .overrideRuntimeConfigKey("quarkus.langchain4j.vertexai.anthropic.project-id", "dummy");
 
     @Inject
     ChatModel chatLanguageModel;
 
     @Test
     void test() {
-        assertThat(ClientProxy.unwrap(chatLanguageModel)).isInstanceOf(VertexAiChatModel.class);
+        assertThat(ClientProxy.unwrap(chatLanguageModel)).isInstanceOf(VertexAiAnthropicChatModel.class);
 
         wiremock().register(
                 post(urlEqualTo(

@@ -2,7 +2,7 @@
 //DEPS io.quarkus:quarkus-picocli:3.31.3
 //DEPS dev.snowdrop.mtool.ai:vertex-ai-anthropic:1.0.5-SNAPSHOT
 
-import io.quarkiverse.langchain4j.vertexai.runtime.anthropic.VertexAiChatModel;
+import io.quarkiverse.langchain4j.vertexai.runtime.anthropic.VertexAiAnthropicChatModel;
 import picocli.CommandLine;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -32,7 +32,7 @@ public class QuarkusVertexAiAnthropic implements Runnable {
     @Override
     public void run() {
         System.out.println("Starting AI ...");
-        VertexAiChatModel chatModel = VertexAiChatModel.builder().projectId(PROJECT_ID).location(LOCATION)
+        VertexAiAnthropicChatModel chatModel = VertexAiAnthropicChatModel.builder().projectId(PROJECT_ID).location(LOCATION)
                 .modelId(MODEL_NAME).publisher(PUBLISHER).logRequests(true).logResponses(true).maxOutputTokens(1024)
                 .timeout(Duration.ofSeconds(30)).build();
 
