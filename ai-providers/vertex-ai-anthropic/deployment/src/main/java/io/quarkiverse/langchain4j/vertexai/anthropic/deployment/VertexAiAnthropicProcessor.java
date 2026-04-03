@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.vertexai.models.deployment;
+package io.quarkiverse.langchain4j.vertexai.anthropic.deployment;
 
 import static io.quarkiverse.langchain4j.deployment.LangChain4jDotNames.*;
 
@@ -17,7 +17,7 @@ import io.quarkiverse.langchain4j.deployment.items.ChatModelProviderCandidateBui
 import io.quarkiverse.langchain4j.deployment.items.EmbeddingModelProviderCandidateBuildItem;
 import io.quarkiverse.langchain4j.deployment.items.SelectedChatModelProviderBuildItem;
 import io.quarkiverse.langchain4j.runtime.NamedConfigUtil;
-import io.quarkiverse.langchain4j.vertexai.runtime.models.VertexAiModelsRecorder;
+import io.quarkiverse.langchain4j.vertexai.runtime.anthropic.VertexAiAnthropicRecorder;
 import io.quarkus.arc.deployment.SyntheticBeanBuildItem;
 import io.quarkus.deployment.Capabilities;
 import io.quarkus.deployment.Capability;
@@ -30,10 +30,10 @@ import io.quarkus.resteasy.reactive.spi.MessageBodyReaderOverrideBuildItem;
 import io.quarkus.resteasy.reactive.spi.MessageBodyWriterOverrideBuildItem;
 import io.smallrye.config.Priorities;
 
-public class VertexAiModelsProcessor {
+public class VertexAiAnthropicProcessor {
 
-    private static final String FEATURE = "langchain4j-vertexai-models";
-    private static final String PROVIDER = "vertexai-models";
+    private static final String FEATURE = "langchain4j-vertexai-anthropic";
+    private static final String PROVIDER = "vertexai-anthropic";
 
     @BuildStep
     FeatureBuildItem feature() {
@@ -52,7 +52,7 @@ public class VertexAiModelsProcessor {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @BuildStep
     @Record(ExecutionTime.RUNTIME_INIT)
-    void generateBeans(VertexAiModelsRecorder recorder, List<SelectedChatModelProviderBuildItem> selectedChatItem,
+    void generateBeans(VertexAiAnthropicRecorder recorder, List<SelectedChatModelProviderBuildItem> selectedChatItem,
             BuildProducer<SyntheticBeanBuildItem> beanProducer) {
         for (var selected : selectedChatItem) {
             if (PROVIDER.equals(selected.getProvider())) {

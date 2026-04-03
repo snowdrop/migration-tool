@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.vertexai.runtime.models;
+package io.quarkiverse.langchain4j.vertexai.runtime.anthropic;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.StreamSupport.stream;

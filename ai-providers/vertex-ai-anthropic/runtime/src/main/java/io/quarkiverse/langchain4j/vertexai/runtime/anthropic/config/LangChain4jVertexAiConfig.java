@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.vertexai.runtime.models.config;
+package io.quarkiverse.langchain4j.vertexai.runtime.anthropic.config;
 
 import static io.quarkus.runtime.annotations.ConfigPhase.RUN_TIME;
 

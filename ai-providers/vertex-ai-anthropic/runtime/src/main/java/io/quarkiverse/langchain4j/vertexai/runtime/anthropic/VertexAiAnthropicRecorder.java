@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.vertexai.runtime.models;
+package io.quarkiverse.langchain4j.vertexai.runtime.anthropic;
 
 import static io.quarkiverse.langchain4j.runtime.OptionalUtil.firstOrDefault;
 
@@ -16,21 +16,21 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.DisabledChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import io.quarkiverse.langchain4j.runtime.NamedConfigUtil;
-import io.quarkiverse.langchain4j.vertexai.runtime.models.config.LangChain4jVertexAiConfig;
+import io.quarkiverse.langchain4j.vertexai.runtime.anthropic.config.LangChain4jVertexAiConfig;
 import io.quarkus.arc.SyntheticCreationalContext;
 import io.quarkus.runtime.RuntimeValue;
 import io.quarkus.runtime.annotations.Recorder;
 import io.smallrye.config.ConfigValidationException;
 
 @Recorder
-public class VertexAiModelsRecorder {
+public class VertexAiAnthropicRecorder {
 
     private static final TypeLiteral<Instance<ChatModelListener>> CHAT_MODEL_LISTENER_TYPE_LITERAL = new TypeLiteral<>() {
     };
 
     private final RuntimeValue<LangChain4jVertexAiConfig> runtimeConfig;
 
-    public VertexAiModelsRecorder(RuntimeValue<LangChain4jVertexAiConfig> runtimeConfig) {
+    public VertexAiAnthropicRecorder(RuntimeValue<LangChain4jVertexAiConfig> runtimeConfig) {
         this.runtimeConfig = runtimeConfig;
     }
 

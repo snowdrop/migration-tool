@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.vertexai.runtime.models;
+package io.quarkiverse.langchain4j.vertexai.runtime.anthropic;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;

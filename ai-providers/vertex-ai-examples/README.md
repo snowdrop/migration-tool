@@ -32,7 +32,7 @@ mvn quarkus:dev -Dquarkus.args="'Read the ./pom.xml file and tell me if it inclu
 
 ### jbang script
 
-The jbang `QuarkusVertexAIModels` is also a Quarkus & Picocli example similar to the previous example but where we have coded some
+The jbang `QuarkusVertexAiAnthropic` is also a Quarkus & Picocli example similar to the previous example but where we have coded some
 messages
 ```java
 AiMessage aiMessage = new AiMessage("You are a java expert");
@@ -41,8 +41,8 @@ UserMessage userMessage = new UserMessage("What is a Java Enum ?");
 
 To launch it, execute this command:
 ```shell
-❯ jbang run ./src/main/java/QuarkusVertexAIModels.java
-[jbang] Building jar for QuarkusVertexAIModels.java...
+❯ jbang run ./src/main/java/QuarkusVertexAiAnthropic.java
+[jbang] Building jar for QuarkusVertexAiAnthropic.java...
 [jbang] Post build with io.quarkus.launcher.JBangIntegration
 [jbang] Quarkus augmentation completed in 837ms
 __  ____  __  _____   ___  __ ____  ______ 
@@ -53,17 +53,17 @@ __  ____  __  _____   ___  __ ____  ______
 2026-03-25 15:21:58,116 INFO  [io.quarkus] (main) Profile prod activated.                                                                                                                                   
 2026-03-25 15:21:58,116 INFO  [io.quarkus] (main) Installed features: [cdi, langchain4j, langchain4j-vertexai-models, picocli, qute, rest-client, rest-client-jackson, smallrye-context-propagation, vertx] 
 Starting AI ...                                                                                                                                                                                             
-2026-03-25 15:21:58,177 INFO  [io.quarkiverse.langchain4j.vertexai.runtime.models.VertexAiBaseChatModel] (main) Request: [UserMessage { name = null, contents = [TextContent { text = "Hi Claude" }], attributes = {} }]                                                                                                                                                                                                
-2026-03-25 15:21:58,854 INFO  [io.quarkiverse.langchain4j.vertexai.runtime.models.VertexAiRestApi$VertxAiClientLogger] (vert.x-eventloop-thread-2) Request:                                                 
+2026-03-25 15:21:58,177 INFO  [io.quarkiverse.langchain4j.vertexai.runtime.anthropic.VertexAiBaseChatModel] (main) Request: [UserMessage { name = null, contents = [TextContent { text = "Hi Claude" }], attributes = {} }]                                                                                                                                                                                                
+2026-03-25 15:21:58,854 INFO  [io.quarkiverse.langchain4j.vertexai.runtime.anthropic.VertexAiRestApi$VertxAiClientLogger] (vert.x-eventloop-thread-2) Request:                                                 
 - method: POST
 - url: https://europe-west1-aiplatform.googleapis.com/v1/projects/itpc-gcp-cp-pe-eng-claude/locations/europe-west1/publishers/anthropic/models/claude-opus-4-6:rawPredict
 - headers: [Authorization: Bearer ya...09], [Content-Type: application/json], [User-Agent: Quarkus REST Client], [content-length: 110]
 - body: {"anthropic_version":"vertex-2023-10-16","max_tokens":1024,"messages":[{"role":"user","content":"Hi Claude"}]}
-2026-03-25 15:22:00,903 INFO  [io.quarkiverse.langchain4j.vertexai.runtime.models.VertexAiRestApi$VertxAiClientLogger] (vert.x-eventloop-thread-2) Response:                                                
+2026-03-25 15:22:00,903 INFO  [io.quarkiverse.langchain4j.vertexai.runtime.anthropic.VertexAiRestApi$VertxAiClientLogger] (vert.x-eventloop-thread-2) Response:                                                
 - status code: 200
 - headers: [content-type: application/json], [x-vertex-ai-internal-prediction-backend: harpoon], [date: Wed, 25 Mar 2026 14:22:00 GMT], [request-id: req_vrtx_011CZPwvaXWt3cGD9r2W9LcV], [Vary: X-Origin], [Vary: Referer], [Server: scaffolding on HTTPServer2], [X-XSS-Protection: 0], [X-Frame-Options: SAMEORIGIN], [X-Content-Type-Options: nosniff], [Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000], [Accept-Ranges: none], [Vary: Origin,Accept-Encoding], [Transfer-Encoding: chunked]                                                                                                                           
 - body: {"model":"claude-opus-4-6","id":"msg_vrtx_01JixAPaKzY8NJ3HE6GPE3ue","type":"message","role":"assistant","content":[{"type":"text","text":"Hi there! How are you doing today? Is there anything I can help you with? 😊"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":9,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":24}}                                                                                                                                                           
-2026-03-25 15:22:00,940 INFO  [io.quarkiverse.langchain4j.vertexai.runtime.models.VertexAiBaseChatModel] (main) Response: ChatResponse { aiMessage = AiMessage { text = "Hi there! How are you doing today? Is there anything I can help you with? 😊", thinking = null, toolExecutionRequests = [], attributes = {} }, metadata = ChatResponseMetadata{id='null', modelName='null', tokenUsage=null, finishReason=null} }                                                                                                                                                                                                          
+2026-03-25 15:22:00,940 INFO  [io.quarkiverse.langchain4j.vertexai.runtime.anthropic.VertexAiBaseChatModel] (main) Response: ChatResponse { aiMessage = AiMessage { text = "Hi there! How are you doing today? Is there anything I can help you with? 😊", thinking = null, toolExecutionRequests = [], attributes = {} }, metadata = ChatResponseMetadata{id='null', modelName='null', tokenUsage=null, finishReason=null} }                                                                                                                                                                                                          
 Hi there! How are you doing today? Is there anything I can help you with? 😊                              
 ```
 

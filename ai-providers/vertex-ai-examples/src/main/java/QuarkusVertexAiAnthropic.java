@@ -2,7 +2,7 @@
 //DEPS io.quarkus:quarkus-picocli:3.31.3
 //DEPS dev.snowdrop.mtool.ai:vertex-ai-anthropic:1.0.5-SNAPSHOT
 
-import io.quarkiverse.langchain4j.vertexai.runtime.models.VertexAiChatModel;
+import io.quarkiverse.langchain4j.vertexai.runtime.anthropic.VertexAiChatModel;
 import picocli.CommandLine;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -10,7 +10,7 @@ import dev.langchain4j.data.message.UserMessage;
 import java.time.Duration;
 
 @CommandLine.Command
-public class QuarkusVertexAIModels implements Runnable {
+public class QuarkusVertexAiAnthropic implements Runnable {
     private static final String PROJECT_ID = "itpc-gcp-cp-pe-eng-claude";
     private static final String MODEL_NAME = "claude-opus-4-6";
     private static final String LOCATION = "europe-west1";

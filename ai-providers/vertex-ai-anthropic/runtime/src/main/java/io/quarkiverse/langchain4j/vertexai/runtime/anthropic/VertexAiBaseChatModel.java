@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.vertexai.runtime.models;
+package io.quarkiverse.langchain4j.vertexai.runtime.anthropic;
 
 import static dev.langchain4j.internal.Utils.getOrDefault;
 

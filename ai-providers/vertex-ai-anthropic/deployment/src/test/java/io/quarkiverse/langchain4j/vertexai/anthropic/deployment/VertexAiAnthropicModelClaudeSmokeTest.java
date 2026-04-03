@@ -24,11 +24,11 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import io.quarkiverse.langchain4j.auth.ModelAuthProvider;
 import io.quarkiverse.langchain4j.testing.internal.WiremockAware;
-import io.quarkiverse.langchain4j.vertexai.runtime.models.VertexAiChatModel;
+import io.quarkiverse.langchain4j.vertexai.runtime.anthropic.VertexAiChatModel;
 import io.quarkus.arc.ClientProxy;
 import io.quarkus.test.QuarkusUnitTest;
 
-public class VertexAiModelsPublisherAnthropicModelClaudeSmokeTest extends WiremockAware {
+public class VertexAiAnthropicModelClaudeSmokeTest extends WiremockAware {
 
     private static final String API_KEY = "somekey";
     private static final String CHAT_MODEL_ID = "claude-opus-4-6";

@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.vertexai.runtime.models;
+package io.quarkiverse.langchain4j.vertexai.runtime.anthropic;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.vertexai.models.deployment;
+package io.quarkiverse.langchain4j.vertexai.anthropic.deployment;
 
 import java.util.Optional;
 

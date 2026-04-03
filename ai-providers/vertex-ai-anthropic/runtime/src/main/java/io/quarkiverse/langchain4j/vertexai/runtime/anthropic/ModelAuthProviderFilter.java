@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.vertexai.runtime.models;
+package io.quarkiverse.langchain4j.vertexai.runtime.anthropic;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import io.quarkiverse.langchain4j.auth.ModelAuthProvider;
