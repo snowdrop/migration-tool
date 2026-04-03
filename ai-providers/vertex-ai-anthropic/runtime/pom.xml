@@ -39,10 +39,19 @@
         </dependency>
 
         <!-- Langchain4j -->
+        <!-- Used for the API Classes: AnthropicThinking, etc -->
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-anthropic</artifactId>
         </dependency>
+
+        <!-- We don't use AnthropicRequest, AnthropicResponse, etc POJOs as they are used
+         to talk using for gRPC to the Google Cloud API endpoint !!!
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-vertex-ai-anthropic</artifactId>
+        </dependency>
+        -->
 
         <!-- testing -->
         <dependency>
