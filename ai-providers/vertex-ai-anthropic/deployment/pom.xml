@@ -17,31 +17,17 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- Quarkus -->
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-arc-deployment</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-client-jackson-deployment</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-client-jaxrs-deployment</artifactId>
-        </dependency>
-        <!--
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-tls-registry-deployment</artifactId>
-        </dependency>
-        -->
-
-        <!-- Quarkus Langchain4j -->
+        <!-- Quarkus & Langchain4j -->
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
             <artifactId>quarkus-langchain4j-core-deployment</artifactId>
             <version>${quarkus-langchain4j.version}</version>
+        </dependency>
+
+        <!-- Quarkus -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-client-jackson-deployment</artifactId>
         </dependency>
 
         <!-- Testing -->

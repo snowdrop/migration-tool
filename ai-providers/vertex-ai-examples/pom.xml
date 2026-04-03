@@ -50,7 +50,7 @@
             <artifactId>quarkus-picocli</artifactId>
         </dependency>
         <dependency>
-            <groupId>dev.snowdrop.mtool</groupId>
+            <groupId>dev.snowdrop.mtool.ai</groupId>
             <artifactId>vertex-ai-anthropic</artifactId>
             <version>${project.version}</version>
         </dependency>

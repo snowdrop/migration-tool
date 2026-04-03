@@ -9,14 +9,14 @@ import picocli.CommandLine.Parameters;
 @Command(name = "code", mixinStandardHelpOptions = true)
 public class CodeAssistantCommand implements Runnable {
 
-	@Parameters(defaultValue = "Java Hello World class", description = "The tasks to be executed by the AI coding assistant")
-	String task;
+    @Parameters(defaultValue = "Java Hello World class", description = "The tasks to be executed by the AI coding assistant")
+    String task;
 
-	@Inject
-	CodeAssistantService codeAssistantService;
+    @Inject
+    CodeAssistantService codeAssistantService;
 
-	@Override
-	public void run() {
-		System.out.println(codeAssistantService.writeCode(task));
-	}
+    @Override
+    public void run() {
+        System.out.println(codeAssistantService.writeCode(task));
+    }
 }
