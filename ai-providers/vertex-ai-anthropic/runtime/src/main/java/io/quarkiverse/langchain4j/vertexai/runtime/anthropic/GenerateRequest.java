@@ -11,6 +11,7 @@ import dev.langchain4j.model.anthropic.internal.api.AnthropicTool;
 public record GenerateRequest(String anthropic_version,
         Integer max_tokens,
         List<Message> messages,
+        String system,
         List<AnthropicTool> tools,
         AnthropicThinking thinking) {
     public record Message(

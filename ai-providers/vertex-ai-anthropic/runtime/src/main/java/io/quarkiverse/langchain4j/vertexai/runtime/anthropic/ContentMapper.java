@@ -7,6 +7,7 @@ import java.util.*;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.agent.tool.ToolSpecifications;
 import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.model.anthropic.internal.api.AnthropicCacheType;
 import dev.langchain4j.model.anthropic.internal.api.AnthropicThinking;
 import dev.langchain4j.model.anthropic.internal.api.AnthropicTool;
@@ -20,6 +21,8 @@ public class ContentMapper {
 
     /**
      * Generate the Request from the list of the chat messages and VertexAiconfig
+     * The request structure has been designed according to the Claude API spec:
+     * <a href="https://platform.claude.com/docs/en/api/java/messages/create">Claude API</a>
      *
      * @param messages the Chat Messages
      * @param vertexAiConfig
@@ -47,11 +50,11 @@ public class ContentMapper {
         }
 
         List<GenerateRequest.Message> requestMessages = new ArrayList<>();
+        String systemMessage = "";
 
         for (ChatMessage message : messages) {
             switch (message.type()) {
-                case SYSTEM -> requestMessages
-                        .add(new GenerateRequest.Message(Role.SYSTEM.name().toLowerCase(), chatMessageToText(message)));
+                case SYSTEM -> systemMessage = chatMessageToText(message);
                 case USER -> requestMessages
                         .add(new GenerateRequest.Message(Role.USER.name().toLowerCase(), chatMessageToText(message)));
                 case AI -> requestMessages
@@ -71,6 +74,7 @@ public class ContentMapper {
                 ANTHROPIC_VERSION,
                 vertexAiConfig.maxOutputTokens,
                 requestMessages,
+                systemMessage,
                 toTools(toolSpecifications, vertexAiConfig.strict),
                 anthropicThinking);
     }

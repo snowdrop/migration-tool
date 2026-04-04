@@ -6,6 +6,7 @@ import static java.util.stream.StreamSupport.stream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.quarkiverse.langchain4j.runtime.CurlRequestLogger;
 import jakarta.ws.rs.*;
 
 import org.jboss.logging.Logger;
@@ -97,10 +98,12 @@ public interface VertexAiRestApi {
 
         private final boolean logRequests;
         private final boolean logResponses;
+        private final boolean logCurl;
 
-        public VertxAiClientLogger(boolean logRequests, boolean logResponses) {
+        public VertxAiClientLogger(boolean logRequests, boolean logResponses, boolean logCurl) {
             this.logRequests = logRequests;
             this.logResponses = logResponses;
+            this.logCurl = logCurl;
         }
 
         @Override
@@ -121,6 +124,9 @@ public interface VertexAiRestApi {
                         bodyToString(body));
             } catch (Exception e) {
                 log.warn("Failed to log request", e);
+            }
+            if (logCurl) {
+                CurlRequestLogger.logCurl(log, request, body);
             }
         }
 

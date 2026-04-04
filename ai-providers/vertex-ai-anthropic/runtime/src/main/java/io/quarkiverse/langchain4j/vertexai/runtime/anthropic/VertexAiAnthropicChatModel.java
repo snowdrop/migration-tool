@@ -32,6 +32,7 @@ public class VertexAiAnthropicChatModel extends VertexAiBaseChatModel {
                 builder.toolChoice,
                 builder.logRequests,
                 builder.logResponses,
+                builder.logCurl,
                 builder.strict,
                 builder.timeout,
                 builder.includeThoughts,
@@ -52,10 +53,12 @@ public class VertexAiAnthropicChatModel extends VertexAiBaseChatModel {
                     .connectTimeout(builder.timeout.toSeconds(), TimeUnit.SECONDS)
                     .readTimeout(builder.timeout.toSeconds(), TimeUnit.SECONDS);
 
-            if (builder.logRequests || builder.logResponses) {
+            if (builder.logRequests || builder.logResponses || builder.logCurl) {
                 restApiBuilder.loggingScope(LoggingScope.REQUEST_RESPONSE);
-                restApiBuilder.clientLogger(new VertexAiRestApi.VertxAiClientLogger(builder.logRequests,
-                        builder.logResponses));
+                restApiBuilder.clientLogger(new VertexAiRestApi.VertxAiClientLogger(
+                        builder.logRequests,
+                        builder.logResponses,
+                        builder.logCurl));
             }
             restApiBuilder.register(new ModelAuthProviderFilter(builder.modelId));
             restApi = restApiBuilder.build(VertexAiRestApi.class);
@@ -93,6 +96,7 @@ public class VertexAiAnthropicChatModel extends VertexAiBaseChatModel {
         private Duration timeout = Duration.ofSeconds(10);
         private Boolean logRequests = false;
         private Boolean logResponses = false;
+        private Boolean logCurl;
         private List<ChatModelListener> listeners = Collections.emptyList();
         private Boolean strict = false;
 
@@ -172,6 +176,11 @@ public class VertexAiAnthropicChatModel extends VertexAiBaseChatModel {
 
         public Builder logResponses(boolean logResponses) {
             this.logResponses = logResponses;
+            return this;
+        }
+
+        public Builder logCurl(boolean logCurl) {
+            this.logCurl = logCurl;
             return this;
         }
 
