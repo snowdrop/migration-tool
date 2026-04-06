@@ -70,6 +70,18 @@
             <version>1.7.4</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.quarkiverse.langchain4j</groupId>
+            <artifactId>quarkus-langchain4j-openai</artifactId>
+            <version>1.7.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.quarkiverse.langchain4j</groupId>
+            <artifactId>quarkus-langchain4j-vertex-ai-models</artifactId>
+            <version>999-SNAPSHOT</version>
+        </dependency>
+
         <!-- lsp4j -->
         <dependency>
             <groupId>org.eclipse.lsp4j</groupId>
