@@ -96,7 +96,7 @@ public class VertexAiAnthropicChatModel extends VertexAiBaseChatModel {
         private Duration timeout = Duration.ofSeconds(10);
         private Boolean logRequests = false;
         private Boolean logResponses = false;
-        private Boolean logCurl;
+        private Boolean logCurl = false;
         private List<ChatModelListener> listeners = Collections.emptyList();
         private Boolean strict = false;
 
