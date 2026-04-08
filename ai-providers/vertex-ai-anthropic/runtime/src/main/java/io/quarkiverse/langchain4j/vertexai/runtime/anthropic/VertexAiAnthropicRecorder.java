@@ -66,7 +66,8 @@ public class VertexAiAnthropicRecorder {
                     .publisher(aiConfig.publisher())
                     .modelId(modelId)
                     .logRequests(firstOrDefault(false, aiConfig.logRequests()))
-                    .logResponses(firstOrDefault(false, aiConfig.logResponses()));
+                    .logResponses(firstOrDefault(false, aiConfig.logResponses()))
+                    .logCurl(firstOrDefault(false, aiConfig.logRequestsCurl()));
 
             if (aiConfig.timeout().isPresent()) {
                 builder.timeout(aiConfig.timeout().get());

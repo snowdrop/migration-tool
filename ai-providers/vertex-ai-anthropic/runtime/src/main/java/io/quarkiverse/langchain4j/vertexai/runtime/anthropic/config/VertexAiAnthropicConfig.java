@@ -93,6 +93,13 @@ public interface VertexAiAnthropicConfig {
         Optional<Boolean> logResponses();
 
         /**
+         * Whether the Anthropic client should log requests as cURL commands
+         */
+        @ConfigDocDefault("false")
+        @WithDefault("${quarkus.langchain4j.log-requests-curl}")
+        Optional<Boolean> logRequestsCurl();
+
+        /**
          * Global timeout for requests to Vertex AI APIs
          */
         @ConfigDocDefault("10s")
