@@ -3,6 +3,15 @@
 This project has been created to test different Java LLM libraries to access Anthropic Claude running as partner model on Vertex AI.
 the endpoint to be accessed using the Vertex AI API is rawPredict which is documented here: https://docs.cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.endpoints/rawPredict
 
+## AI environment variables
+
+To access the Vertex AI API - Anthropic, you will have to set the following properties:
+```shell
+export QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_LOCATION=<GOOGLE_CLOUD_PLATFORM_LOCATION>
+export QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_PROJECT_ID=<GOOGLE_CLOUD_PLATFORM_PROJECT_ID>
+```
+**Remark**: The model defined by default is `claude-opus-4-6` and can be changed using this variable: `QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_MODEL_ID`
+
 ## Langchain4j - Vertex AI
 
 The jbang `VertexAIAnthropicWithScanner` and `VertexAIAnthropicChat.java` uses the `LangChain4j vertex-ai-anthropic` library to access the Google Cloud platform. 
@@ -25,7 +34,7 @@ You can access the Vertex AI API and Anthropic model using the new module: `Quar
 runs a `CodeAssistantCommand` command, register an AI service able to chat with the model using your request/task provided as picocli argument 
 and if needed the model can request to read/write files locally using the registered tools: `readFile` and `writeFile`
 
-To use it, run the following command where you pass the task to be executed
+To use it, run the following command where you pass the task(s) to be executed
 ```shell
 mvn quarkus:dev -Dquarkus.args="'Read the ./pom.xml file and tell me if it includes as quarkus extension vertex ai'"
 ```
@@ -72,8 +81,8 @@ Hi there! How are you doing today? Is there anything I can help you with? 😊
 You can curl the Vertex AI API and endpoint [rawPredict](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.endpoints/rawPredict) using curl with the following payload and headers:
 
 ```bash
-export PROJECT_ID=itpc-gcp-cp-pe-eng-claude
-export LOCATION=europe-west1
+export PROJECT_ID=<GOOGLE_CLOUD_PLATFORM_PROJECT_ID>
+export LOCATION=<GOOGLE_CLOUD_PLATFORM_LOCATION>
 export MODEL_ID=claude-opus-4-6
 export MAX_TOKENS=1024
 export ANTHROPIC_VERSION=vertex-2023-10-16

@@ -10,15 +10,36 @@ import dev.langchain4j.model.vertexai.anthropic.VertexAiAnthropicChatModel;
 
 public class VertexAIAnthropicChat {
 
-    private static final String PROJECT_ID = "itpc-gcp-cp-pe-eng-claude";
-    private static final String MODEL_NAME = "claude-opus-4-6";
-    private static final String LOCATION = "europe-west1";
-
     public static void main(String[] args) {
+        String projectId = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_PROJECT_ID", "dummy");
+        String location = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_LOCATION", "dummy");
+        String modelId = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_MODEL_ID", "claude-opus-4-6");
+
+        validateRequired(projectId, "QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_PROJECT_ID");
+        validateRequired(location, "QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_LOCATION");
+
         System.out.println("Starting AI chat ...");
-        ChatModel model = VertexAiAnthropicChatModel.builder().project(PROJECT_ID).location(LOCATION)
-                .modelName(MODEL_NAME).maxTokens(1000).logRequests(true).logResponses(true).build();
+        ChatModel model = VertexAiAnthropicChatModel.builder().project(projectId).location(location)
+                .modelName(modelId).maxTokens(1000).logRequests(true).logResponses(true).build();
 
         System.out.println(model.chat("Hi Claude"));
+    }
+
+    /**
+     * Helper to get Env Var or return a default.
+     */
+    private static String getEnv(String name, String defaultValue) {
+        String val = System.getenv(name);
+        return (val != null && !val.isBlank()) ? val : defaultValue;
+    }
+
+    /**
+     * Helper to enforce required fields.
+     */
+    private static void validateRequired(String value, String envName) {
+        if (value == null || value.isBlank() || value.equals("dummy")) {
+            throw new IllegalStateException(
+                    "CRITICAL ERROR: The environment variable '" + envName + "' is required but not set.");
+        }
     }
 }
