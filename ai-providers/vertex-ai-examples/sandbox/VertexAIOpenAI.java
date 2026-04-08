@@ -10,8 +10,8 @@ import java.io.IOException;
 public class VertexAIOpenAI {
 
     public static void main(String[] args) throws IOException {
-        String projectId = "itpc-gcp-cp-pe-eng-claude";
-        String location = "europe-west1";
+        String projectId = "dummy";
+        String location = "dummy";
         String modelId = "claude-opus-4-6";
 
         GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();

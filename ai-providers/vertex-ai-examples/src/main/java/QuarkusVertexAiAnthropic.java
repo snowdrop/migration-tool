@@ -11,10 +11,6 @@ import java.time.Duration;
 
 @CommandLine.Command
 public class QuarkusVertexAiAnthropic implements Runnable {
-    private static final String PROJECT_ID = "itpc-gcp-cp-pe-eng-claude";
-    private static final String MODEL_NAME = "claude-opus-4-6";
-    private static final String LOCATION = "europe-west1";
-    private static final String PUBLISHER = "anthropic";
 
     /*
      * "anthropic_version": "vertex-2023-10-16", <========
@@ -31,14 +27,40 @@ public class QuarkusVertexAiAnthropic implements Runnable {
      */
     @Override
     public void run() {
+        String publisher = "anthropic";
+        String projectId = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_PROJECT_ID", "dummy");
+        String location = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_LOCATION", "dummy");
+        String modelId = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_MODEL_ID", "claude-opus-4-6");
+
+        validateRequired(projectId, "QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_PROJECT_ID");
+        validateRequired(location, "QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_LOCATION");
+
         System.out.println("Starting AI ...");
-        VertexAiAnthropicChatModel chatModel = VertexAiAnthropicChatModel.builder().projectId(PROJECT_ID).location(LOCATION)
-                .modelId(MODEL_NAME).publisher(PUBLISHER).logRequests(true).logResponses(true).maxOutputTokens(1024)
+        VertexAiAnthropicChatModel chatModel = VertexAiAnthropicChatModel.builder().projectId(projectId).location(location)
+                .modelId(modelId).publisher(publisher).logRequests(true).logResponses(true).maxOutputTokens(1024)
                 .timeout(Duration.ofSeconds(30)).build();
 
         AiMessage aiMessage = new AiMessage("You are a java expert");
         UserMessage userMessage = new UserMessage("What is a Java Enum ?");
 
         System.out.println(chatModel.chat(aiMessage, userMessage));
+    }
+
+    /**
+     * Helper to get Env Var or return a default.
+     */
+    private static String getEnv(String name, String defaultValue) {
+        String val = System.getenv(name);
+        return (val != null && !val.isBlank()) ? val : defaultValue;
+    }
+
+    /**
+     * Helper to enforce required fields.
+     */
+    private static void validateRequired(String value, String envName) {
+        if (value == null || value.isBlank() || value.equals("dummy")) {
+            throw new IllegalStateException(
+                    "CRITICAL ERROR: The environment variable '" + envName + "' is required but not set.");
+        }
     }
 }
