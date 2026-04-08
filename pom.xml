@@ -62,6 +62,7 @@
         <module>scanner</module>
         <module>migration-cli</module>
         <module>tests</module>
+        <module>ai-providers/ai-workflow</module>
     </modules>
 
     <developers>
@@ -171,6 +172,11 @@
                 <version>${quarkus-langchain4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.quarkiverse.langchain4j</groupId>
+                <artifactId>quarkus-langchain4j-agentic</artifactId>
+                <version>${quarkus-langchain4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-anthropic</artifactId>
                 <version>${langchain4j-anthropic.version}</version>
@@ -238,6 +244,15 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>${quarkus.platform.group-id}</groupId>
+                    <artifactId>quarkus-maven-plugin</artifactId>
+                    <version>${quarkus.platform.version}</version>
+                    <configuration>
+                        <skip>${quarkus.build.skip}</skip>
+                    </configuration>
+                    <extensions>true</extensions>
+                </plugin>
                 <plugin>
                     <groupId>net.revelc.code.formatter</groupId>
                     <artifactId>formatter-maven-plugin</artifactId>
