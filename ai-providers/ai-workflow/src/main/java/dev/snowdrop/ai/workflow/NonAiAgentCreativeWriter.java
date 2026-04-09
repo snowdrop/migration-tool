@@ -10,6 +10,7 @@ public class NonAiAgentCreativeWriter {
 
     @Agent(description = "Generates a non AI story based on the given topic", outputKey = "story")
     public static String generateNonAIStory(@V("topic") String topic) {
+        System.out.println("!!!!!!! Calling the Non AI agent !!!!!!");
         return "This is my story created by a non AI agent !!";
     }
 }
