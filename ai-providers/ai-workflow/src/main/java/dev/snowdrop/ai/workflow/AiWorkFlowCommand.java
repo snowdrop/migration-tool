@@ -20,10 +20,10 @@ public class AiWorkFlowCommand implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Chatting ..." + aiModel.chat("Tell me what Brussels is in 2 lines"));
-
+        //System.out.println("Chatting ..." + aiModel.chat("Tell me what Brussels is in 2 lines"));
         System.out.println("Creating a story ...");
         String story = storyCreator.write("Tell me a story about Brussels !");
         System.out.println(story);
+        System.out.println("-".repeat(90));
     }
 }

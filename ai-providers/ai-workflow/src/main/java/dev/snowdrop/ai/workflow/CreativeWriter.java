@@ -16,6 +16,6 @@ public interface CreativeWriter {
             Return only the story and nothing else.
             The topic is {{topic}}.
             """)
-    @Agent("Generates a story based on the given topic")
+    @Agent(description = "Generates a story based on the given topic", outputKey = "story")
     String generateStory(@V("topic") String topic);
 }
