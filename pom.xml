@@ -62,7 +62,6 @@
         <module>scanner</module>
         <module>migration-cli</module>
         <module>tests</module>
-        <module>ai-providers/ai-workflow</module>
     </modules>
 
     <developers>
