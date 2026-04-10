@@ -23,7 +23,7 @@ public class JBangMigrationAiTool {
         @Tool("Execute the Maven OpenRewrite goal to apply the changes")
         public String executeMavenRewrite(String recipeName) {
             try {
-                // On construit la commande Maven pour lancer une recette spécifique
+                // Mvn rewrite command
                 String command = String.format("mvn rewrite:run -Drewrite.activeRecipes=%s", recipeName);
 
                 Process process = Runtime.getRuntime().exec(command);

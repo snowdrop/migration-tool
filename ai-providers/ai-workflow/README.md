@@ -295,5 +295,16 @@ unchecked items, reasons about what tools to call, and updates the checkboxes. T
 
 ### References
 
+1. Skills
+
+- Tool to install skills: https://github.com/vercel-labs/skills
+- Claude documentation about skills: https://code.claude.com/docs/en/skills
+
+2. Quarkus skills
+
+- https://github.com/quarkusio/quarkus-skills
 - https://github.com/b6k-dev/quarkus-skill
+
+3. How to use skills with langchain4j
+
 - https://docs.langchain4j.dev/tutorials/skills#programmatically
