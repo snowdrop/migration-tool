@@ -299,6 +299,7 @@ unchecked items, reasons about what tools to call, and updates the checkboxes. T
 
 - Tool to install skills: https://github.com/vercel-labs/skills
 - Claude documentation about skills: https://code.claude.com/docs/en/skills
+- Claude commands and bundled skills: https://code.claude.com/docs/en/commands
 
 2. Quarkus skills
 
