@@ -4,7 +4,7 @@ This project explores how we could use AI and non AI agents part of an Agentic W
 TODO
 
 Before to decide what we will do it is also important to answer to the following question as most of the tasks to be executed part of a plan ciuld also be managed by
-AI directly (= workflow processor) using Tools
+AI directly (= workflow processor) using Tools, skills, etc.
 
 ### Should we create an AI workflow ?
 
@@ -292,3 +292,8 @@ Key Design Decisions
 
 The main insight is that your tasks_plan.md is already a structured enough format for the LLM to parse directly -- no need for a separate plan parser. The LLM reads the markdown, finds
 unchecked items, reasons about what tools to call, and updates the checkboxes. The @Tool methods are the hands; the LLM is the brain.
+
+### References
+
+- https://github.com/b6k-dev/quarkus-skill
+- https://docs.langchain4j.dev/tutorials/skills#programmatically
