@@ -19,17 +19,17 @@ Here's the design, grounded in the patterns you already use:
 Architecture Overview
 
 MigrationPlanAgent (orchestrator)                                                                                                                                                          
-│                                                                                                                                                                                        
+|                                                                                                                                                                                        
 ├─ MigrationTools (@Tool methods the AI can call)                                                                                                                                        
-│    ├─ readMigrationPlan(filePath)
-│    ├─ markTaskCompleted(filePath, taskText)                                                                                                                                            
-│    ├─ readSourceFile(path)                                                                                                                                                             
-│    ├─ writeFile(path, content)
-│    ├─ updateProperty(key, value, profile)
-│    ├─ modifyPomDependency(action, groupId, artifactId)
-│    ├─ executeMaven(args)
-│    └─ applyOpenRewriteRecipe(recipeName)
-│
+|    ├─ readMigrationPlan(filePath)
+|    ├─ markTaskCompleted(filePath, taskText)                                                                                                                                            
+|    ├─ readSourceFile(path)                                                                                                                                                             
+|    ├─ writeFile(path, content)
+|    ├─ updateProperty(key, value, profile)
+|    ├─ modifyPomDependency(action, groupId, artifactId)
+|    ├─ executeMaven(args)
+|    └─ applyOpenRewriteRecipe(recipeName)
+|
 └─ ChatMemory (MessageWindowChatMemory)
 ```
 
@@ -280,20 +280,15 @@ tool call.
 
 ---
 Key Design Decisions
-┌──────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│     Concern      │                                             Approach                                             │
-├──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Plan parsing     │ Let the LLM read the markdown directly -- it understands checkbox syntax natively                │
-├──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Checkbox updates │ @Tool method with regex - [ ] → - [x] replacement                                                │
-├──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Verification     │ After each change, call executeMaven("compile") before marking done                              │
-├──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Error handling   │ System prompt instructs the agent NOT to check the box if verification fails                     │
-├──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Scope control    │ Process one phase at a time to stay within context window limits                                 │
-├──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Memory           │ MessageWindowChatMemory (like your JBangMigrationAiTool) keeps recent tool call/response context │
-└──────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+| Concern          | Approach                                                                                         |
+|------------------|--------------------------------------------------------------------------------------------------|
+| Plan parsing     | Let the LLM read the markdown directly -- it understands checkbox syntax natively                |
+| Checkbox updates | @Tool method with regex - [ ] → - [x] replacement                                                |
+| Verification     | After each change, call executeMaven("compile") before marking done                              |
+| Error handling   | System prompt instructs the agent NOT to check the box if verification fails                     |
+| Scope control    | Process one phase at a time to stay within context window limits                                 |
+| Memory           | MessageWindowChatMemory (like your JBangMigrationAiTool) keeps recent tool call/response context |
+
 The main insight is that your tasks_plan.md is already a structured enough format for the LLM to parse directly -- no need for a separate plan parser. The LLM reads the markdown, finds
 unchecked items, reasons about what tools to call, and updates the checkboxes. The @Tool methods are the hands; the LLM is the brain.
