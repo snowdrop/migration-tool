@@ -72,7 +72,6 @@ public class JBangAiFlow {
 
         System.out.println("==== Generate the monitoring data report ====");
         HtmlReportGenerator.generateReport(agentMonitor, Path.of("non-ai-agents.html"));
-
     }
 
     public interface TasksRouterAgentInstance extends MonitoredAgent {

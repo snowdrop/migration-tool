@@ -40,6 +40,10 @@
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-vertex-ai-anthropic</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
