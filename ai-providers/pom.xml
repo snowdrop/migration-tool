@@ -18,6 +18,7 @@
     <modules>
         <module>vertex-ai-anthropic</module>
         <module>vertex-ai-examples</module>
+        <module>ai-workflow</module>
     </modules>
 
 </project>

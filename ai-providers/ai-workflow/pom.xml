@@ -9,8 +9,8 @@
         <version>1.0.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>vertex-ai-examples</artifactId>
-    <name>Migration Tool :: AI :: Vertex AI examples </name>
+    <artifactId>ai-workflow</artifactId>
+    <name>Migration Tool :: AI :: Workflow prototype</name>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -19,32 +19,30 @@
     </properties>
 
     <dependencies>
-        <!-- Quarkus & Vertex AI Anthropic client-->
+        <!-- Quarkus -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-picocli</artifactId>
+        </dependency>
+
+        <!-- Quarkus and langchain4j -->
+        <dependency>
+            <groupId>io.quarkiverse.langchain4j</groupId>
+            <artifactId>quarkus-langchain4j-agentic</artifactId>
         </dependency>
         <dependency>
             <groupId>dev.snowdrop.mtool.ai</groupId>
             <artifactId>vertex-ai-anthropic</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <!-- Langchain4j -->
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-vertex-ai-anthropic</artifactId>
         </dependency>
         <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-vertex-ai-anthropic</artifactId>
-        </dependency>
-
-        <!-- Logging -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.17</version>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
         </dependency>
     </dependencies>
 
@@ -53,9 +51,8 @@
             <plugin>
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
+                <extensions>true</extensions>
                 <executions>
-                    <!-- Disable inherited quarkus-maven-plugin executions for the deployment module
-                         to avoid circular dependency resolution during generate-code phase -->
                     <execution>
                         <goals>
                             <goal>build</goal>
@@ -67,4 +64,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
