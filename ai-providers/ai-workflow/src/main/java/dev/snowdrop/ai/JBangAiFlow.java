@@ -47,13 +47,11 @@ public class JBangAiFlow {
         UntypedAgent tasksAgent = AgenticServices.conditionalBuilder()
                 .subAgents(
                         "category is AI",
-                        agenticScope ->
-                                agenticScope.readState("category", TaskCategory.UNKNOWN) == TaskCategory.AI,
+                        agenticScope -> agenticScope.readState("category", TaskCategory.UNKNOWN) == TaskCategory.AI,
                         javaCodingAssistant)
                 .subAgents(
                         "category is REWRITE",
-                        agenticScope ->
-                                agenticScope.readState("category", TaskCategory.UNKNOWN) == TaskCategory.REWRITE,
+                        agenticScope -> agenticScope.readState("category", TaskCategory.UNKNOWN) == TaskCategory.REWRITE,
                         new ExecuteRecipeFromTask())
                 .build();
 
@@ -63,7 +61,8 @@ public class JBangAiFlow {
                 .build();
 
         System.out.println(aFlow.ask("I have an OpenRewrite recipe to be executed: verifyJavaCode"));
-        System.out.println(aFlow.ask("Can you, as Java Coding assistant AI expert, tell me what a Java enum is in maximum 2 lines ?"));
+        System.out.println(
+                aFlow.ask("Can you, as Java Coding assistant AI expert, tell me what a Java enum is in maximum 2 lines ?"));
 
         System.out.println("==== Report monitoring data ====");
         AgentMonitor agentMonitor = aFlow.agentMonitor();
@@ -81,33 +80,36 @@ public class JBangAiFlow {
 
     public interface TaskCategoryRouter extends MonitoredAgent {
         @UserMessage("""
-            Analyze the user request and categorize it as 'ai' or 'rewrite',
-            In case the request doesn't belong to any of those categories categorize it as 'unknown'.
-            Reply with only one of those words and nothing else.
+                Analyze the user request and categorize it as 'ai' or 'rewrite',
+                In case the request doesn't belong to any of those categories categorize it as 'unknown'.
+                Reply with only one of those words and nothing else.
 
-            The user request is: '{{request}}'.
-            """)
+                The user request is: '{{request}}'.
+                """)
         @Agent(description = "Categorize a user request tasks", outputKey = "category")
         TaskCategory askToAgent(@V("request") String request);
     }
 
     public enum TaskCategory {
-        AI, REWRITE, MANUAL, UNKNOWN
+        AI,
+        REWRITE,
+        MANUAL,
+        UNKNOWN
     }
 
     public static class ExecuteRecipeFromTask {
         @Agent(description = "Execute an OpenRewrite recipe using as input the FQName of the recipe java class", outputKey = "response")
         public static String executeTask(@V("request") String recipeFQName) {
-            return String.format("OpenRewrite task executed: %s",recipeFQName);
+            return String.format("OpenRewrite task executed: %s", recipeFQName);
         }
     }
 
     public interface JavaCodingAssistant extends MonitoredAgent {
         @UserMessage("""
-            You are a AI Java Coding assistant.
-            Analyze the following user request and provide the best coding response.
-            The user request is {{request}}.
-            """)
+                You are a AI Java Coding assistant.
+                Analyze the following user request and provide the best coding response.
+                The user request is {{request}}.
+                """)
         @Agent(description = "An AI Java coding assistant", outputKey = "response")
         String toCode(@V("request") String request);
     }

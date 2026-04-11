@@ -1,5 +1,6 @@
 package dev.snowdrop.ai; /// usr/bin/env jbang "$0" "$@" ; exit $?
 //DEPS dev.langchain4j:langchain4j:1.13.0
+
 //DEPS dev.langchain4j:langchain4j-agentic:1.13.0-beta23
 //DEPS dev.langchain4j:langchain4j-vertex-ai-anthropic:1.13.0-beta23
 //DEPS com.opencsv:opencsv:5.7.1
@@ -114,4 +115,3 @@ public class JBangMigrationAiTool {
         }
     }
 }
-
