@@ -14,7 +14,7 @@
     <name>Migration Tool :: Scanner</name>
 
     <properties>
-        <maven.version>3.9.12</maven.version>
+        <maven.version>3.9.14</maven.version>
         <maven-resolver.version>1.9.25</maven-resolver.version>
 
         <!-- Skip to execute quarkus maven plugin -->
