@@ -23,7 +23,7 @@
         <ascii-table.version>1.9.0</ascii-table.version>
         <assertj.version>3.27.7</assertj.version>
         <gson.version>2.13.2</gson.version>
-        <google-auth-library-oauth2-http.version>1.43.0</google-auth-library-oauth2-http.version>
+        <google-auth-library-oauth2-http.version>1.46.0</google-auth-library-oauth2-http.version>
         <jackson.version>2.18.0</jackson.version>
         <langchain4j-anthropic.version>1.12.2</langchain4j-anthropic.version>
         <langchain4j-vertex-ai-anthropic.version>1.12.2-beta22</langchain4j-vertex-ai-anthropic.version>
