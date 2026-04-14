@@ -68,7 +68,7 @@
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
             <artifactId>quarkus-langchain4j-anthropic</artifactId>
-            <version>1.7.4</version>
+            <version>1.8.4</version>
         </dependency>
         -->
         <!-- Using the Vertex AI Anthropic API able to access Anthropic on Google Cloud platform -->
