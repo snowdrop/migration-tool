@@ -25,7 +25,7 @@
         <gson.version>2.13.2</gson.version>
         <google-auth-library-oauth2-http.version>1.43.0</google-auth-library-oauth2-http.version>
         <jackson.version>2.18.0</jackson.version>
-        <langchain4j-anthropic.version>1.12.2</langchain4j-anthropic.version>
+        <langchain4j-anthropic.version>1.13.0</langchain4j-anthropic.version>
         <langchain4j-vertex-ai-anthropic.version>1.13.0-beta23</langchain4j-vertex-ai-anthropic.version>
         <lombok.version>1.18.44</lombok.version>
         <org.eclipse.lsp4j.version>0.24.0</org.eclipse.lsp4j.version>
