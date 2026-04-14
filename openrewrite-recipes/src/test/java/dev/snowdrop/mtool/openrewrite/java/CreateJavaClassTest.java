@@ -10,7 +10,7 @@ public class CreateJavaClassTest implements RewriteTest {
 
     private final String classTemplate = """
             package %s;
-
+            import io.quarkus.runtime.QuarkusApplication;
             %sclass %s implements QuarkusApplication {
                 @Override
                 public int run(String... args) throws Exception {
@@ -22,12 +22,13 @@ public class CreateJavaClassTest implements RewriteTest {
 
     @Test
     void shouldCreateTodoApplicationClass() {
+        CreateJavaClassFromTemplate javaTodoClass = new CreateJavaClassFromTemplate(classTemplate, "src/main/java",
+                "org.openrewrite.example", "public", "TodoApplication", null, "foo/bar", "quarkus-core");
         rewriteRun(
-                spec -> spec.recipe(new CreateJavaClassFromTemplate(classTemplate, "src/main/java",
-                        "org.openrewrite.example", "public", "TodoApplication", null, "foo/bar")),
+                spec -> spec.recipe(javaTodoClass),
                 java(doesNotExist(), """
                         package org.openrewrite.example;
-
+                        import io.quarkus.runtime.QuarkusApplication;
                         public class TodoApplication implements QuarkusApplication {
                             @Override
                             public int run(String... args) throws Exception {

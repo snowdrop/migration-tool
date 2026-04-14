@@ -67,7 +67,7 @@ public class MigrateSpringBootToQuarkusTest implements RewriteTest {
                 .recipes(new ReplaceSpringBootApplicationWithQuarkusMainAnnotation(),
                         new RemoveMethodInvocations("org.springframework.boot.SpringApplication run(..)"),
                         new CreateJavaClassFromTemplate(todoClassTemplate, "src/main/java", "com.todo.app", "public",
-                                "TodoApplication", false, ""),
+                                "TodoApplication", false, "", ""),
                         new AddQuarkusRun(""))
 
                 .parser((Parser.Builder) JavaParser.fromJavaVersion().dependsOn("""

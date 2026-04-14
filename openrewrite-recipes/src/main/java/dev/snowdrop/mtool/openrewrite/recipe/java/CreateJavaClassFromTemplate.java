@@ -61,6 +61,10 @@ public class CreateJavaClassFromTemplate extends ScanningRecipe<AtomicBoolean> {
     @Nullable
     String relativePath;
 
+    @Option(displayName = "Maven artifact name to add to the classpath", description = "Maven artifact name to add to the classpath", required = false, example = "quarkus-core")
+    @Nullable
+    String artifactName;
+
     @Override
     public String getDisplayName() {
         return "Create Java class";
@@ -110,7 +114,9 @@ public class CreateJavaClassFromTemplate extends ScanningRecipe<AtomicBoolean> {
 
     private Stream<SourceFile> createEmptyClass() {
         String packageModifier = "package-private".equals(modifier) ? "" : modifier + " ";
-        return JavaParser.fromJavaVersion().build()
+        return JavaParser.fromJavaVersion()
+                .classpath(artifactName)
+                .build()
                 .parse(String.format(classTemplate, packageName, packageModifier, className))
                 .map(brandNewFile -> brandNewFile.withSourcePath(getSourcePath()));
     }
