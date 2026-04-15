@@ -17,3 +17,11 @@ applications/**/*.csv
 .settings
 .classpath
 target
+
+## AI
+.bob
+.moderne
+.claude
+
+## Openrewrite
+rewrite.yml
