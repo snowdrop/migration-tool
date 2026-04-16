@@ -25,8 +25,8 @@ Load the relevant reference file before each phase:
 | Reference | Use during |
 |---|---|
 | [references/dependency-map.md](references/dependency-map.md) | Phase 1-2: Build system and dependency mapping |
-| [references/annotation-map.md](references/annotation-map.md) | Phase 3-5: Code migration (DI, REST, Data, Security, Test, Lifecycle) |
-| [references/config-map.md](references/config-map.md) | Phase 4: Configuration property migration |
+| [references/annotation-map.md](references/annotation-map.md) | Phase 3-4: Code migration (DI, REST, Data, Security, Test, Lifecycle) |
+| [references/config-map.md](references/config-map.md) | Phase 5: Configuration property migration |
 
 ## Step 1: Analyze the Spring Boot Application
 
@@ -47,9 +47,11 @@ Propose a phased plan. Each phase maps to a rule execution order:
 |-------|-------|------|
 | 1. Build system | 1 | Replace Spring Boot parent with Quarkus BOM, swap plugins, add core deps |
 | 2. Dependencies | 2-3 | Replace Spring starters with Quarkus equivalents — see [dependency-map.md](references/dependency-map.md) |
-| 3. Annotations | 4 | Update annotation types — see [annotation-map.md](references/annotation-map.md) |
-| 4. Configuration | 6 | Map Spring properties to Quarkus equivalents — see [config-map.md](references/config-map.md) |
-| 5. Complex code | 7-8 | View layer, REST clients, security config — AI-assisted refactoring |
+| 3. Data layer | 4 | Entities (Panache), repositories, service layer simplification |
+| 4. Controllers | 5 | Annotations, `Model` → Qute templates, `redirect:` → `Response.seeOther()` |
+| 5. Configuration | 6 | Map Spring properties to Quarkus equivalents — see [config-map.md](references/config-map.md) |
+| 6. Templates & assets | 7 | Thymeleaf → Qute, static resources to `META-INF/resources/`, remove CSRF |
+| 7. Cleanup | 8 | Remove main class, leftover Spring imports, final verification |
 
 Ask the user which approach they prefer:
 - **Spring compat** (recommended): Use `quarkus-spring-web`, `quarkus-spring-data-jpa`, etc. Minimal code changes.
@@ -188,7 +190,65 @@ public class TodoRepository implements PanacheRepository<Todo> {
 // Usage: todoRepository.listAll(), todoRepository.findById(id)
 ```
 
+**Pagination with PanacheQuery:**
+
+```java
+// BEFORE: Spring Data
+Page<Todo> findByCompleted(boolean completed, Pageable pageable);
+
+// AFTER: Panache Repository
+public List<Todo> findByCompleted(boolean completed, int page, int size) {
+    return find("completed", completed).page(Page.of(page, size)).list();
+}
+// For Page-like metadata, use PanacheQuery:
+PanacheQuery<Todo> query = find("completed", completed);
+query.page(Page.of(page, size));
+long totalCount = query.count();
+List<Todo> items = query.list();
+```
+
 When the user chose **Spring compat** path, keep `JpaRepository`/`CrudRepository` interfaces — they work with `quarkus-spring-data-jpa`.
+
+### Phase 3 Reference: Service Layer
+
+In Spring Boot apps, services often follow the interface + implementation pattern (`TodoService` interface + `TodoServiceImpl` class). In Quarkus, this indirection is usually unnecessary. For the **native Quarkus** path:
+
+```java
+// BEFORE: Spring — interface + impl
+public interface TodoService {
+    List<Todo> findAll();
+    Todo save(Todo todo);
+}
+
+@Service
+public class TodoServiceImpl implements TodoService {
+    @Autowired
+    private TodoRepository repository;
+
+    @Override
+    public List<Todo> findAll() { return repository.findAll(); }
+
+    @Override
+    public Todo save(Todo todo) { return repository.save(todo); }
+}
+
+// AFTER: Quarkus — single class with @ApplicationScoped
+@ApplicationScoped
+public class TodoService {
+    @Inject
+    TodoRepository repository;
+
+    public List<Todo> findAll() { return repository.listAll(); }
+    public Todo save(Todo todo) { repository.persist(todo); return todo; }
+}
+```
+
+**Decision guide:**
+- If the service only delegates to the repository → consider eliminating it and injecting the repository directly in the resource
+- If the service has real business logic → keep it as a single `@ApplicationScoped` class, remove the interface
+- If the interface is used for testing/mocking → Quarkus `@InjectMock` works on concrete classes, no interface needed
+
+For **Spring compat** path, `@Service` is supported by `quarkus-spring-di` — no changes needed beyond ensuring the class has a scope.
 
 ### Phase 5 Reference: Thymeleaf → Qute Templates
 
@@ -239,6 +299,101 @@ public class TodoResource {
 
 File rename: `templates/todos.html` → `templates/TodoResource/todos.html` (must match the enclosing class name when using `@CheckedTemplate`).
 
+**`Model.addAttribute()` → `Template.data()`:**
+
+```java
+// BEFORE: Spring MVC — Model as parameter
+@GetMapping("/todos/{id}")
+public String detail(@PathVariable Long id, Model model) {
+    model.addAttribute("todo", todoService.findById(id));
+    model.addAttribute("categories", categoryService.findAll());
+    return "todo-detail";
+}
+
+// AFTER: Quarkus + Qute — type-safe template data
+@GET
+@Path("/{id}")
+@Produces(MediaType.TEXT_HTML)
+public TemplateInstance detail(@PathParam("id") Long id) {
+    return Templates.todoDetail(todoService.findById(id), categoryService.findAll());
+}
+
+@CheckedTemplate
+public static class Templates {
+    public static native TemplateInstance todoDetail(Todo todo, List<Category> categories);
+}
+```
+
+**`return "redirect:..."` → `Response.seeOther()`:**
+
+```java
+// BEFORE: Spring MVC
+@PostMapping("/todos")
+public String create(@ModelAttribute Todo todo) {
+    todoService.save(todo);
+    return "redirect:/todos";
+}
+
+// AFTER: Quarkus + JAX-RS
+@POST
+@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+public Response create(@BeanParam Todo todo) {
+    todoService.save(todo);
+    return Response.seeOther(URI.create("/todos")).build();
+}
+```
+
+### Phase 5 Reference: Static Assets & CSRF
+
+Move static resources from Spring Boot's default location to Quarkus:
+
+```
+# BEFORE (Spring Boot)
+src/main/resources/static/css/style.css
+src/main/resources/static/js/app.js
+
+# AFTER (Quarkus)
+src/main/resources/META-INF/resources/css/style.css
+src/main/resources/META-INF/resources/js/app.js
+```
+
+**Remove Spring CSRF tokens** from JavaScript/HTML — Quarkus does not use Spring Security's CSRF mechanism:
+
+```javascript
+// DELETE these from JS files:
+const token = document.querySelector('meta[name="_csrf"]').content;
+const header = document.querySelector('meta[name="_csrf_header"]').content;
+headers[header] = token;
+```
+
+```html
+<!-- DELETE these from HTML templates: -->
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+```
+
+If the app needs CSRF protection in Quarkus, use `quarkus-csrf-reactive` (form-based) or configure it via `quarkus.http.csrf`.
+
+### Phase 5 Reference: Main Class Removal
+
+Quarkus does not need a `@SpringBootApplication` main class — it auto-generates one.
+
+```java
+// DELETE this entire file (e.g., Application.java / MyApp.java):
+@SpringBootApplication
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+```
+
+If the main class contains `@Bean` definitions or `CommandLineRunner` logic, migrate those first:
+- `@Bean` methods → move to a `@ApplicationScoped` configuration class with `@Produces`
+- `CommandLineRunner` / `ApplicationRunner` → convert to `void onStart(@Observes StartupEvent event)`
+- Then delete the main class file
+
 ## Step 4: Verify the Migration
 
 Run each check in order. A check fails = stop and fix before continuing.
@@ -278,7 +433,7 @@ Present the review as a structured report:
 
 ### Summary
 - Strategy: [Full Migration / Spring Compatibility]
-- Phases completed: [X/5]
+- Phases completed: [X/7]
 - Checks passed: [X/6]
 
 ### Changes by Phase
