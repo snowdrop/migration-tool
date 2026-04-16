@@ -1,10 +1,6 @@
 ---
 name: migrate-spring-to-quarkus
 description: Migrate Spring Boot applications to Quarkus. Use when the user wants to migrate, convert, or port a Spring Boot app to Quarkus, or asks about Spring-to-Quarkus migration steps. Supports both Spring compatibility extensions and native Quarkus migration paths.
-compatibility: Requires Java 21 and Maven. Optionally uses mtool CLI for automated transformations.
-metadata:
-  author: snowdrop
-  version: "3.0"
 ---
 
 # Migrate Spring Boot to Quarkus
@@ -74,6 +70,174 @@ Execute each phase in order:
 3. **Complex changes** (view layer, REST clients, security): Explain before/after, get user confirmation. If you cannot migrate something, add a TODO comment — never silently delete.
 
 4. **After each phase**, verify: `mvn clean compile -DskipTests`
+
+### Phase 1 Reference: Build System (pom.xml)
+
+When migrating `pom.xml`, use these XML blocks as reference. Replace the Spring Boot parent and plugin with the Quarkus equivalents:
+
+**Remove** the Spring Boot parent:
+```xml
+<!-- DELETE this -->
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>...</version>
+</parent>
+```
+
+**Add** Quarkus BOM in `<dependencyManagement>`:
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.quarkus.platform</groupId>
+            <artifactId>quarkus-bom</artifactId>
+            <version>${quarkus.platform.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+**Add** the Quarkus Maven plugin and update compiler/surefire:
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>io.quarkus.platform</groupId>
+            <artifactId>quarkus-maven-plugin</artifactId>
+            <version>${quarkus.platform.version}</version>
+            <extensions>true</extensions>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>build</goal>
+                        <goal>generate-code</goal>
+                        <goal>generate-code-tests</goal>
+                        <goal>native-image-agent</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>${compiler-plugin.version}</version>
+            <configuration>
+                <parameters>true</parameters>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>${surefire-plugin.version}</version>
+            <configuration>
+                <systemPropertyVariables>
+                    <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                </systemPropertyVariables>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+Define `quarkus.platform.version` as a property (use the latest Quarkus release). Do NOT hardcode the version — check https://quarkus.io for the current release.
+
+### Phase 3 Reference: JPA / Data Layer (Panache)
+
+When using the **native Quarkus** migration path (not Spring compat), convert Spring Data repositories to Panache. Two patterns are available:
+
+**Active Record pattern** (entity contains query methods):
+
+```java
+// BEFORE: Spring Data
+public interface TodoRepository extends JpaRepository<Todo, Long> {
+    List<Todo> findByCompleted(boolean completed);
+}
+
+// AFTER: Panache Active Record
+@Entity
+public class Todo extends PanacheEntity {
+    public String title;
+    public boolean completed;
+
+    public static List<Todo> findByCompleted(boolean completed) {
+        return list("completed", completed);
+    }
+}
+// Usage: Todo.listAll(), Todo.findById(id), Todo.findByCompleted(true)
+// Note: 'id' field is provided by PanacheEntity — remove @Id from entity
+```
+
+**Repository pattern** (separate repository class):
+
+```java
+// BEFORE: Spring Data
+public interface TodoRepository extends JpaRepository<Todo, Long> {
+    List<Todo> findByCompleted(boolean completed);
+}
+
+// AFTER: Panache Repository
+@ApplicationScoped
+public class TodoRepository implements PanacheRepository<Todo> {
+    public List<Todo> findByCompleted(boolean completed) {
+        return list("completed", completed);
+    }
+}
+// Usage: todoRepository.listAll(), todoRepository.findById(id)
+```
+
+When the user chose **Spring compat** path, keep `JpaRepository`/`CrudRepository` interfaces — they work with `quarkus-spring-data-jpa`.
+
+### Phase 5 Reference: Thymeleaf → Qute Templates
+
+When migrating templates from Thymeleaf to Qute, use this syntax conversion table:
+
+| Thymeleaf | Qute | Notes |
+|---|---|---|
+| `th:text="${name}"` | `{name}` | Direct expression |
+| `th:utext="${html}"` | `{html.raw}` | Unescaped HTML output |
+| `th:each="item : ${items}"` | `{#for item in items}...{/for}` | Loop |
+| `th:if="${condition}"` | `{#if condition}...{/if}` | Conditional |
+| `th:unless="${condition}"` | `{#if !condition}...{/if}` | Negated conditional |
+| `th:href="@{/path/{id}(id=${item.id})}"` | `href="/path/{item.id}"` | URL with path param |
+| `th:action="@{/submit}"` | `action="/submit"` | Form action |
+| `th:value="${value}"` | `value="{value}"` | Input value |
+| `th:class="${active ? 'on' : 'off'}"` | `class="{active ? 'on' : 'off'}"` | Conditional class |
+| `th:fragment="name"` | `{#include name /}` | Template fragment/include |
+
+**Controller → Qute type-safe templates:**
+
+```java
+// BEFORE: Spring MVC + Thymeleaf
+@Controller
+public class TodoController {
+    @GetMapping("/todos")
+    public String list(Model model) {
+        model.addAttribute("todos", todoService.findAll());
+        return "todos";  // resolves to templates/todos.html
+    }
+}
+
+// AFTER: Quarkus + Qute
+@Path("/todos")
+@ApplicationScoped
+public class TodoResource {
+    @CheckedTemplate
+    public static class Templates {
+        public static native TemplateInstance todos(List<Todo> todos);
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public TemplateInstance list() {
+        return Templates.todos(todoService.findAll());
+    }
+}
+```
+
+File rename: `templates/todos.html` → `templates/TodoResource/todos.html` (must match the enclosing class name when using `@CheckedTemplate`).
 
 ## Step 4: Verify the Migration
 
