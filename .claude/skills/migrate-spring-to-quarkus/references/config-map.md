@@ -29,6 +29,13 @@
 | `spring.jpa.properties.hibernate.format_sql` | `quarkus.hibernate-orm.log.format-sql=true` |
 | `spring.jpa.open-in-view=false` | Not applicable (no OSIV in Quarkus) |
 | `spring.jpa.defer-datasource-initialization` | Use Flyway or `import.sql` |
+| `spring.jpa.hibernate.naming.physical-strategy` | `quarkus.hibernate-orm.physical-naming-strategy` |
+| `spring.jpa.hibernate.naming.implicit-strategy` | `quarkus.hibernate-orm.implicit-naming-strategy` |
+
+**Naming strategy warning:** Spring Boot defaults to `SpringPhysicalNamingStrategy` which converts camelCase to snake_case (`firstName` → `first_name`). Quarkus uses Hibernate 6's JPA-compliant default which **preserves Java names as-is** (`firstName` → `firstName`). If your database uses snake_case column names (common with Spring Boot apps), you must either:
+- Set a physical naming strategy: `quarkus.hibernate-orm.physical-naming-strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy`
+- Or update `@Column(name="...")` annotations on each entity field
+- **Also update `import.sql` / `data.sql` files** — column names must match the naming strategy
 
 ## Flyway
 
@@ -97,6 +104,25 @@
 | `src/main/resources/static/` | `src/main/resources/META-INF/resources/` |
 | `src/main/resources/public/` | `src/main/resources/META-INF/resources/` |
 | `spring.web.resources.static-locations` | Quarkus always uses `META-INF/resources/` |
+
+## Templating (Thymeleaf → Qute)
+
+| Spring Boot (Thymeleaf) | Quarkus (Qute) |
+|---|---|
+| `spring.thymeleaf.prefix=classpath:/templates/` | Templates in `src/main/resources/templates/` (same) |
+| `spring.thymeleaf.cache=false` | Automatic in dev mode |
+| Missing variable → empty string (silent) | Missing variable → **exception** (strict by default) |
+
+**Qute strict rendering** — this is a significant behavior difference:
+
+| Property | Default | Effect |
+|---|---|---|
+| `quarkus.qute.strict-rendering` | `true` | Missing variables throw `TemplateException` at runtime |
+| `quarkus.qute.property-not-found-strategy` | — | Only applies when `strict-rendering=false`: `noop` (empty, like Thymeleaf), `throw-exception`, `output-original` |
+
+**Migration approach:** Start with `strict-rendering=false` and `property-not-found-strategy=output-original` to find all missing variables, then fix them and enable strict mode.
+
+**`@CheckedTemplate`** validates expressions at **build time** — no Thymeleaf equivalent. Use `@CheckedTemplate(requireTypeSafeExpressions = false)` to relax during migration.
 
 ## Spring Cloud Config Server
 

@@ -156,6 +156,10 @@ This report helps the user understand exactly what happened and provides feedbac
 - **Test port**: Quarkus tests default to port 8081. If app uses 8081, add `quarkus.http.test-port=0`
 - **No component scanning**: Beans in external JARs need a Jandex index or `quarkus.index-dependency`
 - **Profile handling**: Spring's `application-{profile}.properties` → Quarkus `%profile.` prefix
+- **Naming strategy mismatch**: Spring Boot defaults to snake_case (`firstName` → `first_name`). Quarkus/Hibernate 6 preserves camelCase as-is. Set `quarkus.hibernate-orm.physical-naming-strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy` to match Spring Boot behavior. **Also update `import.sql`/`data.sql` column names** to match.
+- **JAX-RS path conflicts**: Spring allows multiple `@RestController` classes with overlapping `@RequestMapping` paths — JAX-RS does not. When migrating multiple controllers, check for duplicate `@Path` values and consolidate or disambiguate.
+- **Qute strict rendering**: Qute defaults to `strict-rendering=true` — missing template variables throw exceptions, unlike Thymeleaf which outputs empty strings. Start migration with `quarkus.qute.strict-rendering=false` and `quarkus.qute.property-not-found-strategy=output-original` to find issues, then enable strict mode.
+- **`@InjectMock` package change**: Since Quarkus 3.2, use `io.quarkus.test.InjectMock` (not `io.quarkus.test.junit.mockito.InjectMock`). Old package deprecated in 3.2, removed in 4.0.
 
 ## Spring Compat Extension Limitations
 

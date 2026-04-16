@@ -172,7 +172,7 @@
 | `@SpringBootTest` | `@QuarkusTest` | **Supported directly** | Works as Quarkus test annotation |
 | `@WebMvcTest` | `@QuarkusTest` + RestAssured | — | |
 | `@DataJpaTest` | `@QuarkusTest` with test profile | — | |
-| `@MockBean` | `@InjectMock` (`quarkus-junit5-mockito`) | — | |
+| `@MockBean` | `@InjectMock` (`io.quarkus.test.InjectMock`) | — | **Moved in 3.2**: old `io.quarkus.test.junit.mockito.InjectMock` deprecated, removed in 4.0 |
 | `@TestConfiguration` | `@QuarkusTestResource` | — | |
 | `@ActiveProfiles("test")` | `@TestProfile(TestProfile.class)` | — | |
 | `TestRestTemplate` | RestAssured (`given().when().get(...)`) | — | |
