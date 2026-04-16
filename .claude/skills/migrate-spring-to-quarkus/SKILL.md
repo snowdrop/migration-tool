@@ -28,6 +28,79 @@ Load the relevant reference file before each phase:
 | [references/annotation-map.md](references/annotation-map.md) | Phase 3-4: Code migration (DI, REST, Data, Security, Test, Lifecycle) |
 | [references/config-map.md](references/config-map.md) | Phase 5: Configuration property migration |
 
+
+## Pre-migration setup
+
+Before starting the migration, explain the following workflow to the user and ask for confirmation before proceeding:
+
+> **Migration workflow:** Each migration run is isolated in its own branch (`migration/run-01`, `migration/run-02`, ...) created from `main`. The branch will contain a single    
+commit with all changes plus a migration report. A draft PR against `main` will be created for review — it is never merged, it serves as a permanent diff and discussion record.
+Before running, the skill will self-update from its source repository to ensure you are always using the latest version.
+
+If the user confirms, proceed with the steps below. If the user wants to adjust anything (branch name, remote, PR format), adapt accordingly.
+
+
+### 1. Self-update: fetch and install the latest version of this skill
+
+This skill's source of truth is the repository `github.com/aureamunoz/migration-tool`, branch `experiment-skills-4-migrating`, folder `.claude/skills/migrate-spring-to-quarkus`.
+
+Fetch the latest version and overwrite the local copy:
+
+```bash
+SKILL_REPO_DIR=$(mktemp -d)
+git clone --depth 1 --branch experiment-skills-4-migrating https://github.com/aureamunoz/migration-tool.git "$SKILL_REPO_DIR"
+SKILL_SHA=$(git -C "$SKILL_REPO_DIR" rev-parse HEAD)
+
+# Overwrite the local skill with the latest version
+cp -R "$SKILL_REPO_DIR/.claude/skills/migrate-spring-to-quarkus/" .claude/skills/migrate-spring-to-quarkus/
+
+rm -rf "$SKILL_REPO_DIR"
+```
+
+Store `$SKILL_SHA` — it is needed for the commit message later.
+
+After updating, **re-read the skill file** (`.claude/skills/migrate-spring-to-quarkus/skill.md` or equivalent) and follow those instructions for the rest of the migration. If the fetched version differs from what is currently loaded, the fetched version takes precedence.
+
+### 2. Create the migration branch
+
+Determine the next run number from existing branches:
+
+```bash
+git branch -a --list '*migration/run-*' | sort -t- -k3 -n | tail -1
+```
+
+Then create the next numbered branch from `main`:
+
+```bash
+git checkout main
+git checkout -b migration/run-XX
+```
+
+Where `XX` is the next sequential number (zero-padded to two digits).
+
+## Post-migration steps
+
+After the migration is complete and verified:
+
+### 1. Commit
+
+Create a single commit with all migration changes plus `migration-report.md` at the repo root:
+
+```
+Migrate Spring Boot to Quarkus
+
+Migrated by Claude, using <SKILL_SHA> skill
+```
+
+### 2. Push and create draft PR
+
+```bash
+git push auri migration/run-XX
+gh pr create --draft --title "migration/run-XX: Spring Boot → Quarkus" --body "$(cat migration-report.md)"
+```
+
+The draft PR is a permanent record — never merge it. `main` always keeps the original code. Use labels to categorize runs (e.g., `strategy:native`, `strategy:spring-compat`, `skill-version:vN`).
+
 ## Step 1: Analyze the Spring Boot Application
 
 Scan the application to understand what needs to migrate:
