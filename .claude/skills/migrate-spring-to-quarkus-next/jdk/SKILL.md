@@ -9,7 +9,7 @@ metadata:
 
 # Phase 0: Check JDK Version
 
-Verify that the installed JDK meets the minimum version requirement (JDK 21) before proceeding with the migration.
+Verify that the installed JDK meets the version requirement using the user's prompt VERSION before proceeding with the migration.
 
 ## Preconditions
 

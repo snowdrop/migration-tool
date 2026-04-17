@@ -26,9 +26,9 @@ All modules and their SKILL.md are located under:
 .claude/skills/spring-boot-to-quarkus/<module-folder>/SKILL.md
 ```
 
-| Domain             | Gate Check (precondition)                                                                                                               | Gate Result                                                             |
-|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
-| `jdk`              | JDK 21+ required                                                                                                                        | Check java version                                                      | **ALWAYS** — stop migration if < 21 |
+| Domain             | Gate Check (precondition)                                                | Parameters            | Gate Result                          |
+|--------------------|--------------------------------------------------------------------------|-----------------------|--------------------------------------|
+| `jdk`              | JDK 21+ required                                                         | `VERSION=21`          | **ALWAYS** — stop migration if < 21  |
 
 ## Execution Protocol
 
@@ -48,6 +48,7 @@ For each phase, follow this protocol:
      Read `.claude/skills/migrate-spring-to-quarkus-next/{domain}/SKILL.md`
 
   4. EXECUTE
+     Pass the **Parameters** from the gate table to the loaded skill.
      Follow the Migration Steps defined in the loaded SKILL.md.
 
   5. When applicable, compile the application
