@@ -159,3 +159,24 @@ Quarkus auto-generates a main class — delete the `@SpringBootApplication` file
 
 - `@Bean` methods → move to an `@ApplicationScoped` class with `@Produces`
 - `CommandLineRunner` / `ApplicationRunner` → `void onStart(@Observes StartupEvent event)`
+
+## Watch out
+
+- **Missing `@Transactional`**: Quarkus uses `jakarta.transaction.Transactional`, not Spring's
+- **Bean discovery**: Quarkus uses build-time CDI; beans must have a scope annotation
+- **No OSIV**: Quarkus doesn't have Open Session in View; lazy loading outside transactions will fail
+- **No component scanning**: Beans in external JARs need a Jandex index or `quarkus.index-dependency`
+- **JAX-RS path conflicts**: Spring allows overlapping `@RequestMapping` paths — JAX-RS does not. Check for duplicate `@Path` values
+
+## Spring Compat Extension Limitations
+
+When using the compatibility strategy (`quarkus-spring-*` extensions), be aware of these **verified limitations from the Quarkus source code**:
+
+| Extension | What does NOT work |
+|---|---|
+| `quarkus-spring-di` | `@Primary`, `@Conditional*`, `@Profile`, `@Lazy` not processed. SpEL `#{...}` in `@Value` throws error. `@Bean` must be inside `@Configuration` class. |
+| `quarkus-spring-web` | Only `@RestController` — plain `@Controller` not supported. Only one `@RestControllerAdvice` per app. `@CrossOrigin`, `@InitBinder`, `@ModelAttribute` not supported. No reactive types (`Mono`, `Flux`). |
+| `quarkus-spring-security` | Limited SpEL in `@PreAuthorize`: only `hasRole`, `hasAnyRole`, `permitAll`, `denyAll`, `isAuthenticated`, `@bean.method()`, param comparison. Cannot mix `and`/`or` operators. Cannot combine `@Secured` with `@PreAuthorize`. |
+| `quarkus-spring-data-jpa` | SpEL `#{...}` in `@Query` not supported. No `Distinct` queries. Limited custom repository fragment support. |
+| `quarkus-spring-cache` | Single cache name only (no arrays). `key`, `condition`, `unless`, `keyGenerator`, `cacheManager` parameters NOT supported. No `@Caching` or `@CacheConfig`. |
+| `quarkus-spring-scheduled` | `fixedDelay` NOT supported (only `fixedRate`). Cannot combine `initialDelay` with `cron`. |

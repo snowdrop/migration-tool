@@ -94,4 +94,8 @@ Rename Spring properties to Quarkus equivalents using config-map.md. Key mapping
 - `server.port` → `quarkus.http.port`
 - `logging.level.*` → `quarkus.log.category."*".level`
 
-**Watch out for naming strategy** — see Common Pitfalls in the orchestrator.
+## Watch out
+
+- **Profile handling**: Spring's `application-{profile}.properties` → Quarkus `%profile.` prefix in a single `application.properties`
+- **Naming strategy mismatch**: Spring Boot defaults to snake_case (`firstName` → `first_name`). Quarkus/Hibernate 6 preserves camelCase. Set `quarkus.hibernate-orm.physical-naming-strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy`. **Also update `import.sql`/`data.sql` column names**.
+- **`quarkus-spring-boot-properties`** (Spring compat only): `@ConstructorBinding` NOT supported (needs no-arg constructor + setters). `Map<K,V>` types NOT supported.

@@ -62,7 +62,7 @@ Present a summary table with area, findings, and complexity. Then ask the user:
 
 ## Step 2: Execute Modules
 
-### Decision Gate Tablet 
+### Decision Gate Table 
 
 For each module, evaluate whether it applies to this project. A module executes only when its gate is **PASS**. 
 Inspect the project to determine the gate result — do not rely on blind grep commands; use your understanding of the codebase.
@@ -92,15 +92,6 @@ FOR module IN [build, code, frontend, testing, cleanup]:
      Fails → diagnose and fix before proceeding
   6. LOG — mark checkbox as done
 ```
-
-### Execution Checklist
-
-- [ ] **build**: Spring Boot build markers in pom.xml?
-- [ ] **code**: Spring annotations in Java sources?
-- [ ] **frontend**: Templates or static resources?
-- [ ] **testing**: Spring test annotations?
-- [ ] **cleanup**: ALWAYS
-- [ ] **verification**: ALWAYS
 
 ### Running Individual Modules
 
@@ -182,31 +173,3 @@ Present the review as a structured report:
 ## Step 5: Commit and PR (only if git workflow was accepted)
 
 Follow [modules/git.md](modules/git.md) — **Post-migration** section. Ask the user for confirmation before committing, and again before pushing / creating the draft PR. Do not proceed with either action without explicit user approval.
-
-## Common Pitfalls
-
-- **Missing `@Transactional`**: Quarkus uses `jakarta.transaction.Transactional`, not Spring's
-- **Bean discovery**: Quarkus uses build-time CDI; beans must have a scope annotation
-- **No OSIV**: Quarkus doesn't have Open Session in View; lazy loading outside transactions will fail
-- **Static resources**: Place in `src/main/resources/META-INF/resources/` (not `static/`)
-- **Test port**: Quarkus tests default to port 8081. If app uses 8081, add `quarkus.http.test-port=0`
-- **No component scanning**: Beans in external JARs need a Jandex index or `quarkus.index-dependency`
-- **Profile handling**: Spring's `application-{profile}.properties` → Quarkus `%profile.` prefix
-- **Naming strategy mismatch**: Spring Boot defaults to snake_case (`firstName` → `first_name`). Quarkus/Hibernate 6 preserves camelCase. Set `quarkus.hibernate-orm.physical-naming-strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy`. **Also update `import.sql`/`data.sql` column names**.
-- **JAX-RS path conflicts**: Spring allows overlapping `@RequestMapping` paths — JAX-RS does not. Check for duplicate `@Path` values.
-- **Qute strict rendering**: Defaults to `strict-rendering=true` — missing variables throw exceptions. Start with `quarkus.qute.strict-rendering=false` and `quarkus.qute.property-not-found-strategy=output-original` during migration.
-- **`@InjectMock` package change**: Since Quarkus 3.2, use `io.quarkus.test.InjectMock` (not `io.quarkus.test.junit.mockito.InjectMock`). Old package deprecated in 3.2, removed in 4.0.
-
-## Spring Compat Extension Limitations
-
-When using the compatibility strategy (`quarkus-spring-*` extensions), be aware of these **verified limitations from the Quarkus source code**:
-
-| Extension | What does NOT work |
-|---|---|
-| `quarkus-spring-di` | `@Primary`, `@Conditional*`, `@Profile`, `@Lazy` not processed. SpEL `#{...}` in `@Value` throws error. `@Bean` must be inside `@Configuration` class. |
-| `quarkus-spring-web` | Only `@RestController` — plain `@Controller` not supported. Only one `@RestControllerAdvice` per app. `@CrossOrigin`, `@InitBinder`, `@ModelAttribute` not supported. No reactive types (`Mono`, `Flux`). |
-| `quarkus-spring-security` | Limited SpEL in `@PreAuthorize`: only `hasRole`, `hasAnyRole`, `permitAll`, `denyAll`, `isAuthenticated`, `@bean.method()`, param comparison. Cannot mix `and`/`or` operators. Cannot combine `@Secured` with `@PreAuthorize`. |
-| `quarkus-spring-data-jpa` | SpEL `#{...}` in `@Query` not supported. No `Distinct` queries. Limited custom repository fragment support. |
-| `quarkus-spring-cache` | Single cache name only (no arrays). `key`, `condition`, `unless`, `keyGenerator`, `cacheManager` parameters NOT supported. No `@Caching` or `@CacheConfig`. |
-| `quarkus-spring-scheduled` | `fixedDelay` NOT supported (only `fixedRate`). Cannot combine `initialDelay` with `cron`. |
-| `quarkus-spring-boot-properties` | `@ConstructorBinding` NOT supported (needs no-arg constructor + setters). `Map<K,V>` types NOT supported. |
