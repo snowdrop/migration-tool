@@ -20,10 +20,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -144,7 +141,8 @@ class RulesTest extends BaseRulesTest {
                 // promptMessage (deprecated en favor de tasks)
                 Arrays.asList(
                         "Add to the pom.xml file the Quarkus BOM dependency within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core",
-                        "The version of quarkus to be used and to included within the pom.xml properties is 3.31.3.")) };
+                        "The version of quarkus to be used and to included within the pom.xml properties is 3.31.3."),
+                new ArrayList<>()) };
 
         // Manual Instructions
         Rule.Manual[] manualInstructions = new Rule.Manual[] { new Rule.Manual(
@@ -182,7 +180,7 @@ class RulesTest extends BaseRulesTest {
         // AI Instructions
         Rule.Ai[] aiInstructions = new Rule.Ai[] { new Rule.Ai(null,
                 // promptMessage (deprecated en favor de tasks)
-                aiTasks) };
+                aiTasks, new ArrayList<>()) };
 
         // Manual Instructions
         Rule.Manual[] manualInstructions = new Rule.Manual[] { new Rule.Manual("See openrewrite instructions") };
@@ -220,7 +218,7 @@ class RulesTest extends BaseRulesTest {
         // AI Instructions
         Rule.Ai[] aiInstructions = new Rule.Ai[] { new Rule.Ai(null,
                 // promptMessage (deprecated en favor de tasks)
-                aiTasks) };
+                aiTasks, new ArrayList<>()) };
 
         // Manual Instructions
         Rule.Manual[] manualInstructions = new Rule.Manual[] { new Rule.Manual("See openrewrite instructions") };
@@ -229,7 +227,7 @@ class RulesTest extends BaseRulesTest {
         Rule.Openrewrite[] openrewriteInstructions = new Rule.Openrewrite[] { new Rule.Openrewrite(
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
-                null, // recipeList (aquí podrías añadir los recipes si los necesitas)
+                null, // recipeList (You could add the recipes here if you need them.)
                 new String[] { "dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
                         "org.openrewrite:rewrite-maven:8.73.0" }) };
 
@@ -262,8 +260,8 @@ class RulesTest extends BaseRulesTest {
 
         // AI Instructions
         Rule.Ai[] aiInstructions = new Rule.Ai[] { new Rule.Ai(null,
-                // promptMessage (deprecated en favor de tasks)
-                List.of("TODO")) };
+                // promptMessage (deprecated in favor of tasks)
+                List.of("TODO"), new ArrayList<>()) };
 
         // Manual Instructions
         Rule.Manual[] manualInstructions = new Rule.Manual[] { new Rule.Manual("See openrewrite instructions") };

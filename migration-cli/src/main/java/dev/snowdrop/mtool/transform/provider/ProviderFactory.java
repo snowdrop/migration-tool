@@ -1,6 +1,7 @@
 package dev.snowdrop.mtool.transform.provider;
 
 import dev.snowdrop.mtool.transform.provider.impl.AiProvider;
+import dev.snowdrop.mtool.transform.provider.impl.AiSkillsProvider;
 import dev.snowdrop.mtool.transform.provider.impl.ManualProvider;
 import dev.snowdrop.mtool.transform.provider.impl.OpenRewriteProvider;
 
@@ -18,6 +19,7 @@ public class ProviderFactory {
     static {
         registerProvider(new OpenRewriteProvider());
         registerProvider(new AiProvider());
+        registerProvider(new AiSkillsProvider());
         registerProvider(new ManualProvider());
     }
 

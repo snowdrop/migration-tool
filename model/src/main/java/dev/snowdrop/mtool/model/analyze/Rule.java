@@ -14,7 +14,7 @@ public record Rule(String category, @JsonProperty("customVariables") List<String
     public record Instruction(Ai[] ai, Manual[] manual, Openrewrite[] openrewrite) {
     }
 
-    public record Ai(@Deprecated String promptMessage, List<String> tasks) {
+    public record Ai(@Deprecated String promptMessage, List<String> tasks, List<String> skills) {
     }
 
     public record Manual(String todo) {

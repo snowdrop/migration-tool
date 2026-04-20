@@ -6,6 +6,7 @@ import dev.snowdrop.mtool.transform.TransformationService;
 import dev.snowdrop.mtool.model.transform.MigrationTasksExport;
 import dev.snowdrop.mtool.transform.provider.ai.Assistant;
 import dev.snowdrop.mtool.transform.provider.ai.FileSystemTool;
+import dev.snowdrop.mtool.transform.provider.ai.SkillsAssistant;
 import dev.snowdrop.mtool.transform.provider.impl.OpenRewriteProvider;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionContext;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionResult;
@@ -40,7 +41,7 @@ public class TransformCommand implements Runnable {
     private boolean dryRun;
 
     @CommandLine.Option(names = { "-p",
-            "--provider" }, description = "Migration provider to use (ai, openrewrite, manual). Default: from migration.provider property")
+            "--provider" }, description = "Migration provider to use (ai, ai-skill, openrewrite, manual). Default: from migration.provider property")
     @ConfigProperty(name = "migration.provider")
     private String provider;
 
@@ -50,8 +51,14 @@ public class TransformCommand implements Runnable {
     @ConfigProperty(name = "openrewrite.maven-plugin.version")
     private String openRewriteMavenPluginVersion;
 
+    @ConfigProperty(name = "quarkus.langchain4j.skills.directories")
+    private String aiAgentSkillsHomeDir;
+
     @Inject
     Assistant aiAssistant;
+
+    @Inject
+    SkillsAssistant aiSkillsAssistant;
 
     @Inject
     FileSystemTool fileSystemTool;
@@ -162,8 +169,8 @@ public class TransformCommand implements Runnable {
 
         // Configure the Context with the information used by the Provider
         fileSystemTool.setBasePath(projectPath);
-        ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider, aiAssistant,
-                openRewriteMavenPluginVersion, compositeRecipeName);
+        ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider, aiAssistant, aiSkillsAssistant,
+                aiAgentSkillsHomeDir, openRewriteMavenPluginVersion, compositeRecipeName);
 
         if ("openrewrite".equals(provider)) {
             // Batch all OpenRewrite tasks into a single Maven execution
@@ -212,7 +219,7 @@ public class TransformCommand implements Runnable {
         var instructions = task.getRule().instructions();
         boolean hasInstructions = instructions != null && switch (provider) {
             case "openrewrite" -> instructions.openrewrite() != null;
-            case "ai" -> instructions.ai() != null;
+            case "ai", "ai-skills" -> instructions.ai() != null;
             case "manual" -> instructions.manual() != null;
             default -> false;
         };
