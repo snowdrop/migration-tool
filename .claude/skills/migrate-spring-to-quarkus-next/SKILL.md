@@ -1,6 +1,8 @@
 ---
-name: migrate-spring-to-quarkus-next
-description: Migrate Spring Boot applications to Quarkus using a modular, gate-driven approach. Supports both Spring compatibility extensions and native Quarkus migration paths. Use when the user wants to migrate, convert, or port a Spring Boot app to Quarkus.
+name: migrate-spring-to-quarkus
+description: Migrates Spring Boot applications to Quarkus using a modular, gate-driven approach. Supports Spring compatibility extensions and native Quarkus migration paths. 
+  Use when the user wants to migrate, convert, or port a Spring Boot app to Quarkus, mentions "spring to quarkus", "quarkus migration", "replace spring",
+  or asks about migrating "pom.xml", "Spring MVC", "Spring Data JPA", "Thymeleaf", "@SpringBootApplication".
 license: Apache-2.0
 metadata:
   author: Quarkus Team - https://github.com/quarkusio/quarkus
@@ -33,18 +35,6 @@ Load the relevant reference file when working on a module:
 | [references/config-map.md](references/config-map.md) | Build module: configuration property migration |
 
 
-## Pre-migration setup
-
-### Git branch (optional)
-
-Check if the target project is a git repository. If it is, propose the git workflow to the user:
-
-> **Migration workflow:** Each migration run can be isolated in its own branch (`migration/run-01`, `migration/run-02`, ...) created from `main`. The branch will contain a single commit with all changes plus a migration report. A draft PR against `main` will be created for review — it is never merged, it serves as a permanent diff and discussion record. **Would you like to use this workflow?**
-
-- **User accepts** → follow [modules/git.md](modules/git.md) — **Pre-migration** section. Propose the branch name and wait for confirmation before creating it.
-- **User declines** → skip git management entirely, proceed with migration in the current branch.
-- **Not a git repo** → inform the user, skip git management, proceed normally.
-
 ## Step 1: Analyze & Choose Strategy
 
 Scan the application to understand what needs to migrate:
@@ -55,12 +45,24 @@ Scan the application to understand what needs to migrate:
 - **UI / View layer**: Check for Thymeleaf/JSP templates, static resources, Model+View patterns
 - **Tests**: Check for `@SpringBootTest`, `@WebMvcTest`, `@DataJpaTest`
 
-Present a summary table with area, findings, and complexity. Then ask the user:
+Present a summary table with area, findings, and complexity. Then ask the user to choose a strategy:
 
 - **Spring compat** (recommended): Use `quarkus-spring-web`, `quarkus-spring-data-jpa`, etc. Minimal code changes.
 - **Native Quarkus**: Replace all Spring annotations with JAX-RS/CDI. More work, full Quarkus experience.
 
-## Step 2: Execute Modules
+**Stop here and wait for the user's response before continuing.** Do not ask about git workflow or anything else in the same message.
+
+## Step 2: Git branch (optional)
+
+After the user has chosen a strategy, check if the target project is a git repository. If it is, propose the git workflow:
+
+> **Migration workflow:** Each migration run can be isolated in its own branch (`migration/run-01`, `migration/run-02`, ...) created from `main`. The branch will contain a single commit with all changes plus a migration report. A draft PR against `main` will be created for review — it is never merged, it serves as a permanent diff and discussion record. **Would you like to use this workflow?**
+
+- **User accepts** → follow [modules/git.md](modules/git.md) — **Pre-migration** section. Propose the branch name and wait for confirmation before creating it.
+- **User declines** → skip git management entirely, proceed with migration in the current branch.
+- **Not a git repo** → inform the user, skip git management, proceed normally.
+
+## Step 3: Execute Modules
 
 ### Decision Gate Table 
 
@@ -103,7 +105,7 @@ To run a single module outside the full migration flow, read its file directly:
 
 The module will use the current project state and the chosen strategy (if already decided). If no strategy has been chosen, the module will ask.
 
-## Step 3: Verify the Migration
+## Step 4: Verify the Migration
 
 Run each check in order. A check fails = stop and fix before continuing.
 
@@ -116,7 +118,7 @@ Run each check in order. A check fails = stop and fix before continuing.
 | 5 | **Starts up** | `mvn quarkus:dev` | App starts, `curl http://localhost:8080/q/health` returns UP |
 | 6 | **No leftover templates** | Search for Thymeleaf/JSP references | None remaining (unless intentionally kept) |
 
-## Step 4: Migration Review (Self-Reflection)
+## Step 5: Migration Review (Self-Reflection)
 
 Answer each question honestly:
 
@@ -124,7 +126,7 @@ Answer each question honestly:
 2. **What required manual judgment?** Non-obvious decisions made.
 3. **What was left as TODO?** Every `// TODO: Migration required` comment and why.
 4. **Was any code removed?** What, where, justification. Flag runtime risks.
-5. **What checks failed initially?** Failures from Step 3 and how you fixed them.
+5. **What checks failed initially?** Failures from Step 4 and how you fixed them.
 6. **What's missing from the skill references?** Mappings you had to figure out.
 
 ### Migration Report
@@ -170,6 +172,6 @@ Present the review as a structured report:
 - [Any missing mappings, unclear instructions, or edge cases discovered]
 ```
 
-## Step 5: Commit and PR (only if git workflow was accepted)
+## Step 6: Commit and PR (only if git workflow was accepted)
 
 Follow [modules/git.md](modules/git.md) — **Post-migration** section. Ask the user for confirmation before committing, and again before pushing / creating the draft PR. Do not proceed with either action without explicit user approval.

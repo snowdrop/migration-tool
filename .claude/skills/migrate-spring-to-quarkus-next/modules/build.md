@@ -9,6 +9,7 @@ Load [references/dependency-map.md](../references/dependency-map.md) and [refere
 - [ ] Replace Spring Boot parent with Quarkus BOM
 - [ ] Replace `spring-boot-maven-plugin` with `quarkus-maven-plugin`
 - [ ] Update `maven-compiler-plugin` and `maven-surefire-plugin`
+- [ ] Add `native` profile`
 - [ ] Replace Spring starters with Quarkus equivalents (use dependency-map.md)
 - [ ] Migrate `application.properties` / `application.yml` (use config-map.md)
 - [ ] Remove unused Spring-only dependencies (`spring-boot-devtools`, etc.)
@@ -84,6 +85,27 @@ Load [references/dependency-map.md](../references/dependency-map.md) and [refere
 ```
 
 Define `quarkus.platform.version` as a Maven property. Do NOT hardcode the version — use the latest Quarkus release.
+
+**Add** Quarkus native profile:
+
+```xml
+<profiles>
+        <profile>
+            <id>native</id>
+            <activation>
+                <property>
+                    <name>native</name>
+                </property>
+            </activation>
+            <properties>
+                <quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
+                <skipITs>false</skipITs>
+                <quarkus.native.enabled>true</quarkus.native.enabled>
+            </properties>
+        </profile>
+    </profiles>
+```
+ 
 
 ## Configuration Migration
 
