@@ -25,8 +25,7 @@
         <gson.version>2.13.2</gson.version>
         <google-auth-library-oauth2-http.version>1.46.0</google-auth-library-oauth2-http.version>
         <jackson.version>2.18.0</jackson.version>
-        <langchain4j-anthropic.version>1.13.0</langchain4j-anthropic.version>
-        <langchain4j-vertex-ai-anthropic.version>1.13.0-beta23</langchain4j-vertex-ai-anthropic.version>
+        <langchain4j-bom.version>1.13.0</langchain4j-bom.version>
         <lombok.version>1.18.44</lombok.version>
         <org.eclipse.lsp4j.version>0.24.0</org.eclipse.lsp4j.version>
         <openrewrite-recipe-bom.version>3.27.1</openrewrite-recipe-bom.version>
@@ -101,12 +100,21 @@
             </dependency>
 
             <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-bom</artifactId>
+                <version>${langchain4j-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.openrewrite.recipe</groupId>
                 <artifactId>rewrite-recipe-bom</artifactId>
                 <version>${openrewrite-recipe-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
@@ -174,16 +182,6 @@
                 <groupId>io.quarkiverse.langchain4j</groupId>
                 <artifactId>quarkus-langchain4j-agentic</artifactId>
                 <version>${quarkus-langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-anthropic</artifactId>
-                <version>${langchain4j-anthropic.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-vertex-ai-anthropic</artifactId>
-                <version>${langchain4j-vertex-ai-anthropic.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.quarkiverse.langchain4j</groupId>

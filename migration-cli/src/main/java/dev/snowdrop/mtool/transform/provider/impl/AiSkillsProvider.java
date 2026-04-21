@@ -56,8 +56,10 @@ public class AiSkillsProvider implements MigrationProvider {
         // We only process until now only one instruction/rule !
         var ai = Arrays.stream(task.getRule().instructions().ai()).findFirst().orElse(null);
 
+        assert ai != null;
         if (ai.skills() == null || ai.skills().isEmpty()) {
-            return ExecutionResult.failure("No tasks defined with AI instruction, skipping", null);
+            return ExecutionResult
+                    .warning(String.format("No AI Skills defined part of the rule: %s. Skipping", task.getRule().ruleID()));
         }
 
         try {
