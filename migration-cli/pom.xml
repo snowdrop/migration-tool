@@ -84,8 +84,9 @@
             <version>${quarkus-langchain4j.version}</version>
         </dependency>
         <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-skills</artifactId>
+            <groupId>io.quarkiverse.langchain4j</groupId>
+            <artifactId>quarkus-langchain4j-skills</artifactId>
+            <version>${quarkus-langchain4j.version}</version>
         </dependency>
 
         <!-- lsp4j -->
