@@ -14,6 +14,7 @@ import io.quarkiverse.langchain4j.vertexai.runtime.anthropic.VertexAiAnthropicCh
 import org.jboss.logging.Logger;
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,7 @@ public class AiSkillsProvider implements MigrationProvider {
         String location = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_LOCATION", "dummy");
         String modelId = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_MODEL_ID", "claude-opus-4-6");
         String publisher = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_PUBLISHER", "anthropic");
+        int duration = Integer.parseInt(getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_DURATION", "30"));
 
         validateRequired(projectId, "QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_PROJECT_ID");
         validateRequired(location, "QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_LOCATION");
@@ -37,8 +39,9 @@ public class AiSkillsProvider implements MigrationProvider {
                 .modelId(modelId)
                 .publisher(publisher)
                 .maxOutputTokens(20000)
-                .logRequests(true)
-                .logResponses(true)
+                .timeout(Duration.ofSeconds(duration))
+                .logRequests(false)
+                .logResponses(false)
                 .build();
     }
 
@@ -110,10 +113,10 @@ public class AiSkillsProvider implements MigrationProvider {
 
         skills.forEach(s -> {
             logger.infof("============= Sending user message to the model");
-            Skills agentSkills = Skills.from(FileSystemSkillLoader.loadSkill(Path.of(ctx.aiSkillsHomeDir(), s)));
+            Skills agentSkill = Skills.from(FileSystemSkillLoader.loadSkill(Path.of(ctx.aiSkillsHomeDir(), s)));
             SkillsAssistant service = AiServices.builder(SkillsAssistant.class)
                     .chatModel(model)
-                    .toolProvider(agentSkills.toolProvider())
+                    .systemMessage(agentSkill.formatAvailableSkills())
                     .build();
 
             String response = service.chat("Migrate the application using the SKILL provided");
