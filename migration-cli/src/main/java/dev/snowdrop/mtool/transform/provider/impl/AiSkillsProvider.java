@@ -1,12 +1,14 @@
 package dev.snowdrop.mtool.transform.provider.impl;
 
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.response.*;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.skills.FileSystemSkillLoader;
 import dev.langchain4j.skills.Skills;
 import dev.snowdrop.mtool.model.analyze.MigrationTask;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.transform.provider.MigrationProvider;
+import dev.snowdrop.mtool.transform.provider.ai.FileSystemTool;
 import dev.snowdrop.mtool.transform.provider.ai.SkillsAssistant;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionContext;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionResult;
@@ -19,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static dev.langchain4j.model.LambdaStreamingResponseHandler.onPartialResponse;
+
 public class AiSkillsProvider implements MigrationProvider {
     private static final Logger logger = Logger.getLogger(AiSkillsProvider.class);
     private ChatModel model;
@@ -29,6 +33,9 @@ public class AiSkillsProvider implements MigrationProvider {
         String modelId = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_MODEL_ID", "claude-opus-4-6");
         String publisher = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_PUBLISHER", "anthropic");
         int duration = Integer.parseInt(getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_DURATION", "30"));
+        int maxTokens = Integer.parseInt(getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_MAX_TOKENS", "1000"));
+        Boolean logRequests = Boolean.valueOf(getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_LOG_REQUESTS", "false"));
+        Boolean logResponses = Boolean.valueOf(getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_LOG_RESPONSES", "false"));
 
         validateRequired(projectId, "QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_PROJECT_ID");
         validateRequired(location, "QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_LOCATION");
@@ -38,10 +45,10 @@ public class AiSkillsProvider implements MigrationProvider {
                 .location(location)
                 .modelId(modelId)
                 .publisher(publisher)
-                .maxOutputTokens(20000)
+                .maxOutputTokens(maxTokens)
                 .timeout(Duration.ofSeconds(duration))
-                .logRequests(false)
-                .logResponses(false)
+                .logRequests(logRequests)
+                .logResponses(logResponses)
                 .build();
     }
 
@@ -114,15 +121,16 @@ public class AiSkillsProvider implements MigrationProvider {
         // Claude: .claude/skills
 
         skills.forEach(s -> {
-            logger.infof("============= Sending user message to the model");
+            logger.infof("=== Processing SKILL: %S", s);
             Skills agentSkill = Skills.from(FileSystemSkillLoader.loadSkill(Path.of(ctx.aiSkillsHomeDir(), s)));
             SkillsAssistant service = AiServices.builder(SkillsAssistant.class)
                     .chatModel(model)
                     .systemMessage(agentSkill.formatAvailableSkills())
                     .build();
 
-            String response = service.chat("Migrate the application using the SKILL provided");
-            logger.infof("============= Model response: %s", response);
+            String response = service
+                    .chat(String.format("Migrate the application of the current directory using the SKILL: %s", s));
+            logger.infof("=== Model response: %s", response);
         });
 
         return true;
