@@ -26,6 +26,7 @@ public class AiSkillsProvider implements MigrationProvider {
         String projectId = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_PROJECT_ID", "dummy");
         String location = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_LOCATION", "dummy");
         String modelId = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_MODEL_ID", "claude-opus-4-6");
+        String publisher = getEnv("QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_PUBLISHER", "anthropic");
 
         validateRequired(projectId, "QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_PROJECT_ID");
         validateRequired(location, "QUARKUS_LANGCHAIN4J_VERTEXAI_ANTHROPIC_LOCATION");
@@ -34,6 +35,7 @@ public class AiSkillsProvider implements MigrationProvider {
                 .projectId(projectId)
                 .location(location)
                 .modelId(modelId)
+                .publisher(publisher)
                 .maxOutputTokens(20000)
                 .logRequests(true)
                 .logResponses(true)
@@ -106,7 +108,6 @@ public class AiSkillsProvider implements MigrationProvider {
         // TODO: Have a property to set the SKILL Agent home folder
         // Claude: .claude/skills
 
-        // How could we call a specific skill ?
         skills.forEach(s -> {
             logger.infof("============= Sending user message to the model");
             Skills agentSkills = Skills.from(FileSystemSkillLoader.loadSkill(Path.of(ctx.aiSkillsHomeDir(), s)));
