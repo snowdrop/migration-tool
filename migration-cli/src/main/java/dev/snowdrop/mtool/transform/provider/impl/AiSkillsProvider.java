@@ -126,6 +126,7 @@ public class AiSkillsProvider implements MigrationProvider {
             SkillsAssistant service = AiServices.builder(SkillsAssistant.class)
                     .chatModel(model)
                     .systemMessage(agentSkill.formatAvailableSkills())
+                    .maxSequentialToolsInvocations(100)
                     .build();
 
             String response = service
