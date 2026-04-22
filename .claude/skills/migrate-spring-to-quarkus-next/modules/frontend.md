@@ -4,11 +4,25 @@ Migrate templates, static assets, and view-related code from Spring MVC + Thymel
 
 ## What to do
 
+- [ ] Ensure `quarkus-rest-qute` dependency is in `pom.xml`
 - [ ] Convert Thymeleaf templates to Qute syntax
 - [ ] Move static resources from `static/` to `META-INF/resources/`
 - [ ] Remove Spring CSRF tokens from HTML and JavaScript
 - [ ] Rename template directories to match `@CheckedTemplate` class names
 - [ ] Compile: `mvn clean compile -DskipTests`
+
+## Dependency
+
+Use `quarkus-rest-qute` — **never** `quarkus-qute` alone:
+
+```xml
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-rest-qute</artifactId>
+</dependency>
+```
+
+`quarkus-qute` is the standalone engine without REST integration. It will fail at runtime when JAX-RS resources return `TemplateInstance`. `quarkus-rest-qute` includes Qute and adds the REST integration layer.
 
 ## Thymeleaf → Qute Syntax Conversion
 

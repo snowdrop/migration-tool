@@ -1,6 +1,8 @@
 ---
-name: migrate-spring-to-quarkus
-description: Migrate Spring Boot applications to Quarkus. Use when the user wants to migrate, convert, or port a Spring Boot app to Quarkus, or asks about Spring-to-Quarkus migration steps. Supports both Spring compatibility extensions and native Quarkus migration paths.
+name: migrate-spring-to-quarkus-old
+description: Migrate Spring Boot applications to Quarkus. Use when the user wants to migrate, convert, 
+  or port a Spring Boot app to Quarkus, or asks about Spring-to-Quarkus migration steps. 
+  Supports both Spring compatibility extensions and native Quarkus migration paths.
 ---
 
 # Migrate Spring Boot to Quarkus

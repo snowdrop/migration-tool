@@ -38,7 +38,7 @@
 
 | Spring Boot | Quarkus |
 |---|---|
-| `spring-boot-starter-thymeleaf` | `quarkus-qute-web` (preferred) or `quarkus-thymeleaf` (community) |
+| `spring-boot-starter-thymeleaf` | `quarkus-rest-qute` (when controllers return `TemplateInstance`) or `quarkus-qute-web` (auto-serve templates without REST resources). **Never** use `quarkus-qute` alone — it lacks REST integration. |
 | `spring-boot-starter-freemarker` | `quarkus-freemarker` |
 
 ## Scheduling / DI / Config
