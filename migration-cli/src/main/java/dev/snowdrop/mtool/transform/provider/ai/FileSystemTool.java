@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A LangChain4j tool that exposes file system read and write operations to AI agents.
@@ -63,7 +65,29 @@ public class FileSystemTool {
             logger.debugf("Reading file: %s", resolved);
             return Files.readString(resolved);
         } catch (IOException e) {
-            return "Error reading file: " + e.getMessage();
+            return String.format("Skip the path: %s as this %s", path, e.getMessage());
+        }
+    }
+
+    @Tool("Whenever you need to know the files part of an application to understand the java project structure")
+    public List<String> listFiles(@P("The relative path from the project root. Use '.' for the root directory. " +
+            "Example: 'src/main/java' or 'src/test/resources'. " +
+            "Do not use absolute paths or leading slashes.") String path)
+            throws IOException {
+
+        Path resolved = resolve(path);
+
+        if (!resolved.startsWith(basePath)) {
+            return List.of("Error: Access denied. You cannot look outside the project root.");
+        }
+
+        if (!Files.exists(resolved)) {
+            return List.of("Error: Directory does not exist: " + path);
+        }
+
+        try (var stream = Files.list(resolved)) {
+            return stream.map(p -> basePath.relativize(p).toString())
+                    .collect(Collectors.toList());
         }
     }
 
