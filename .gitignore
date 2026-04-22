@@ -21,7 +21,8 @@ target
 ## AI
 .bob
 .moderne
-.claude
+.claude/*
+!.claude/skills/
 
 ## Openrewrite
 rewrite.yml

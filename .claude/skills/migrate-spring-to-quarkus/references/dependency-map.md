@@ -12,7 +12,7 @@
 | `spring-boot-starter-security` | `quarkus-security` + `quarkus-oidc` (or `quarkus-elytron-security-properties-file`) | `quarkus-spring-security` |
 | `spring-boot-starter-actuator` | `quarkus-smallrye-health` + `quarkus-micrometer` | `quarkus-spring-boot-properties` |
 | `spring-boot-starter-cache` | `quarkus-cache` | `quarkus-spring-cache` |
-| `spring-boot-starter-test` | `quarkus-junit5` + `io.rest-assured:rest-assured` | `quarkus-junit5` |
+| `spring-boot-starter-test` | `quarkus-junit` + `io.rest-assured:rest-assured` | `quarkus-junit` |
 
 ## Data / Persistence
 
@@ -38,7 +38,7 @@
 
 | Spring Boot | Quarkus |
 |---|---|
-| `spring-boot-starter-thymeleaf` | `quarkus-qute-web` (preferred) or `quarkus-thymeleaf` (community) |
+| `spring-boot-starter-thymeleaf` | `quarkus-rest-qute` (when controllers return `TemplateInstance`) or `quarkus-qute-web` (auto-serve templates without REST resources). **Never** use `quarkus-qute` alone — it lacks REST integration. |
 | `spring-boot-starter-freemarker` | `quarkus-freemarker` |
 
 ## Scheduling / DI / Config
@@ -55,7 +55,7 @@
 |---|---|---|
 | `spring-boot-starter-data-rest` | `quarkus-rest` + `quarkus-hibernate-orm-panache` | `quarkus-spring-data-rest` |
 | `spring-cloud-starter-config` | -- | `quarkus-spring-cloud-config-client` |
-| `spring-boot-starter-test` (with `@SpringBootTest`) | `quarkus-junit5` | `quarkus-spring-boot-test` |
+| `spring-boot-starter-test` (with `@SpringBootTest`) | `quarkus-junit` | `quarkus-spring-boot-test` |
 
 ## Observability
 
