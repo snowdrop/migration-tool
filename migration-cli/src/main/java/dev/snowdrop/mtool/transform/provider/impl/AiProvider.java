@@ -74,7 +74,7 @@ public class AiProvider implements MigrationProvider {
             details.add("- " + task);
         });
 
-        boolean success = execAiCmd(context, tasks, details);
+        boolean success = execAiCmd(context, tasks);
         details.add("Ai cmd executed successfully");
 
         if (success) {
@@ -84,7 +84,7 @@ public class AiProvider implements MigrationProvider {
         }
     }
 
-    private boolean execAiCmd(ExecutionContext ctx, List<String> tasks, List<String> details) {
+    private boolean execAiCmd(ExecutionContext ctx, List<String> tasks) {
         logger.info("Hello! I'm your AI migration assistant and I will help you move your code");
 
         tasks.forEach(t -> {

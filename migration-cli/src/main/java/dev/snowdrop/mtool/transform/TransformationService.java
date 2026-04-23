@@ -27,6 +27,8 @@ public class TransformationService {
     public void logExecutionResult(ExecutionResult result, boolean verbose) {
         if (result.success()) {
             logger.infof("Task completed successfully: %s", result.message());
+        } else if (result.warning() != null) {
+            logger.warn(result.warning());
         } else {
             logger.errorf("Task failed: %s", result.message());
             if (result.exception() != null && verbose) {
@@ -62,6 +64,8 @@ public class TransformationService {
         if (result.success()) {
             return ExecutionResult.success(String.format("   %s execution completed successfully", ctx.provideType()),
                     allDetails);
+        } else if (result.warning() != null) {
+            return ExecutionResult.warning(String.format("   %s for provider: %s", result.warning(), ctx.provideType()));
         } else {
             return ExecutionResult.failure(String.format("   %s execution failed !", ctx.provideType()));
         }

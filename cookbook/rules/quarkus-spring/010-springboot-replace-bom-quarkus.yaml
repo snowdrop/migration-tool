@@ -13,6 +13,9 @@
   order: 1
   instructions:
     ai:
+      - skills:
+          - "spring-boot-to-quarkus/check-jdk"
+          - "spring-boot-to-quarkus/configuration"
       - tasks:
           - "Add to the pom.xml file the Quarkus BOM dependency version 3.31.3 within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core and quarkus-smallrye-openapi"
           - "Remove next from the ôpm.xml the plugin org.springframework.boot:spring-boot-maven-plugin"
