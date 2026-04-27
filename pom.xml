@@ -36,7 +36,7 @@
         <quarkus.platform.version>3.31.3</quarkus.platform.version>
         <quarkus-wiremock.version>1.6.1</quarkus-wiremock.version>
         <rewrite-client.version>0.3.4</rewrite-client.version>
-        <spring-boot.version>4.0.5</spring-boot.version>
+        <spring-boot.version>4.0.6</spring-boot.version>
 
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
         <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
