@@ -116,3 +116,6 @@ To run a single phase, read the specific phase's SKILL.md directly:
 - "Read `.claude/skills/migration/spring-boot-to-quarkus/maven-build-system/SKILL.md` and execute it"
 - "Run the controller-to-resource phase"
 - "Apply the ui-model migration"
+
+## Maven execution
+- Always add `--no-transfer-progress` to avoid Maven's progress bar interfering with logs.
