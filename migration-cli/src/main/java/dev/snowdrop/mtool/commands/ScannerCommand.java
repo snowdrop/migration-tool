@@ -31,6 +31,10 @@ public class ScannerCommand implements Runnable {
     @CommandLine.Parameters(index = "1", description = "Query to be executed")
     public String query;
 
+    @CommandLine.Option(names = {
+            "--scanner" }, description = "Scanner tool to be used to analyse the code: jdtls, openrewrite, file, maven", defaultValue = "openrewrite")
+    public String scanner;
+
     @Override
     public void run() {
         long startTime = System.nanoTime();
@@ -41,7 +45,7 @@ public class ScannerCommand implements Runnable {
             throw new IllegalStateException("❌ Project path of the application does not exist: " + appPath);
         }
         String appPathString = resolvePath(appPath).toString();
-        Config config = new Config(appPathString, null, null, null, null, null, null, false, null, null, null);
+        Config config = new Config(appPathString, null, null, null, null, null, null, false, null, scanner, null);
 
         Query q;
 

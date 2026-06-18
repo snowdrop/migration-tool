@@ -311,7 +311,12 @@ public class OpenRewriteQueryScanner implements QueryScanner {
     }
 
     private RecipeHolder parse(Query query) {
-        return switch (query.fileType() + "." + query.symbol()) {
+        //TODO: To be improved
+        String key = query.fileType() + "." + query.symbol();
+        if ("java.class".equals(key) && query.operation().contains("find all")) {
+            return buildFindAllJavaClassRecipe(query);
+        }
+        return switch (key) {
             case "java.annotation" -> buildSearchAnnotationRecipe(query);
             case "source.file" -> buildFindSourceFilesRecipe(query);
             case "properties.key" -> buildFindProperties(query);
@@ -330,6 +335,22 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
         recipeHolder.setRecipesList(List.of(
                 new RecipeDefinition().withFullyQualifyRecipeName("org.openrewrite.properties.search.FindProperties")
+                        .withFieldMappings(fieldMappings)));
+
+        return recipeHolder;
+    }
+
+    private RecipeHolder buildFindAllJavaClassRecipe(Query query) {
+        String annotationName = query.keyValues().get("name");
+
+        RecipeHolder recipeHolder = new RecipeHolder().withName("dev.snowdrop.mtool.openrewrite.ConditionToMatch")
+                .withDisplayName("Find all java classes").withDescription(
+                        "Discovers all class declarations within a project, recording which files they appear in, their superclasses, and interfaces.");
+
+        HashMap<String, String> fieldMappings = new HashMap<>();
+
+        recipeHolder.setRecipesList(
+                List.of(new RecipeDefinition().withFullyQualifyRecipeName("org.openrewrite.java.search.FindClassHierarchy")
                         .withFieldMappings(fieldMappings)));
 
         return recipeHolder;
@@ -423,7 +444,8 @@ public class OpenRewriteQueryScanner implements QueryScanner {
         String symbol = query.symbol();
         String fileType = query.fileType();
         // Check the configuration to see if this query should use the Maven scanner
-        return (fileType.contains("java") && symbol.contains("annotation"))
+        return (fileType.contains("java") && symbol.contains("class"))
+                || (fileType.contains("java") && symbol.contains("annotation"))
                 || (fileType.contains("properties") && symbol.contains("key"))
                 || (fileType.contains("source") && symbol.contains("file"));
     }
