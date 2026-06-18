@@ -54,7 +54,7 @@ public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
     public Set<Query> visitSimpleClause(QueryParser.SimpleClauseContext ctx) {
         QueryParser.ClauseContext cctx = ctx.clause();
         Map<String, String> keyValuePairs = new HashMap<>();
-        String operation = null;
+        String operation = "";
 
         if (cctx.FIND() != null) {
             boolean hasAll = cctx.getToken(QueryParser.T__0, 0) != null;
@@ -70,7 +70,7 @@ public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
                 String value = removeQuotes(vopCtx.value().getText());
                 String symbol = cctx.symbol() != null ? cctx.symbol().getText() : "";
                 String defaultKey = getDefaultKeyForSymbol(symbol);
-                operation = value;
+                keyValuePairs.put(defaultKey, value);
             }
         }
 
