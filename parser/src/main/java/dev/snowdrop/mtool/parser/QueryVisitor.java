@@ -54,23 +54,27 @@ public class QueryVisitor extends QueryBaseVisitor<Set<Query>> {
     public Set<Query> visitSimpleClause(QueryParser.SimpleClauseContext ctx) {
         QueryParser.ClauseContext cctx = ctx.clause();
         Map<String, String> keyValuePairs = new HashMap<>();
+        String operation = null;
 
-        // Check if the clause has key-value pairs or just a single value
-        if (cctx.keyValuePair() != null && !cctx.keyValuePair().isEmpty()) {
-            // Handle case with key=value pairs: java.annotation is (name='@SpringBootApplication')
-            keyValuePairs = cctx.keyValuePair().stream()
-                    .collect(Collectors.toMap(kvp -> kvp.key().getText(), kvp -> removeQuotes(kvp.value().getText())));
-        } else if (cctx.value() != null) {
-            // Handle case where there is no k=v but only a single value: java.annotation is '@SpringBootApplication'
-            String value = removeQuotes(cctx.value().getText()); // Remove quotes from value
-            String symbol = cctx.symbol() != null ? cctx.symbol().getText() : "";
-
-            // Use appropriate default key based on the symbol type
-            String defaultKey = getDefaultKeyForSymbol(symbol);
-            keyValuePairs.put(defaultKey, value);
+        if (cctx.FIND() != null) {
+            boolean hasAll = cctx.getToken(QueryParser.T__0, 0) != null;
+            operation = hasAll ? "find all" : "find";
         }
 
-        Query qr = new Query(cctx.fileType().getText(), cctx.symbol() != null ? cctx.symbol().getText() : "",
+        QueryParser.ValueOrPairsContext vopCtx = cctx.valueOrPairs();
+        if (vopCtx != null) {
+            if (!vopCtx.keyValuePair().isEmpty()) {
+                keyValuePairs = vopCtx.keyValuePair().stream()
+                        .collect(Collectors.toMap(kvp -> kvp.key().getText(), kvp -> removeQuotes(kvp.value().getText())));
+            } else if (vopCtx.value() != null) {
+                String value = removeQuotes(vopCtx.value().getText());
+                String symbol = cctx.symbol() != null ? cctx.symbol().getText() : "";
+                String defaultKey = getDefaultKeyForSymbol(symbol);
+                operation = value;
+            }
+        }
+
+        Query qr = new Query(cctx.fileType().getText(), cctx.symbol() != null ? cctx.symbol().getText() : "", operation,
                 keyValuePairs);
 
         // Only add to simpleQueries if this clause is not part of an AND or OR operation

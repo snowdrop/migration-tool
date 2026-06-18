@@ -34,7 +34,7 @@ class ScanCommandExecutorTest {
         // Given
         ScanCommandExecutor executor = new ScanCommandExecutor(spiRegistry);
 
-        Query query = new Query("java", "annotation", Collections.emptyMap());
+        Query query = new Query("java", "annotation", "", Collections.emptyMap());
 
         List<Match> expectedResults = List.of(new Match("file1", "openrewrite", Collections.emptyList()),
                 new Match("file2", "maven", Collections.emptyList()));
@@ -54,7 +54,7 @@ class ScanCommandExecutorTest {
     @Test
     void executeCommandForQuery_returnsEmptyListWhenNoScannerFound() {
         ScanCommandExecutor executor = new ScanCommandExecutor(spiRegistry);
-        Query query = new Query("java", "interface", Collections.emptyMap());
+        Query query = new Query("java", "interface", "", Collections.emptyMap());
 
         List<Match> result = executor.executeCommandForQuery(config, query);
 

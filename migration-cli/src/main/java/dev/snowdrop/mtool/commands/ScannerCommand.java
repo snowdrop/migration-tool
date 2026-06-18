@@ -51,7 +51,7 @@ public class ScannerCommand implements Runnable {
             q = userQuery.get();
             logger.infof("Processing user's query: %s", query);
         } else {
-            q = new Query("pom", "dependency", Map.of(
+            q = new Query("pom", "dependency", "", Map.of(
                     "gavs", "org.springframework.boot:spring-boot-starter-parent:3.5.3"));
         }
 
