@@ -27,28 +27,32 @@ import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFold
 public class AnalyzeCommand implements Runnable {
     private static final Logger logger = Logger.getLogger(AnalyzeCommand.class);
 
-    @CommandLine.Parameters(index = "0", description = "Path to the Java project to analyze")
+    @CommandLine.Parameters(index = "0", description = "Path to the Java project to analyze", scope = CommandLine.ScopeType.INHERIT)
     public String appPath;
 
-    @CommandLine.Option(names = { "-r", "--rules" }, description = "Path to rules directory (default: from config)")
+    @CommandLine.Option(names = { "-r",
+            "--rules" }, description = "Path to rules directory (default: from config)", scope = CommandLine.ScopeType.INHERIT)
     public String rulesPath;
 
-    @CommandLine.Option(names = { "-s", "--source" }, description = "Source technology to consider for analysis")
+    @CommandLine.Option(names = { "-s",
+            "--source" }, description = "Source technology to consider for analysis", scope = CommandLine.ScopeType.INHERIT)
     public String source;
 
-    @CommandLine.Option(names = { "-t", "--target" }, description = "Target technology to consider for analysis")
+    @CommandLine.Option(names = { "-t",
+            "--target" }, description = "Target technology to consider for analysis", scope = CommandLine.ScopeType.INHERIT)
     public String target;
 
     @CommandLine.Option(names = {
-            "--jdt-ls-path" }, description = "Path to JDT-LS installation (default: from config)", required = false)
+            "--jdt-ls-path" }, description = "Path to JDT-LS installation (default: from config)", required = false, scope = CommandLine.ScopeType.INHERIT)
     public String jdtLsPath;
 
     @CommandLine.Option(names = {
-            "--jdt-workspace" }, description = "Path to JDT workspace directory (default: from config)", required = false)
+            "--jdt-workspace" }, description = "Path to JDT workspace directory (default: from config)", required = false, scope = CommandLine.ScopeType.INHERIT)
     public String jdtWorkspace;
 
-    @CommandLine.Option(names = { "-v", "--verbose" }, description = "Enable verbose output")
-    private boolean verbose;
+    @CommandLine.Option(names = { "-v",
+            "--verbose" }, description = "Enable verbose output", scope = CommandLine.ScopeType.INHERIT)
+    public boolean verbose;
 
     @CommandLine.Option(names = { "-o",
             "--output" }, description = "Export the analysing result using as format: json (default), csv, html")
@@ -83,16 +87,15 @@ public class AnalyzeCommand implements Runnable {
         Path path = Paths.get(appPath);
         if (!path.toFile().exists()) {
             logger.errorf("❌ Project path of the application does not exist: %s", appPath);
-            throw new IllegalStateException("❌ Project path of the application does not exist: %s\", appPath");
+            throw new IllegalStateException("❌ Project path of the application does not exist: " + appPath);
         }
 
-        String appPathString = appPath;
-        appPathString = resolvePath(appPathString).toString();
+        String appPathString = resolvePath(appPath).toString();
 
         String rulesPathString = Optional.ofNullable(rulesPath)
                 .or(() -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.rules-path", String.class)))
                 .orElseThrow(() -> new RuntimeException("Rules path is required but not configured"));
-        Path rulesPath = resolvePath(rulesPathString);
+        Path resolvedRulesPath = resolvePath(rulesPathString);
 
         String sourceTechnology = Optional.ofNullable(source)
                 .or(() -> Optional
@@ -103,7 +106,7 @@ public class AnalyzeCommand implements Runnable {
                 .or(() -> Optional
                         .ofNullable(ConfigProvider.getConfig().getValue("analyzer.technology-target", String.class)))
                 .orElseThrow(
-                        () -> new RuntimeException("Target technology for migration is requiered but not configured"));
+                        () -> new RuntimeException("Target technology for migration is required but not configured"));
 
         String jdtLsPathString = Optional.ofNullable(jdtLsPath).or(
                 () -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.jdt-ls-path", String.class)))
@@ -124,10 +127,9 @@ public class AnalyzeCommand implements Runnable {
                 .ofNullable(ConfigProvider.getConfig().getValue("openrewrite.maven-plugin.version", String.class))
                 .orElseThrow(() -> new RuntimeException("Openrewrite maven plugin version not define"));
 
-        Config config = new Config(appPathString, rulesPath, sourceTechnology, targetTechnology, jdtLsPathString,
+        Config config = new Config(appPathString, resolvedRulesPath, sourceTechnology, targetTechnology, jdtLsPathString,
                 jdtWksString, lsCmd, verbose, output, scanner, openRewriteMavenPluginVersion);
 
-        // Log resolved paths for debugging
         logger.infof("Jdt-ls path: %s", jdtLsPath);
         logger.infof("Jdt-ls workspace: %s", jdtWksString);
         logger.infof("Language server command: %s", lsCmd);
