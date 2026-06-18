@@ -27,31 +27,31 @@ import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFold
 public class AnalyzeCommand implements Runnable {
     private static final Logger logger = Logger.getLogger(AnalyzeCommand.class);
 
-    @CommandLine.Parameters(index = "0", description = "Path to the Java project to analyze", scope = CommandLine.ScopeType.INHERIT)
+    @CommandLine.Parameters(index = "0", description = "Path to the Java project to analyze")
     public String appPath;
 
     @CommandLine.Option(names = { "-r",
-            "--rules" }, description = "Path to rules directory (default: from config)", scope = CommandLine.ScopeType.INHERIT)
+            "--rules" }, description = "Path to rules directory (default: from config)")
     public String rulesPath;
 
     @CommandLine.Option(names = { "-s",
-            "--source" }, description = "Source technology to consider for analysis", scope = CommandLine.ScopeType.INHERIT)
+            "--source" }, description = "Source technology to consider for analysis")
     public String source;
 
     @CommandLine.Option(names = { "-t",
-            "--target" }, description = "Target technology to consider for analysis", scope = CommandLine.ScopeType.INHERIT)
+            "--target" }, description = "Target technology to consider for analysis")
     public String target;
 
     @CommandLine.Option(names = {
-            "--jdt-ls-path" }, description = "Path to JDT-LS installation (default: from config)", required = false, scope = CommandLine.ScopeType.INHERIT)
+            "--jdt-ls-path" }, description = "Path to JDT-LS installation (default: from config)", required = false)
     public String jdtLsPath;
 
     @CommandLine.Option(names = {
-            "--jdt-workspace" }, description = "Path to JDT workspace directory (default: from config)", required = false, scope = CommandLine.ScopeType.INHERIT)
+            "--jdt-workspace" }, description = "Path to JDT workspace directory (default: from config)", required = false)
     public String jdtWorkspace;
 
     @CommandLine.Option(names = { "-v",
-            "--verbose" }, description = "Enable verbose output", scope = CommandLine.ScopeType.INHERIT)
+            "--verbose" }, description = "Enable verbose output")
     public boolean verbose;
 
     @CommandLine.Option(names = { "-o",
