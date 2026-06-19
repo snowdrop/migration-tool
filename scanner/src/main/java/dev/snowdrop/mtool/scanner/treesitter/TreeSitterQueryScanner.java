@@ -145,7 +145,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
     private List<Match> scanJavaClasses(Config config, Query query) {
         String targetClass = query.keyValues().get("name");
         List<Match> matches = new ArrayList<>();
-        List<Path> javaFiles = findFiles(Paths.get(config.appPath()), "glob:**/*.java");
+        List<Path> javaFiles = findFiles(Paths.get(config.appPath()), "glob:**/src/main/java/**/*.java");
 
         try (TreeSitter ts = TreeSitter.create();
                 TreeSitterParser parser = ts.newParser(Language.JAVA)) {
