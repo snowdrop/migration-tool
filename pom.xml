@@ -115,6 +115,13 @@
                 <optional>true</optional>
             </dependency>
 
+            <!-- Treesitter4j used by the scanner -->
+            <dependency>
+                <groupId>io.roastedroot</groupId>
+                <artifactId>treesitter4j</artifactId>
+                <version>999-SNAPSHOT</version>
+            </dependency>
+
             <!-- lsp4j -->
             <dependency>
                 <groupId>org.eclipse.lsp4j</groupId>
