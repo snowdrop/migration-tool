@@ -92,7 +92,8 @@ public class TreeSitterQueryScanner implements QueryScanner {
         List<Path> javaFiles = findFiles(Paths.get(config.appPath()), JAVA_SOURCE_GLOB_PATTERN);
 
         try (TreeSitter ts = TreeSitter.create();
-                TreeSitterParser parser = ts.newParser(Language.JAVA)) {
+                TreeSitterParser parser = ts.newParser(Language.JAVA);
+                TreeSitterQuery tsQuery = ts.newQuery(Language.JAVA, JAVA_ANNOTATION_QUERY)) {
 
             for (Path javaFile : javaFiles) {
                 String source = Files.readString(javaFile);
@@ -100,26 +101,23 @@ public class TreeSitterQueryScanner implements QueryScanner {
                 try (TreeSitterTree tree = parser.parseString(source)) {
                     TreeSitterNode root = tree.rootNode();
 
-                    try (TreeSitterQuery tsQuery = ts.newQuery(Language.JAVA, JAVA_ANNOTATION_QUERY)) {
-                        List<TreeSitterQueryResult> results = tsQuery.exec(root, source);
-                        for (TreeSitterQueryResult result : results) {
-                            String foundName = source.substring(result.node().startByte(), result.node().endByte());
+                    List<TreeSitterQueryResult> results = tsQuery.exec(root, source);
+                    for (TreeSitterQueryResult result : results) {
+                        String foundName = source.substring(result.node().startByte(), result.node().endByte());
 
-                            int line = result.node().startRow() + 1;
-                            String relativePath = Paths.get(config.appPath()).relativize(javaFile).toString();
-                            String formatted = String.format("%s:%d | @%s", relativePath, line, foundName);
-                            matches.add(new Match(
-                                    query.fileType() + "-" + query.symbol(),
-                                    SCANNER_TYPE,
-                                    formatted));
-                        }
+                        int line = result.node().startRow() + 1;
+                        String relativePath = Paths.get(config.appPath()).relativize(javaFile).toString();
+                        String formatted = String.format("%s:%d | @%s", relativePath, line, foundName);
+                        matches.add(new Match(
+                                query.fileType() + "-" + query.symbol(),
+                                SCANNER_TYPE,
+                                formatted));
                     }
                 }
             }
         } catch (IOException e) {
             logger.errorf("Error scanning Java files for annotations: %s", e.getMessage());
         }
-
         logger.infof("Found %d annotation matches.", matches.size());
         return matches;
     }
@@ -129,14 +127,13 @@ public class TreeSitterQueryScanner implements QueryScanner {
         List<Path> javaFiles = findFiles(Paths.get(config.appPath()), JAVA_SOURCE_GLOB_PATTERN);
 
         try (TreeSitter ts = TreeSitter.create();
-                TreeSitterParser parser = ts.newParser(Language.JAVA)) {
+                TreeSitterParser parser = ts.newParser(Language.JAVA);
+                TreeSitterQuery tsQuery = ts.newQuery(Language.JAVA, JAVA_CLASS_QUERY)) {
 
             for (Path javaFile : javaFiles) {
                 String source = Files.readString(javaFile);
 
-                try (TreeSitterTree tree = parser.parseString(source);
-                        TreeSitterQuery tsQuery = ts.newQuery(Language.JAVA, JAVA_CLASS_QUERY)) {
-
+                try (TreeSitterTree tree = parser.parseString(source)) {
                     List<TreeSitterQueryResult> results = tsQuery.exec(tree.rootNode(), source);
                     for (TreeSitterQueryResult result : results) {
                         String className = source.substring(result.node().startByte(), result.node().endByte());
