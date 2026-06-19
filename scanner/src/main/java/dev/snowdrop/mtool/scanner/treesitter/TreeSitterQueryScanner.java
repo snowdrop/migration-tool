@@ -18,9 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -37,10 +35,8 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
     private static final String JAVA_IMPORT_QUERY = """
             (import_declaration
-              (scoped_identifier
-                scope: (scoped_identifier) @package_name
-                name: (identifier) @class_name)
-            )
+               (scoped_identifier) @package_imported
+             )
             """;
 
     private static final String JAVA_CLASS_QUERY = "(class_declaration name: (identifier) @class_name)";
@@ -170,17 +166,26 @@ public class TreeSitterQueryScanner implements QueryScanner {
             String appPath, Path filePath) {
         List<Match> matches = new ArrayList<>();
         for (TreeSitterQueryResult result : results) {
-            String className = source.substring(result.node().startByte(), result.node().endByte());
+            String entityName = source.substring(result.node().startByte(), result.node().endByte());
 
-            int line = result.node().startRow() + 1;
             String relativePath = Paths.get(appPath).relativize(filePath).toString();
-            String formatted = String.format("%s:%d | %s", relativePath, line, className);
+            String formatted = formatResult(relativePath, result.node(), entityName);
             matches.add(new Match(
                     query.fileType() + "-" + query.symbol(),
                     SCANNER_TYPE,
                     formatted));
         }
         return matches;
+    }
+
+    private String formatResult(String relativePath, TreeSitterNode node, String entityName) {
+        return String.format("Path: %s, start: (%d, %d), end: (%d-%d), text: %s",
+                relativePath,
+                node.startRow() + 1,
+                node.startColumn() + 1,
+                node.endRow() + 1,
+                node.endColumn() + 1,
+                entityName);
     }
 
     private List<Match> scanPomDependencies(Config config, Query query) {
