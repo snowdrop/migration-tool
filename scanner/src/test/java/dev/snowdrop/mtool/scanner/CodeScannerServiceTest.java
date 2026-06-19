@@ -123,8 +123,8 @@ class CodeScannerServiceTest {
         Match autowired = new Match("2", "openrewrite",
                 "2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:8|JAVA.ANNOTATION|org.springframework.beans.factory.annotation.Autowired");
         List<Match> matches = List.of(controller, autowired);
-        Query queryAutowired = new Query("java", "annotation", Map.of("name", "Autowired"));
-        Query queryController = new Query("java", "annotation", Map.of("name", "RestController"));
+        Query queryAutowired = new Query("java", "annotation", "", Map.of("name", "Autowired"));
+        Query queryController = new Query("java", "annotation", "", Map.of("name", "RestController"));
         Mockito.when(scanCommandExecutor.executeCommandForQuery(config, queryAutowired)).thenReturn(List.of(autowired));
         Mockito.when(scanCommandExecutor.executeCommandForQuery(config, queryController))
                 .thenReturn(List.of(controller));

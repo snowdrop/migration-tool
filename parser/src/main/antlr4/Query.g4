@@ -17,15 +17,24 @@ operation
     | clause #SimpleClause
     ;
 
-clause: fileType ('.' symbol)? ('is' | '=') (value | '(' keyValuePair (',' keyValuePair)* ')');
+// OLD : clause: fileType ('.' symbol)? ('is' | '=' | 'all') (value | '(' keyValuePair (',' keyValuePair)* ')');
+// New clause syntax supporting to search about: find all java.classes
+clause
+    : FIND? 'all'? fileType (DOT symbol)? (assignmentOp valueOrPairs)?
+    ;
+
+// Separated sub-rules to keep the AST syntax tree nodes clean
+assignmentOp: 'is' | '=' | 'all';
+valueOrPairs: value | LPAREN keyValuePair (COMMA keyValuePair)* RPAREN;
+
 fileType: 'JAVA' | 'java' | 'POM' | 'pom' | 'TEXT' | 'text' | 'PROPERTY' | 'property' | 'PROPERTIES' | 'properties' | 'YAML' | 'yaml' | 'JSON' | 'json';
 symbol: ID;
-keyValuePair: key '=' value;
+keyValuePair: key EQUALS value;
 key: QUOTED_STRING | ID;
 value: QUOTED_STRING | ID;
-logicalOp: AND | OR;
 
 // LEXER vocabulary of the language
+FIND:  'FIND' | 'find'; // Added explicit support for your action verb
 IS:    'is';
 AND:   'AND';
 OR:    'OR';

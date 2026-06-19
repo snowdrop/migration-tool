@@ -16,7 +16,7 @@ public class SimpleQueryTest extends AbstractQueryParser {
         QueryVisitor visitor = parseQuery(simpleQuery);
 
         // Don't include simple quotes around the key or value
-        Query query = new Query("java", "annotation", Map.of("name", "@SpringBootApplication"));
+        Query query = new Query("java", "annotation", "", Map.of("name", "@SpringBootApplication"));
 
         Set<Query> queries = visitor.getSimpleQueries();
         Assert.assertTrue(queries.size() == 1);
@@ -29,7 +29,7 @@ public class SimpleQueryTest extends AbstractQueryParser {
         QueryVisitor visitor = parseQuery(simpleQuery);
 
         // Should automatically use "name" as default key for annotation
-        Query expectedQuery = new Query("java", "annotation", Map.of("name", "@SpringBootApplication"));
+        Query expectedQuery = new Query("java", "annotation", "", Map.of("name", "@SpringBootApplication"));
 
         Set<Query> queries = visitor.getSimpleQueries();
         Assert.assertTrue(queries.size() == 1);
@@ -42,7 +42,7 @@ public class SimpleQueryTest extends AbstractQueryParser {
         QueryVisitor visitor = parseQuery(annotationQuery);
 
         // Should automatically use "name" as default key for annotation
-        Query expectedQuery = new Query("java", "annotation", Map.of("name", "@SpringBootApplication"));
+        Query expectedQuery = new Query("java", "annotation", "", Map.of("name", "@SpringBootApplication"));
 
         Set<Query> queries = visitor.getSimpleQueries();
         Assert.assertTrue(queries.size() == 1);
@@ -53,7 +53,7 @@ public class SimpleQueryTest extends AbstractQueryParser {
     public void shouldParseAPomDependencyQuery() {
         String annotationQuery = "pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')";
         QueryVisitor visitor = parseQuery(annotationQuery);
-        Query expectedQuery = new Query("pom", "dependency",
+        Query expectedQuery = new Query("pom", "dependency", "",
                 Map.of("gavs", "org.springframework.boot:spring-boot-starter-web"));
 
         Set<Query> queries = visitor.getSimpleQueries();
