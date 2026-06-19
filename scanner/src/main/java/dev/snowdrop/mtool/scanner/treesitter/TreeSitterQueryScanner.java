@@ -41,6 +41,8 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
     private static final String JAVA_ALL_CLASS_QUERY = "(class_declaration name: (identifier) @class_name)";
 
+    private static final String PROPERTIES_ALL_QUERY = "(property (key) (value)) @property";
+
     private static final String POM_DEPENDENCY_QUERY = """
             (element
               (STag . (Name) @tag.dep (#match? @tag.dep "(dependency|parent)"))
@@ -55,11 +57,16 @@ public class TreeSitterQueryScanner implements QueryScanner {
             """;
 
     private static String JAVA_SOURCE_GLOB_PATTERN = "glob:**/src/{main,test}/java/**/*.java";
+    private static String PROPERTIES_SOURCE_GLOB_PATTERN = "glob:**/src/{main,test}/resources/*.properties";
 
     @Override
     public List<Match> scansCodeFor(Config config, Query query) {
         String key = query.fileType() + "." + query.symbol();
         logger.infof("TreeSitter scanner executing for query %s", key);
+
+        if (query.fileType().equals("properties")) {
+            return scanPropertiesFiles(config, query, PROPERTIES_ALL_QUERY);
+        }
 
         return switch (key) {
             case "java.class" -> scanJavaFiles(config, query, JAVA_ALL_CLASS_QUERY);
@@ -85,8 +92,33 @@ public class TreeSitterQueryScanner implements QueryScanner {
     public boolean supports(Query query) {
         String fileType = query.fileType();
         String symbol = query.symbol();
-        return (fileType.equals("java") && (symbol.equals("annotation") || symbol.equals("class") || symbol.equals("import")))
-                || (fileType.equals("pom") && symbol.equals("dependency"));
+        return (fileType.equals("java") && (symbol.equals("annotation") || symbol.equals("class") || symbol.equals(
+                "import"))) ||
+                (fileType.equals("pom") && symbol.equals("dependency") ||
+                        (fileType.equals("properties")));
+    }
+
+    private List<Match> scanPropertiesFiles(Config config, Query query, String treeSitterQuery) {
+        List<Match> matches = new ArrayList<>();
+        List<Path> propertiesFiles = findFiles(Paths.get(config.appPath()), PROPERTIES_SOURCE_GLOB_PATTERN);
+        try (TreeSitter ts = TreeSitter.create();
+                TreeSitterParser parser = ts.newParser(Language.PROPERTIES);
+                TreeSitterQuery tsQuery = ts.newQuery(Language.PROPERTIES, treeSitterQuery)) {
+
+            for (Path javaFile : propertiesFiles) {
+                String source = Files.readString(javaFile);
+
+                try (TreeSitterTree tree = parser.parseString(source)) {
+                    List<TreeSitterQueryResult> results = tsQuery.exec(tree.rootNode(), source);
+                    matches.addAll(generateMatchesFromResults(results, query, source, config.appPath(), javaFile));
+                }
+            }
+        } catch (IOException e) {
+            logger.errorf("Error scanning properties files for %s: %s", query.symbol(), e.getMessage());
+        }
+
+        logger.infof("Found %d %s matches", matches.size(), query.symbol());
+        return matches;
     }
 
     private List<Match> scanJavaFiles(Config config, Query query, String treeSitterQuery) {
