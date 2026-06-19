@@ -35,7 +35,13 @@ public class TreeSitterQueryScanner implements QueryScanner {
             (annotation name: (identifier) @annotation_name)
             """;
 
-    private static final String JAVA_IMPORT_QUERY = "(import_declaration (scoped_identifier) @import_path)";
+    private static final String JAVA_IMPORT_QUERY = """
+            (import_declaration
+              (scoped_identifier
+                scope: (scoped_identifier) @package_name
+                name: (identifier) @class_name)
+            )
+            """;
 
     private static final String JAVA_CLASS_QUERY = "(class_declaration name: (identifier) @class_name)";
 
@@ -52,7 +58,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
               )) @dependency.block
             """;
 
-    private static String JAVA_SOURCE_GLOB_PATTERN = "glob:**/src/main/java/**/*.java";
+    private static String JAVA_SOURCE_GLOB_PATTERN = "glob:**/src/{main,test}/java/**/*.java";
 
     @Override
     public List<Match> scansCodeFor(Config config, Query query) {
@@ -83,7 +89,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
     public boolean supports(Query query) {
         String fileType = query.fileType();
         String symbol = query.symbol();
-        return (fileType.equals("java") && (symbol.equals("annotation") || symbol.equals("class")))
+        return (fileType.equals("java") && (symbol.equals("annotation") || symbol.equals("class") || symbol.equals("import")))
                 || (fileType.equals("pom") && symbol.equals("dependency"));
     }
 
