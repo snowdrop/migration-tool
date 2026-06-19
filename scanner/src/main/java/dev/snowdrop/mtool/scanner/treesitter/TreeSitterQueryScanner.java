@@ -87,6 +87,30 @@ public class TreeSitterQueryScanner implements QueryScanner {
                 || (fileType.equals("pom") && symbol.equals("dependency"));
     }
 
+    private List<Match> scanJavaClasses(Config config, Query query) {
+        List<Match> matches = new ArrayList<>();
+        List<Path> javaFiles = findFiles(Paths.get(config.appPath()), JAVA_SOURCE_GLOB_PATTERN);
+
+        try (TreeSitter ts = TreeSitter.create();
+                TreeSitterParser parser = ts.newParser(Language.JAVA);
+                TreeSitterQuery tsQuery = ts.newQuery(Language.JAVA, JAVA_CLASS_QUERY)) {
+
+            for (Path javaFile : javaFiles) {
+                String source = Files.readString(javaFile);
+
+                try (TreeSitterTree tree = parser.parseString(source)) {
+                    List<TreeSitterQueryResult> results = tsQuery.exec(tree.rootNode(), source);
+                    matches.addAll(generateMatchesFromResults(results, query, source, config.appPath(), javaFile));
+                }
+            }
+        } catch (IOException e) {
+            logger.errorf("Error scanning Java files for classes: %s", e.getMessage());
+        }
+
+        logger.infof("Found %d class matches", matches.size());
+        return matches;
+    }
+
     private List<Match> scanJavaAnnotations(Config config, Query query) {
         List<Match> matches = new ArrayList<>();
         List<Path> javaFiles = findFiles(Paths.get(config.appPath()), JAVA_SOURCE_GLOB_PATTERN);
@@ -102,17 +126,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
                     TreeSitterNode root = tree.rootNode();
 
                     List<TreeSitterQueryResult> results = tsQuery.exec(root, source);
-                    for (TreeSitterQueryResult result : results) {
-                        String foundName = source.substring(result.node().startByte(), result.node().endByte());
-
-                        int line = result.node().startRow() + 1;
-                        String relativePath = Paths.get(config.appPath()).relativize(javaFile).toString();
-                        String formatted = String.format("%s:%d | @%s", relativePath, line, foundName);
-                        matches.add(new Match(
-                                query.fileType() + "-" + query.symbol(),
-                                SCANNER_TYPE,
-                                formatted));
-                    }
+                    matches.addAll(generateMatchesFromResults(results, query, source, config.appPath(), javaFile));
                 }
             }
         } catch (IOException e) {
@@ -122,65 +136,20 @@ public class TreeSitterQueryScanner implements QueryScanner {
         return matches;
     }
 
-    private List<Match> scanJavaClasses(Config config, Query query) {
+    private List<Match> scanJavaImport(Config config, Query query) {
         List<Match> matches = new ArrayList<>();
         List<Path> javaFiles = findFiles(Paths.get(config.appPath()), JAVA_SOURCE_GLOB_PATTERN);
 
         try (TreeSitter ts = TreeSitter.create();
                 TreeSitterParser parser = ts.newParser(Language.JAVA);
-                TreeSitterQuery tsQuery = ts.newQuery(Language.JAVA, JAVA_CLASS_QUERY)) {
+                TreeSitterQuery tsQuery = ts.newQuery(Language.JAVA, JAVA_IMPORT_QUERY)) {
 
             for (Path javaFile : javaFiles) {
                 String source = Files.readString(javaFile);
 
                 try (TreeSitterTree tree = parser.parseString(source)) {
                     List<TreeSitterQueryResult> results = tsQuery.exec(tree.rootNode(), source);
-                    for (TreeSitterQueryResult result : results) {
-                        String className = source.substring(result.node().startByte(), result.node().endByte());
-
-                        int line = result.node().startRow() + 1;
-                        String relativePath = Paths.get(config.appPath()).relativize(javaFile).toString();
-                        String formatted = String.format("%s:%d | %s", relativePath, line, className);
-                        matches.add(new Match(
-                                query.fileType() + "-" + query.symbol(),
-                                SCANNER_TYPE,
-                                formatted));
-                    }
-                }
-            }
-        } catch (IOException e) {
-            logger.errorf("Error scanning Java files for classes: %s", e.getMessage());
-        }
-
-        logger.infof("Found %d class matches", matches.size());
-        return matches;
-    }
-
-    private List<Match> scanJavaImport(Config config, Query query) {
-        List<Match> matches = new ArrayList<>();
-        List<Path> javaFiles = findFiles(Paths.get(config.appPath()), JAVA_SOURCE_GLOB_PATTERN);
-
-        try (TreeSitter ts = TreeSitter.create();
-                TreeSitterParser parser = ts.newParser(Language.JAVA)) {
-
-            for (Path javaFile : javaFiles) {
-                String source = Files.readString(javaFile);
-
-                try (TreeSitterTree tree = parser.parseString(source);
-                        TreeSitterQuery tsQuery = ts.newQuery(Language.JAVA, JAVA_IMPORT_QUERY)) {
-
-                    List<TreeSitterQueryResult> results = tsQuery.exec(tree.rootNode(), source);
-                    for (TreeSitterQueryResult result : results) {
-                        String className = source.substring(result.node().startByte(), result.node().endByte());
-
-                        int line = result.node().startRow() + 1;
-                        String relativePath = Paths.get(config.appPath()).relativize(javaFile).toString();
-                        String formatted = String.format("%s:%d | %s", relativePath, line, className);
-                        matches.add(new Match(
-                                query.fileType() + "-" + query.symbol(),
-                                SCANNER_TYPE,
-                                formatted));
-                    }
+                    matches.addAll(generateMatchesFromResults(results, query, source, config.appPath(), javaFile));
                 }
             }
         } catch (IOException e) {
@@ -188,6 +157,23 @@ public class TreeSitterQueryScanner implements QueryScanner {
         }
 
         logger.infof("Found %d import package matches", matches.size());
+        return matches;
+    }
+
+    private List<Match> generateMatchesFromResults(List<TreeSitterQueryResult> results, Query query, String source,
+            String appPath, Path filePath) {
+        List<Match> matches = new ArrayList<>();
+        for (TreeSitterQueryResult result : results) {
+            String className = source.substring(result.node().startByte(), result.node().endByte());
+
+            int line = result.node().startRow() + 1;
+            String relativePath = Paths.get(appPath).relativize(filePath).toString();
+            String formatted = String.format("%s:%d | %s", relativePath, line, className);
+            matches.add(new Match(
+                    query.fileType() + "-" + query.symbol(),
+                    SCANNER_TYPE,
+                    formatted));
+        }
         return matches;
     }
 
