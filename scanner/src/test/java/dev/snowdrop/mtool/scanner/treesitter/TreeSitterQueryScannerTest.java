@@ -32,10 +32,10 @@ class TreeSitterQueryScannerTest {
     @Test
     void supportsExpectedQueryTypes() {
         assertEquals("treesitter", scanner.getScannerType());
-        assertTrue(scanner.supports(new Query("java", "annotation", "", Collections.emptyMap())));
-        assertTrue(scanner.supports(new Query("java", "class", "", Collections.emptyMap())));
-        assertTrue(scanner.supports(new Query("pom", "dependency", "", Collections.emptyMap())));
-        assertFalse(scanner.supports(new Query("properties", "key", "", Collections.emptyMap())));
+        assertTrue(scanner.supports(new Query("java", "annotation", "all", Collections.emptyMap())));
+        assertTrue(scanner.supports(new Query("java", "class", "all", Collections.emptyMap())));
+        assertTrue(scanner.supports(new Query("pom", "dependency", "all", Collections.emptyMap())));
+        assertTrue(scanner.supports(new Query("properties", "", "all", Collections.emptyMap())));
     }
 
     @Test

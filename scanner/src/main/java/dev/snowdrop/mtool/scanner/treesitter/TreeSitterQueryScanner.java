@@ -90,12 +90,17 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
     @Override
     public boolean supports(Query query) {
+        if (!"all".equals(query.operation())) {
+            return false;
+        }
+
         String fileType = query.fileType();
         String symbol = query.symbol();
+
         return (fileType.equals("java") && (symbol.equals("annotation") || symbol.equals("class") || symbol.equals(
-                "import"))) ||
-                (fileType.equals("pom") && symbol.equals("dependency") ||
-                        (fileType.equals("properties")));
+                "import")) ||
+                fileType.equals("pom") && symbol.equals("dependency") ||
+                fileType.equals("properties") && symbol.equals(""));
     }
 
     private List<Match> scanPropertiesFiles(Config config, Query query, String treeSitterQuery) {
