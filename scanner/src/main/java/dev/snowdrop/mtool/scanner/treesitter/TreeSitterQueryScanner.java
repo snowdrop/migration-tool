@@ -65,13 +65,15 @@ public class TreeSitterQueryScanner implements QueryScanner {
         logger.infof("TreeSitter scanner executing for query %s", key);
 
         if (query.fileType().equals("properties")) {
-            return scanPropertiesFiles(config, query, PROPERTIES_ALL_QUERY);
+            return scanSourceFiles(config, query, PROPERTIES_ALL_QUERY, PROPERTIES_SOURCE_GLOB_PATTERN, Language.PROPERTIES);
         }
 
         return switch (key) {
-            case "java.class" -> scanJavaFiles(config, query, JAVA_ALL_CLASS_QUERY);
-            case "java.annotation" -> scanJavaFiles(config, query, JAVA_ALL_ANNOTATION_QUERY);
-            case "java.import" -> scanJavaFiles(config, query, JAVA_ALL_IMPORT_QUERY);
+            case "java.class" -> scanSourceFiles(config, query, JAVA_ALL_CLASS_QUERY, JAVA_SOURCE_GLOB_PATTERN, Language.JAVA);
+            case "java.annotation" ->
+                scanSourceFiles(config, query, JAVA_ALL_ANNOTATION_QUERY, JAVA_SOURCE_GLOB_PATTERN, Language.JAVA);
+            case "java.import" ->
+                scanSourceFiles(config, query, JAVA_ALL_IMPORT_QUERY, JAVA_SOURCE_GLOB_PATTERN, Language.JAVA);
             case "pom.dependency" -> scanPomDependencies(config, query);
             default -> throw new IllegalArgumentException("Unsupported query: " + key);
         };
@@ -90,7 +92,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
     @Override
     public boolean supports(Query query) {
-        if (!"all".equals(query.operation())) {
+        if (!query.operation().contains("all")) {
             return false;
         }
 
@@ -100,17 +102,18 @@ public class TreeSitterQueryScanner implements QueryScanner {
         return (fileType.equals("java") && (symbol.equals("annotation") || symbol.equals("class") || symbol.equals(
                 "import")) ||
                 fileType.equals("pom") && symbol.equals("dependency") ||
-                fileType.equals("properties") && symbol.equals(""));
+                fileType.equals("properties") && symbol.isEmpty());
     }
 
-    private List<Match> scanPropertiesFiles(Config config, Query query, String treeSitterQuery) {
+    private List<Match> scanSourceFiles(Config config, Query query, String treeSitterQuery, String globPattern,
+            Language language) {
         List<Match> matches = new ArrayList<>();
-        List<Path> propertiesFiles = findFiles(Paths.get(config.appPath()), PROPERTIES_SOURCE_GLOB_PATTERN);
+        List<Path> sourceFiles = findFiles(Paths.get(config.appPath()), globPattern);
         try (TreeSitter ts = TreeSitter.create();
-                TreeSitterParser parser = ts.newParser(Language.PROPERTIES);
-                TreeSitterQuery tsQuery = ts.newQuery(Language.PROPERTIES, treeSitterQuery)) {
+                TreeSitterParser parser = ts.newParser(language);
+                TreeSitterQuery tsQuery = ts.newQuery(language, treeSitterQuery)) {
 
-            for (Path javaFile : propertiesFiles) {
+            for (Path javaFile : sourceFiles) {
                 String source = Files.readString(javaFile);
 
                 try (TreeSitterTree tree = parser.parseString(source)) {
@@ -119,31 +122,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
                 }
             }
         } catch (IOException e) {
-            logger.errorf("Error scanning properties files for %s: %s", query.symbol(), e.getMessage());
-        }
-
-        logger.infof("Found %d %s matches", matches.size(), query.symbol());
-        return matches;
-    }
-
-    private List<Match> scanJavaFiles(Config config, Query query, String treeSitterQuery) {
-        List<Match> matches = new ArrayList<>();
-        List<Path> javaFiles = findFiles(Paths.get(config.appPath()), JAVA_SOURCE_GLOB_PATTERN);
-
-        try (TreeSitter ts = TreeSitter.create();
-                TreeSitterParser parser = ts.newParser(Language.JAVA);
-                TreeSitterQuery tsQuery = ts.newQuery(Language.JAVA, treeSitterQuery)) {
-
-            for (Path javaFile : javaFiles) {
-                String source = Files.readString(javaFile);
-
-                try (TreeSitterTree tree = parser.parseString(source)) {
-                    List<TreeSitterQueryResult> results = tsQuery.exec(tree.rootNode(), source);
-                    matches.addAll(generateMatchesFromResults(results, query, source, config.appPath(), javaFile));
-                }
-            }
-        } catch (IOException e) {
-            logger.errorf("Error scanning Java files for %s: %s", query.symbol(), e.getMessage());
+            logger.errorf("Error scanning source files for %s: %s", query.symbol(), e.getMessage());
         }
 
         logger.infof("Found %d %s matches", matches.size(), query.symbol());
