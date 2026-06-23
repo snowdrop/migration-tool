@@ -2,7 +2,7 @@ package dev.snowdrop.mtool.tests.analyze.precondition;
 
 import dev.snowdrop.mtool.tests.analyze.BaseRulesTest;
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.PreconditionFailedException;
@@ -58,7 +58,7 @@ class ShouldNoMatchPreconditionAndThrowTest extends BaseRulesTest {
 
         // Process the rule
         try {
-            Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+            Map<String, List<Result>> result = codeScannerService.scan(rules.getFirst()).getResults();
         } catch (PreconditionFailedException e) {
             assertTrue(e.getMessage().contains("Project does not meet the precondition requirements for rule"));
         }

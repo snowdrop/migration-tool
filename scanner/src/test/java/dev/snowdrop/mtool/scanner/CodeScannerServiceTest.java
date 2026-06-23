@@ -1,7 +1,7 @@
 package dev.snowdrop.mtool.scanner;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.model.parser.Query;
 import dev.snowdrop.mtool.parser.QueryUtils;
@@ -59,7 +59,7 @@ class CodeScannerServiceTest {
                 "simple-condition-rule", null, when, Collections.emptyList(), 1, null);
 
         QueryVisitor queryVisitor = QueryUtils.parseAndVisit(rule.when().condition());
-        List<Match> matches = List.of(new Match("1", "openrewrite",
+        List<Result> matches = List.of(new Result("1", "openrewrite",
                 "2025-11-10_16-11-55-417/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:5|JAVA.ANNOTATION|org.springframework.boot.autoconfigure.SpringBootApplication"));
         Mockito.when(
                 scanCommandExecutor.executeCommandForQuery(config, queryVisitor.getSimpleQueries().iterator().next()))
@@ -67,7 +67,7 @@ class CodeScannerServiceTest {
 
         ScanningResult scanningResult = codeScannerService.scan(rule);
         Assertions.assertTrue(scanningResult.isMatchSucceeded());
-        Map<String, List<Match>> result = scanningResult.getMatches();
+        Map<String, List<Result>> result = scanningResult.getResults();
         assertNotNull(result);
         assertTrue(result.containsKey("simple-condition-rule"));
         assertEquals(1, result.get("simple-condition-rule").size());
@@ -90,19 +90,19 @@ class CodeScannerServiceTest {
                 "or-condition-test", null, when, Collections.emptyList(), 1, null);
 
         QueryVisitor queryVisitor = QueryUtils.parseAndVisit(rule.when().condition());
-        Match controller = new Match("1", "openrewrite",
+        Result controller = new Result("1", "openrewrite",
                 "2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:13|JAVA.ANNOTATION|org.springframework.stereotype.Controller");
-        Match autowired = new Match("2", "openrewrite",
+        Result autowired = new Result("2", "openrewrite",
                 "2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:8|JAVA.ANNOTATION|org.springframework.beans.factory.annotation.Autowired");
-        Match getMapping = new Match("3", "openrewrite",
+        Result getMapping = new Result("3", "openrewrite",
                 "2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:14|JAVA.ANNOTATION|org.springframework.web.bind.annotation.GetMapping");
-        List<Match> matches = List.of(controller, getMapping, autowired);
+        List<Result> matches = List.of(controller, getMapping, autowired);
         Mockito.when(scanCommandExecutor.executeCommandForQuery(config, queryVisitor.getOrQueries().iterator().next()))
                 .thenReturn(matches);
 
         ScanningResult scanningResult = codeScannerService.scan(rule);
         Assertions.assertTrue(scanningResult.isMatchSucceeded());
-        Map<String, List<Match>> result = scanningResult.getMatches();
+        Map<String, List<Result>> result = scanningResult.getResults();
         assertNotNull(result);
         assertTrue(result.containsKey("or-condition-test"));
         assertEquals(3, result.get("or-condition-test").size());
@@ -118,11 +118,11 @@ class CodeScannerServiceTest {
                 List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
                 "and-condition-test", null, when, Collections.emptyList(), 1, null);
 
-        Match controller = new Match("1", "openrewrite",
+        Result controller = new Result("1", "openrewrite",
                 "2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:13|JAVA.ANNOTATION|org.springframework.stereotype.RestController");
-        Match autowired = new Match("2", "openrewrite",
+        Result autowired = new Result("2", "openrewrite",
                 "2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:8|JAVA.ANNOTATION|org.springframework.beans.factory.annotation.Autowired");
-        List<Match> matches = List.of(controller, autowired);
+        List<Result> matches = List.of(controller, autowired);
         Query queryAutowired = new Query("java", "annotation", "", Map.of("name", "Autowired"));
         Query queryController = new Query("java", "annotation", "", Map.of("name", "RestController"));
         Mockito.when(scanCommandExecutor.executeCommandForQuery(config, queryAutowired)).thenReturn(List.of(autowired));
@@ -131,7 +131,7 @@ class CodeScannerServiceTest {
 
         ScanningResult scanningResult = codeScannerService.scan(rule);
         Assertions.assertTrue(scanningResult.isMatchSucceeded());
-        Map<String, List<Match>> result = scanningResult.getMatches();
+        Map<String, List<Result>> result = scanningResult.getResults();
         assertNotNull(result);
         assertTrue(result.containsKey("and-condition-test"));
         assertEquals(2, result.get("and-condition-test").size());
@@ -152,7 +152,7 @@ class CodeScannerServiceTest {
 
         ScanningResult scanningResult = codeScannerService.scan(rule);
         Assertions.assertFalse(scanningResult.isMatchSucceeded());
-        Map<String, List<Match>> result = scanningResult.getMatches();
+        Map<String, List<Result>> result = scanningResult.getResults();
         assertNotNull(result);
         assertTrue(result.containsKey("and-condition-test"));
 

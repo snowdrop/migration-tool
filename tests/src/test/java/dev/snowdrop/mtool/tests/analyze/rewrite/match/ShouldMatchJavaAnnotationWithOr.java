@@ -2,7 +2,7 @@ package dev.snowdrop.mtool.tests.analyze.rewrite.match;
 
 import dev.snowdrop.mtool.tests.analyze.BaseRulesTest;
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
@@ -56,7 +56,7 @@ class ShouldMatchJavaAnnotationWithOr extends BaseRulesTest {
         List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
         // Process the rule
-        Map<String, List<Match>> matchList = codeScannerService.scan(rules.getFirst()).getMatches();
+        Map<String, List<Result>> matchList = codeScannerService.scan(rules.getFirst()).getResults();
 
         // Then
         assertNotNull(matchList);

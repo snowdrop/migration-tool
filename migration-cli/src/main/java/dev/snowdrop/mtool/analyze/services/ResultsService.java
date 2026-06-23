@@ -7,7 +7,7 @@ import com.github.freva.asciitable.Column;
 import com.github.freva.asciitable.HorizontalAlign;
 import com.github.freva.asciitable.Styler;
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.MigrationTask;
 import dev.snowdrop.mtool.model.analyze.html.Cell;
 import dev.snowdrop.mtool.model.analyze.html.Row;
@@ -274,7 +274,7 @@ public class ResultsService {
             String ruleId = entry.getKey();
             MigrationTask aTask = entry.getValue();
 
-            List<Match> queryResults = new ArrayList<>();
+            List<Result> queryResults = new ArrayList<>();
 
             /*
              * This code is deprecated since we handle now a query/scanner (and not all queries for one scanner only) and use a
@@ -301,9 +301,9 @@ public class ResultsService {
                 StringBuilder allResultsDetails = new StringBuilder();
 
                 for (int i = 0; i < queryResults.size(); i++) {
-                    Match match = queryResults.get(i);
+                    Result result = queryResults.get(i);
 
-                    String resultDetails = formatMatchResult(match);
+                    String resultDetails = formatResultEntry(result);
                     if (!resultDetails.isEmpty()) {
                         allResultsDetails.append(resultDetails);
                     } else {
@@ -341,19 +341,18 @@ public class ResultsService {
         return tableData;
     }
 
-    private static String formatMatchResult(Match match) {
+    private static String formatResultEntry(Result result) {
 
-        switch (match.scannerType()) {
+        switch (result.scannerType()) {
             case "jdtls":
-                var symbolInformations = (ArrayList<SymbolInformation>) match.result();
-                // TODO: Should we consider to support to handle a list of SymbolInformation when we issue a jdtls query too ?
+                var symbolInformations = (ArrayList<SymbolInformation>) result.result();
                 var symbolDetails = formatSymbolInformation(symbolInformations.get(0));
                 symbolDetails.append("\n").append(symbolInformations.get(0).getLocation().getUri());
                 return symbolDetails.toString();
             case "openrewrite":
-                return formatRewrite(match);
+                return formatRewrite(result);
             case "maven", "file-search":
-                return match.result().toString();
+                return result.result().toString();
             default:
                 return "";
         }
@@ -377,8 +376,8 @@ public class ResultsService {
      * @param match - the Match result to format
      * @return the formated match result string
      */
-    private static String formatRewrite(Match match) {
-        String matchResult = (String) match.result();
+    private static String formatRewrite(Result result) {
+        String matchResult = (String) result.result();
         String[] parts = matchResult.split("\\|");
         return String.format("Find '%s' in file: %s using the recipe: \"%s\"", parts[1], parts[0], parts[2]);
     }

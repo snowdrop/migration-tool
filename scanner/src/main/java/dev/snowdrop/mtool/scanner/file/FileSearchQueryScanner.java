@@ -2,7 +2,7 @@ package dev.snowdrop.mtool.scanner.file;
 
 import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.analyze.FilePath;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.MatchLocation;
 import dev.snowdrop.mtool.model.parser.Query;
 import dev.snowdrop.mtool.scanner.QueryScanner;
@@ -37,13 +37,13 @@ public class FileSearchQueryScanner implements QueryScanner {
     }
 
     @Override
-    public List<Match> executeQueries(Config config, Set<Query> queries) {
+    public List<Result> executeQueries(Config config, Set<Query> queries) {
         return List.of();
     }
 
     @Override
-    public List<Match> scansCodeFor(Config config, Query query) {
-        List<Match> matches = new ArrayList<>();
+    public List<Result> scansCodeFor(Config config, Query query) {
+        List<Result> matches = new ArrayList<>();
         logger.infof("File search scanner executing for query %s.%s", query.fileType(), query.symbol());
 
         String escapeDots = query.keyValues().get("value").replace(".", "\\.");
@@ -57,7 +57,7 @@ public class FileSearchQueryScanner implements QueryScanner {
             String result = String.format("%s/%s:%d | %s", parentFolderName, fileName, matchLocation.lineNumber(),
                     matchLocation.lineContent());
             var matchId = String.format("%s-%s", query.fileType(), query.symbol());
-            matches.add(new Match(matchId, getScannerType(), result));
+            matches.add(new Result(matchId, getScannerType(), result));
 
         }
         return matches;

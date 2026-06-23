@@ -1,6 +1,7 @@
 package dev.snowdrop.parser;
 
 import dev.snowdrop.mtool.model.parser.Query;
+import dev.snowdrop.mtool.parser.QueryParserUtil;
 import dev.snowdrop.mtool.parser.QueryVisitor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.Set;
 
-public class QueryFindAllTest extends AbstractQueryParser {
+public class QueryFindAllTestUtil extends QueryParserUtil {
 
     @Test
     public void queryFindAllJavaClasses() {

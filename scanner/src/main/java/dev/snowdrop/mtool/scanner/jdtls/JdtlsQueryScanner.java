@@ -1,7 +1,7 @@
 package dev.snowdrop.mtool.scanner.jdtls;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.parser.Query;
 import dev.snowdrop.mtool.scanner.QueryScanner;
 import org.eclipse.lsp4j.SymbolInformation;
@@ -26,13 +26,13 @@ public class JdtlsQueryScanner implements QueryScanner {
 
     @Deprecated
     @Override
-    public List<Match> executeQueries(Config config, Set<Query> queries) {
+    public List<Result> executeQueries(Config config, Set<Query> queries) {
         logger.infof("JDTLS scanner executing %d queries", queries.size());
 
-        List<Match> allResults = new ArrayList<>();
+        List<Result> allResults = new ArrayList<>();
 
         for (Query q : queries) {
-            List<Match> partial = scansCodeFor(config, q);
+            List<Result> partial = scansCodeFor(config, q);
 
             if (partial != null && !partial.isEmpty()) {
                 allResults.addAll(partial);
@@ -59,18 +59,18 @@ public class JdtlsQueryScanner implements QueryScanner {
                 || (fileType.contains("java") && symbol.contains("package"));
     }
 
-    public List<Match> scansCodeFor(Config config, Query query) {
+    public List<Result> scansCodeFor(Config config, Query query) {
         logger.infof("JDTLS scanner executing 1 query");
 
-        List<Match> results = executeQuery(config, query);
+        List<Result> results = executeQuery(config, query);
 
         logger.debugf("Found %d matches for query %s.%s (DTO: %s)", results.size(), query.fileType(), query.symbol());
 
         return results;
     }
 
-    private List<Match> executeQuery(Config config, Query query) {
-        List<Match> results = new ArrayList<>();
+    private List<Result> executeQuery(Config config, Query query) {
+        List<Result> results = new ArrayList<>();
 
         logger.infof("Executing JDTLS query: %s.%s", query.fileType(), query.symbol());
 
@@ -83,7 +83,7 @@ public class JdtlsQueryScanner implements QueryScanner {
 
             // TODO: As there is no matchId created for a JDTLS query, we will use the type+symbol. To be reviewed
             var matchId = String.format("%s-%s", query.fileType(), query.symbol());
-            results.add(new Match(matchId, getScannerType(), symbolResults));
+            results.add(new Result(matchId, getScannerType(), symbolResults));
 
         } catch (Exception e) {
             logger.errorf("Failed to execute JDTLS query %s.%s: %s", query.fileType(), query.symbol(), e.getMessage(),

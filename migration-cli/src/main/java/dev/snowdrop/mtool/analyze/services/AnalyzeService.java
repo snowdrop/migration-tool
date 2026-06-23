@@ -1,7 +1,7 @@
 package dev.snowdrop.mtool.analyze.services;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.MigrationTask;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.scanner.CodeScannerService;
@@ -37,8 +37,8 @@ public class AnalyzeService {
 
         for (Rule rule : rules) {
             ScanningResult scanningResult = codeScannerService.scan(rule);
-            Map<String, List<Match>> results = scanningResult.isMatchSucceeded()
-                    ? scanningResult.getMatches()
+            Map<String, List<Result>> results = scanningResult.isMatchSucceeded()
+                    ? scanningResult.getResults()
                     : Collections.emptyMap();
 
             tasks.put(rule.ruleID(), new MigrationTask().withRule(rule).withMatchResults(results.get(rule.ruleID()))

@@ -2,7 +2,7 @@ package dev.snowdrop.mtool.tests.analyze.properties;
 
 import dev.snowdrop.mtool.tests.analyze.BaseRulesTest;
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
@@ -67,7 +67,7 @@ class PropertiesKeyUsingRewriteScannerTest extends BaseRulesTest {
         });
 
         // Process the rule
-        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        Map<String, List<Result>> result = codeScannerService.scan(rules.getFirst()).getResults();
 
         runCat(Path.of(tempDir.toString(), applicationToScan, "target/rewrite/rewrite.patch"));
         result.forEach((match, matches) -> {
@@ -78,15 +78,15 @@ class PropertiesKeyUsingRewriteScannerTest extends BaseRulesTest {
         assertNotNull(result);
         assertTrue(result.containsKey("springboot-datasource-config"));
 
-        List<Match> matches = result.get("springboot-datasource-config");
+        List<Result> matches = result.get("springboot-datasource-config");
         assertNotNull(matches);
 
         System.out.println("#### Show matches ....");
-        matches.stream().map(Match::result).map(Object::toString).flatMap(s -> Arrays.stream(s.split("\\|")))
+        matches.stream().map(Result::result).map(Object::toString).flatMap(s -> Arrays.stream(s.split("\\|")))
                 .forEach(System.out::println);
 
         //assertThat(matches).hasSize(4);
-        assertThat(matches).extracting(Match::result).map(Object::toString) // Convert the object to string first
+        assertThat(matches).extracting(Result::result).map(Object::toString) // Convert the object to string first
                 .flatExtracting(s -> Arrays.asList(s.split("\\|")))
                 .contains("src/main/resources/application.properties",
                         "spring.datasource.url=jdbc:mysql://127.0.0.1:3306/todo", "spring.datasource.username=root",
@@ -104,7 +104,7 @@ class PropertiesKeyUsingRewriteScannerTest extends BaseRulesTest {
         });
 
         // Process the rule
-        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        Map<String, List<Result>> result = codeScannerService.scan(rules.getFirst()).getResults();
 
         runCat(Path.of(tempDir.toString(), applicationToScan, "target/rewrite/rewrite.patch"));
         result.forEach((match, matches) -> {
@@ -115,15 +115,15 @@ class PropertiesKeyUsingRewriteScannerTest extends BaseRulesTest {
         assertNotNull(result);
         assertTrue(result.containsKey("springboot-datasource-or-jpa-properties"));
 
-        List<Match> matches = result.get("springboot-datasource-or-jpa-properties");
+        List<Result> matches = result.get("springboot-datasource-or-jpa-properties");
         assertNotNull(matches);
 
         System.out.println("#### Show matches ....");
-        matches.stream().map(Match::result).map(Object::toString).flatMap(s -> Arrays.stream(s.split("\\|")))
+        matches.stream().map(Result::result).map(Object::toString).flatMap(s -> Arrays.stream(s.split("\\|")))
                 .forEach(System.out::println);
 
         //assertThat(matches).hasSize(4);
-        assertThat(matches).extracting(Match::result).map(Object::toString) // Convert the object to string first
+        assertThat(matches).extracting(Result::result).map(Object::toString) // Convert the object to string first
                 .flatExtracting(s -> Arrays.asList(s.split("\\|")))
                 .contains("src/main/resources/application.properties",
                         "spring.datasource.url=jdbc:mysql://127.0.0.1:3306/todo", "spring.datasource.username=root",
