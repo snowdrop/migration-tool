@@ -4,7 +4,8 @@ public enum ScannerType {
     OPENREWRITE("openrewrite"),
     JDTLS("jdtls"),
     MAVEN("maven"),
-    FILE_SEARCH("file-search");
+    FILE_SEARCH("file-search"),
+    TREESITTER("treesitter");
 
     private final String label;
 

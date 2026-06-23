@@ -86,6 +86,34 @@ public interface QueryListener extends ParseTreeListener {
     void exitClause(QueryParser.ClauseContext ctx);
 
     /**
+     * Enter a parse tree produced by {@link QueryParser#assignmentOp}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterAssignmentOp(QueryParser.AssignmentOpContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link QueryParser#assignmentOp}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitAssignmentOp(QueryParser.AssignmentOpContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link QueryParser#valueOrPairs}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterValueOrPairs(QueryParser.ValueOrPairsContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link QueryParser#valueOrPairs}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitValueOrPairs(QueryParser.ValueOrPairsContext ctx);
+
+    /**
      * Enter a parse tree produced by {@link QueryParser#fileType}.
      *
      * @param ctx the parse tree
@@ -154,18 +182,4 @@ public interface QueryListener extends ParseTreeListener {
      * @param ctx the parse tree
      */
     void exitValue(QueryParser.ValueContext ctx);
-
-    /**
-     * Enter a parse tree produced by {@link QueryParser#logicalOp}.
-     *
-     * @param ctx the parse tree
-     */
-    void enterLogicalOp(QueryParser.LogicalOpContext ctx);
-
-    /**
-     * Exit a parse tree produced by {@link QueryParser#logicalOp}.
-     *
-     * @param ctx the parse tree
-     */
-    void exitLogicalOp(QueryParser.LogicalOpContext ctx);
 }

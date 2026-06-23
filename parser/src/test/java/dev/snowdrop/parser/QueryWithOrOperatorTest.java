@@ -17,8 +17,8 @@ public class QueryWithOrOperatorTest extends AbstractQueryParser {
         QueryVisitor visitor = parseQuery(queryWithOr);
 
         // Don't include simple quotes around the key or value
-        Query queryA = new Query("java", "annotation", Map.of("name", "@SpringBootApplication"));
-        Query queryB = new Query("java", "annotation", Map.of("name", "@Deprecated"));
+        Query queryA = new Query("java", "annotation", "", Map.of("name", "@SpringBootApplication"));
+        Query queryB = new Query("java", "annotation", "", Map.of("name", "@Deprecated"));
 
         Set<Query> queries = visitor.getOrQueries();
         var queryList = queries.stream().toList();

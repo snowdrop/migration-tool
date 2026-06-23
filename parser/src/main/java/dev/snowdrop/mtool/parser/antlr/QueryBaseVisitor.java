@@ -88,6 +88,32 @@ public class QueryBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
      * </p>
      */
     @Override
+    public T visitAssignmentOp(QueryParser.AssignmentOpContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     * The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.
+     * </p>
+     */
+    @Override
+    public T visitValueOrPairs(QueryParser.ValueOrPairsContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     * The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.
+     * </p>
+     */
+    @Override
     public T visitFileType(QueryParser.FileTypeContext ctx) {
         return visitChildren(ctx);
     }
@@ -141,19 +167,6 @@ public class QueryBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
      */
     @Override
     public T visitValue(QueryParser.ValueContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>
-     * The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.
-     * </p>
-     */
-    @Override
-    public T visitLogicalOp(QueryParser.LogicalOpContext ctx) {
         return visitChildren(ctx);
     }
 }

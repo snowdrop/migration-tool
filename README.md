@@ -73,7 +73,7 @@ flowchart LR
 
 ### Enhanced rule
 
-The rule represents, per se, the contract definition between what we would like to discover within the code source scanned: java, properties, xml, json, maven or gradle files and what a provider should do to properly transform the code. 
+The rule represents, per se, the contract definition between what we would like to discover within the code source scanned: java, properties, xml, json, maven or Gradle files and what a provider should do to properly transform the code. 
 
 As presented hereafter, we have introduced different new fields part of the Rule YAML file:
 
@@ -253,6 +253,7 @@ Our Migration Tool client (aka mtool) proposes 2 commands:
 
 - **[analyze](#scan-and-analyze)**: Scan the code source using the rules matching conditions and generate a JSON report augmented with the provider's instructions.
 - **[transform](#transform-your-application)**: Apply the transformation's instructions using as input the JSON report by using the chosen provider
+- **[scan](#scan-an-application-using-query)**: Execute a query against an application 
 
 ```shell
 Usage: mtool [-hV] [COMMAND]
@@ -263,7 +264,8 @@ instructions
 Commands:
   analyze    Analyze a project for migration
   transform  Transform a java application
-  help       Display help information about the specified command.
+  help       Display help information about the specified command
+  scan       Scan an application against a query
 ```
 
 To check the installed version:
@@ -336,6 +338,22 @@ The tool supports different scanners able to scan the code source:
 - file and content search
 
 A scanner can be defined you launch the `analyze` command with the option `--scanner`. In this case, the tool will select it as default to scan and match a condition but will revert to one of the alternative scanners if the default don't support to search about: `<type>.<symbol>` where <type> can be: pom, java, properties, etc. and `symbol`: dependency, key, annotation, etc.
+
+### Scan an application using query
+
+Work in progress !
+
+To evaluate different a query against an application, use the `scan` command where you pass as parameters: the path to the application to analyze and a
+query
+
+```shell
+mtool scan <appPath> <query>
+
+using as query:
+
+java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
+pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')
+```
 
 ## Transform your application
 

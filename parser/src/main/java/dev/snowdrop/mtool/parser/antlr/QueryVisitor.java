@@ -56,6 +56,22 @@ public interface QueryVisitor<T> extends ParseTreeVisitor<T> {
     T visitClause(QueryParser.ClauseContext ctx);
 
     /**
+     * Visit a parse tree produced by {@link QueryParser#assignmentOp}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitAssignmentOp(QueryParser.AssignmentOpContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link QueryParser#valueOrPairs}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitValueOrPairs(QueryParser.ValueOrPairsContext ctx);
+
+    /**
      * Visit a parse tree produced by {@link QueryParser#fileType}.
      *
      * @param ctx the parse tree
@@ -94,12 +110,4 @@ public interface QueryVisitor<T> extends ParseTreeVisitor<T> {
      * @return the visitor result
      */
     T visitValue(QueryParser.ValueContext ctx);
-
-    /**
-     * Visit a parse tree produced by {@link QueryParser#logicalOp}.
-     *
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    T visitLogicalOp(QueryParser.LogicalOpContext ctx);
 }
