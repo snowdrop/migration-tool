@@ -3,6 +3,7 @@ package dev.snowdrop.mtool.commands;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.common.base.Strings;
 import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.analyze.Plan;
 import dev.snowdrop.mtool.model.analyze.Result;
@@ -87,6 +88,7 @@ public class ScannerCommand implements Runnable {
         int totalResults = 0;
         if (results != null) {
             for (Map.Entry<String, List<Result>> entry : results.entrySet()) {
+                logger.infof(Strings.repeat("=", 100));
                 logger.infof("--- %s ---", entry.getKey());
                 for (Result r : entry.getValue()) {
                     logger.infof("  Result: %s", r.result());
