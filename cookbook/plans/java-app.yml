@@ -1,4 +1,4 @@
-name: java-application
+name: Plan to analyze java code source
 queries:
   - find all java.class
   - find all java.annotation
