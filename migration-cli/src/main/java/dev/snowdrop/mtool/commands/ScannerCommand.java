@@ -89,7 +89,7 @@ public class ScannerCommand implements Runnable {
         if (results != null) {
             for (Map.Entry<String, List<Result>> entry : results.entrySet()) {
                 logger.infof(Strings.repeat("=", 100));
-                logger.infof("--- %s ---", entry.getKey());
+                logger.infof("=== %s ===", entry.getKey());
                 for (Result r : entry.getValue()) {
                     logger.infof("  Result: %s", r.result());
                 }
