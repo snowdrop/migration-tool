@@ -11,7 +11,7 @@ import org.wildfly.common.Assert;
 import java.util.Map;
 import java.util.Set;
 
-public class QueryWithOrOperatorTestUtil {
+public class QueryWithOrOperatorTest {
 
     private static QueryParserUtil queryParserUtil;
 

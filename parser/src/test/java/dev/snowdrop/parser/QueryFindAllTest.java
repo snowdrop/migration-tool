@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.Set;
 
-public class QueryFindAllTestUtil {
+public class QueryFindAllTest {
 
     @Test
     public void queryFindAllJavaClasses() {
