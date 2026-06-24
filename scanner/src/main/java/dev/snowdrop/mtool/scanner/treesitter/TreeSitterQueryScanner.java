@@ -41,6 +41,8 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
     private static final String JAVA_ALL_CLASS_QUERY = "(class_declaration name: (identifier) @class_name)";
 
+    private static final String JAVA_ALL_INTERFACE_QUERY = "(interface_declaration name: (identifier) @interface_name)";
+
     private static final String PROPERTIES_ALL_QUERY = "(property (key) (value)) @property";
 
     private static final String POM_DEPENDENCY_QUERY = """
@@ -60,32 +62,6 @@ public class TreeSitterQueryScanner implements QueryScanner {
     private static String PROPERTIES_SOURCE_GLOB_PATTERN = "glob:**/src/{main,test}/resources/*.properties";
 
     @Override
-    public List<Result> scansCodeFor(Config config, Query query) {
-        String key = query.fileType() + "." + query.symbol();
-        logger.infof("TreeSitter scanner executing for query %s", key);
-
-        if (query.fileType().equals("properties")) {
-            return scanSourceFiles(config, query, PROPERTIES_ALL_QUERY, PROPERTIES_SOURCE_GLOB_PATTERN, Language.PROPERTIES);
-        }
-
-        return switch (key) {
-            case "java.class" -> scanSourceFiles(config, query, JAVA_ALL_CLASS_QUERY, JAVA_SOURCE_GLOB_PATTERN, Language.JAVA);
-            case "java.annotation" ->
-                scanSourceFiles(config, query, JAVA_ALL_ANNOTATION_QUERY, JAVA_SOURCE_GLOB_PATTERN, Language.JAVA);
-            case "java.import" ->
-                scanSourceFiles(config, query, JAVA_ALL_IMPORT_QUERY, JAVA_SOURCE_GLOB_PATTERN, Language.JAVA);
-            case "pom.dependency" -> scanPomDependencies(config, query);
-            default -> throw new IllegalArgumentException("Unsupported query: " + key);
-        };
-    }
-
-    @Override
-    @Deprecated
-    public List<Result> executeQueries(Config config, Set<Query> queries) {
-        return List.of();
-    }
-
-    @Override
     public String getScannerType() {
         return SCANNER_TYPE;
     }
@@ -100,9 +76,37 @@ public class TreeSitterQueryScanner implements QueryScanner {
         String symbol = query.symbol();
 
         return (fileType.equals("java") && (symbol.equals("annotation") || symbol.equals("class") || symbol.equals(
-                "import")) ||
+                "import") || symbol.equals("interface")) ||
                 fileType.equals("pom") && symbol.equals("dependency") ||
                 fileType.equals("properties") && symbol.isEmpty());
+    }
+
+    @Override
+    public List<Result> scansCodeFor(Config config, Query query) {
+        String key = query.fileType() + "." + query.symbol();
+        logger.infof("TreeSitter scanner executing for query %s", key);
+
+        if (query.fileType().equals("properties")) {
+            return scanSourceFiles(config, query, PROPERTIES_ALL_QUERY, PROPERTIES_SOURCE_GLOB_PATTERN, Language.PROPERTIES);
+        }
+
+        return switch (key) {
+            case "java.class" -> scanSourceFiles(config, query, JAVA_ALL_CLASS_QUERY, JAVA_SOURCE_GLOB_PATTERN, Language.JAVA);
+            case "java.interface" ->
+                scanSourceFiles(config, query, JAVA_ALL_INTERFACE_QUERY, JAVA_SOURCE_GLOB_PATTERN, Language.JAVA);
+            case "java.annotation" ->
+                scanSourceFiles(config, query, JAVA_ALL_ANNOTATION_QUERY, JAVA_SOURCE_GLOB_PATTERN, Language.JAVA);
+            case "java.import" ->
+                scanSourceFiles(config, query, JAVA_ALL_IMPORT_QUERY, JAVA_SOURCE_GLOB_PATTERN, Language.JAVA);
+            case "pom.dependency" -> scanPomDependencies(config, query);
+            default -> throw new IllegalArgumentException("Unsupported query: " + key);
+        };
+    }
+
+    @Override
+    @Deprecated
+    public List<Result> executeQueries(Config config, Set<Query> queries) {
+        return List.of();
     }
 
     private List<Result> scanSourceFiles(Config config, Query query, String treeSitterQuery, String globPattern,
