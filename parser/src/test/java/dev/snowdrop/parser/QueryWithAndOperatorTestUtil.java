@@ -4,18 +4,26 @@ import dev.snowdrop.mtool.model.parser.Query;
 import dev.snowdrop.mtool.parser.QueryParserUtil;
 import dev.snowdrop.mtool.parser.QueryVisitor;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.wildfly.common.Assert;
 
 import java.util.Map;
 import java.util.Set;
 
-public class QueryWithAndOperatorTestUtil extends QueryParserUtil {
+public class QueryWithAndOperatorTestUtil {
+
+    private static QueryParserUtil queryParserUtil;
+
+    @BeforeAll
+    static void init() {
+        queryParserUtil = new QueryParserUtil();
+    }
 
     @Test
     public void queryWithClauseAnnotationAndClauseAnnotation() {
         String queryWithAnd = "java.annotation is \"@SpringBootApplication\" AND java.annotation is \"@ResponseBody\"";
-        QueryVisitor visitor = parseQuery(queryWithAnd);
+        QueryVisitor visitor = queryParserUtil.parseQuery(queryWithAnd);
 
         // Don't include simple quotes around the key or value
         Query queryA = new Query("java", "annotation", "", Map.of("name", "@SpringBootApplication"));
@@ -39,7 +47,7 @@ public class QueryWithAndOperatorTestUtil extends QueryParserUtil {
     @Test
     public void queryWithClauseAnnotationAndClausePomDependency() {
         String queryWithAnd = "java.annotation is \"@SpringBootApplication\" AND pom.dependency is (artifactId='quarkus-core', version='3.16.2')";
-        QueryVisitor visitor = parseQuery(queryWithAnd);
+        QueryVisitor visitor = queryParserUtil.parseQuery(queryWithAnd);
 
         // Don't include simple quotes around the key or value
         Query queryA = new Query("java", "annotation", "", Map.of("name", "@SpringBootApplication"));
@@ -63,7 +71,7 @@ public class QueryWithAndOperatorTestUtil extends QueryParserUtil {
     @Test
     public void testMixedQuoteSyntax() {
         String queryWithMixedQuotes = "java.annotation is '@SpringBootApplication' AND pom.dependency is \"quarkus-core\"";
-        QueryVisitor visitor = parseQuery(queryWithMixedQuotes);
+        QueryVisitor visitor = queryParserUtil.parseQuery(queryWithMixedQuotes);
 
         Query queryA = new Query("java", "annotation", "", Map.of("name", "@SpringBootApplication"));
         Query queryB = new Query("pom", "dependency", "", Map.of("artifactId", "quarkus-core"));
@@ -78,7 +86,7 @@ public class QueryWithAndOperatorTestUtil extends QueryParserUtil {
     @Test
     public void testDoubleQuotesInKeyValuePairs() {
         String queryWithDoubleQuotes = "java.annotation is (name=\"@SpringBootApplication\") AND pom.dependency is (artifactId=\"quarkus-core\", version=\"3.16.2\")";
-        QueryVisitor visitor = parseQuery(queryWithDoubleQuotes);
+        QueryVisitor visitor = queryParserUtil.parseQuery(queryWithDoubleQuotes);
 
         Query queryA = new Query("java", "annotation", "", Map.of("name", "@SpringBootApplication"));
         Query queryB = new Query("pom", "dependency", "", Map.of("artifactId", "quarkus-core", "version", "3.16.2"));
