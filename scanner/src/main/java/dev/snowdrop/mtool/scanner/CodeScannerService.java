@@ -33,7 +33,7 @@ public class CodeScannerService {
 
         for (int i = 0; i < plan.getQueries().size(); i++) {
             String queryStr = plan.getQueries().get(i);
-            String id = String.format("%s :: ", planName, plan.getQueries().get(i));
+            String id = String.format("%s :: %s", planName, plan.getQueries().get(i));
             ScanningResult sr = executeQueryWithVisitor(id, QueryUtils.parseAndVisit(queryStr));
             if (sr.getResults() != null) {
                 allResults.putAll(sr.getResults());
