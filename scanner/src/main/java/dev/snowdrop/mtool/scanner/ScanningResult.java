@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ScanningResult {
-    private final boolean matchSucceeded;
+    private boolean matchSucceeded = false;
     private final Map<String, List<Result>> results;
 
     public ScanningResult(boolean matchSucceeded, Map<String, List<Result>> results) {
@@ -15,7 +15,6 @@ public class ScanningResult {
     }
 
     public ScanningResult(Map<String, List<Result>> results) {
-        this.matchSucceeded = false;
         this.results = results;
     }
 
