@@ -1,7 +1,9 @@
 package dev.snowdrop.mtool.scanner;
 
-import dev.snowdrop.mtool.model.analyze.*;
+import dev.snowdrop.mtool.model.analyze.Config;
+import dev.snowdrop.mtool.model.analyze.Plan;
 import dev.snowdrop.mtool.model.analyze.Result;
+import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.model.parser.Query;
 import dev.snowdrop.mtool.parser.QueryUtils;
 import dev.snowdrop.mtool.parser.QueryVisitor;
