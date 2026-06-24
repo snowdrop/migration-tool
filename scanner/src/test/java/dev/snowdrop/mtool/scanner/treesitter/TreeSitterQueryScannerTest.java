@@ -1,7 +1,7 @@
 package dev.snowdrop.mtool.scanner.treesitter;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.parser.Query;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -62,7 +62,7 @@ class TreeSitterQueryScannerTest {
         Config config = new Config(tempDir.toString(), null, null, null, null, null, null, false, null, "treesitter", null);
         Query query = new Query("java", "annotation", "", Map.of("name", "jakarta.ws.rs.Path"));
 
-        List<Match> matches = scanner.scansCodeFor(config, query);
+        List<Result> matches = scanner.scansCodeFor(config, query);
 
         assertEquals(1, matches.size());
         assertEquals("treesitter", matches.get(0).scannerType());
@@ -84,7 +84,7 @@ class TreeSitterQueryScannerTest {
         Config config = new Config(tempDir.toString(), null, null, null, null, null, null, false, null, "treesitter", null);
         Query query = new Query("java", "class", "", Map.of("name", "TaskController"));
 
-        List<Match> matches = scanner.scansCodeFor(config, query);
+        List<Result> matches = scanner.scansCodeFor(config, query);
 
         assertEquals(1, matches.size());
         assertTrue(matches.get(0).result().toString().contains("TaskController"));
@@ -112,7 +112,7 @@ class TreeSitterQueryScannerTest {
         Query query = new Query("pom", "dependency", "",
                 Map.of("gavs", "org.springframework.boot:spring-boot-starter-web"));
 
-        List<Match> matches = scanner.scansCodeFor(config, query);
+        List<Result> matches = scanner.scansCodeFor(config, query);
 
         assertEquals(1, matches.size());
         assertTrue(matches.get(0).result().toString().contains("org.springframework.boot:spring-boot-starter-web"));

@@ -1,7 +1,7 @@
 package dev.snowdrop.mtool.tests.analyze;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
@@ -75,14 +75,14 @@ class MatchServiceCookBookTest extends BaseRulesTest {
         rules.forEach(r -> System.out.println("### rule: " + r.when().condition()));
 
         // When
-        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        Map<String, List<Result>> result = codeScannerService.scan(rules.getFirst()).getResults();
         runCat(Path.of(tempDir.toString(), appName, "target/rewrite/rewrite.patch"));
 
         // The recipe has been executed as we got a result having a key but the result is empty as no match succeeded to search about the annotation
         assertNotNull(result);
         assertTrue(result.containsKey("000-springboot-annotation-notfound"));
 
-        List<Match> matches = result.get("000-springboot-annotation-notfound");
+        List<Result> matches = result.get("000-springboot-annotation-notfound");
         assertEquals(0, matches.size());
         System.out.println("########################################");
     }
@@ -97,7 +97,7 @@ class MatchServiceCookBookTest extends BaseRulesTest {
         List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
         // Against the project: spring-boot-todo-app
-        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        Map<String, List<Result>> result = codeScannerService.scan(rules.getFirst()).getResults();
         runCat(Path.of(tempDir.toString(), appName, "target/rewrite/rewrite.patch"));
 
         assertEquals(1, rules.getFirst().order());
@@ -120,7 +120,7 @@ class MatchServiceCookBookTest extends BaseRulesTest {
         List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
         // Against the project: spring-boot-todo-app
-        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        Map<String, List<Result>> result = codeScannerService.scan(rules.getFirst()).getResults();
         runCat(Path.of(tempDir.toString(), appName, "target/rewrite/rewrite.patch"));
 
         // We should get a match against the following Java class: src/main/java/com/todo/app/AppApplication.java
@@ -141,7 +141,7 @@ class MatchServiceCookBookTest extends BaseRulesTest {
         List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
         // Against the project: spring-boot-todo-app
-        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        Map<String, List<Result>> result = codeScannerService.scan(rules.getFirst()).getResults();
         runCat(Path.of(tempDir.toString(), appName, "target/rewrite/rewrite.patch"));
 
         // We should get a match against the following Java class: src/main/java/com/todo/app/AppApplication.java
@@ -160,7 +160,7 @@ class MatchServiceCookBookTest extends BaseRulesTest {
         List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
         // When
-        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        Map<String, List<Result>> result = codeScannerService.scan(rules.getFirst()).getResults();
         runCat(Path.of(tempDir.toString(), appName, "target/rewrite/rewrite.patch"));
 
         // Then
@@ -190,7 +190,7 @@ class MatchServiceCookBookTest extends BaseRulesTest {
         List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
         // Against the project: spring-boot-todo-app
-        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        Map<String, List<Result>> result = codeScannerService.scan(rules.getFirst()).getResults();
         runCat(Path.of(tempDir.toString(), appName, "target/rewrite/rewrite.patch"));
 
         // Then, we got as result

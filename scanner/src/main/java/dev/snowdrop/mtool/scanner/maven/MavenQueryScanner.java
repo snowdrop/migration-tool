@@ -1,7 +1,7 @@
 package dev.snowdrop.mtool.scanner.maven;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.MavenGav;
 import dev.snowdrop.mtool.model.parser.Query;
 import dev.snowdrop.mtool.scanner.QueryScanner;
@@ -38,13 +38,13 @@ public class MavenQueryScanner implements QueryScanner {
 
     @Deprecated
     @Override
-    public List<Match> executeQueries(Config config, Set<Query> queries) {
+    public List<Result> executeQueries(Config config, Set<Query> queries) {
         logger.infof("Maven scanner executing %d queries", queries.size());
 
-        List<Match> allResults = new ArrayList<>();
+        List<Result> allResults = new ArrayList<>();
 
         for (Query q : queries) {
-            List<Match> partial = scansCodeFor(config, q);
+            List<Result> partial = scansCodeFor(config, q);
 
             if (partial != null && !partial.isEmpty()) {
                 allResults.addAll(partial);
@@ -56,10 +56,10 @@ public class MavenQueryScanner implements QueryScanner {
     }
 
     @Override
-    public List<Match> scansCodeFor(Config config, Query query) {
+    public List<Result> scansCodeFor(Config config, Query query) {
         logger.infof("Maven scanner executing for query %s.%s", query.fileType(), query.symbol());
 
-        List<Match> results = executeSingleQuery(config, query);
+        List<Result> results = executeSingleQuery(config, query);
 
         logger.debugf("Found %d matches for query %s.%s ", results.size(), query.fileType(), query.symbol());
 
@@ -81,8 +81,8 @@ public class MavenQueryScanner implements QueryScanner {
                 || fileType.equals("pom") && symbol.equals("dependencies"));
     }
 
-    private List<Match> executeSingleQuery(Config config, Query query) {
-        List<Match> results = new ArrayList<>();
+    private List<Result> executeSingleQuery(Config config, Query query) {
+        List<Result> results = new ArrayList<>();
 
         logger.infof("Executing Maven dependency query: %s", query);
 
@@ -100,7 +100,7 @@ public class MavenQueryScanner implements QueryScanner {
                 var result = String.format("Dependency found: %s in file:\n %s, at line: %d and position: %d",
                         String.format("%s:%s:%s", g, a, v), il.getSource().getLocation(), il.getLineNumber(),
                         il.getColumnNumber());
-                results.add(new Match("", "maven", result));
+                results.add(new Result("", "maven", result));
             });
         } else {
             MavenGav mvnGav = getMavenGav(query.keyValues().get("gavs"));
@@ -116,7 +116,7 @@ public class MavenQueryScanner implements QueryScanner {
                 var result = String.format("Dependency: %s found in file:\n %s\nat line: %d and position: %d",
                         formatGav(groupId, artifactId, version), il.getSource().getLocation(), il.getLineNumber(),
                         il.getColumnNumber());
-                results.add(new Match("", "maven", result));
+                results.add(new Result("", "maven", result));
             }
         }
 

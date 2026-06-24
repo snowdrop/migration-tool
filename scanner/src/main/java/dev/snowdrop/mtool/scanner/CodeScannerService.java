@@ -1,7 +1,8 @@
 package dev.snowdrop.mtool.scanner;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Plan;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.model.parser.Query;
 import dev.snowdrop.mtool.parser.QueryUtils;
@@ -22,6 +23,25 @@ public class CodeScannerService {
     public CodeScannerService(Config config, ScanCommandExecutor scanCommandExecutor) {
         this.config = config;
         this.scanCommandExecutor = scanCommandExecutor;
+    }
+
+    public ScanningResult scan(Plan plan) {
+        if (plan == null || plan.getQueries() == null || plan.getQueries().isEmpty()) {
+            throw new RuntimeException("Plan cannot be empty !");
+        }
+
+        String planName = plan.getName() != null ? plan.getName() : "plan";
+        Map<String, List<Result>> allResults = new HashMap<>();
+
+        for (int i = 0; i < plan.getQueries().size(); i++) {
+            String queryStr = plan.getQueries().get(i);
+            String id = String.format("%s :: %s", planName, plan.getQueries().get(i));
+            ScanningResult sr = executeQueryWithVisitor(id, QueryUtils.parseAndVisit(queryStr));
+            if (sr.getResults() != null) {
+                allResults.putAll(sr.getResults());
+            }
+        }
+        return new ScanningResult(allResults);
     }
 
     public ScanningResult scan(Rule rule) {
@@ -49,6 +69,24 @@ public class CodeScannerService {
         return executeQueryWithVisitor(QueryUtils.parseAndVisit(rule.when().condition()), rule);
     }
 
+    private ScanningResult executeQueryWithVisitor(String id, QueryVisitor visitor) {
+        Map<String, List<Result>> results = new HashMap<>();
+
+        if (!visitor.getSimpleQueries().isEmpty()) {
+            List<Result> aggregatedResults = new ArrayList<>();
+
+            for (Query q : visitor.getSimpleQueries()) {
+                List<Result> partial = scanCommandExecutor.executeCommandForQuery(config, q);
+                if (partial != null && !partial.isEmpty()) {
+                    aggregatedResults.addAll(partial);
+                }
+            }
+            results.put(id, aggregatedResults);
+        }
+
+        return new ScanningResult(results);
+    }
+
     /**
      * Executes the query using the visitor pattern and returns the scanning result.
      * This method handles the different types of queries (simple, OR, AND) and their execution logic.
@@ -58,7 +96,7 @@ public class CodeScannerService {
      * @return ScanningResult containing the match status and results
      */
     private ScanningResult executeQueryWithVisitor(QueryVisitor visitor, Rule rule) {
-        Map<String, List<Match>> results = new HashMap<>();
+        Map<String, List<Result>> results = new HashMap<>();
         boolean matchSucceeded = false;
 
         /*
@@ -80,10 +118,10 @@ public class CodeScannerService {
          */
 
         if (!visitor.getSimpleQueries().isEmpty()) {
-            List<Match> aggregatedResults = new ArrayList<>();
+            List<Result> aggregatedResults = new ArrayList<>();
 
             for (Query q : visitor.getSimpleQueries()) {
-                List<Match> partial = scanCommandExecutor.executeCommandForQuery(config, q);
+                List<Result> partial = scanCommandExecutor.executeCommandForQuery(config, q);
                 if (partial != null && !partial.isEmpty()) {
                     aggregatedResults.addAll(partial);
                 }
@@ -92,10 +130,10 @@ public class CodeScannerService {
             results.put(rule.ruleID(), aggregatedResults);
             matchSucceeded = !aggregatedResults.isEmpty();
         } else if (!visitor.getOrQueries().isEmpty()) {
-            List<Match> aggregated = new ArrayList<>();
+            List<Result> aggregated = new ArrayList<>();
 
             for (Query q : visitor.getOrQueries()) {
-                List<Match> partial = scanCommandExecutor.executeCommandForQuery(config, q);
+                List<Result> partial = scanCommandExecutor.executeCommandForQuery(config, q);
 
                 if (partial != null && !partial.isEmpty()) {
                     aggregated.addAll(partial);
@@ -106,12 +144,12 @@ public class CodeScannerService {
             matchSucceeded = aggregated.stream().anyMatch(r -> r != null);
         } else if (!visitor.getAndQueries().isEmpty()) {
             boolean allMatched = true;
-            List<Match> andMatches = new ArrayList<>();
+            List<Result> andResults = new ArrayList<>();
 
             for (Query q : visitor.getAndQueries()) {
 
-                List<Match> partial = scanCommandExecutor.executeCommandForQuery(config, q);
-                andMatches.addAll(partial);
+                List<Result> partial = scanCommandExecutor.executeCommandForQuery(config, q);
+                andResults.addAll(partial);
 
                 // If any subquery has no results, the AND fails.
                 if (partial.isEmpty()) {
@@ -119,8 +157,8 @@ public class CodeScannerService {
                 }
             }
 
-            results.merge(rule.ruleID(), andMatches, (existing, newOnes) -> {
-                List<Match> combined = new ArrayList<>(existing);
+            results.merge(rule.ruleID(), andResults, (existing, newOnes) -> {
+                List<Result> combined = new ArrayList<>(existing);
                 combined.addAll(newOnes);
                 return combined;
             });

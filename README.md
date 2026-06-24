@@ -343,8 +343,7 @@ A scanner can be defined you launch the `analyze` command with the option `--sca
 
 Work in progress !
 
-To evaluate different a query against an application, use the `scan` command where you pass as parameters: the path to the application to analyze and a
-query
+To evaluate different a query against an application, use the `scan` command where you pass as parameters: the path to the application to analyze and a query
 
 ```shell
 mtool scan <appPath> <query>
@@ -353,6 +352,22 @@ using as query:
 
 java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'
 pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')
+```
+
+You can also combine different queries defined part of yaml file that we call a plan
+
+```shell
+mtool scan <appPath> --plan <planPath>/java-app.yml --scanner treesitter
+```
+Example of YAML plan
+```yaml
+name: java-application
+queries:
+  - find all java.class
+  - find all java.annotation
+  - find all java.import
+  - find all properties
+  - find all pom.dependencies
 ```
 
 ## Transform your application

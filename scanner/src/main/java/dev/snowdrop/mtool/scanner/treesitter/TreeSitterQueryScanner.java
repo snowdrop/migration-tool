@@ -1,7 +1,7 @@
 package dev.snowdrop.mtool.scanner.treesitter;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.parser.Query;
 import dev.snowdrop.mtool.scanner.QueryScanner;
 import io.roastedroot.treesitter.Language;
@@ -60,7 +60,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
     private static String PROPERTIES_SOURCE_GLOB_PATTERN = "glob:**/src/{main,test}/resources/*.properties";
 
     @Override
-    public List<Match> scansCodeFor(Config config, Query query) {
+    public List<Result> scansCodeFor(Config config, Query query) {
         String key = query.fileType() + "." + query.symbol();
         logger.infof("TreeSitter scanner executing for query %s", key);
 
@@ -81,7 +81,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
     @Override
     @Deprecated
-    public List<Match> executeQueries(Config config, Set<Query> queries) {
+    public List<Result> executeQueries(Config config, Set<Query> queries) {
         return List.of();
     }
 
@@ -105,9 +105,9 @@ public class TreeSitterQueryScanner implements QueryScanner {
                 fileType.equals("properties") && symbol.isEmpty());
     }
 
-    private List<Match> scanSourceFiles(Config config, Query query, String treeSitterQuery, String globPattern,
+    private List<Result> scanSourceFiles(Config config, Query query, String treeSitterQuery, String globPattern,
             Language language) {
-        List<Match> matches = new ArrayList<>();
+        List<Result> matches = new ArrayList<>();
         List<Path> sourceFiles = findFiles(Paths.get(config.appPath()), globPattern);
         try (TreeSitter ts = TreeSitter.create();
                 TreeSitterParser parser = ts.newParser(language);
@@ -129,7 +129,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
         return matches;
     }
 
-    private List<Match> scanPomDependencies(Config config, Query query) {
+    private List<Result> scanPomDependencies(Config config, Query query) {
         String gavs = query.keyValues().get("gavs");
         if (gavs == null) {
             logger.warn("No 'gavs' key provided for pom.dependency query");
@@ -140,7 +140,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
         String targetGroupId = gavParts.length > 0 ? gavParts[0] : null;
         String targetArtifactId = gavParts.length > 1 ? gavParts[1] : null;
 
-        List<Match> matches = new ArrayList<>();
+        List<Result> matches = new ArrayList<>();
         List<Path> pomFiles = findFiles(Paths.get(config.appPath()), "glob:**/pom.xml");
 
         try (TreeSitter ts = TreeSitter.create();
@@ -173,7 +173,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
                                     String relativePath = Paths.get(config.appPath()).relativize(pomFile).toString();
                                     String formatted = String.format("%s:%d | %s:%s",
                                             relativePath, line, currentGroupId, currentArtifactId);
-                                    matches.add(new Match(
+                                    matches.add(new Result(
                                             query.fileType() + "-" + query.symbol(),
                                             SCANNER_TYPE,
                                             formatted));
@@ -206,15 +206,15 @@ public class TreeSitterQueryScanner implements QueryScanner {
         return groupMatch && targetArtifactId.equals(artifactId);
     }
 
-    private List<Match> generateMatchesFromResults(List<TreeSitterQueryResult> results, Query query, String source,
+    private List<Result> generateMatchesFromResults(List<TreeSitterQueryResult> results, Query query, String source,
             String appPath, Path filePath) {
-        List<Match> matches = new ArrayList<>();
+        List<Result> matches = new ArrayList<>();
         for (TreeSitterQueryResult result : results) {
             String entityName = source.substring(result.node().startByte(), result.node().endByte());
 
             String relativePath = Paths.get(appPath).relativize(filePath).toString();
             String formatted = formatResult(relativePath, result.node(), entityName);
-            matches.add(new Match(
+            matches.add(new Result(
                     query.fileType() + "-" + query.symbol(),
                     SCANNER_TYPE,
                     formatted));

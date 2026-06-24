@@ -1,0 +1,7 @@
+name: Plan to analyze java code source
+queries:
+  - find all java.class
+  - find all java.annotation
+  - find all java.import
+  - find all properties
+  - find all pom.dependencies

@@ -2,7 +2,7 @@ package dev.snowdrop.mtool.tests.analyze.jdtls;
 
 import dev.snowdrop.mtool.tests.analyze.BaseRulesTest;
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
@@ -67,14 +67,14 @@ class ShouldMatchJavaClassTest extends BaseRulesTest {
         List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
         // Process the rule
-        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        Map<String, List<Result>> result = codeScannerService.scan(rules.getFirst()).getResults();
 
         // Then
         assertNotNull(result);
         // Should find from the CSV file the rule-id string
         assertEquals(1, result.get("java-class-taskcontroller-found").size());
 
-        Match match = result.get("java-class-taskcontroller-found").get(0);
+        Result match = result.get("java-class-taskcontroller-found").get(0);
         assertNotNull(match);
 
         @SuppressWarnings("unchecked")

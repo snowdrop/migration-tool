@@ -9,12 +9,12 @@ import java.util.List;
 public class MigrationTask {
     private Rule rule;
     private Rule.Instruction instruction;
-    private List<Match> matchResults;
+    private List<Result> matchResults;
 
     @Deprecated
     private List<SymbolInformation> lsResults;
     @Deprecated
-    private List<Match> rewriteResults;
+    private List<Result> rewriteResults;
 
     public MigrationTask() {
     }
@@ -29,7 +29,7 @@ public class MigrationTask {
         return this;
     }
 
-    public MigrationTask withMatchResults(List<Match> matchResults) {
+    public MigrationTask withMatchResults(List<Result> matchResults) {
         this.matchResults = matchResults;
         return this;
     }
@@ -38,7 +38,7 @@ public class MigrationTask {
         return rule;
     }
 
-    public List<Match> getMatchResults() {
+    public List<Result> getMatchResults() {
         return matchResults;
     }
 
@@ -49,7 +49,7 @@ public class MigrationTask {
     }
 
     @Deprecated
-    public MigrationTask withRewriteResults(List<Match> rewriteResults) {
+    public MigrationTask withRewriteResults(List<Result> rewriteResults) {
         this.rewriteResults = rewriteResults;
         return this;
     }
@@ -60,7 +60,7 @@ public class MigrationTask {
     }
 
     @Deprecated
-    public List<Match> getRewriteResults() {
+    public List<Result> getRewriteResults() {
         return matchResults;
     }
 }
