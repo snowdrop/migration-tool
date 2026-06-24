@@ -124,7 +124,7 @@ public class JdtLsClient {
                 "--add-opens", "java.base/java.lang=ALL-UNNAMED", "-jar",
                 Paths.get(config.jdtLsPath(), "plugins", launcherJar).toString(), "-configuration",
                 configPath.toString(), "-data", wksDir.resolve(".jdt_workspace").toString());
-        pb.redirectErrorStream(false);
+        pb.redirectErrorStream(true);
 
         String javaHome = Optional.ofNullable(System.getProperty("JAVA_HOME")).orElse(System.getProperty("java.home"));
 
