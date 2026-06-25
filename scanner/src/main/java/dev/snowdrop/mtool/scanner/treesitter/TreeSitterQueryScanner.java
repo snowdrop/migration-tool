@@ -46,7 +46,13 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
     private static final String PROPERTIES_ALL_QUERY = "(property (key) (value)) @property";
 
-    private static final String HTML_ALL_QUERY = "(document) @html";
+    private static final String HTML_ALL_QUERY = """
+             (element
+               (start_tag
+                 (tag_name) @tag.html (#eq? @tag.html "html")
+               )
+             )
+            """;
 
     private static final String POM_DEPENDENCY_QUERY = """
             (element
@@ -223,7 +229,6 @@ public class TreeSitterQueryScanner implements QueryScanner {
             String appPath, Path filePath) {
         List<Result> matches = new ArrayList<>();
         for (TreeSitterQueryResult result : results) {
-            //String entityName = source.substring(result.node().startByte(), result.node().endByte());
             int startByte = result.node().startByte();
             int endByte = result.node().endByte();
 
@@ -240,14 +245,14 @@ public class TreeSitterQueryScanner implements QueryScanner {
         return matches;
     }
 
-    private String formatResult(String relativePath, TreeSitterNode node, String entityName) {
+    private String formatResult(String relativePath, TreeSitterNode node, String snippet) {
         return String.format("Path: %s, start: (%d, %d), end: (%d-%d), text: %s",
                 relativePath,
                 node.startRow() + 1,
                 node.startColumn() + 1,
                 node.endRow() + 1,
                 node.endColumn() + 1,
-                entityName);
+                snippet);
     }
 
     private List<Path> findFiles(Path startPath, String globPattern) {
