@@ -6,3 +6,4 @@ queries:
   - find all java.import
   - find all pom.dependencies
   - find all properties
+  - find all html

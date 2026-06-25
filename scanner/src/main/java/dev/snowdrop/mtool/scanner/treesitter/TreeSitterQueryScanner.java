@@ -14,6 +14,7 @@ import io.roastedroot.treesitter.TreeSitterTree;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,6 +46,14 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
     private static final String PROPERTIES_ALL_QUERY = "(property (key) (value)) @property";
 
+    private static final String HTML_ALL_QUERY = """
+             (element
+               (start_tag
+                 (tag_name) @tag.html (#eq? @tag.html "html")
+               )
+             )
+            """;
+
     private static final String POM_DEPENDENCY_QUERY = """
             (element
               (STag . (Name) @tag.dep (#match? @tag.dep "(dependency|parent)"))
@@ -60,6 +69,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
     private static String JAVA_SOURCE_GLOB_PATTERN = "glob:**/src/{main,test}/java/**/*.java";
     private static String PROPERTIES_SOURCE_GLOB_PATTERN = "glob:**/src/{main,test}/resources/*.properties";
+    private static String WEB_SOURCE_GLOB_PATTERN = "glob:**/src/{main,test}/resources/**/*.{html,htm}";
 
     @Override
     public String getScannerType() {
@@ -78,7 +88,8 @@ public class TreeSitterQueryScanner implements QueryScanner {
         return (fileType.equals("java") && (symbol.equals("annotation") || symbol.equals("class") || symbol.equals(
                 "import") || symbol.equals("interface")) ||
                 fileType.equals("pom") && symbol.equals("dependency") ||
-                fileType.equals("properties") && symbol.isEmpty());
+                fileType.equals("properties") && symbol.isEmpty() ||
+                fileType.equals("html") && symbol.isEmpty());
     }
 
     @Override
@@ -88,6 +99,10 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
         if (query.fileType().equals("properties")) {
             return scanSourceFiles(config, query, PROPERTIES_ALL_QUERY, PROPERTIES_SOURCE_GLOB_PATTERN, Language.PROPERTIES);
+        }
+
+        if (query.fileType().equals("html")) {
+            return scanSourceFiles(config, query, HTML_ALL_QUERY, WEB_SOURCE_GLOB_PATTERN, Language.HTML);
         }
 
         return switch (key) {
@@ -122,7 +137,8 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
                 try (TreeSitterTree tree = parser.parseString(source)) {
                     List<TreeSitterQueryResult> results = tsQuery.exec(tree.rootNode(), source);
-                    matches.addAll(generateMatchesFromResults(results, query, source, config.appPath(), javaFile));
+                    matches.addAll(generateMatchesFromResults(results, query, source.getBytes(StandardCharsets.UTF_8),
+                            config.appPath(), javaFile));
                 }
             }
         } catch (IOException e) {
@@ -210,14 +226,17 @@ public class TreeSitterQueryScanner implements QueryScanner {
         return groupMatch && targetArtifactId.equals(artifactId);
     }
 
-    private List<Result> generateMatchesFromResults(List<TreeSitterQueryResult> results, Query query, String source,
+    private List<Result> generateMatchesFromResults(List<TreeSitterQueryResult> results, Query query, byte[] sourceBytes,
             String appPath, Path filePath) {
         List<Result> matches = new ArrayList<>();
         for (TreeSitterQueryResult result : results) {
-            String entityName = source.substring(result.node().startByte(), result.node().endByte());
+            int startByte = result.node().startByte();
+            int endByte = result.node().endByte();
+
+            String snippet = new String(sourceBytes, startByte, (endByte - startByte), StandardCharsets.UTF_8);
 
             String relativePath = Paths.get(appPath).relativize(filePath).toString();
-            String formatted = formatResult(relativePath, result.node(), entityName);
+            String formatted = formatResult(relativePath, result.node(), snippet);
             matches.add(new Result(
                     query.fileType() + "-" + query.symbol(),
                     SCANNER_TYPE,
@@ -226,14 +245,14 @@ public class TreeSitterQueryScanner implements QueryScanner {
         return matches;
     }
 
-    private String formatResult(String relativePath, TreeSitterNode node, String entityName) {
+    private String formatResult(String relativePath, TreeSitterNode node, String snippet) {
         return String.format("Path: %s, start: (%d, %d), end: (%d-%d), text: %s",
                 relativePath,
                 node.startRow() + 1,
                 node.startColumn() + 1,
                 node.endRow() + 1,
                 node.endColumn() + 1,
-                entityName);
+                snippet);
     }
 
     private List<Path> findFiles(Path startPath, String globPattern) {
