@@ -137,7 +137,8 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
                 try (TreeSitterTree tree = parser.parseString(source)) {
                     List<TreeSitterQueryResult> results = tsQuery.exec(tree.rootNode(), source);
-                    matches.addAll(generateMatchesFromResults(results, query, source, config.appPath(), javaFile));
+                    matches.addAll(generateMatchesFromResults(results, query, source.getBytes(StandardCharsets.UTF_8),
+                            config.appPath(), javaFile));
                 }
             }
         } catch (IOException e) {
@@ -225,14 +226,13 @@ public class TreeSitterQueryScanner implements QueryScanner {
         return groupMatch && targetArtifactId.equals(artifactId);
     }
 
-    private List<Result> generateMatchesFromResults(List<TreeSitterQueryResult> results, Query query, String source,
+    private List<Result> generateMatchesFromResults(List<TreeSitterQueryResult> results, Query query, byte[] sourceBytes,
             String appPath, Path filePath) {
         List<Result> matches = new ArrayList<>();
         for (TreeSitterQueryResult result : results) {
             int startByte = result.node().startByte();
             int endByte = result.node().endByte();
 
-            byte[] sourceBytes = source.getBytes(StandardCharsets.UTF_8);
             String snippet = new String(sourceBytes, startByte, (endByte - startByte), StandardCharsets.UTF_8);
 
             String relativePath = Paths.get(appPath).relativize(filePath).toString();
