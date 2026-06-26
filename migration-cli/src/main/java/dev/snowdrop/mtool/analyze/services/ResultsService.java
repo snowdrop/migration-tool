@@ -13,6 +13,7 @@ import dev.snowdrop.mtool.model.analyze.html.Cell;
 import dev.snowdrop.mtool.model.analyze.html.Row;
 import dev.snowdrop.mtool.analyze.utils.TerminalUtils;
 import dev.snowdrop.mtool.model.transform.MigrationTasksExport;
+import dev.snowdrop.mtool.model.transform.ScanResultsExport;
 import io.quarkus.qute.*;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -30,6 +31,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -42,8 +44,11 @@ public class ResultsService {
         RULE_REPO_URL_FORMAT = ConfigProvider.getConfig().getValue("analyzer.rules.repo_url", String.class);
     }
 
-    private final String source;
-    private final String target;
+    private String source;
+    private String target;
+
+    public ResultsService() {
+    }
 
     public ResultsService(String source, String target) {
         this.source = source;
@@ -267,33 +272,26 @@ public class ResultsService {
     }
 
     public List<String[]> generateDataTable(Map<String, MigrationTask> results, String source, String target) {
-        // Prepare data for the table
-        List<String[]> tableData = new ArrayList<>();
-
+        Map<String, List<Result>> converted = new LinkedHashMap<>();
         for (Map.Entry<String, MigrationTask> entry : results.entrySet()) {
+            MigrationTask task = entry.getValue();
+            List<Result> matchResults = (task.getMatchResults() != null) ? task.getMatchResults() : List.of();
+            converted.put(entry.getKey(), matchResults);
+        }
+        return generateDataTable(converted);
+    }
+
+    public List<String[]> generateDataTable(Map<String, List<Result>> results) {
+        List<String[]> tableData = new ArrayList<>();
+        String sourceToTarget = (source != null && target != null)
+                ? String.format("%s -> %s", source, target)
+                : "";
+
+        for (Map.Entry<String, List<Result>> entry : results.entrySet()) {
             String ruleId = entry.getKey();
-            MigrationTask aTask = entry.getValue();
-
-            List<Result> queryResults = new ArrayList<>();
-
-            /*
-             * This code is deprecated since we handle now a query/scanner (and not all queries for one scanner only) and use a
-             * match result
-             * if (aTask.getLsResults() != null && !aTask.getLsResults().isEmpty()) {
-             * queryResults = aTask.getLsResults();
-             * }
-             *
-             * if (aTask.getRewriteResults() != null && !aTask.getRewriteResults().isEmpty()) {
-             * queryResults = aTask.getRewriteResults();
-             * }
-             */
-
-            if (aTask.getMatchResults() != null && !aTask.getMatchResults().isEmpty()) {
-                queryResults = aTask.getMatchResults();
-            }
+            List<Result> queryResults = entry.getValue() != null ? entry.getValue() : List.of();
 
             String hasQueryResults = queryResults.isEmpty() ? "No" : "Yes";
-            String sourceToTarget = String.format("%s -> %s", source, target);
 
             if (queryResults.isEmpty()) {
                 tableData.add(new String[] { ruleId, sourceToTarget, hasQueryResults, "No match found" });
@@ -310,22 +308,6 @@ public class ResultsService {
                         allResultsDetails.append("No results found");
                     }
 
-                    /*
-                     * This code is deprecated since we handle now a query/scanner (and not all queries for one scanner only)
-                     * and use a match result
-                     * if (result instanceof SymbolInformation symbolInfo) {
-                     * String symbolDetails = formatSymbolInformation(symbolInfo);
-                     * allResultsDetails.append(symbolDetails).append("\n").append(symbolInfo.getLocation().getUri());
-                     * } else if (result instanceof Match match) {
-                     * String resultDetails = formatRewriteImproved(match);
-                     * allResultsDetails.append(resultDetails);
-                     * } else {
-                     * // Fallback for unknown types
-                     * allResultsDetails.append("Unknown result type: ").append(result.getClass().getSimpleName());
-                     * }
-                     */
-
-                    // Add separator between multiple results (except for the last one)
                     if (i < queryResults.size() - 1) {
                         allResultsDetails.append("\n--- result ---\n");
                     }
@@ -335,9 +317,7 @@ public class ResultsService {
             }
         }
 
-        // Sorts the List<String[]> by comparing the first element (row[0]) of each array which is the RuleID
         tableData.sort(Comparator.comparing(row -> row[0]));
-
         return tableData;
     }
 
@@ -351,7 +331,7 @@ public class ResultsService {
                 return symbolDetails.toString();
             case "openrewrite":
                 return formatRewrite(result);
-            case "maven", "file-search":
+            case "maven", "file-search", "treesitter":
                 return result.result().toString();
             default:
                 return "";
@@ -418,6 +398,154 @@ public class ResultsService {
             if (config.verbose()) {
                 logger.error("Export error details:", e);
             }
+        }
+    }
+
+    public void exportScanResultsAsJson(Config config, Map<String, List<Result>> results) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm")
+                    .withLocale(Locale.getDefault());
+            String dateTimeformated = LocalDateTime.now().format(formatter);
+
+            ScanResultsExport exportData = new ScanResultsExport("Scan Results", config.appPath(),
+                    dateTimeformated, results);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            File outputFile = new File(String.format("%s/scanning-%s-report_%s.json", config.appPath(),
+                    config.scanner(), dateTimeformated));
+
+            if (outputFile.getParentFile() != null) {
+                outputFile.getParentFile().mkdirs();
+            }
+
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, exportData);
+            logger.infof("📄 Scan results exported to: %s", outputFile);
+
+        } catch (IOException e) {
+            logger.errorf("❌ Failed to export scan results to JSON: %s", e.getMessage());
+            if (config.verbose()) {
+                logger.error("Export error details:", e);
+            }
+        }
+    }
+
+    public void showCsvTable(Map<String, List<Result>> results) {
+        showCsvTable(generateDataTable(results));
+    }
+
+    public void exportAsHtml(Config config, Map<String, List<Result>> results) {
+        exportAsHtml(config, generateDataTable(results));
+    }
+
+    public void exportAsCsv(Config config, Map<String, List<Result>> results) {
+        exportAsCsv(config, generateDataTable(results));
+    }
+
+    public void showScanTable(Map<String, List<Result>> results) {
+        List<String[]> tableData = generateScanDataTable(results);
+        System.out.println("\n=== Scan Results ===");
+        String asciiTable = AsciiTable.builder()
+                .styler(TerminalUtils.headerStyle())
+                .data(tableData,
+                        Arrays.asList(
+                                new Column().header("Query").headerAlign(HorizontalAlign.LEFT)
+                                        .dataAlign(HorizontalAlign.LEFT).with(r -> r[0]),
+                                new Column().header("Results").headerAlign(HorizontalAlign.LEFT)
+                                        .maxWidth(120).dataAlign(HorizontalAlign.LEFT).with(r -> r[1])))
+                .asString();
+        System.out.println(asciiTable);
+    }
+
+    public List<String[]> generateScanDataTable(Map<String, List<Result>> results) {
+        List<String[]> tableData = new ArrayList<>();
+
+        for (Map.Entry<String, List<Result>> entry : results.entrySet()) {
+            String queryKey = entry.getKey();
+            List<Result> queryResults = entry.getValue() != null ? entry.getValue() : List.of();
+
+            if (queryResults.isEmpty()) {
+                tableData.add(new String[] { queryKey, "No match found" });
+            } else {
+                StringBuilder details = new StringBuilder();
+                for (int i = 0; i < queryResults.size(); i++) {
+                    Result result = queryResults.get(i);
+                    String resultDetails = formatResultEntry(result);
+                    details.append(!resultDetails.isEmpty() ? resultDetails : "No results found");
+                    if (i < queryResults.size() - 1) {
+                        details.append("\n--- result ---\n");
+                    }
+                }
+                tableData.add(new String[] { queryKey, details.toString() });
+            }
+        }
+
+        tableData.sort(Comparator.comparing(row -> row[0]));
+        return tableData;
+    }
+
+    public void exportScanAsHtml(Config config, Map<String, List<Result>> results) {
+        String[] headers = { "Query", "Results" };
+        List<Row> tableData = convertToRows(headers, generateScanDataTable(results));
+
+        TemplateLocator templateLocator = getTemplateLocator(".html");
+        Engine engine = Engine.builder().addLocator(templateLocator).addDefaults()
+                .addValueResolver(new ReflectionValueResolver()).build();
+
+        try {
+            Template reportTmpl = engine.getTemplate("report");
+            if (reportTmpl == null) {
+                logger.error("Could not load template: report");
+                return;
+            }
+
+            String report = reportTmpl.data("tableData", tableData).data("headers", headers).render();
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm")
+                    .withLocale(Locale.getDefault());
+            String dateTimeformated = LocalDateTime.now().format(formatter);
+
+            String reportHtmlFileName = String.format("%s/scanning-%s-report_%s.html", config.appPath(),
+                    config.scanner(), dateTimeformated);
+            Files.writeString(Paths.get(reportHtmlFileName), report);
+
+            logger.infof("==== HTML Report file exported to: file:///%s", reportHtmlFileName);
+        } catch (Exception e) {
+            logger.error("Error rendering template: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void exportScanAsCsv(Config config, Map<String, List<Result>> results) {
+        String[] headers = { "Query", "Results" };
+        List<Row> tableData = convertToRows(headers, generateScanDataTable(results));
+
+        TemplateLocator templateLocator = getTemplateLocator(".csv");
+        Engine engine = Engine.builder().addLocator(templateLocator).addDefaults()
+                .addValueResolver(new ReflectionValueResolver()).build();
+
+        try {
+            Template reportTmpl = engine.getTemplate("report");
+            if (reportTmpl == null) {
+                logger.error("Could not load template: report");
+                return;
+            }
+
+            String report = reportTmpl.data("tableData", tableData).data("headers", headers).render();
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm")
+                    .withLocale(Locale.getDefault());
+            String dateTimeformated = LocalDateTime.now().format(formatter);
+
+            String reportCsvFileName = String.format("%s/scanning-%s-report_%s.csv", config.appPath(),
+                    config.scanner(), dateTimeformated);
+            Files.writeString(Paths.get(reportCsvFileName), report);
+
+            logger.infof("==== CSV Report file exported to: file:///%s", reportCsvFileName);
+        } catch (Exception e) {
+            logger.error("Error rendering template: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
