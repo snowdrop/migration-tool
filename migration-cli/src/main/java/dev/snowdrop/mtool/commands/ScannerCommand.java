@@ -3,7 +3,7 @@ package dev.snowdrop.mtool.commands;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.common.base.Strings;
+import dev.snowdrop.mtool.analyze.services.ResultsService;
 import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.analyze.Plan;
 import dev.snowdrop.mtool.model.analyze.Result;
@@ -46,6 +46,10 @@ public class ScannerCommand implements Runnable {
             "--plan" }, description = "Path to a YAML plan file containing queries to execute")
     public String planFile;
 
+    @CommandLine.Option(names = { "-o",
+            "--output" }, description = "Export the scan result using as format: json, csv, html")
+    private String output;
+
     @Override
     public void run() {
         long startTime = System.nanoTime();
@@ -85,19 +89,12 @@ public class ScannerCommand implements Runnable {
         ScanningResult scanningResult = codeScannerService.scan(plan);
 
         Map<String, List<Result>> results = scanningResult.getResults();
-        int totalResults = 0;
         if (results != null) {
-            for (Map.Entry<String, List<Result>> entry : results.entrySet()) {
-                logger.infof(Strings.repeat("=", 100));
-                logger.infof("=== %s ===", entry.getKey());
-                for (Result r : entry.getValue()) {
-                    logger.infof("  Result: %s", r.result());
-                }
-                totalResults += entry.getValue().size();
-            }
+            displayResults(results, config);
         }
 
         long elapsedMs = (System.nanoTime() - startTime) / 1_000_000;
+        int totalResults = results != null ? results.values().stream().mapToInt(List::size).sum() : 0;
         logger.infof("%d result(s) from plan '%s'. Elapsed: %d ms", totalResults, plan.getName(), elapsedMs);
     }
 
@@ -117,11 +114,25 @@ public class ScannerCommand implements Runnable {
         ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
         List<Result> matches = scanCommandExecutor.executeCommandForQuery(config, q);
 
-        matches.forEach(m -> {
-            logger.infof("Result : %s ", m.result());
-        });
+        Map<String, List<Result>> results = Map.of(q.fileType() + ":" + q.symbol(), matches);
+        displayResults(results, config);
 
         long elapsedMs = (System.nanoTime() - startTime) / 1_000_000;
         logger.infof(matches.size() + " match(es). Elapsed: " + elapsedMs + " ms");
+    }
+
+    private void displayResults(Map<String, List<Result>> results, Config config) {
+        ResultsService resultsService = new ResultsService();
+
+        resultsService.showScanTable(results);
+
+        if (output != null && !output.isEmpty()) {
+            switch (output) {
+                case "json" -> resultsService.exportScanResultsAsJson(config, results);
+                case "html" -> resultsService.exportScanAsHtml(config, results);
+                case "csv" -> resultsService.exportScanAsCsv(config, results);
+                default -> logger.warnf("The format selected to export the report is unknown: %s", output);
+            }
+        }
     }
 }

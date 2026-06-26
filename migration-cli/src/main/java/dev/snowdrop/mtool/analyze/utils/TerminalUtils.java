@@ -41,6 +41,15 @@ public class TerminalUtils {
         };
     }
 
+    public static Styler headerStyle() {
+        return new Styler() {
+            @Override
+            public List<String> styleHeader(Column column, int col, List<String> data) {
+                return data.stream().map(line -> colorize(line, GREEN)).collect(Collectors.toList());
+            }
+        };
+    }
+
     /**
      * Applies color formatting to text.
      *
