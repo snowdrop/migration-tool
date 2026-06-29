@@ -4,7 +4,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBeanBuilder;
 import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.analyze.CsvRecord;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.ScannerType;
 import dev.snowdrop.mtool.model.openrewrite.CompositeRecipe;
 import dev.snowdrop.mtool.model.openrewrite.RecipeDefinition;
@@ -17,6 +17,7 @@ import dev.snowdrop.rewrite.config.RewriteConfig;
 import org.jboss.logging.Logger;
 import org.openrewrite.DataTable;
 import org.openrewrite.RecipeRun;
+import org.openrewrite.java.table.ClassHierarchy;
 import org.openrewrite.table.SearchResults;
 
 import java.io.BufferedReader;
@@ -48,13 +49,13 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
     @Deprecated
     @Override
-    public List<Match> executeQueries(Config config, Set<Query> queries) {
+    public List<Result> executeQueries(Config config, Set<Query> queries) {
         logger.infof("OpenRewrite scanner executing %d queries", queries.size());
 
-        List<Match> allResults = new ArrayList<>();
+        List<Result> allResults = new ArrayList<>();
 
         for (Query q : queries) {
-            List<Match> partial = scansCodeFor(config, q);
+            List<Result> partial = scansCodeFor(config, q);
 
             if (partial != null && !partial.isEmpty()) {
                 allResults.addAll(partial);
@@ -66,12 +67,12 @@ public class OpenRewriteQueryScanner implements QueryScanner {
     }
 
     @Override
-    public List<Match> scansCodeFor(Config config, Query query) {
+    public List<Result> scansCodeFor(Config config, Query query) {
         return scansCode(config, query);
     }
 
     @Deprecated
-    private List<Match> oldMethodToGetMatches(Config config, Query query) {
+    private List<Result> oldMethodToGetMatches(Config config, Query query) {
         logger.infof("OpenRewrite scanner executing 1 query");
 
         if (config.scanner() != null && !ScannerType.OPENREWRITE.label().equals(config.scanner())) {
@@ -93,7 +94,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
         }
 
         String matchId = extractMatchId(openRewriteRecipe);
-        List<Match> results = findRecordsMatching(config.appPath(), matchId);
+        List<Result> results = findRecordsMatching(config.appPath(), matchId);
 
         logger.debugf("Found %d matches for query %s.%s ", results.size(), query.fileType(), query.symbol());
 
@@ -107,7 +108,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
      * @param config
      * @return
      */
-    private List<Match> scansCode(Config config, Query q) {
+    private List<Result> scansCode(Config config, Query q) {
         logger.infof("OpenRewrite scanner executing 1 query");
 
         if (config.scanner() != null && !ScannerType.OPENREWRITE.label().equals(config.scanner())) {
@@ -133,7 +134,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
          */
         RecipeHolder recipeHolder = parse(q);
 
-        List<Match> matches;
+        List<Result> matches;
         try {
             matches = applyRecipes(config, recipeHolder);
         } catch (Exception e) {
@@ -148,51 +149,73 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
     }
 
-    //TODO this method needs to be adapted, for the moment respects the existent needs to display data
-    List<Match> findMatchsFromResults(ResultsContainer resultsContainer, RecipeDefinition recipeDefinition) {
-        List<Match> results = new ArrayList<>();
+    List<Result> findMatchsFromResults(ResultsContainer resultsContainer, RecipeDefinition recipeDefinition) {
+        List<Result> results = new ArrayList<>();
+        List<String> findTerms = List.of("FindClass", "FindMethod");
 
-        if (!resultsContainer.isNotEmpty()) {
+        boolean isFindEntityRecipe = findTerms.stream().anyMatch(recipeDefinition.getFqName()::contains);
+        if (!isFindEntityRecipe && !resultsContainer.isNotEmpty()) {
             logger.warnf("No match found for the recipe: %s%n", recipeDefinition.getFqName());
             return results;
         }
 
         RecipeRun run = resultsContainer.getRecipeRuns().get(recipeDefinition.getFqName());
-        Optional<Map.Entry<DataTable<?>, List<?>>> resultMap = run.getDataTables().entrySet().stream()
-                .filter(entry -> entry.getKey().getName().contains("SearchResults")).findFirst();
 
-        if (resultMap.isPresent()) {
-
-            List<SearchResults.Row> rows = (List<SearchResults.Row>) resultMap.get().getValue();
-            for (SearchResults.Row row : rows) {
-
-                // The source path of the file with the search result markers present.
-                String sourcePath = row.getSourcePath();
-
-                // A recipe may modify the source path. This is the path after the run. null when a source file was deleted during the run.
-                // TODO: Do we need it when we do a search ?
-                String afterSourcePath = row.getAfterSourcePath();
-
-                // The specific recipe that added the Search marker.
-                String recipe = row.getRecipe();
-
-                // The content of the description of the marker.
-                String description = row.getRecipe();
-
-                // The trimmed printed tree of the LST element that the marker is attached to.
-                String result = row.getResult();
-
-                String formatedResult = String.format("%s|%s|%s|%s", sourcePath, result, description, recipe);
-                logger.debugf("Match's recipe: %s datatable result: %s%n", recipe, formatedResult);
-                results.add(new Match("toBeDone", getScannerType(), formatedResult));
-            }
+        String fqName = recipeDefinition.getFqName();
+        if ("org.openrewrite.java.search.FindClassHierarchy".equals(fqName)) {
+            results = extractClassHierarchyResults(run, fqName);
         } else {
-            logger.warnf("No SearchResults DataTable found for: %s%n", recipeDefinition.getFqName());
+            results = extractSearchResults(run, fqName);
         }
         return results;
     }
 
-    private List<Match> applyRecipes(Config config, RecipeHolder recipeHolder) throws Exception {
+    private List<Result> extractClassHierarchyResults(RecipeRun run, String fqName) {
+        List<Result> results = new ArrayList<>();
+        Optional<Map.Entry<DataTable<?>, List<?>>> resultMap = run.getDataTables().entrySet().stream()
+                .filter(entry -> entry.getKey().getName().contains("ClassHierarchy")).findFirst();
+
+        if (resultMap.isPresent()) {
+            List<ClassHierarchy.Row> rows = (List<ClassHierarchy.Row>) resultMap.get().getValue();
+            for (ClassHierarchy.Row row : rows) {
+                String sourcePath = row.getSourcePath();
+                String className = row.getClassName();
+                String superclass = row.getSuperclass();
+                String interfaces = row.getInterfaces();
+
+                String formatedResult = String.format("%s|%s|%s|%s", sourcePath, className, superclass, interfaces);
+                logger.debugf("ClassHierarchy datatable result: %s%n", formatedResult);
+                results.add(new Result("toBeDone", getScannerType(), formatedResult));
+            }
+        } else {
+            logger.warnf("No ClassHierarchy DataTable found for: %s%n", fqName);
+        }
+        return results;
+    }
+
+    private List<Result> extractSearchResults(RecipeRun run, String fqName) {
+        List<Result> results = new ArrayList<>();
+        Optional<Map.Entry<DataTable<?>, List<?>>> resultMap = run.getDataTables().entrySet().stream()
+                .filter(entry -> entry.getKey().getName().contains("SearchResults")).findFirst();
+
+        if (resultMap.isPresent()) {
+            List<SearchResults.Row> rows = (List<SearchResults.Row>) resultMap.get().getValue();
+            for (SearchResults.Row row : rows) {
+                String sourcePath = row.getSourcePath();
+                String recipe = row.getRecipe();
+                String result = row.getResult();
+
+                String formatedResult = String.format("%s|%s|%s|%s", sourcePath, result, recipe, recipe);
+                logger.debugf("Match's recipe: %s datatable result: %s%n", recipe, formatedResult);
+                results.add(new Result("toBeDone", getScannerType(), formatedResult));
+            }
+        } else {
+            logger.warnf("No SearchResults DataTable found for: %s%n", fqName);
+        }
+        return results;
+    }
+
+    private List<Result> applyRecipes(Config config, RecipeHolder recipeHolder) throws Exception {
         RewriteConfig cfg = new RewriteConfig();
         cfg.setAppPath(Paths.get(config.appPath()));
 
@@ -311,7 +334,12 @@ public class OpenRewriteQueryScanner implements QueryScanner {
     }
 
     private RecipeHolder parse(Query query) {
-        return switch (query.fileType() + "." + query.symbol()) {
+        //TODO: To be improved
+        String key = query.fileType() + "." + query.symbol();
+        if ("java.class".equals(key) && query.operation().contains("find all")) {
+            return buildFindAllJavaClassRecipe(query);
+        }
+        return switch (key) {
             case "java.annotation" -> buildSearchAnnotationRecipe(query);
             case "source.file" -> buildFindSourceFilesRecipe(query);
             case "properties.key" -> buildFindProperties(query);
@@ -330,6 +358,22 @@ public class OpenRewriteQueryScanner implements QueryScanner {
 
         recipeHolder.setRecipesList(List.of(
                 new RecipeDefinition().withFullyQualifyRecipeName("org.openrewrite.properties.search.FindProperties")
+                        .withFieldMappings(fieldMappings)));
+
+        return recipeHolder;
+    }
+
+    private RecipeHolder buildFindAllJavaClassRecipe(Query query) {
+        String annotationName = query.keyValues().get("name");
+
+        RecipeHolder recipeHolder = new RecipeHolder().withName("dev.snowdrop.mtool.openrewrite.ConditionToMatch")
+                .withDisplayName("Find all java classes").withDescription(
+                        "Discovers all class declarations within a project, recording which files they appear in, their superclasses, and interfaces.");
+
+        HashMap<String, String> fieldMappings = new HashMap<>();
+
+        recipeHolder.setRecipesList(
+                List.of(new RecipeDefinition().withFullyQualifyRecipeName("org.openrewrite.java.search.FindClassHierarchy")
                         .withFieldMappings(fieldMappings)));
 
         return recipeHolder;
@@ -423,7 +467,8 @@ public class OpenRewriteQueryScanner implements QueryScanner {
         String symbol = query.symbol();
         String fileType = query.fileType();
         // Check the configuration to see if this query should use the Maven scanner
-        return (fileType.contains("java") && symbol.contains("annotation"))
+        return (fileType.contains("java") && symbol.contains("class"))
+                || (fileType.contains("java") && symbol.contains("annotation"))
                 || (fileType.contains("properties") && symbol.contains("key"))
                 || (fileType.contains("source") && symbol.contains("file"));
     }
@@ -511,8 +556,8 @@ public class OpenRewriteQueryScanner implements QueryScanner {
     }
 
     @Deprecated
-    private List<Match> findRecordsMatching(String projectPath, String matchIdToSearch) {
-        List<Match> results = new ArrayList<>();
+    private List<Result> findRecordsMatching(String projectPath, String matchIdToSearch) {
+        List<Result> results = new ArrayList<>();
         Path openRewriteCsvPath = Paths.get(projectPath, "target", "rewrite", "datatables");
 
         try {
@@ -549,7 +594,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
                                                     csvFileName, i + 3, pattern, symbolType, fileType);
 
                                             // TODO: Deprecated the field name as we will use only the result
-                                            results.add(new Match(matchIdToSearch, getScannerType(), result));
+                                            results.add(new Result(matchIdToSearch, getScannerType(), result));
                                             logger.infof("Found match in %s at record %d: %s", csvFile, i + 1, result);
                                         }
                                     }

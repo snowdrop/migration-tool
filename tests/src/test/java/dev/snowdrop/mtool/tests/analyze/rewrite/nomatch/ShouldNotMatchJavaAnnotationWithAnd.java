@@ -2,7 +2,7 @@ package dev.snowdrop.mtool.tests.analyze.rewrite.nomatch;
 
 import dev.snowdrop.mtool.tests.analyze.BaseRulesTest;
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
@@ -56,13 +56,13 @@ class ShouldNotMatchJavaAnnotationWithAnd extends BaseRulesTest {
         List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
         // Process the rule
-        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        Map<String, List<Result>> result = codeScannerService.scan(rules.getFirst()).getResults();
 
         // Then
         assertNotNull(result);
         assertTrue(result.containsKey("annotation-and-annotation-no_match"));
 
-        Match match = result.get("annotation-and-annotation-no_match").get(0);
+        Result match = result.get("annotation-and-annotation-no_match").get(0);
         assertNotNull(match);
 
         String csvRecord = (String) match.result();

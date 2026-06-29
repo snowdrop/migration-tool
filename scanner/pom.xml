@@ -14,7 +14,7 @@
     <name>Migration Tool :: Scanner</name>
 
     <properties>
-        <maven.version>3.9.14</maven.version>
+        <maven.version>3.9.16</maven.version>
         <maven-resolver.version>1.9.25</maven-resolver.version>
 
         <!-- Skip to execute quarkus maven plugin -->
@@ -37,6 +37,14 @@
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
+        </dependency>
+
+        <!-- Scanner dependencies -->
+        <!-- Openrewrite -->
+        <dependency>
+            <groupId>dev.snowdrop.openrewrite</groupId>
+            <artifactId>service</artifactId>
+            <classifier>shaded</classifier>
         </dependency>
 
         <!-- lsp4j -->
@@ -62,16 +70,16 @@
             <version>${maven-resolver.version}</version>
         </dependency>
 
+        <!-- Treesitter4j -->
+        <dependency>
+            <groupId>io.roastedroot</groupId>
+            <artifactId>treesitter4j</artifactId>
+        </dependency>
+
         <!-- OpenCSV for better CSV parsing and object binding -->
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.snowdrop.openrewrite</groupId>
-            <artifactId>service</artifactId>
-            <classifier>shaded</classifier>
         </dependency>
 
         <!-- Test -->

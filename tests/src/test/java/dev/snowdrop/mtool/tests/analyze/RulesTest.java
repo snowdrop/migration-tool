@@ -1,7 +1,7 @@
 package dev.snowdrop.mtool.tests.analyze;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
@@ -64,9 +64,9 @@ class RulesTest extends BaseRulesTest {
         List<Rule> rules = parseRulesFromFolder(Path.of(rulesPath.toString(), "quarkus"));
 
         // When
-        Map<String, List<Match>> result1 = codeScannerService.scan(rules.get(0)).getMatches();
-        Map<String, List<Match>> result2 = codeScannerService.scan(rules.get(1)).getMatches();
-        Map<String, List<Match>> result3 = codeScannerService.scan(rules.get(2)).getMatches();
+        Map<String, List<Result>> result1 = codeScannerService.scan(rules.get(0)).getResults();
+        Map<String, List<Result>> result2 = codeScannerService.scan(rules.get(1)).getResults();
+        Map<String, List<Result>> result3 = codeScannerService.scan(rules.get(2)).getResults();
 
         // Then
         assertNotNull(result1);
@@ -102,7 +102,7 @@ class RulesTest extends BaseRulesTest {
     @MethodSource("provideRealWorldRules")
     void testExecuteRewriteCmd_WithRealWorldRules(String ruleId, Rule rule, String expectedConditionType) {
         // When
-        Map<String, List<Match>> result = codeScannerService.scan(rule).getMatches();
+        Map<String, List<Result>> result = codeScannerService.scan(rule).getResults();
 
         // Then
         assertNotNull(result, "Result should not be null for rule: " + ruleId);

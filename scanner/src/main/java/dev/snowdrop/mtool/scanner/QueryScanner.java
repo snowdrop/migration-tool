@@ -1,7 +1,7 @@
 package dev.snowdrop.mtool.scanner;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.parser.Query;
 
 import java.util.List;
@@ -20,12 +20,12 @@ public interface QueryScanner {
      *
      * @param config the configuration context
      * @param queries the set of homogeneous queries to execute
-     * @return list of matches found by this scanner
+     * @return list of results found by this scanner
      */
     @Deprecated
-    List<Match> executeQueries(Config config, Set<Query> queries);
+    List<Result> executeQueries(Config config, Set<Query> queries);
 
-    List<Match> scansCodeFor(Config config, Query query);
+    List<Result> scansCodeFor(Config config, Query query);
 
     /**
      * Returns the scanner type identifier.

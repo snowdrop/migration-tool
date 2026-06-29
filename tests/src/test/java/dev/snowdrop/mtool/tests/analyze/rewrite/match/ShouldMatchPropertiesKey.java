@@ -1,7 +1,7 @@
 package dev.snowdrop.mtool.tests.analyze.rewrite.match;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.Rule;
 import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
@@ -56,14 +56,14 @@ class ShouldMatchPropertiesKey extends BaseRulesTest {
         List<Rule> rules = parseRulesFromFile(Path.of(rulesPath.toString(), ruleSubPath));
 
         // Process the rule
-        Map<String, List<Match>> result = codeScannerService.scan(rules.getFirst()).getMatches();
+        Map<String, List<Result>> result = codeScannerService.scan(rules.getFirst()).getResults();
 
         // Then
         assertNotNull(result);
         assertTrue(result.containsKey("springboot-datasource-config"));
         assertEquals(4, result.get("springboot-datasource-config").size());
 
-        Match match = result.get("springboot-datasource-config").getFirst();
+        Result match = result.get("springboot-datasource-config").getFirst();
         assertNotNull(match);
         String record = (String) match.result();
         assertEquals(true, record.contains("src/main/resources/application.properties"));

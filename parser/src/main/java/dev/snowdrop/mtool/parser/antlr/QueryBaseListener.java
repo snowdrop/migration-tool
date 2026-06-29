@@ -131,6 +131,50 @@ public class QueryBaseListener implements QueryListener {
      * </p>
      */
     @Override
+    public void enterAssignmentOp(QueryParser.AssignmentOpContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     * The default implementation does nothing.
+     * </p>
+     */
+    @Override
+    public void exitAssignmentOp(QueryParser.AssignmentOpContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     * The default implementation does nothing.
+     * </p>
+     */
+    @Override
+    public void enterValueOrPairs(QueryParser.ValueOrPairsContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     * The default implementation does nothing.
+     * </p>
+     */
+    @Override
+    public void exitValueOrPairs(QueryParser.ValueOrPairsContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     * The default implementation does nothing.
+     * </p>
+     */
+    @Override
     public void enterFileType(QueryParser.FileTypeContext ctx) {
     }
 
@@ -231,28 +275,6 @@ public class QueryBaseListener implements QueryListener {
      */
     @Override
     public void exitValue(QueryParser.ValueContext ctx) {
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>
-     * The default implementation does nothing.
-     * </p>
-     */
-    @Override
-    public void enterLogicalOp(QueryParser.LogicalOpContext ctx) {
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>
-     * The default implementation does nothing.
-     * </p>
-     */
-    @Override
-    public void exitLogicalOp(QueryParser.LogicalOpContext ctx) {
     }
 
     /**

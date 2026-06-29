@@ -1,7 +1,7 @@
 package dev.snowdrop.mtool.scanner;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.parser.Query;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,16 +34,16 @@ class ScanCommandExecutorTest {
         // Given
         ScanCommandExecutor executor = new ScanCommandExecutor(spiRegistry);
 
-        Query query = new Query("java", "annotation", Collections.emptyMap());
+        Query query = new Query("java", "annotation", "", Collections.emptyMap());
 
-        List<Match> expectedResults = List.of(new Match("file1", "openrewrite", Collections.emptyList()),
-                new Match("file2", "maven", Collections.emptyList()));
+        List<Result> expectedResults = List.of(new Result("file1", "openrewrite", Collections.emptyList()),
+                new Result("file2", "maven", Collections.emptyList()));
 
         when(spiRegistry.resolveScannerForQuery(config, query)).thenReturn(scanner);
         when(scanner.scansCodeFor(config, query)).thenReturn(expectedResults);
 
         // When
-        List<Match> result = executor.executeCommandForQuery(config, query);
+        List<Result> result = executor.executeCommandForQuery(config, query);
 
         // Then
         assertEquals(expectedResults, result);
@@ -54,9 +54,9 @@ class ScanCommandExecutorTest {
     @Test
     void executeCommandForQuery_returnsEmptyListWhenNoScannerFound() {
         ScanCommandExecutor executor = new ScanCommandExecutor(spiRegistry);
-        Query query = new Query("java", "interface", Collections.emptyMap());
+        Query query = new Query("java", "interface", "", Collections.emptyMap());
 
-        List<Match> result = executor.executeCommandForQuery(config, query);
+        List<Result> result = executor.executeCommandForQuery(config, query);
 
         assertTrue(result.isEmpty());
     }

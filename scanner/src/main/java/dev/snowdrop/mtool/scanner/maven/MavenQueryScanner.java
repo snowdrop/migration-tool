@@ -1,7 +1,7 @@
 package dev.snowdrop.mtool.scanner.maven;
 
 import dev.snowdrop.mtool.model.analyze.Config;
-import dev.snowdrop.mtool.model.analyze.Match;
+import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.analyze.MavenGav;
 import dev.snowdrop.mtool.model.parser.Query;
 import dev.snowdrop.mtool.scanner.QueryScanner;
@@ -27,27 +27,24 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Scanner implementation for Maven POM dependency queries.
- * Handles queries like pom.dependency.
+ * Scanner implementation for Maven POM dependency queries. Handles queries like pom.dependency.
  */
 public class MavenQueryScanner implements QueryScanner {
     private static final Logger logger = Logger.getLogger(MavenQueryScanner.class);
     private ModelBuilder modelBuilder = null;
-    private static final String MAVEN_DEP_DTO = "dev.snowdrop.model.MavenDependencyDTO";
 
     public MavenQueryScanner() {
-
     }
 
     @Deprecated
     @Override
-    public List<Match> executeQueries(Config config, Set<Query> queries) {
+    public List<Result> executeQueries(Config config, Set<Query> queries) {
         logger.infof("Maven scanner executing %d queries", queries.size());
 
-        List<Match> allResults = new ArrayList<>();
+        List<Result> allResults = new ArrayList<>();
 
         for (Query q : queries) {
-            List<Match> partial = scansCodeFor(config, q);
+            List<Result> partial = scansCodeFor(config, q);
 
             if (partial != null && !partial.isEmpty()) {
                 allResults.addAll(partial);
@@ -59,10 +56,10 @@ public class MavenQueryScanner implements QueryScanner {
     }
 
     @Override
-    public List<Match> scansCodeFor(Config config, Query query) {
+    public List<Result> scansCodeFor(Config config, Query query) {
         logger.infof("Maven scanner executing for query %s.%s", query.fileType(), query.symbol());
 
-        List<Match> results = executeSingleQuery(config, query);
+        List<Result> results = executeSingleQuery(config, query);
 
         logger.debugf("Found %d matches for query %s.%s ", results.size(), query.fileType(), query.symbol());
 
@@ -80,50 +77,79 @@ public class MavenQueryScanner implements QueryScanner {
         // Check the configuration to see if this query should use the Maven scanner
         String symbol = query.symbol();
         String fileType = query.fileType();
-        return fileType.contains("pom") && symbol.contains("dependency");
+        return (fileType.contains("pom") && symbol.contains("dependency")
+                || fileType.equals("pom") && symbol.equals("dependencies"));
     }
 
-    private List<Match> executeSingleQuery(Config config, Query query) {
-        List<Match> results = new ArrayList<>();
+    private List<Result> executeSingleQuery(Config config, Query query) {
+        List<Result> results = new ArrayList<>();
 
         logger.infof("Executing Maven dependency query: %s", query);
 
-        MavenGav mvnGav = parse(query);
-        // Extract dependency search criteria
-        String groupId = mvnGav.groupId();
-        String artifactId = mvnGav.artifactId();
-        String version = mvnGav.version();
-
-        // Find and analyze pom.xml file
+        // Find the pom.xml path
         Path pomPath = Paths.get(config.appPath(), "pom.xml");
 
-        Optional<InputLocation> loc = findDependencyLocation(pomPath.toString(), groupId, artifactId, version);
-        if (loc.isPresent()) {
-            InputLocation il = loc.get();
-            // The il.getSource().getModelId() returns the ID of the artifact within the model BUT not the artifact that we are looking for !
-            var result = String.format("Dependency: %s found in file:\n %s\nat line: %d and position: %d",
-                    formatGav(groupId, artifactId, version), il.getSource().getLocation(), il.getLineNumber(),
-                    il.getColumnNumber());
-            results.add(new Match("", "maven", result));
+        // No GAVs defined, so let find all the dependencies
+        if (query.keyValues().isEmpty()) {
+            List<Dependency> dependencies = findDependencies(pomPath.toString());
+            dependencies.forEach(l -> {
+                var g = l.getGroupId();
+                var a = l.getArtifactId();
+                var v = l.getVersion();
+                var il = l.getLocation("");
+                var result = String.format("Dependency found: %s in file:\n %s, at line: %d and position: %d",
+                        String.format("%s:%s:%s", g, a, v), il.getSource().getLocation(), il.getLineNumber(),
+                        il.getColumnNumber());
+                results.add(new Result("", "maven", result));
+            });
+        } else {
+            MavenGav mvnGav = getMavenGav(query.keyValues().get("gavs"));
+            // Extract dependency search criteria
+            String groupId = mvnGav.groupId();
+            String artifactId = mvnGav.artifactId();
+            String version = mvnGav.version();
+
+            Optional<InputLocation> loc = findDependencyLocation(pomPath.toString(), groupId, artifactId, version);
+            if (loc.isPresent()) {
+                InputLocation il = loc.get();
+                // The il.getSource().getModelId() returns the ID of the artifact within the model BUT not the artifact that we are looking for !
+                var result = String.format("Dependency: %s found in file:\n %s\nat line: %d and position: %d",
+                        formatGav(groupId, artifactId, version), il.getSource().getLocation(), il.getLineNumber(),
+                        il.getColumnNumber());
+                results.add(new Result("", "maven", result));
+            }
         }
 
         return results;
     }
 
-    private MavenGav parse(Query query) {
-        String gavs = query.keyValues().get("gavs");
-        String[] parts = gavs.split(":");
+    private List<Dependency> findDependencies(String pomPath) {
+        modelBuilder = new DefaultModelBuilderFactory().newInstance();
+        ModelBuildingResult result = buildModel(pomPath);
 
-        if (parts.length < 2) {
-            throw new IllegalArgumentException(
-                    "Invalid forma for 'gavs'. 'groupId:artifactId[:version]' expected. Received: " + gavs);
+        List<Dependency> dependencies = searchDependencies(result.getEffectiveModel());
+
+        // If not found with effective model, try with raw model to BOM's case
+        /*
+         * if (dependencies.isEmpty()) {
+         * dependencies = searchDependencies(result.getRawModel());
+         * }
+         */
+
+        return dependencies;
+    }
+
+    private List<Dependency> searchDependencies(Model model) {
+        List<Dependency> dependencies = new ArrayList<>();
+        if (model.getDependencies() != null) {
+            dependencies.addAll(model.getDependencies());
         }
-
-        String groupId = parts[0];
-        String artifactId = parts[1];
-        String version = parts.length > 2 ? parts[2] : "";
-
-        return new MavenGav(groupId, artifactId, version);
+        /*
+         * if (model.getDependencyManagement() != null) {
+         * dependencies.addAll(model.getDependencyManagement().getDependencies());
+         * }
+         */
+        return dependencies;
     }
 
     public Optional<InputLocation> findDependencyLocation(String pomPath, String groupId, String artifactId,
@@ -190,6 +216,27 @@ public class MavenQueryScanner implements QueryScanner {
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Extract the gav
+     *
+     * @param gavs The string of the gav definition: groupId:artifactId:(version)
+     * @return the MavenGav
+     */
+    private MavenGav getMavenGav(String gavs) {
+        String[] parts = gavs.split(":");
+
+        if (parts.length < 2) {
+            throw new IllegalArgumentException(
+                    "Invalid format for 'gavs'. 'groupId:artifactId[:version]' expected. Received: " + gavs);
+        }
+
+        String groupId = parts[0];
+        String artifactId = parts[1];
+        String version = parts.length > 2 ? parts[2] : "";
+
+        return new MavenGav(groupId, artifactId, version);
     }
 
     /**
