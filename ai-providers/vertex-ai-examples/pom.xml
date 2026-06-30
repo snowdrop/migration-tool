@@ -6,7 +6,7 @@
     <parent>
         <groupId>dev.snowdrop.mtool.ai</groupId>
         <artifactId>ai-providers-parent</artifactId>
-        <version>1.0.5-SNAPSHOT</version>
+        <version>1.0.6</version>
     </parent>
 
     <artifactId>vertex-ai-examples</artifactId>
