@@ -27,5 +27,5 @@
               oldFullyQualifiedTypeName: org.springframework.stereotype.Controller
               newFullyQualifiedTypeName: org.springframework.web.bind.annotation.RestController
         gav:
-        - dev.snowdrop.mtool:openrewrite-recipes:1.0.6
+        - dev.snowdrop.mtool:openrewrite-recipes:1.0.7-SNAPSHOT
         - org.openrewrite:rewrite-java:8.73.0

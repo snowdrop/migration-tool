@@ -56,7 +56,7 @@
           - dev.snowdrop.mtool.openrewrite.recipe.spring.AddQuarkusMavenPlugin
           - org.openrewrite.quarkus.spring.RemoveSpringBootParent
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.6
+          - dev.snowdrop.mtool:openrewrite-recipes:1.0.7-SNAPSHOT
           - org.openrewrite:rewrite-maven:8.73.0
           - org.openrewrite:rewrite-java:8.73.0
           - org.openrewrite.recipe:rewrite-java-dependencies:1.46.0
