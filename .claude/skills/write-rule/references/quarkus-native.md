@@ -48,7 +48,7 @@ java.annotation is 'org.springframework.web.bind.annotation.GetMapping'
 
 ## GAV coordinates
 
-- `dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT`
+- `dev.snowdrop.mtool:openrewrite-recipes:1.0.7-SNAPSHOT`
 - `org.openrewrite:rewrite-maven:8.73.0`
 - `org.openrewrite:rewrite-java:8.73.0`
 

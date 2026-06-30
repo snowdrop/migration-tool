@@ -511,7 +511,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
         // Recipe's jar files
         String gavs = "org.openrewrite:rewrite-java:8.73.0,"
                 + "org.openrewrite.recipe:rewrite-java-dependencies:1.44.0,"
-                + "dev.snowdrop.mtool:openrewrite-recipes:1.0.5-SNAPSHOT";
+                + "dev.snowdrop.mtool:openrewrite-recipes:1.0.7-SNAPSHOT";
 
         try {
             List<String> command = new ArrayList<>();
