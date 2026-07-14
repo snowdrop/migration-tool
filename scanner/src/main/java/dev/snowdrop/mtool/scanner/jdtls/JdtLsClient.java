@@ -45,6 +45,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * @deprecated Use OpenRewrite scanner instead. Will be removed in a future release.
+ */
+@Deprecated(since = "1.0.7", forRemoval = true)
 public class JdtLsClient {
     private static final Logger logger = Logger.getLogger(JdtLsClient.class);
     private static final long TIMEOUT = 30000;

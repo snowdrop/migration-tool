@@ -2,6 +2,7 @@ package dev.snowdrop.mtool.model.analyze;
 
 public enum ScannerType {
     OPENREWRITE("openrewrite"),
+    @Deprecated(since = "1.0.7", forRemoval = true)
     JDTLS("jdtls"),
     MAVEN("maven"),
     FILE_SEARCH("file-search"),

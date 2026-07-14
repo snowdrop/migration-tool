@@ -42,12 +42,14 @@ public class AnalyzeCommand implements Runnable {
             "--target" }, description = "Target technology to consider for analysis")
     public String target;
 
+    @Deprecated(since = "1.0.7", forRemoval = true)
     @CommandLine.Option(names = {
-            "--jdt-ls-path" }, description = "Path to JDT-LS installation (default: from config)", required = false)
+            "--jdt-ls-path" }, description = "Path to JDT-LS installation (deprecated)", required = false, hidden = true)
     public String jdtLsPath;
 
+    @Deprecated(since = "1.0.7", forRemoval = true)
     @CommandLine.Option(names = {
-            "--jdt-workspace" }, description = "Path to JDT workspace directory (default: from config)", required = false)
+            "--jdt-workspace" }, description = "Path to JDT workspace directory (deprecated)", required = false, hidden = true)
     public String jdtWorkspace;
 
     @CommandLine.Option(names = { "-v",
@@ -59,7 +61,7 @@ public class AnalyzeCommand implements Runnable {
     private String output;
 
     @CommandLine.Option(names = {
-            "--scanner" }, description = "Scanner tool to be used to analyse the code: jdtls, openrewrite", defaultValue = "openrewrite")
+            "--scanner" }, description = "Scanner tool to be used to analyse the code: openrewrite (default), jdtls (deprecated)", defaultValue = "openrewrite")
     public String scanner;
 
     @Override
@@ -108,20 +110,23 @@ public class AnalyzeCommand implements Runnable {
                 .orElseThrow(
                         () -> new RuntimeException("Target technology for migration is required but not configured"));
 
-        String jdtLsPathString = Optional.ofNullable(jdtLsPath).or(
-                () -> Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.jdt-ls-path", String.class)))
-                .orElseThrow(() -> new RuntimeException("JDT LS path is required but not configured"));
-        jdtLsPathString = resolvePath(jdtLsPathString).toString();
+        if ("jdtls".equalsIgnoreCase(scanner)) {
+            logger.warnf(
+                    "The JDTLS scanner is deprecated and will be removed in a future release. Use '--scanner openrewrite' instead.");
+        }
+
+        String jdtLsPathString = Optional.ofNullable(jdtLsPath)
+                .or(() -> ConfigProvider.getConfig().getOptionalValue("analyzer.jdt-ls-path", String.class))
+                .map(p -> resolvePath(p).toString())
+                .orElse(null);
 
         String jdtWksString = Optional.ofNullable(jdtWorkspace)
-                .or(() -> Optional
-                        .ofNullable(ConfigProvider.getConfig().getValue("analyzer.jdt-workspace-path", String.class)))
-                .orElseThrow(() -> new RuntimeException("Jdt workspace is required but not configured"));
-        jdtWksString = resolvePath(jdtWksString).toString();
+                .or(() -> ConfigProvider.getConfig().getOptionalValue("analyzer.jdt-workspace-path", String.class))
+                .map(p -> resolvePath(p).toString())
+                .orElse(null);
 
-        String lsCmd = Optional.ofNullable(ConfigProvider.getConfig().getValue("analyzer.jdt-ls-command", String.class))
-                .orElseThrow(() -> new RuntimeException(
-                        "Command to be executed against the LS server is required but not configured"));
+        String lsCmd = ConfigProvider.getConfig().getOptionalValue("analyzer.jdt-ls-command", String.class)
+                .orElse(null);
 
         String openRewriteMavenPluginVersion = Optional
                 .ofNullable(ConfigProvider.getConfig().getValue("openrewrite.maven-plugin.version", String.class))
@@ -130,9 +135,6 @@ public class AnalyzeCommand implements Runnable {
         Config config = new Config(appPathString, resolvedRulesPath, sourceTechnology, targetTechnology, jdtLsPathString,
                 jdtWksString, lsCmd, verbose, output, scanner, openRewriteMavenPluginVersion);
 
-        logger.infof("Jdt-ls path: %s", jdtLsPath);
-        logger.infof("Jdt-ls workspace: %s", jdtWksString);
-        logger.infof("Language server command: %s", lsCmd);
         logger.infof("Application path: %s", appPath);
         logger.infof("Source technology: %s", sourceTechnology);
         logger.infof("Target technology: %s", targetTechnology);

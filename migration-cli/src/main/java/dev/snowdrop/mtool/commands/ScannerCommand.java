@@ -39,7 +39,7 @@ public class ScannerCommand implements Runnable {
     public String query;
 
     @CommandLine.Option(names = {
-            "--scanner" }, description = "Scanner tool to be used to analyse the code: jdtls, openrewrite, file, maven, treesitter", defaultValue = "openrewrite")
+            "--scanner" }, description = "Scanner tool to be used to analyse the code: openrewrite (default), file, maven, treesitter, jdtls (deprecated)", defaultValue = "openrewrite")
     public String scanner;
 
     @CommandLine.Option(names = {

@@ -2,6 +2,10 @@ package dev.snowdrop.mtool.scanner.utils;
 
 import org.jboss.logging.Logger;
 
+/**
+ * @deprecated Use OpenRewrite scanner instead. Will be removed in a future release.
+ */
+@Deprecated(since = "1.0.7", forRemoval = true)
 public class JdtLsUtils {
     private static final Logger logger = Logger.getLogger(JdtLsUtils.class);
 

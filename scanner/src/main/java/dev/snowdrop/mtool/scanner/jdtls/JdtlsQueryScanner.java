@@ -14,7 +14,10 @@ import java.util.Set;
 /**
  * Scanner implementation for JDTLS-based Java queries.
  * Handles queries like java.class, java.package using JDTLS language server.
+ *
+ * @deprecated Use OpenRewrite scanner instead. Will be removed in a future release.
  */
+@Deprecated(since = "1.0.7", forRemoval = true)
 public class JdtlsQueryScanner implements QueryScanner {
 
     private static final Logger logger = Logger.getLogger(JdtlsQueryScanner.class);
@@ -60,6 +63,8 @@ public class JdtlsQueryScanner implements QueryScanner {
     }
 
     public List<Result> scansCodeFor(Config config, Query query) {
+        logger.warnf(
+                "The JDTLS scanner is deprecated and will be removed in a future release. Use '--scanner openrewrite' instead.");
         logger.infof("JDTLS scanner executing 1 query");
 
         List<Result> results = executeQuery(config, query);

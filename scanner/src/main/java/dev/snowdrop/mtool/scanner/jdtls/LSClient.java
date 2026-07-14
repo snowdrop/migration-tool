@@ -9,6 +9,10 @@ import org.jboss.logging.Logger;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * @deprecated Use OpenRewrite scanner instead. Will be removed in a future release.
+ */
+@Deprecated(since = "1.0.7", forRemoval = true)
 public class LSClient implements LanguageClient {
     private static final Logger logger = Logger.getLogger(LSClient.class);
 

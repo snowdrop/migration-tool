@@ -9,7 +9,7 @@ import java.util.Set;
 
 /**
  * Strategy interface for different query scanner implementations.
- * Each scanner type (OpenRewrite, Maven, Gradle, JDTLS, File) implements this interface.
+ * Each scanner type (OpenRewrite, Maven, Gradle, File) implements this interface.
  *
  */
 public interface QueryScanner {
@@ -30,7 +30,7 @@ public interface QueryScanner {
     /**
      * Returns the scanner type identifier.
      *
-     * @return the scanner type (e.g., "openrewrite", "maven", "gradle", "jdtls", "file")
+     * @return the scanner type (e.g., "openrewrite", "maven", "gradle", "file")
      */
     String getScannerType();
 

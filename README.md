@@ -206,10 +206,10 @@ The project uses the [Spring TODO](./applications/spring-boot-todo-app) example 
 
 The poc has been designed using the following technology:
 - [Quarkus and Picocli](https://quarkus.io/guides/picocli) to manage the CLI part and commands 
-- [konveyor jdt language server](https://github.com/konveyor/java-analyzer-bundle) to scan the java files to search about using the rule `when` condition.
+- ~~[konveyor jdt language server](https://github.com/konveyor/java-analyzer-bundle) to scan the java files to search about using the rule `when` condition.~~ (**Deprecated since 1.0.7** — use OpenRewrite scanner instead)
 - [Openrewrite recipe](https://docs.openrewrite.org/concepts-and-explanations/recipes) to execute using the `maven rewrite` goal the transformations as defined part of the rule's instructions
 - [Antlr](https://www.antlr.org/) as parser tool to generate the code for the new Query Simpler language to be used to `Match` conditions
-- The different applications: `jdt-ls server`, `mvn command` are executed as OS processes using Java `ProcessBuilder`.
+- The different applications: `mvn command` are executed as OS processes using Java `ProcessBuilder`.
 
 ## Requirements
 
@@ -234,7 +234,13 @@ Otherwise, if you plan to contribute to the project, git clone and compile it
 mvn clean install -DskipTests
 ```
 
-## Konveyor jdt-ls (optional)
+## Konveyor jdt-ls (deprecated)
+
+> [!WARNING]
+> The JDTLS scanner is **deprecated since 1.0.7** and will be removed in a future release. Use `--scanner openrewrite` instead.
+
+<details>
+<summary>Legacy instructions (click to expand)</summary>
 
 Download the [konveyor language server](https://github.com/konveyor/java-analyzer-bundle) using the image packaging it:
 ```shell
@@ -246,6 +252,8 @@ podman cp $ID:/jdtls ./jdt/konveyor-jdtls
 
 > [!NOTE]
 > If you're using bash and not fishell, remember to export the environment variables too!
+
+</details>
 
 ## mtool client's commands
 
@@ -277,41 +285,27 @@ mtool --version
 
 To analyze and generate the migration plan report (optional), execute this `analyze` command 
 ```shell
-Usage: mtool analyze [-v] [--jdt-ls-path=<jdtLsPath>]
-                   [--jdt-workspace=<jdtWorkspace>] [-o=<output>]
-                   [-r=<rulesPath>] [-s=<source>] [--scanner=<scanner>]
-                   [-t=<target>] <appPath>
+Usage: mtool analyze [-v] [-o=<output>] [-r=<rulesPath>] [-s=<source>]
+                   [--scanner=<scanner>] [-t=<target>] <appPath>
 Analyze a project for migration
       <appPath>             Path to the Java project to analyze
-      --jdt-ls-path=<jdtLsPath>
-                            Path to JDT-LS installation (default: from config)
-      --jdt-workspace=<jdtWorkspace>
-                            Path to JDT workspace directory (default: from
-                              config)
   -o, --output=<output>     Export the analysing result using the format.
                               Values: json
   -r, --rules=<rulesPath>   Path to rules directory (default: from config)
   -s, --source=<source>     Source technology to consider for analysis
-      --scanner=<scanner>   Scanner tool to be used to analyse the code: jdtls,
-                              openrewrite
+      --scanner=<scanner>   Scanner tool to be used to analyse the code:
+                              openrewrite (default), jdtls (deprecated)
   -t, --target=<target>     Target technology to consider for analysis
   -v, --verbose             Enable verbose output
 ```
 
 using either the `quarkus:dev` goal or the jar file created from the previous maven command executed
 ```shell
-mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
+mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze -r /PATH/TO/rules ./applications/spring-boot-todo-app"
 
 or 
 
-❯ java -jar /PATH/TO/migration-tool-parent/migration-cli/target/quarkus-app/quarkus-run.jar analyze --jdt-ls-path /PATH/TO/java-analyzer-quarkus/jdt/konveyor-jdtls --jdt-workspace /PATH/TO/java-analyzer-quarkus/jdt -r /PATH/TO/java-analyzer-quarkus/rules ./applications/spring-boot-todo-app"
-Usage: mtool [COMMAND]
-Quarkus mtool client able to scan, analyze and migrate a java application using
-instructions
-Commands:
-  analyze    Analyze a project for migration
-  transform  Transform a java application
-  help       Display help information about the specified command.
+java -jar /PATH/TO/migration-tool-parent/migration-cli/target/quarkus-app/quarkus-run.jar analyze -r /PATH/TO/rules ./applications/spring-boot-todo-app
 ```
 
 > [!TIP]
@@ -332,10 +326,10 @@ mvn -pl migration-cli quarkus:dev -Dquarkus.args="analyze ../applications/spring
 #### Scanner
 
 The tool supports different scanners able to scan the code source:
-- konveyor jdt-ls
-- openrewrite recipe
+- openrewrite recipe (default)
 - maven
 - file and content search
+- ~~konveyor jdt-ls~~ (deprecated since 1.0.7)
 
 A scanner can be defined you launch the `analyze` command with the option `--scanner`. In this case, the tool will select it as default to scan and match a condition but will revert to one of the alternative scanners if the default don't support to search about: `<type>.<symbol>` where <type> can be: pom, java, properties, etc. and `symbol`: dependency, key, annotation, etc.
 
@@ -518,9 +512,10 @@ The `analyze` or `transform` commands can be executed using the quarkus uber jar
 
 ```properties
 # .env file content
-ANALYZER_JDT_LS_PATH=jdt/konveyor-jdtls
-ANALYZER_JDT_WORKSPACE_PATH=jdt
 ANALYZER_RULES_PATH=cookbook/rules
+# Deprecated since 1.0.7:
+# ANALYZER_JDT_LS_PATH=jdt/konveyor-jdtls
+# ANALYZER_JDT_WORKSPACE_PATH=jdt
 ```
 Next source it and execute the following java commands within or outside the project to analyze/transform:
 
@@ -584,7 +579,13 @@ mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
 | MT-005 |        | Do we have to integrate a workflow engine part of the solution to externalize the sequential approach of the openrewrite framework within a separate engine ?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |         |
 
 
-## Deprecated
+## Deprecated (JDTLS — since 1.0.7)
+
+> [!WARNING]
+> The entire JDTLS scanner subsystem is deprecated since 1.0.7 and will be removed in a future release. Use `--scanner openrewrite` instead.
+
+<details>
+<summary>Legacy JDTLS instructions (click to expand)</summary>
 
 ### Start using the JdtlsFactory Main application
 
@@ -621,4 +622,6 @@ wget https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.50.
 mkdir jdt-ls
 tar -vxf jdt-language-server-1.50.0.tar.gz -C jdt-ls
 ```
+
+</details>
 
