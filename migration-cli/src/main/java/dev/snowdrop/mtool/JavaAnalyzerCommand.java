@@ -3,6 +3,7 @@ package dev.snowdrop.mtool;
 import dev.snowdrop.mtool.commands.AnalyzeCommand;
 import dev.snowdrop.mtool.commands.ScannerCommand;
 import dev.snowdrop.mtool.commands.TransformCommand;
+import dev.snowdrop.mtool.commands.ValidateCommand;
 import io.quarkus.picocli.runtime.annotations.TopCommand;
 import picocli.CommandLine;
 
@@ -10,6 +11,7 @@ import picocli.CommandLine;
 @CommandLine.Command(name = "mtool", description = "Quarkus mtool client able to scan, analyze and migrate a java application using instructions", subcommands = {
         AnalyzeCommand.class,
         TransformCommand.class,
+        ValidateCommand.class,
         CommandLine.HelpCommand.class,
         ScannerCommand.class
 }, versionProvider = JavaAnalyzerCommand.VersionProvider.class, mixinStandardHelpOptions = true)
