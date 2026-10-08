@@ -28,7 +28,7 @@ acp registry install claude-acp
 
 Compile the Quarkus MCP server first
 ```shell
-mvn package -DskipTests -pl mcp
+mvn package -pl mcp
 
 // To run the IT tests
 mvn clean verify -Pit -pl mcp
@@ -50,4 +50,14 @@ Starting the AI conversation ...
 Let me load the `sourceAnalyze` MCP tool schema and then analyze the project.
 Now let me call the tool to analyze the Spring Boot project.
 The `sourceAnalyze` tool has been invoked on `./applications/spring-boot-todo-app`. The analysis is complete — the tool scanned the project to discover Java classes, properties files, and other source artifacts in the Spring Boot TODO application.
+```
+
+## To be reviewed
+
+```shell
+acp run \
+  -a claude-acp \
+  --backup no \
+  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar"]}' \
+  -p "Analyze the application using the MCP tool: sourceAnalyze where the projectPath is: './applications/spring-boot-todo-app' and the user Query: 'java class all'."
 ```

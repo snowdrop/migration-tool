@@ -18,6 +18,22 @@
     </properties>
 
     <dependencies>
+        <!-- mtool: model,parser and scanner -->
+        <dependency>
+            <groupId>dev.snowdrop.mtool</groupId>
+            <artifactId>model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.snowdrop.mtool</groupId>
+            <artifactId>parser</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.snowdrop.mtool</groupId>
+            <artifactId>scanner</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- Quarkus -->
         <dependency>
             <groupId>io.quarkiverse.mcp</groupId>
