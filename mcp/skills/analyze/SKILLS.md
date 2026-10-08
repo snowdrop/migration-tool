@@ -10,3 +10,4 @@ description: "Use when user says: analyze the code, analyze the application unde
   - the queries: 
     - 'java class all'
     - 'java annotation all'
+    - 'java interface all'
