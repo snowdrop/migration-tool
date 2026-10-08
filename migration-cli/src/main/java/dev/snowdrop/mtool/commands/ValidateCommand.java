@@ -4,10 +4,12 @@ import dev.snowdrop.mtool.model.validate.ValidationReport;
 import dev.snowdrop.mtool.model.validate.ValidationResult;
 import dev.snowdrop.mtool.validate.ProjectSetupValidator;
 import dev.snowdrop.mtool.validate.Validator;
+import dev.snowdrop.mtool.validate.persistence.PersistenceValidator;
 import org.jboss.logging.Logger;
 import picocli.CommandLine;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import static dev.snowdrop.mtool.scanner.utils.FileUtils.resolvePath;
@@ -23,7 +25,7 @@ public class ValidateCommand implements Runnable {
     private static final String BOLD = "\u001B[1m";
     private static final String RESET = "\u001B[0m";
 
-    @CommandLine.Parameters(index = "0", description = "Validator to run (e.g. project-setup)")
+    @CommandLine.Parameters(index = "0", description = "Validator to run (e.g. project-setup, persistence)")
     public String validatorName;
 
     @CommandLine.Parameters(index = "1", description = "Path to the project to validate")
@@ -35,6 +37,10 @@ public class ValidateCommand implements Runnable {
 
     @CommandLine.Option(names = { "--skip-compile" }, description = "Skip the mvn compile check")
     public boolean skipCompile;
+
+    @CommandLine.Option(names = {
+            "--spring-project" }, description = "Path to the original Spring project (required for persistence validator)")
+    public String springProjectPath;
 
     @Override
     public void run() {
@@ -56,8 +62,16 @@ public class ValidateCommand implements Runnable {
     }
 
     private Validator resolveValidator() {
-        List<Validator> validators = List.of(
-                new ProjectSetupValidator(skipCompile));
+        List<Validator> validators = new ArrayList<>();
+        validators.add(new ProjectSetupValidator(skipCompile));
+
+        if (springProjectPath != null) {
+            Path springPath = resolvePath(springProjectPath);
+            validators.add(new PersistenceValidator(springPath, skipCompile));
+        } else if ("persistence".equals(validatorName)) {
+            logger.error("--spring-project is required for the persistence validator");
+            return null;
+        }
 
         return validators.stream()
                 .filter(v -> v.name().equals(validatorName))
