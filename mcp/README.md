@@ -55,9 +55,11 @@ The `sourceAnalyze` tool has been invoked on `./applications/spring-boot-todo-ap
 ## To be reviewed
 
 ```shell
+# Using a SKILL
 acp run \
   -a claude-acp \
   --backup no \
+  -s ./mcp/skills/analyze/SKILLS.md \
   --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar"]}' \
-  -p "Analyze the application using the MCP tool: sourceAnalyze where the projectPath is: './applications/spring-boot-todo-app' and the user Query: 'java class all'."
+  -p "Analyze the application: ./applications/quarkus-todo-demo-app"
 ```
