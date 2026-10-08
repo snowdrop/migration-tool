@@ -21,7 +21,7 @@ public class AnalyseTools {
             + "Accepts multiple queries separated by semicolons, e.g. 'java class all;java annotation all'")
     public String sourceAnalyze(
             @ToolArg(description = "Queries to perform, separated by ';'. Each query has 3 parts: <fileType> <symbol> <operation>. "
-                    + "Example: 'java class all;java annotation all'") String userQueries,
+                    + "Example: 'java class all;java annotation all';pom dependency all; properties all") String userQueries,
             @ToolArg(description = "Project path", defaultValue = ".") String projectPath) {
 
         Config cfg = new Config(projectPath, null, null, null, null, null, null, false, null, "treesitter", null);
@@ -34,12 +34,18 @@ public class AnalyseTools {
         for (String queryStr : queryStrings) {
             String trimmed = queryStr.trim();
             String[] param = trimmed.split(" ");
-            if (param.length < 3) {
-                sections.add("## Query: " + trimmed + "\nError: query must have 3 parts: <fileType> <symbol> <operation>");
+            if (param.length < 2) {
+                sections.add("## Query: " + trimmed
+                        + "\nError: query must have at least 2 parts: <fileType> [<symbol>] <operation>");
                 continue;
             }
 
-            Query q = new Query(param[0], param[1], param[2], Collections.emptyMap());
+            Query q;
+            if (param.length == 2) {
+                q = new Query(param[0], "", param[1], Collections.emptyMap());
+            } else {
+                q = new Query(param[0], param[1], param[2], Collections.emptyMap());
+            }
             LOG.infof("Scan the project: %s using query: %s", projectPath, trimmed);
 
             List<Result> matches = executor.executeCommandForQuery(cfg, q);

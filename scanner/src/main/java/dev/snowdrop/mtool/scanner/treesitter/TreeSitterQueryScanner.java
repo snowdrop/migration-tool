@@ -151,14 +151,15 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
     private List<Result> scanPomDependencies(Config config, Query query) {
         String gavs = query.keyValues().get("gavs");
-        if (gavs == null) {
-            logger.warn("No 'gavs' key provided for pom.dependency query");
-            return List.of();
-        }
+        String targetGroupId = null;
+        String targetArtifactId = null;
+        boolean matchAll = (gavs == null || gavs.isBlank());
 
-        String[] gavParts = gavs.split(":");
-        String targetGroupId = gavParts.length > 0 ? gavParts[0] : null;
-        String targetArtifactId = gavParts.length > 1 ? gavParts[1] : null;
+        if (!matchAll) {
+            String[] gavParts = gavs.split(":");
+            targetGroupId = gavParts.length > 0 ? gavParts[0] : null;
+            targetArtifactId = gavParts.length > 1 ? gavParts[1] : null;
+        }
 
         List<Result> matches = new ArrayList<>();
         List<Path> pomFiles = findFiles(Paths.get(config.appPath()), "glob:**/pom.xml");
@@ -187,8 +188,9 @@ public class TreeSitterQueryScanner implements QueryScanner {
                                 currentArtifactId = source.substring(
                                         result.node().startByte(), result.node().endByte()).trim();
 
-                                if (matchesGav(currentGroupId, currentArtifactId, targetGroupId, targetArtifactId)
-                                        && blockNode != null) {
+                                if (blockNode != null
+                                        && (matchAll || matchesGav(currentGroupId, currentArtifactId, targetGroupId,
+                                                targetArtifactId))) {
                                     int line = blockNode.startRow() + 1;
                                     String relativePath = Paths.get(config.appPath()).relativize(pomFile).toString();
                                     String formatted = String.format("%s:%d | %s:%s",
@@ -211,7 +213,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
             logger.errorf("Error scanning POM files for dependencies: %s", e.getMessage());
         }
 
-        logger.infof("Found %d dependency matches for '%s'", matches.size(), gavs);
+        logger.infof("Found %d dependency matches for '%s'", matches.size(), matchAll ? "all" : gavs);
         return matches;
     }
 
