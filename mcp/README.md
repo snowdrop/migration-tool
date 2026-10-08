@@ -28,7 +28,10 @@ acp registry install claude-acp
 
 Compile the Quarkus MCP server first
 ```shell
-mvn package -DskipTests
+mvn package -DskipTests -pl mcp
+
+// To run the IT tests
+mvn clean verify -Pit -pl mcp
 ```
 
 Next, launch the ACP client and pass the parameters to configure the Quarkus MCP server using stdio mode
