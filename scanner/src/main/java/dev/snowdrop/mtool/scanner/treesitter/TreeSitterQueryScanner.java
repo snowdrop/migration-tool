@@ -30,8 +30,40 @@ public class TreeSitterQueryScanner implements QueryScanner {
     private static final String SCANNER_TYPE = "treesitter";
 
     private static final String JAVA_ALL_ANNOTATION_QUERY = """
-            (marker_annotation name: (identifier) @annotation_name)
-            (annotation name: (identifier) @annotation_name)
+            (class_declaration
+              (modifiers [(marker_annotation name: (identifier) @annotation.class)
+                          (annotation name: (identifier) @annotation.class)])
+              name: (identifier) @target.class)
+
+            (interface_declaration
+              (modifiers [(marker_annotation name: (identifier) @annotation.interface)
+                          (annotation name: (identifier) @annotation.interface)])
+              name: (identifier) @target.interface)
+
+            (enum_declaration
+              (modifiers [(marker_annotation name: (identifier) @annotation.enum)
+                          (annotation name: (identifier) @annotation.enum)])
+              name: (identifier) @target.enum)
+
+            (method_declaration
+              (modifiers [(marker_annotation name: (identifier) @annotation.method)
+                          (annotation name: (identifier) @annotation.method)])
+              name: (identifier) @target.method)
+
+            (constructor_declaration
+              (modifiers [(marker_annotation name: (identifier) @annotation.constructor)
+                          (annotation name: (identifier) @annotation.constructor)])
+              name: (identifier) @target.constructor)
+
+            (field_declaration
+              (modifiers [(marker_annotation name: (identifier) @annotation.field)
+                          (annotation name: (identifier) @annotation.field)])
+              declarator: (variable_declarator name: (identifier) @target.field))
+
+            (formal_parameter
+              (modifiers [(marker_annotation name: (identifier) @annotation.parameter)
+                          (annotation name: (identifier) @annotation.parameter)])
+              name: (identifier) @target.parameter)
             """;
 
     private static final String JAVA_ALL_IMPORT_QUERY = """
@@ -151,14 +183,15 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
     private List<Result> scanPomDependencies(Config config, Query query) {
         String gavs = query.keyValues().get("gavs");
-        if (gavs == null) {
-            logger.warn("No 'gavs' key provided for pom.dependency query");
-            return List.of();
-        }
+        String targetGroupId = null;
+        String targetArtifactId = null;
+        boolean matchAll = (gavs == null || gavs.isBlank());
 
-        String[] gavParts = gavs.split(":");
-        String targetGroupId = gavParts.length > 0 ? gavParts[0] : null;
-        String targetArtifactId = gavParts.length > 1 ? gavParts[1] : null;
+        if (!matchAll) {
+            String[] gavParts = gavs.split(":");
+            targetGroupId = gavParts.length > 0 ? gavParts[0] : null;
+            targetArtifactId = gavParts.length > 1 ? gavParts[1] : null;
+        }
 
         List<Result> matches = new ArrayList<>();
         List<Path> pomFiles = findFiles(Paths.get(config.appPath()), "glob:**/pom.xml");
@@ -187,8 +220,9 @@ public class TreeSitterQueryScanner implements QueryScanner {
                                 currentArtifactId = source.substring(
                                         result.node().startByte(), result.node().endByte()).trim();
 
-                                if (matchesGav(currentGroupId, currentArtifactId, targetGroupId, targetArtifactId)
-                                        && blockNode != null) {
+                                if (blockNode != null
+                                        && (matchAll || matchesGav(currentGroupId, currentArtifactId, targetGroupId,
+                                                targetArtifactId))) {
                                     int line = blockNode.startRow() + 1;
                                     String relativePath = Paths.get(config.appPath()).relativize(pomFile).toString();
                                     String formatted = String.format("%s:%d | %s:%s",
@@ -211,7 +245,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
             logger.errorf("Error scanning POM files for dependencies: %s", e.getMessage());
         }
 
-        logger.infof("Found %d dependency matches for '%s'", matches.size(), gavs);
+        logger.infof("Found %d dependency matches for '%s'", matches.size(), matchAll ? "all" : gavs);
         return matches;
     }
 
@@ -229,30 +263,62 @@ public class TreeSitterQueryScanner implements QueryScanner {
     private List<Result> generateMatchesFromResults(List<TreeSitterQueryResult> results, Query query, byte[] sourceBytes,
             String appPath, Path filePath) {
         List<Result> matches = new ArrayList<>();
+        boolean isAnnotationQuery = "annotation".equals(query.symbol());
+        String relativePath = Paths.get(appPath).relativize(filePath).toString();
+
+        if (!isAnnotationQuery) {
+            for (TreeSitterQueryResult result : results) {
+                String snippet = extractSnippet(sourceBytes, result.node());
+                String formatted = formatResult(relativePath, result.node(), snippet, null, null);
+                matches.add(new Result(query.fileType() + "-" + query.symbol(), SCANNER_TYPE, formatted));
+            }
+            return matches;
+        }
+
+        // For annotations: buffer annotation captures, flush when the target name arrives
+        List<TreeSitterQueryResult> pendingAnnotations = new ArrayList<>();
+        String pendingTargetType = null;
+
         for (TreeSitterQueryResult result : results) {
-            int startByte = result.node().startByte();
-            int endByte = result.node().endByte();
-
-            String snippet = new String(sourceBytes, startByte, (endByte - startByte), StandardCharsets.UTF_8);
-
-            String relativePath = Paths.get(appPath).relativize(filePath).toString();
-            String formatted = formatResult(relativePath, result.node(), snippet);
-            matches.add(new Result(
-                    query.fileType() + "-" + query.symbol(),
-                    SCANNER_TYPE,
-                    formatted));
+            String captureName = result.name();
+            if (captureName.startsWith("annotation.")) {
+                pendingTargetType = captureName.substring("annotation.".length());
+                pendingAnnotations.add(result);
+            } else if (captureName.startsWith("target.")) {
+                String targetName = extractSnippet(sourceBytes, result.node());
+                for (TreeSitterQueryResult ann : pendingAnnotations) {
+                    String annSnippet = extractSnippet(sourceBytes, ann.node());
+                    String formatted = formatResult(relativePath, ann.node(), annSnippet, pendingTargetType, targetName);
+                    matches.add(new Result(query.fileType() + "-" + query.symbol(), SCANNER_TYPE, formatted));
+                }
+                pendingAnnotations.clear();
+                pendingTargetType = null;
+            }
         }
         return matches;
     }
 
-    private String formatResult(String relativePath, TreeSitterNode node, String snippet) {
-        return String.format("Path: %s, start: (%d, %d), end: (%d-%d), text: %s",
+    private String extractSnippet(byte[] sourceBytes, TreeSitterNode node) {
+        return new String(sourceBytes, node.startByte(), node.endByte() - node.startByte(), StandardCharsets.UTF_8);
+    }
+
+    private String formatResult(String relativePath, TreeSitterNode node, String snippet, String targetType,
+            String targetName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("Path: %s, start: (%d, %d), end: (%d-%d), text: %s",
                 relativePath,
                 node.startRow() + 1,
                 node.startColumn() + 1,
                 node.endRow() + 1,
                 node.endColumn() + 1,
-                snippet);
+                snippet));
+        if (targetType != null) {
+            sb.append(", target: ").append(targetType);
+        }
+        if (targetName != null) {
+            sb.append(", on: ").append(targetName);
+        }
+        return sb.toString();
     }
 
     private List<Path> findFiles(Path startPath, String globPattern) {

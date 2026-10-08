@@ -26,3 +26,5 @@ target
 
 ## Openrewrite
 rewrite.yml
+*.log.*
+*.log
