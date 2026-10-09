@@ -173,6 +173,12 @@ public class PersistenceValidator implements Validator {
                     Status.PASSED,
                     String.format("Implicit '%s' -> explicit '%s' (naming convention change allowed)",
                             spring.getClassName(), quarkus.getTableName())));
+        } else if (isConstantReference(spring.getTableName()) || isConstantReference(quarkus.getTableName())) {
+            report.add(new ValidationResult(
+                    new ValidationRule(ruleName, "Table name matches"),
+                    Status.WARNING,
+                    String.format("Cannot resolve constant reference: %s vs %s",
+                            spring.getTableName(), quarkus.getTableName())));
         } else {
             report.add(new ValidationResult(
                     new ValidationRule(ruleName, "Table name matches"),
@@ -189,6 +195,24 @@ public class PersistenceValidator implements Validator {
         if (springId == null && quarkusId == null) {
             return;
         }
+
+        if (springId != null && quarkusId == null && extendsPanacheEntity(quarkus)) {
+            String springStrategy = springId.getStrategy();
+            if (springStrategy == null || "AUTO".equals(springStrategy)) {
+                report.add(new ValidationResult(
+                        new ValidationRule(ruleName, "ID generation strategy matches"),
+                        Status.PASSED,
+                        "ID managed by PanacheEntity (default strategy AUTO matches Spring)"));
+            } else {
+                report.add(new ValidationResult(
+                        new ValidationRule(ruleName, "ID generation strategy matches"),
+                        Status.WARNING,
+                        String.format("PanacheEntity uses default strategy AUTO, Spring used %s",
+                                springStrategy)));
+            }
+            return;
+        }
+
         if (springId != null && quarkusId != null
                 && Objects.equals(springId.getStrategy(), quarkusId.getStrategy())) {
             report.add(new ValidationResult(
@@ -219,6 +243,13 @@ public class PersistenceValidator implements Validator {
             String ruleName = spring.getClassName() + "." + fieldName;
 
             if (!quarkusFields.containsKey(fieldName)) {
+                if ("id".equals(fieldName) && extendsPanacheEntity(quarkus)) {
+                    report.add(new ValidationResult(
+                            new ValidationRule(ruleName, "Field exists in Quarkus"),
+                            Status.PASSED,
+                            "Field 'id' inherited from PanacheEntity"));
+                    continue;
+                }
                 report.add(new ValidationResult(
                         new ValidationRule(ruleName, "Field exists in Quarkus"),
                         Status.FAILED,
@@ -350,6 +381,18 @@ public class PersistenceValidator implements Validator {
     private String relationshipKey(RelationshipModel rel) {
         String target = simpleClassName(rel.getTargetEntity());
         return String.format("%s|%s|%s", rel.getType(), target, rel.getColumn());
+    }
+
+    private static boolean isConstantReference(String value) {
+        if (value == null) {
+            return false;
+        }
+        return value.contains(".");
+    }
+
+    private static boolean extendsPanacheEntity(EntityModel entity) {
+        return entity.getExtendsClasses().stream()
+                .anyMatch(s -> "PanacheEntity".equals(simpleClassName(s)));
     }
 
     private static String simpleClassName(String fullName) {

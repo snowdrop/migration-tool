@@ -11,6 +11,7 @@ import dev.snowdrop.mtool.model.validate.persistence.RelationshipModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,8 @@ class EntityExtractor {
             return entities;
         }
 
+        Map<String, TypeDeclaration> allTypesBySimpleName = new HashMap<>();
+
         for (Map.Entry<String, CompilationUnit> cuEntry : analysis.getSymbolTable().entrySet()) {
             CompilationUnit cu = cuEntry.getValue();
             if (cu.getTypeDeclarations() == null) {
@@ -33,13 +36,43 @@ class EntityExtractor {
             }
 
             for (Map.Entry<String, TypeDeclaration> typeEntry : cu.getTypeDeclarations().entrySet()) {
-                EntityModel entity = buildEntity(typeEntry.getKey(), typeEntry.getValue(), cu);
+                String qname = typeEntry.getKey();
+                int dot = qname.lastIndexOf('.');
+                String simpleName = dot >= 0 ? qname.substring(dot + 1) : qname;
+                allTypesBySimpleName.put(simpleName, typeEntry.getValue());
+
+                EntityModel entity = buildEntity(qname, typeEntry.getValue(), cu);
                 if (entity != null) {
                     entities.add(entity);
                 }
             }
         }
+
+        for (EntityModel entity : entities) {
+            resolveMappedSuperclass(entity, allTypesBySimpleName);
+        }
+
         return entities;
+    }
+
+    private void resolveMappedSuperclass(EntityModel entity, Map<String, TypeDeclaration> allTypes) {
+        for (String superclass : orEmpty(entity.getExtendsClasses())) {
+            TypeDeclaration parentType = allTypes.get(superclass);
+            if (parentType == null) {
+                continue;
+            }
+
+            boolean isMappedSuperclass = orEmpty(parentType.getAnnotations()).stream()
+                    .anyMatch(a -> AnnotationUtils.getAnnotationName(a) != null
+                            && "MappedSuperclass".equals(AnnotationUtils.getAnnotationName(a)));
+            if (!isMappedSuperclass) {
+                continue;
+            }
+
+            for (FieldDeclaration field : orEmpty(parentType.getFieldDeclarations())) {
+                processField(entity, field);
+            }
+        }
     }
 
     private EntityModel buildEntity(String qname, TypeDeclaration jtype, CompilationUnit cu) {
