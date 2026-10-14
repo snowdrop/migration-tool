@@ -2,6 +2,7 @@ package dev.snowdrop.mtool.commands;
 
 import dev.snowdrop.mtool.model.validate.ValidationReport;
 import dev.snowdrop.mtool.model.validate.ValidationResult;
+import dev.snowdrop.mtool.scanner.analyzer.TreeSitterAnalyzer;
 import dev.snowdrop.mtool.validate.ProjectSetupValidator;
 import dev.snowdrop.mtool.validate.Validator;
 import dev.snowdrop.mtool.validate.persistence.PersistenceValidator;
@@ -67,7 +68,7 @@ public class ValidateCommand implements Runnable {
 
         if (springProjectPath != null) {
             Path springPath = resolvePath(springProjectPath);
-            validators.add(new PersistenceValidator(springPath, skipCompile));
+            validators.add(new PersistenceValidator(new TreeSitterAnalyzer(), springPath, skipCompile));
         } else if ("persistence".equals(validatorName)) {
             logger.error("--spring-project is required for the persistence validator");
             return null;

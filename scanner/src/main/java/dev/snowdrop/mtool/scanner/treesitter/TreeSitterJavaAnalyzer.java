@@ -22,14 +22,18 @@ import java.util.stream.Stream;
 /**
  * Replaces CLDK's CodeAnalyzer: parses Java source files using TreeSitter
  * and builds an AnalysisResult with the same structure that the Extractors consume.
+ *
+ * @deprecated Use {@link dev.snowdrop.mtool.scanner.analyzer.TreeSitterAnalyzer} instead.
  */
-public class TreeSitterJavaAnalyzer {
+@Deprecated
+public class TreeSitterJavaAnalyzer implements dev.snowdrop.mtool.scanner.analyzer.JavaAnalyzer {
 
     private static final Logger logger = Logger.getLogger(TreeSitterJavaAnalyzer.class);
 
     private static final Set<String> EXCLUDED_DIRS = Set.of(
             "target", "build", ".git", ".svn", "node_modules", ".m2");
 
+    @Override
     public AnalysisResult analyze(Path projectPath) {
         AnalysisResult result = new AnalysisResult();
         List<Path> javaFiles = findJavaFiles(projectPath);

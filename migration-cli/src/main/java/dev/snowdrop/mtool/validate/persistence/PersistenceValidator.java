@@ -9,7 +9,7 @@ import dev.snowdrop.mtool.model.validate.persistence.EntityModel;
 import dev.snowdrop.mtool.model.validate.persistence.FieldModel;
 import dev.snowdrop.mtool.model.validate.persistence.IdGenerationModel;
 import dev.snowdrop.mtool.model.validate.persistence.RelationshipModel;
-import dev.snowdrop.mtool.scanner.treesitter.TreeSitterJavaAnalyzer;
+import dev.snowdrop.mtool.scanner.analyzer.JavaAnalyzer;
 import dev.snowdrop.mtool.validate.Validator;
 import org.jboss.logging.Logger;
 
@@ -42,10 +42,12 @@ public class PersistenceValidator implements Validator {
             "OneToOne", "EAGER",
             "ManyToMany", "LAZY");
 
+    private final JavaAnalyzer analyzer;
     private final Path springProjectPath;
     private final boolean skipCompile;
 
-    public PersistenceValidator(Path springProjectPath, boolean skipCompile) {
+    public PersistenceValidator(JavaAnalyzer analyzer, Path springProjectPath, boolean skipCompile) {
+        this.analyzer = analyzer;
         this.springProjectPath = springProjectPath;
         this.skipCompile = skipCompile;
     }
@@ -58,7 +60,6 @@ public class PersistenceValidator implements Validator {
     @Override
     public ValidationReport validate(Path quarkusProjectPath) {
         ValidationReport report = new ValidationReport(name());
-        TreeSitterJavaAnalyzer analyzer = new TreeSitterJavaAnalyzer();
         EntityExtractor extractor = new EntityExtractor();
 
         logger.infof("Analyzing Spring project: %s", springProjectPath);

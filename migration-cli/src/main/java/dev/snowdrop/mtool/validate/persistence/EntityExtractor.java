@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Extracts JPA entity metadata from an AnalysisResult produced by TreeSitterJavaAnalyzer.
+ * Extracts JPA entity metadata from an AnalysisResult produced by a JavaAnalyzer.
  * Adapted from IBM's quarkus-skills EntityExtractor — same logic, different input source.
  */
 class EntityExtractor {

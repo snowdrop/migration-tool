@@ -3,7 +3,8 @@ package dev.snowdrop.mtool.tests.validate;
 import dev.snowdrop.mtool.model.codeanalysis.AnalysisResult;
 import dev.snowdrop.mtool.model.validate.ValidationReport;
 import dev.snowdrop.mtool.model.validate.ValidationResult;
-import dev.snowdrop.mtool.scanner.treesitter.TreeSitterJavaAnalyzer;
+import dev.snowdrop.mtool.scanner.analyzer.JavaAnalyzer;
+import dev.snowdrop.mtool.scanner.analyzer.TreeSitterAnalyzer;
 import dev.snowdrop.mtool.validate.persistence.PersistenceValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -23,7 +24,7 @@ class PersistenceValidatorTest {
     void extractsEntityFromJavaSource() throws IOException {
         Path springProject = createProject(tempDir.resolve("spring"), SPRING_ENTITY);
 
-        TreeSitterJavaAnalyzer analyzer = new TreeSitterJavaAnalyzer();
+        JavaAnalyzer analyzer = new TreeSitterAnalyzer();
         AnalysisResult result = analyzer.analyze(springProject);
 
         assertThat(result.getSymbolTable()).isNotEmpty();
@@ -37,7 +38,7 @@ class PersistenceValidatorTest {
     void extractsTableName() throws IOException {
         Path springProject = createProject(tempDir.resolve("spring"), SPRING_ENTITY);
 
-        TreeSitterJavaAnalyzer analyzer = new TreeSitterJavaAnalyzer();
+        JavaAnalyzer analyzer = new TreeSitterAnalyzer();
         AnalysisResult result = analyzer.analyze(springProject);
 
         var types = result.getSymbolTable().values().iterator().next().getTypeDeclarations();
@@ -49,7 +50,7 @@ class PersistenceValidatorTest {
     void extractsFieldsWithAnnotations() throws IOException {
         Path springProject = createProject(tempDir.resolve("spring"), SPRING_ENTITY);
 
-        TreeSitterJavaAnalyzer analyzer = new TreeSitterJavaAnalyzer();
+        JavaAnalyzer analyzer = new TreeSitterAnalyzer();
         AnalysisResult result = analyzer.analyze(springProject);
 
         var types = result.getSymbolTable().values().iterator().next().getTypeDeclarations();
@@ -69,7 +70,7 @@ class PersistenceValidatorTest {
     void extractsRelationshipAnnotations() throws IOException {
         Path springProject = createProject(tempDir.resolve("spring"), ENTITY_WITH_RELATIONSHIP);
 
-        TreeSitterJavaAnalyzer analyzer = new TreeSitterJavaAnalyzer();
+        JavaAnalyzer analyzer = new TreeSitterAnalyzer();
         AnalysisResult result = analyzer.analyze(springProject);
 
         var types = result.getSymbolTable().values().iterator().next().getTypeDeclarations();
@@ -87,7 +88,7 @@ class PersistenceValidatorTest {
         Path springProject = createProject(tempDir.resolve("spring"), SPRING_ENTITY);
         Path quarkusProject = createProject(tempDir.resolve("quarkus"), SPRING_ENTITY);
 
-        PersistenceValidator validator = new PersistenceValidator(springProject, true);
+        PersistenceValidator validator = new PersistenceValidator(new TreeSitterAnalyzer(), springProject, true);
         ValidationReport report = validator.validate(quarkusProject);
 
         assertThat(report.failed()).isZero();
@@ -99,7 +100,7 @@ class PersistenceValidatorTest {
         Path springProject = createProject(tempDir.resolve("spring"), SPRING_ENTITY);
         Path quarkusProject = createProject(tempDir.resolve("quarkus"), DIFFERENT_ENTITY);
 
-        PersistenceValidator validator = new PersistenceValidator(springProject, true);
+        PersistenceValidator validator = new PersistenceValidator(new TreeSitterAnalyzer(), springProject, true);
         ValidationReport report = validator.validate(quarkusProject);
 
         assertThat(report.failed()).isGreaterThan(0);
@@ -112,7 +113,7 @@ class PersistenceValidatorTest {
         Path springProject = createProject(tempDir.resolve("spring"), SPRING_ENTITY);
         Path quarkusProject = createProject(tempDir.resolve("quarkus"), ENTITY_MISSING_FIELD);
 
-        PersistenceValidator validator = new PersistenceValidator(springProject, true);
+        PersistenceValidator validator = new PersistenceValidator(new TreeSitterAnalyzer(), springProject, true);
         ValidationReport report = validator.validate(quarkusProject);
 
         assertThat(report.getResults()).anyMatch(r -> r.status() == ValidationResult.Status.FAILED
@@ -124,7 +125,7 @@ class PersistenceValidatorTest {
         Path springProject = createProject(tempDir.resolve("spring"), SPRING_ENTITY);
         Path quarkusProject = createProject(tempDir.resolve("quarkus"), ENTITY_DIFFERENT_ID_STRATEGY);
 
-        PersistenceValidator validator = new PersistenceValidator(springProject, true);
+        PersistenceValidator validator = new PersistenceValidator(new TreeSitterAnalyzer(), springProject, true);
         ValidationReport report = validator.validate(quarkusProject);
 
         assertThat(report.getResults()).anyMatch(r -> r.status() == ValidationResult.Status.FAILED
@@ -136,7 +137,7 @@ class PersistenceValidatorTest {
         Path springProject = createProject(tempDir.resolve("spring"), ENTITY_WITH_CONSTANT_TABLE_NAME);
         Path quarkusProject = createProject(tempDir.resolve("quarkus"), SPRING_ENTITY);
 
-        PersistenceValidator validator = new PersistenceValidator(springProject, true);
+        PersistenceValidator validator = new PersistenceValidator(new TreeSitterAnalyzer(), springProject, true);
         ValidationReport report = validator.validate(quarkusProject);
 
         assertThat(report.getResults())
@@ -174,7 +175,7 @@ class PersistenceValidatorTest {
         Path quarkusProject = tempDir.resolve("quarkus");
         Files.createDirectories(quarkusProject.resolve("src/main/java"));
 
-        PersistenceValidator validator = new PersistenceValidator(springProject, true);
+        PersistenceValidator validator = new PersistenceValidator(new TreeSitterAnalyzer(), springProject, true);
         ValidationReport report = validator.validate(quarkusProject);
 
         assertThat(report.getResults()).anyMatch(r -> r.status() == ValidationResult.Status.FAILED
@@ -283,7 +284,7 @@ class PersistenceValidatorTest {
         Path springProject = createProject(tempDir.resolve("spring"), SPRING_ENTITY);
         Path quarkusProject = createProject(tempDir.resolve("quarkus"), QUARKUS_PANACHE_ENTITY);
 
-        PersistenceValidator validator = new PersistenceValidator(springProject, true);
+        PersistenceValidator validator = new PersistenceValidator(new TreeSitterAnalyzer(), springProject, true);
         ValidationReport report = validator.validate(quarkusProject);
 
         assertThat(report.getResults())
@@ -303,7 +304,7 @@ class PersistenceValidatorTest {
         Path springProject = createProject(tempDir.resolve("spring"), SPRING_ENTITY_AUTO_STRATEGY);
         Path quarkusProject = createProject(tempDir.resolve("quarkus"), QUARKUS_PANACHE_ENTITY);
 
-        PersistenceValidator validator = new PersistenceValidator(springProject, true);
+        PersistenceValidator validator = new PersistenceValidator(new TreeSitterAnalyzer(), springProject, true);
         ValidationReport report = validator.validate(quarkusProject);
 
         assertThat(report.getResults())
@@ -342,7 +343,7 @@ class PersistenceValidatorTest {
                 SPRING_BASE_ENTITY, SPRING_ENTITY_EXTENDS_BASE);
         Path quarkusProject = createProject(tempDir.resolve("quarkus"), SPRING_ENTITY);
 
-        PersistenceValidator validator = new PersistenceValidator(springProject, true);
+        PersistenceValidator validator = new PersistenceValidator(new TreeSitterAnalyzer(), springProject, true);
         ValidationReport report = validator.validate(quarkusProject);
 
         assertThat(report.getResults())
