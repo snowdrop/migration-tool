@@ -40,6 +40,12 @@ public final class TypeQuery {
         return this;
     }
 
+    public TypeQuery annotatedWithFqn(String fqn) {
+        filters.add(t -> t.annotations().stream()
+                .anyMatch(a -> fqn.equals(t.resolveType(a.name()))));
+        return this;
+    }
+
     public TypeQuery extending(String superclassName) {
         filters.add(t -> superclassName.equals(t.superclass())
                 || superclassName.equals(t.superclassFqn()));
