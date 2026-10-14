@@ -2,6 +2,8 @@ package dev.snowdrop.mtool.commands;
 
 import dev.snowdrop.mtool.model.validate.ValidationReport;
 import dev.snowdrop.mtool.model.validate.ValidationResult;
+import dev.snowdrop.mtool.scanner.analyzer.JavaAnalyzer;
+import dev.snowdrop.mtool.scanner.analyzer.JavaParserAnalyzer;
 import dev.snowdrop.mtool.scanner.analyzer.TreeSitterAnalyzer;
 import dev.snowdrop.mtool.validate.ProjectSetupValidator;
 import dev.snowdrop.mtool.validate.Validator;
@@ -43,6 +45,10 @@ public class ValidateCommand implements Runnable {
             "--spring-project" }, description = "Path to the original Spring project (required for persistence validator)")
     public String springProjectPath;
 
+    @CommandLine.Option(names = {
+            "--parser" }, description = "Java parser to use: treesitter (default) or javaparser", defaultValue = "treesitter")
+    public String parser;
+
     @Override
     public void run() {
         Path projectPath = resolvePath(appPath);
@@ -62,13 +68,19 @@ public class ValidateCommand implements Runnable {
         printReport(report);
     }
 
+    private JavaAnalyzer resolveAnalyzer() {
+        return "javaparser".equalsIgnoreCase(parser)
+                ? new JavaParserAnalyzer()
+                : new TreeSitterAnalyzer();
+    }
+
     private Validator resolveValidator() {
         List<Validator> validators = new ArrayList<>();
         validators.add(new ProjectSetupValidator(skipCompile));
 
         if (springProjectPath != null) {
             Path springPath = resolvePath(springProjectPath);
-            validators.add(new PersistenceValidator(new TreeSitterAnalyzer(), springPath, skipCompile));
+            validators.add(new PersistenceValidator(resolveAnalyzer(), springPath, skipCompile));
         } else if ("persistence".equals(validatorName)) {
             logger.error("--spring-project is required for the persistence validator");
             return null;
