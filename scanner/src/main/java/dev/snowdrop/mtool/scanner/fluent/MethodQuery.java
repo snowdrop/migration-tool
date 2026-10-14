@@ -34,6 +34,12 @@ public final class MethodQuery {
         return this;
     }
 
+    public MethodQuery annotatedWithFqn(String fqn) {
+        filters.add(mr -> mr.method().annotations().stream()
+                .anyMatch(a -> fqn.equals(mr.declaringType().resolveType(a.name()))));
+        return this;
+    }
+
     public MethodQuery withModifier(JavaModifier modifier) {
         filters.add(mr -> mr.method().modifiers().contains(modifier));
         return this;

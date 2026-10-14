@@ -37,6 +37,12 @@ public final class FieldQuery {
         return this;
     }
 
+    public FieldQuery annotatedWithFqn(String fqn) {
+        filters.add(fr -> fr.field().annotations().stream()
+                .anyMatch(a -> fqn.equals(fr.declaringType().resolveType(a.name()))));
+        return this;
+    }
+
     public FieldQuery withModifier(JavaModifier modifier) {
         filters.add(fr -> fr.field().modifiers().contains(modifier));
         return this;
