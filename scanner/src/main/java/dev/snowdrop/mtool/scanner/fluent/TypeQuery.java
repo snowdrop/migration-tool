@@ -1,4 +1,4 @@
-package dev.snowdrop.mtool.scanner.treesitter.index;
+package dev.snowdrop.mtool.scanner.fluent;
 
 import dev.snowdrop.mtool.model.java.JavaField;
 import dev.snowdrop.mtool.model.java.JavaMethod;
@@ -16,7 +16,7 @@ public final class TypeQuery {
     private final List<JavaTypeDeclaration> source;
     private final List<Predicate<JavaTypeDeclaration>> filters = new ArrayList<>();
 
-    TypeQuery(List<JavaTypeDeclaration> source) {
+    public TypeQuery(List<JavaTypeDeclaration> source) {
         this.source = source;
     }
 

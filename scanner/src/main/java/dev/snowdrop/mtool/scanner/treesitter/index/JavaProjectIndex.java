@@ -2,6 +2,9 @@ package dev.snowdrop.mtool.scanner.treesitter.index;
 
 import dev.snowdrop.mtool.model.java.JavaSource;
 import dev.snowdrop.mtool.model.java.JavaTypeDeclaration;
+import dev.snowdrop.mtool.scanner.fluent.FieldQuery;
+import dev.snowdrop.mtool.scanner.fluent.MethodQuery;
+import dev.snowdrop.mtool.scanner.fluent.TypeQuery;
 import io.roastedroot.treesitter.Language;
 import io.roastedroot.treesitter.TreeSitter;
 import io.roastedroot.treesitter.TreeSitterParser;

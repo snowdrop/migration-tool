@@ -1,4 +1,4 @@
-package dev.snowdrop.mtool.scanner.treesitter.index;
+package dev.snowdrop.mtool.scanner.fluent;
 
 import dev.snowdrop.mtool.model.java.JavaMethod;
 import dev.snowdrop.mtool.model.java.JavaModifier;
@@ -13,7 +13,7 @@ public final class MethodQuery {
     private final List<JavaTypeDeclaration> source;
     private final List<Predicate<MethodResult>> filters = new ArrayList<>();
 
-    MethodQuery(List<JavaTypeDeclaration> source) {
+    public MethodQuery(List<JavaTypeDeclaration> source) {
         this.source = source;
     }
 

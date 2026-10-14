@@ -4,6 +4,8 @@ import dev.snowdrop.mtool.model.java.JavaModifier;
 import dev.snowdrop.mtool.model.java.JavaSource;
 import dev.snowdrop.mtool.model.java.JavaTypeDeclaration;
 import dev.snowdrop.mtool.model.java.JavaTypeKind;
+import dev.snowdrop.mtool.scanner.fluent.FieldResult;
+import dev.snowdrop.mtool.scanner.fluent.MethodResult;
 import io.roastedroot.treesitter.TreeSitter;
 import org.junit.jupiter.api.Test;
 

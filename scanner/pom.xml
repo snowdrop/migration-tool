@@ -76,6 +76,12 @@
             <artifactId>treesitter4j</artifactId>
         </dependency>
 
+        <!-- Java parser -->
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core</artifactId>
+        </dependency>
+
         <!-- OpenCSV for better CSV parsing and object binding -->
         <dependency>
             <groupId>com.opencsv</groupId>

@@ -1,4 +1,4 @@
-package dev.snowdrop.mtool.scanner.treesitter.index;
+package dev.snowdrop.mtool.scanner.fluent;
 
 import dev.snowdrop.mtool.model.java.JavaField;
 import dev.snowdrop.mtool.model.java.JavaTypeDeclaration;
