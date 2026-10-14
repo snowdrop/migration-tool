@@ -84,6 +84,11 @@ public class PersistenceValidator implements Validator {
         return report;
     }
 
+    /**
+     * Normalizes entity models before comparison to avoid false negatives:
+     * applies JPA default fetch types (EAGER/LAZY) when not explicit,
+     * and uppercases column names since databases are typically case-insensitive.
+     */
     private void normalizeEntities(List<EntityModel> entities) {
         for (EntityModel entity : entities) {
             for (RelationshipModel rel : entity.getRelationships()) {
@@ -123,6 +128,10 @@ public class PersistenceValidator implements Validator {
         }
     }
 
+    /**
+     * Matches Spring and Quarkus entities by class name, detects missing entities,
+     * then compares each pair: table name, ID generation, fields, and relationships.
+     */
     private void validateEntities(List<EntityModel> spring, List<EntityModel> quarkus,
             ValidationReport report) {
         Map<String, EntityModel> springMap = spring.stream()

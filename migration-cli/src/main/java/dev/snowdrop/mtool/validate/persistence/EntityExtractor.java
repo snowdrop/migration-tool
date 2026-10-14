@@ -21,6 +21,12 @@ import java.util.Map;
  */
 class EntityExtractor {
 
+    /**
+     * Transforms raw AST data into JPA domain models.
+     * Iterates all types in the project, builds an EntityModel for each @Entity class
+     * (extracting table name, fields, ID generation, relationships),
+     * then resolves @MappedSuperclass inheritance by merging parent fields into child entities.
+     */
     List<EntityModel> extract(AnalysisResult analysis) {
         List<EntityModel> entities = new ArrayList<>();
         if (analysis == null || analysis.getSymbolTable() == null) {
@@ -55,6 +61,10 @@ class EntityExtractor {
         return entities;
     }
 
+    /**
+     * Resolves cross-file inheritance: if an entity extends a @MappedSuperclass,
+     * merges the parent's fields (including @Id) into the child entity.
+     */
     private void resolveMappedSuperclass(EntityModel entity, Map<String, TypeDeclaration> allTypes) {
         for (String superclass : orEmpty(entity.getExtendsClasses())) {
             TypeDeclaration parentType = allTypes.get(superclass);
@@ -75,6 +85,11 @@ class EntityExtractor {
         }
     }
 
+    /**
+     * Builds an EntityModel from a @Entity-annotated class.
+     * Returns null if the class is not an entity.
+     * Extracts: class name, package, table name, superclass, fields, ID generation, and relationships.
+     */
     private EntityModel buildEntity(String qname, TypeDeclaration jtype, CompilationUnit cu) {
         List<String> annotations = orEmpty(jtype.getAnnotations());
         if (annotations.stream().noneMatch(AnnotationUtils::isEntityAnnotation)) {
@@ -103,6 +118,7 @@ class EntityExtractor {
         return entity;
     }
 
+    /** Extracts class-level annotation values (e.g., table name from @Table). */
     private void applyClassAnnotations(EntityModel entity, List<String> annotations) {
         for (String ann : annotations) {
             if (ann.contains("@Table")) {
@@ -111,6 +127,11 @@ class EntityExtractor {
         }
     }
 
+    /**
+     * Processes a single field declaration: builds a FieldModel (type, column, nullable, unique),
+     * detects @Id with @GeneratedValue for ID generation strategy,
+     * and extracts JPA relationships (@OneToMany, @ManyToOne, etc.) with their attributes.
+     */
     private void processField(EntityModel entity, FieldDeclaration field) {
         String fieldName = field.getVariables().get(0);
         List<String> fa = orEmpty(field.getAnnotations());

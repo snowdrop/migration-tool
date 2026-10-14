@@ -3,7 +3,6 @@ package dev.snowdrop.mtool.tests.validate;
 import dev.snowdrop.mtool.model.codeanalysis.AnalysisResult;
 import dev.snowdrop.mtool.model.validate.ValidationReport;
 import dev.snowdrop.mtool.model.validate.ValidationResult;
-import dev.snowdrop.mtool.model.validate.persistence.EntityModel;
 import dev.snowdrop.mtool.scanner.treesitter.TreeSitterJavaAnalyzer;
 import dev.snowdrop.mtool.validate.persistence.PersistenceValidator;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
