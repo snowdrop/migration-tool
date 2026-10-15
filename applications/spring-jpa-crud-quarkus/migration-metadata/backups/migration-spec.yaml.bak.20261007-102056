@@ -1,0 +1,45 @@
+project:
+  name: spring-jpa-crud-quarkus
+  source_path: /Users/auri/Code/quarkus-skills/tests/target/workdirs/spring-jpa-crud
+  target_path: /Users/auri/Code/quarkus-skills/tests/target/workdirs/spring-jpa-crud-quarkus
+
+source_technology:
+  spring_boot_version: "3.4.4"
+  java_version: "21"
+  build_tool: "Maven"
+
+target_technology:
+  quarkus_version: "3.39.5"
+  java_version: "21"
+  build_tool: "Maven"
+
+detected_features:
+  spring_web: true
+  spring_data_jpa: true
+  spring_security: false
+  spring_kafka: false
+  spring_rabbitmq: false
+  spring_jms: false
+  spring_scheduled: false
+  spring_cache: false
+  view_layer: false
+
+decisions:
+  strategy: "full-quarkus"
+  strategy_source: "user"
+  quarkus_version_source: "default"
+  java_version_source: "default"
+  persistence: "panache-active-record"
+  persistence_source: "default"
+  rest_framework: "quarkus-rest"
+  rest_framework_source: "default"
+  messaging_transport: "none"
+  messaging_transport_source: "default"
+  view_layer: "none"
+  view_layer_source: "default"
+  security_approach: "none"
+  security_approach_source: "default"
+
+metadata:
+  complexity: "low"
+  generatedAt: "2026-09-30T10:00:58Z"

@@ -1,0 +1,44 @@
+project: {name: spring-jpa-crud-quarkus, source_path: /Users/auri/Code/quarkus-skills/tests/target/workdirs/spring-jpa-crud,
+  target_path: /Users/auri/Code/quarkus-skills/tests/target/workdirs/spring-jpa-crud-quarkus}
+source_technology: {spring_boot_version: 3.4.4, java_version: '21', build_tool: Maven}
+target_technology: {quarkus_version: 3.39.5, java_version: '21', build_tool: Maven}
+detected_features: {spring_web: true, spring_data_jpa: true, spring_security: false,
+  spring_kafka: false, spring_rabbitmq: false, spring_jms: false, spring_scheduled: false,
+  spring_cache: false, view_layer: false}
+decisions: {strategy: full-quarkus, strategy_source: user, quarkus_version_source: default,
+  java_version_source: default, persistence: panache-active-record, persistence_source: default,
+  rest_framework: quarkus-rest, rest_framework_source: default, messaging_transport: none,
+  messaging_transport_source: default, view_layer: none, view_layer_source: default,
+  security_approach: none, security_approach_source: default}
+metadata: {complexity: low, generatedAt: '2026-09-30T10:00:58Z'}
+intermediate:
+  history:
+  - phase: project-setup
+    rules_total: 13
+    rules_passed: 12
+    verification_evidence:
+    - {evidence: 'File exists: pom.xml', rule: pom.xml exists, passed: true}
+    - {evidence: 'File exists: application.properties', rule: application.properties
+        exists, passed: true}
+    - {evidence: No Spring Boot annotations found, rule: No Spring Boot files, passed: true}
+    - {evidence: No Spring Framework dependencies found in pom.xml, rule: No Spring
+        dependencies, passed: true}
+    - {evidence: 'pom.xml has groupId, artifactId, version', rule: POM coordinates,
+      passed: true}
+    - {evidence: quarkus-maven-plugin is present in pom.xml, rule: quarkus-maven-plugin,
+      passed: true}
+    - {evidence: 'quarkus-bom found in dependencyManagement (version: 3.39.5 via ${quarkus.platform.version},
+        literal artifactId)', rule: quarkus-bom, passed: true}
+    - {evidence: No extensions listed in spec (nothing to check), rule: Extensions,
+      passed: true}
+    - {evidence: 'Directory exists: src/main/java', rule: src/main/java exists, passed: true}
+    - {evidence: 'Directory exists: src/main/resources', rule: src/main/resources
+        exists, passed: true}
+    - {evidence: 'Directory exists: src/test/java', rule: src/test/java exists, passed: true}
+    - {evidence: 'Directory not found: src/test/resources', rule: src/test/resources
+        exists, passed: false}
+    - {evidence: mvn compile — BUILD SUCCESS, rule: mvn compile, passed: true}
+    run_at: '2026-10-07T08:20:56.874194Z'
+    rules_warned: 0
+    status: partial
+    rules_failed: 1
