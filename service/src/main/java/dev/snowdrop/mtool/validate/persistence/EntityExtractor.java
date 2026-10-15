@@ -50,13 +50,13 @@ import java.util.Optional;
  * (including {@code @Id}) are merged into the child's {@link EntityModel}.
  * </p>
  */
-class EntityExtractor {
+public class EntityExtractor {
 
     private static final List<String> RELATIONSHIP_TYPES = List.of(
             "OneToMany", "ManyToOne", "ManyToMany", "OneToOne");
     private static final String ENTITY_ANNOTATION_NAME = "Entity";
 
-    List<EntityModel> extractEntities(List<JavaTypeDeclaration> types) {
+    public List<EntityModel> extractEntities(List<JavaTypeDeclaration> types) {
         if (types == null || types.isEmpty()) {
             return new ArrayList<>();
         }
