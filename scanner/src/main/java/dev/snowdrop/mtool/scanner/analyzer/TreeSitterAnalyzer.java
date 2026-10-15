@@ -19,15 +19,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 
 public class TreeSitterAnalyzer implements JavaAnalyzer {
 
     private static final Logger logger = Logger.getLogger(TreeSitterAnalyzer.class);
-
-    private static final Set<String> EXCLUDED_DIRS = Set.of(
-            "target", "build", ".git", ".svn", "node_modules", ".m2");
 
     @Override
     public AnalysisResult analyze(Path projectPath) {
@@ -262,25 +257,5 @@ public class TreeSitterAnalyzer implements JavaAnalyzer {
     @Override
     public String toString() {
         return "TreeSitter";
-    }
-
-    private List<Path> findJavaFiles(Path projectPath) {
-        List<Path> files = new ArrayList<>();
-        try (Stream<Path> paths = Files.walk(projectPath)) {
-            paths.filter(Files::isRegularFile)
-                    .filter(p -> p.toString().endsWith(".java"))
-                    .filter(p -> {
-                        for (Path part : projectPath.relativize(p)) {
-                            if (EXCLUDED_DIRS.contains(part.toString())) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    })
-                    .forEach(files::add);
-        } catch (IOException e) {
-            logger.errorf("Error walking project tree: %s", e.getMessage());
-        }
-        return files;
     }
 }
