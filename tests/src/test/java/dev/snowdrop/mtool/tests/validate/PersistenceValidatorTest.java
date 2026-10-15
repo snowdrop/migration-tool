@@ -1,6 +1,6 @@
 package dev.snowdrop.mtool.tests.validate;
 
-import dev.snowdrop.mtool.model.codeanalysis.AnalysisResult;
+import dev.snowdrop.mtool.model.java.JavaTypeDeclaration;
 import dev.snowdrop.mtool.model.validate.ValidationReport;
 import dev.snowdrop.mtool.model.validate.ValidationResult;
 import dev.snowdrop.mtool.scanner.analyzer.JavaAnalyzer;
@@ -12,6 +12,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,12 +26,11 @@ class PersistenceValidatorTest {
         Path springProject = createProject(tempDir.resolve("spring"), SPRING_ENTITY);
 
         JavaAnalyzer analyzer = new TreeSitterAnalyzer();
-        AnalysisResult result = analyzer.analyze(springProject);
+        List<JavaTypeDeclaration> types = analyzer.extractTypes(springProject);
 
-        assertThat(result.getSymbolTable()).isNotEmpty();
-        assertThat(result.getSymbolTable().values().stream()
-                .flatMap(cu -> cu.getTypeDeclarations().values().stream())
-                .filter(t -> t.getAnnotations().stream().anyMatch(a -> a.contains("@Entity")))
+        assertThat(types).isNotEmpty();
+        assertThat(types.stream()
+                .filter(t -> t.annotations().stream().anyMatch(a -> "Entity".equals(a.name())))
                 .count()).isEqualTo(1);
     }
 
@@ -39,11 +39,11 @@ class PersistenceValidatorTest {
         Path springProject = createProject(tempDir.resolve("spring"), SPRING_ENTITY);
 
         JavaAnalyzer analyzer = new TreeSitterAnalyzer();
-        AnalysisResult result = analyzer.analyze(springProject);
+        List<JavaTypeDeclaration> types = analyzer.extractTypes(springProject);
 
-        var types = result.getSymbolTable().values().iterator().next().getTypeDeclarations();
-        var type = types.values().iterator().next();
-        assertThat(type.getAnnotations()).anyMatch(a -> a.contains("@Table") && a.contains("todos"));
+        JavaTypeDeclaration type = types.get(0);
+        assertThat(type.annotations()).anyMatch(a -> "Table".equals(a.name())
+                && a.getArgument("name") != null && a.getArgument("name").contains("todos"));
     }
 
     @Test
@@ -51,19 +51,17 @@ class PersistenceValidatorTest {
         Path springProject = createProject(tempDir.resolve("spring"), SPRING_ENTITY);
 
         JavaAnalyzer analyzer = new TreeSitterAnalyzer();
-        AnalysisResult result = analyzer.analyze(springProject);
+        List<JavaTypeDeclaration> types = analyzer.extractTypes(springProject);
 
-        var types = result.getSymbolTable().values().iterator().next().getTypeDeclarations();
-        var type = types.values().iterator().next();
+        JavaTypeDeclaration type = types.get(0);
+        assertThat(type.fields()).hasSizeGreaterThanOrEqualTo(3);
 
-        assertThat(type.getFieldDeclarations()).hasSizeGreaterThanOrEqualTo(3);
-
-        var idField = type.getFieldDeclarations().stream()
-                .filter(f -> f.getVariables().contains("id"))
+        var idField = type.fields().stream()
+                .filter(f -> "id".equals(f.name()))
                 .findFirst().orElseThrow();
-        assertThat(idField.getAnnotations()).anyMatch(a -> a.contains("@Id"));
-        assertThat(idField.getAnnotations()).anyMatch(a -> a.contains("@GeneratedValue"));
-        assertThat(idField.getType()).isEqualTo("Long");
+        assertThat(idField.annotations()).anyMatch(a -> "Id".equals(a.name()));
+        assertThat(idField.annotations()).anyMatch(a -> "GeneratedValue".equals(a.name()));
+        assertThat(idField.typeName()).isEqualTo("Long");
     }
 
     @Test
@@ -71,16 +69,14 @@ class PersistenceValidatorTest {
         Path springProject = createProject(tempDir.resolve("spring"), ENTITY_WITH_RELATIONSHIP);
 
         JavaAnalyzer analyzer = new TreeSitterAnalyzer();
-        AnalysisResult result = analyzer.analyze(springProject);
+        List<JavaTypeDeclaration> types = analyzer.extractTypes(springProject);
 
-        var types = result.getSymbolTable().values().iterator().next().getTypeDeclarations();
-        var type = types.values().iterator().next();
-
-        var itemsField = type.getFieldDeclarations().stream()
-                .filter(f -> f.getVariables().contains("items"))
+        JavaTypeDeclaration type = types.get(0);
+        var itemsField = type.fields().stream()
+                .filter(f -> "items".equals(f.name()))
                 .findFirst().orElseThrow();
-        assertThat(itemsField.getAnnotations()).anyMatch(a -> a.contains("@OneToMany"));
-        assertThat(itemsField.getType()).isEqualTo("List<Item>");
+        assertThat(itemsField.annotations()).anyMatch(a -> "OneToMany".equals(a.name()));
+        assertThat(itemsField.typeName()).isEqualTo("List<Item>");
     }
 
     @Test

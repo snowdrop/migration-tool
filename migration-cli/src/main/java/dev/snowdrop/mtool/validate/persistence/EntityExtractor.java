@@ -20,31 +20,35 @@ import java.util.Optional;
  * producing a structured representation that can be used to validate, compare,
  * or check persistence layers across projects (e.g. Spring vs Quarkus migration).
  *
- * <p>The extractor uses the Fluent API ({@link TypeQuery}) and structured
- * {@link AnnotationInfo} to search each Java class for:</p>
+ * <p>
+ * The extractor uses the Fluent API ({@link TypeQuery}) and structured
+ * {@link AnnotationInfo} to search each Java class for:
+ * </p>
  *
  * <h3>Class-level</h3>
  * <ul>
- *   <li>{@code @Entity} — identifies a JPA entity (only these classes are extracted)</li>
- *   <li>{@code @Table(name)} — explicit table name mapping</li>
- *   <li>{@code @MappedSuperclass} — triggers field inheritance into child entities</li>
- *   <li>{@code extends / implements} — superclass and interface declarations</li>
+ * <li>{@code @Entity} — identifies a JPA entity (only these classes are extracted)</li>
+ * <li>{@code @Table(name)} — explicit table name mapping</li>
+ * <li>{@code @MappedSuperclass} — triggers field inheritance into child entities</li>
+ * <li>{@code extends / implements} — superclass and interface declarations</li>
  * </ul>
  *
  * <h3>Field-level</h3>
  * <ul>
- *   <li>{@code @Id} + {@code @GeneratedValue(strategy, generator)} — primary key and ID generation strategy</li>
- *   <li>{@code @Column(name, nullable, unique)} — column mapping and constraints</li>
- *   <li>{@code @Transient} — marks fields excluded from persistence</li>
- *   <li>{@code @OneToMany}, {@code @ManyToOne}, {@code @OneToOne}, {@code @ManyToMany} — relationship type,
- *       fetch strategy, mappedBy, and cascade configuration</li>
- *   <li>{@code @JoinColumn(name)} — join column for relationships</li>
- *   <li>Generic type (e.g. {@code List<Item>}) — resolved into collection type and target entity</li>
+ * <li>{@code @Id} + {@code @GeneratedValue(strategy, generator)} — primary key and ID generation strategy</li>
+ * <li>{@code @Column(name, nullable, unique)} — column mapping and constraints</li>
+ * <li>{@code @Transient} — marks fields excluded from persistence</li>
+ * <li>{@code @OneToMany}, {@code @ManyToOne}, {@code @OneToOne}, {@code @ManyToMany} — relationship type,
+ * fetch strategy, mappedBy, and cascade configuration</li>
+ * <li>{@code @JoinColumn(name)} — join column for relationships</li>
+ * <li>Generic type (e.g. {@code List<Item>}) — resolved into collection type and target entity</li>
  * </ul>
  *
  * <h3>Cross-class resolution</h3>
- * <p>If an {@code @Entity} extends a {@code @MappedSuperclass}, the parent's fields
- * (including {@code @Id}) are merged into the child's {@link EntityModel}.</p>
+ * <p>
+ * If an {@code @Entity} extends a {@code @MappedSuperclass}, the parent's fields
+ * (including {@code @Id}) are merged into the child's {@link EntityModel}.
+ * </p>
  */
 class EntityExtractor {
 
