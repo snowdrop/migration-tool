@@ -17,13 +17,14 @@ import java.util.Optional;
 
 /**
  * Extracts JPA entity metadata from a list of JavaTypeDeclarations produced by
- * TreeSitter or JavaParser type extractors, using the Fluent API and structured
- * AnnotationInfo instead of regex-based annotation string parsing.
+ * the Parser type extractor using the Fluent API and structured
+ * AnnotationInfo.
  */
 class EntityExtractor {
 
     private static final List<String> RELATIONSHIP_TYPES = List.of(
             "OneToMany", "ManyToOne", "ManyToMany", "OneToOne");
+    private static final String ENTITY_ANNOTATION_NAME = "Entity";
 
     List<EntityModel> extractEntities(List<JavaTypeDeclaration> types) {
         if (types == null || types.isEmpty()) {
@@ -36,7 +37,7 @@ class EntityExtractor {
         }
 
         List<JavaTypeDeclaration> entityTypes = new TypeQuery(types)
-                .annotatedWith("Entity")
+                .annotatedWith(ENTITY_ANNOTATION_NAME)
                 .toList();
 
         List<EntityModel> entities = new ArrayList<>();
