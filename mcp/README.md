@@ -36,6 +36,22 @@ mvn clean verify -Pit -pl mcp
 
 Next, launch the ACP client and pass the parameters to configure the Quarkus MCP server using stdio mode
 
+## Filesystem access guardrail
+
+The MCP server restricts tool access to a set of allowed directories, following the [MCP local server security](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security#limit-filesystem-access) convention. The `sourceAnalyze` and `sourceValidate` tools will reject any path outside these boundaries.
+
+**Default:** the current working directory (`.`) where the server is started. When you run `acp run` from the repository root, all relative paths like `./applications/...` are allowed automatically.
+
+**Override:** pass `-Dmtool.allowed-dirs=<dir1>,<dir2>` in the MCP server args to restrict or expand access:
+
+```shell
+// Restrict to only the applications directory
+--mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dmtool.allowed-dirs=./applications", "-jar", "./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar"]}'
+
+// Allow access to multiple directories
+--mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dmtool.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar"]}'
+```
+
 ## stdio
 
 ### Analyze Tool
@@ -47,11 +63,6 @@ acp run \
   --backup no \
   --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar"]}' \
   -p "The Project path of the code to analyze using the MCP tool: sourceAnalyze is: ./applications/spring-boot-todo-app"
-...
-Starting the AI conversation ...
-Let me load the `sourceAnalyze` MCP tool schema and then analyze the project.
-Now let me call the tool to analyze the Spring Boot project.
-The `sourceAnalyze` tool has been invoked on `./applications/spring-boot-todo-app`. The analysis is complete — the tool scanned the project to discover Java classes, properties files, and other source artifacts in the Spring Boot TODO application.
 ```
 
 ### Validate tool
@@ -62,7 +73,7 @@ acp run \
   --backup no \
   -s ./mcp/skills/validate/SKILLS.md \
   --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar"]}' \
-  -p "Validate the migration of the spring project: /Users/cmoullia/code/quarkus/rewrite-mtool/migration-tool/applications/spring-jpa-crud against the quarkus project: /Users/cmoullia/code/quarkus/rewrite-mtool/migration-tool/applications/spring-jpa-crud-quarkus. Only run the validator: persistence"
+  -p "Validate the migration of the spring project: ./applications/spring-jpa-crud against the quarkus project: ./applications/spring-jpa-crud-quarkus. Only run the validator: persistence"
 ```
 
 ## To be reviewed

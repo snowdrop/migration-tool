@@ -15,12 +15,14 @@ import dev.snowdrop.mtool.validate.Validator;
 import dev.snowdrop.mtool.validate.persistence.PersistenceValidator;
 import io.quarkiverse.mcp.server.Tool;
 import io.quarkiverse.mcp.server.ToolArg;
+import io.quarkiverse.mcp.server.ToolGuardrails;
 import org.jboss.logging.Logger;
 
 public class ValidateTools {
 
     private static final Logger LOG = Logger.getLogger(ValidateTools.class);
 
+    @ToolGuardrails(input = FilesystemAccessGuardrail.class)
     @Tool(description = "Validate that a Spring-to-Quarkus migration is correct and complete. "
             + "Runs validators (project-setup, persistence) against the migrated Quarkus project, "
             + "comparing it with the original Spring project to detect missing entities, "

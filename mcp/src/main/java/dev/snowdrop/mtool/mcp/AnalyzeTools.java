@@ -11,12 +11,14 @@ import dev.snowdrop.mtool.model.parser.Query;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
 import io.quarkiverse.mcp.server.Tool;
 import io.quarkiverse.mcp.server.ToolArg;
+import io.quarkiverse.mcp.server.ToolGuardrails;
 import org.jboss.logging.Logger;
 
 public class AnalyzeTools {
 
     private static final Logger LOG = Logger.getLogger(AnalyzeTools.class);
 
+    @ToolGuardrails(input = FilesystemAccessGuardrail.class)
     @Tool(description = "Analyze the source to discover the java classes, annotations, properties, etc files. "
             + "Accepts multiple queries separated by semicolons, e.g. 'java class all;java annotation all'")
     public String sourceAnalyze(
