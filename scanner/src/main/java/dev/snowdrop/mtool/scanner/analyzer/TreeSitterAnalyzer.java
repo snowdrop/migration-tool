@@ -4,6 +4,9 @@ import dev.snowdrop.mtool.model.codeanalysis.AnalysisResult;
 import dev.snowdrop.mtool.model.codeanalysis.CompilationUnit;
 import dev.snowdrop.mtool.model.codeanalysis.FieldDeclaration;
 import dev.snowdrop.mtool.model.codeanalysis.TypeDeclaration;
+import dev.snowdrop.mtool.model.java.JavaSource;
+import dev.snowdrop.mtool.model.java.JavaTypeDeclaration;
+import dev.snowdrop.mtool.scanner.treesitter.index.JavaTypeExtractor;
 import io.roastedroot.treesitter.Language;
 import io.roastedroot.treesitter.TreeSitter;
 import io.roastedroot.treesitter.TreeSitterNode;
@@ -236,6 +239,24 @@ public class TreeSitterAnalyzer implements JavaAnalyzer {
             return simpleName;
         }
         return packageName + "." + simpleName;
+    }
+
+    @Override
+    public List<JavaTypeDeclaration> extractTypes(Path projectPath) {
+        List<Path> javaFiles = findJavaFiles(projectPath);
+        List<JavaTypeDeclaration> allTypes = new ArrayList<>();
+
+        try (TreeSitter ts = TreeSitter.create()) {
+            for (Path file : javaFiles) {
+                String source = Files.readString(file);
+                JavaSource javaSource = new JavaSource(file.toString(), source);
+                allTypes.addAll(JavaTypeExtractor.extract(ts, javaSource));
+            }
+        } catch (IOException e) {
+            logger.errorf("Error extracting types: %s", e.getMessage());
+        }
+
+        return allTypes;
     }
 
     @Override

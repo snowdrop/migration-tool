@@ -1,6 +1,6 @@
 package dev.snowdrop.mtool.validate.persistence;
 
-import dev.snowdrop.mtool.model.codeanalysis.AnalysisResult;
+import dev.snowdrop.mtool.model.java.JavaTypeDeclaration;
 import dev.snowdrop.mtool.model.validate.ValidationReport;
 import dev.snowdrop.mtool.model.validate.ValidationResult;
 import dev.snowdrop.mtool.model.validate.ValidationResult.Status;
@@ -63,13 +63,13 @@ public class PersistenceValidator implements Validator {
         EntityExtractor extractor = new EntityExtractor();
 
         logger.infof("Analyzing Spring project: %s", springProjectPath);
-        AnalysisResult springAnalysis = analyzer.analyze(springProjectPath);
-        List<EntityModel> springEntities = extractor.extract(springAnalysis);
+        List<JavaTypeDeclaration> springTypes = analyzer.extractTypes(springProjectPath);
+        List<EntityModel> springEntities = extractor.extractEntities(springTypes);
         normalizeEntities(springEntities);
 
         logger.infof("Analyzing Quarkus project: %s", quarkusProjectPath);
-        AnalysisResult quarkusAnalysis = analyzer.analyze(quarkusProjectPath);
-        List<EntityModel> quarkusEntities = extractor.extract(quarkusAnalysis);
+        List<JavaTypeDeclaration> quarkusTypes = analyzer.extractTypes(quarkusProjectPath);
+        List<EntityModel> quarkusEntities = extractor.extractEntities(quarkusTypes);
         normalizeEntities(quarkusEntities);
 
         logger.infof("Found %d Spring entities, %d Quarkus entities",

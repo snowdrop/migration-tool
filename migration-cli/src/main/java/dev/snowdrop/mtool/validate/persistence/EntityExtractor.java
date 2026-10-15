@@ -1,57 +1,47 @@
 package dev.snowdrop.mtool.validate.persistence;
 
-import dev.snowdrop.mtool.model.codeanalysis.AnalysisResult;
-import dev.snowdrop.mtool.model.codeanalysis.CompilationUnit;
-import dev.snowdrop.mtool.model.codeanalysis.FieldDeclaration;
-import dev.snowdrop.mtool.model.codeanalysis.TypeDeclaration;
+import dev.snowdrop.mtool.model.analyze.AnnotationInfo;
+import dev.snowdrop.mtool.model.java.JavaField;
+import dev.snowdrop.mtool.model.java.JavaTypeDeclaration;
 import dev.snowdrop.mtool.model.validate.persistence.EntityModel;
 import dev.snowdrop.mtool.model.validate.persistence.FieldModel;
 import dev.snowdrop.mtool.model.validate.persistence.IdGenerationModel;
 import dev.snowdrop.mtool.model.validate.persistence.RelationshipModel;
+import dev.snowdrop.mtool.scanner.fluent.TypeQuery;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
- * Extracts JPA entity metadata from an AnalysisResult produced by a JavaAnalyzer.
- * Adapted from IBM's quarkus-skills EntityExtractor — same logic, different input source.
+ * Extracts JPA entity metadata from a list of JavaTypeDeclarations produced by
+ * TreeSitter or JavaParser type extractors, using the Fluent API and structured
+ * AnnotationInfo instead of regex-based annotation string parsing.
  */
 class EntityExtractor {
 
-    /**
-     * Transforms raw AST data into JPA domain models.
-     * Iterates all types in the project, builds an EntityModel for each @Entity class
-     * (extracting table name, fields, ID generation, relationships),
-     * then resolves @MappedSuperclass inheritance by merging parent fields into child entities.
-     */
-    List<EntityModel> extract(AnalysisResult analysis) {
-        List<EntityModel> entities = new ArrayList<>();
-        if (analysis == null || analysis.getSymbolTable() == null) {
-            return entities;
+    private static final List<String> RELATIONSHIP_TYPES = List.of(
+            "OneToMany", "ManyToOne", "ManyToMany", "OneToOne");
+
+    List<EntityModel> extractEntities(List<JavaTypeDeclaration> types) {
+        if (types == null || types.isEmpty()) {
+            return new ArrayList<>();
         }
 
-        Map<String, TypeDeclaration> allTypesBySimpleName = new HashMap<>();
+        Map<String, JavaTypeDeclaration> allTypesBySimpleName = new HashMap<>();
+        for (JavaTypeDeclaration type : types) {
+            allTypesBySimpleName.put(type.simpleName(), type);
+        }
 
-        for (Map.Entry<String, CompilationUnit> cuEntry : analysis.getSymbolTable().entrySet()) {
-            CompilationUnit cu = cuEntry.getValue();
-            if (cu.getTypeDeclarations() == null) {
-                continue;
-            }
+        List<JavaTypeDeclaration> entityTypes = new TypeQuery(types)
+                .annotatedWith("Entity")
+                .toList();
 
-            for (Map.Entry<String, TypeDeclaration> typeEntry : cu.getTypeDeclarations().entrySet()) {
-                String qname = typeEntry.getKey();
-                int dot = qname.lastIndexOf('.');
-                String simpleName = dot >= 0 ? qname.substring(dot + 1) : qname;
-                allTypesBySimpleName.put(simpleName, typeEntry.getValue());
-
-                EntityModel entity = buildEntity(qname, typeEntry.getValue(), cu);
-                if (entity != null) {
-                    entities.add(entity);
-                }
-            }
+        List<EntityModel> entities = new ArrayList<>();
+        for (JavaTypeDeclaration jtype : entityTypes) {
+            entities.add(buildEntity(jtype));
         }
 
         for (EntityModel entity : entities) {
@@ -61,136 +51,141 @@ class EntityExtractor {
         return entities;
     }
 
-    /**
-     * Resolves cross-file inheritance: if an entity extends a @MappedSuperclass,
-     * merges the parent's fields (including @Id) into the child entity.
-     */
-    private void resolveMappedSuperclass(EntityModel entity, Map<String, TypeDeclaration> allTypes) {
-        for (String superclass : orEmpty(entity.getExtendsClasses())) {
-            TypeDeclaration parentType = allTypes.get(superclass);
-            if (parentType == null) {
-                continue;
-            }
-
-            boolean isMappedSuperclass = orEmpty(parentType.getAnnotations()).stream()
-                    .anyMatch(a -> AnnotationUtils.getAnnotationName(a) != null
-                            && "MappedSuperclass".equals(AnnotationUtils.getAnnotationName(a)));
-            if (!isMappedSuperclass) {
-                continue;
-            }
-
-            for (FieldDeclaration field : orEmpty(parentType.getFieldDeclarations())) {
-                processField(entity, field);
-            }
-        }
-    }
-
-    /**
-     * Builds an EntityModel from a @Entity-annotated class.
-     * Returns null if the class is not an entity.
-     * Extracts: class name, package, table name, superclass, fields, ID generation, and relationships.
-     */
-    private EntityModel buildEntity(String qname, TypeDeclaration jtype, CompilationUnit cu) {
-        List<String> annotations = orEmpty(jtype.getAnnotations());
-        if (annotations.stream().noneMatch(AnnotationUtils::isEntityAnnotation)) {
-            return null;
-        }
-
-        int dot = qname.lastIndexOf('.');
+    private EntityModel buildEntity(JavaTypeDeclaration jtype) {
         EntityModel entity = new EntityModel();
-        entity.setOriginalFile(cu.getFilePath());
-        entity.setPackageName(dot >= 0 ? qname.substring(0, dot) : "");
-        entity.setClassName(dot >= 0 ? qname.substring(dot + 1) : qname);
-        entity.setExtendsClasses(orEmpty(jtype.getExtendsList()));
-        entity.setImplementsInterfaces(orEmpty(jtype.getImplementsList()));
-        entity.setAnnotations(annotations);
+        entity.setOriginalFile(jtype.sourcePath());
+        entity.setPackageName(jtype.packageName());
+        entity.setClassName(jtype.simpleName());
+        entity.setExtendsClasses(
+                jtype.superclass() != null ? new ArrayList<>(List.of(jtype.superclass())) : new ArrayList<>());
+        entity.setImplementsInterfaces(new ArrayList<>(jtype.interfaces()));
+        entity.setAnnotations(jtype.annotations().stream().map(AnnotationInfo::name).toList());
 
-        applyClassAnnotations(entity, annotations);
+        findAnnotation(jtype.annotations(), "Table")
+                .ifPresent(a -> entity.setTableName(stripQuotes(a.getArgument("name"))));
 
-        List<FieldDeclaration> fields = orEmpty(jtype.getFieldDeclarations());
-        for (FieldDeclaration field : fields) {
-            if (field.getVariables() == null || field.getVariables().isEmpty()) {
-                continue;
-            }
+        for (JavaField field : jtype.fields()) {
             processField(entity, field);
         }
 
         return entity;
     }
 
-    /** Extracts class-level annotation values (e.g., table name from @Table). */
-    private void applyClassAnnotations(EntityModel entity, List<String> annotations) {
-        for (String ann : annotations) {
-            if (ann.contains("@Table")) {
-                entity.setTableName(AnnotationUtils.extractAnnotationField(ann, "name"));
+    private void resolveMappedSuperclass(EntityModel entity, Map<String, JavaTypeDeclaration> allTypes) {
+        for (String superclass : entity.getExtendsClasses()) {
+            JavaTypeDeclaration parentType = allTypes.get(superclass);
+            if (parentType == null) {
+                continue;
+            }
+
+            boolean isMappedSuperclass = parentType.annotations().stream()
+                    .anyMatch(a -> "MappedSuperclass".equals(a.name()));
+            if (!isMappedSuperclass) {
+                continue;
+            }
+
+            for (JavaField field : parentType.fields()) {
+                processField(entity, field);
             }
         }
     }
 
-    /**
-     * Processes a single field declaration: builds a FieldModel (type, column, nullable, unique),
-     * detects @Id with @GeneratedValue for ID generation strategy,
-     * and extracts JPA relationships (@OneToMany, @ManyToOne, etc.) with their attributes.
-     */
-    private void processField(EntityModel entity, FieldDeclaration field) {
-        String fieldName = field.getVariables().get(0);
-        List<String> fa = orEmpty(field.getAnnotations());
+    private void processField(EntityModel entity, JavaField field) {
+        List<AnnotationInfo> annotations = field.annotations();
 
         FieldModel fm = new FieldModel();
-        fm.setName(fieldName);
-        fm.setType(field.getType());
-        fm.setAnnotations(fa);
-        String isNullable = getAnnotationValue(fa, "@Column", "nullable");
-        fm.setNullable(isNullable != null ? "true".equals(isNullable) : null);
-        String isUnique = getAnnotationValue(fa, "@Column", "unique");
-        fm.setUnique(isUnique != null ? "true".equals(isUnique) : null);
-        fm.setColumn(getAnnotationValue(fa, "@Column", "name"));
-        fm.setTransientField(fa.stream().anyMatch(a -> a.contains("@Transient")));
+        fm.setName(field.name());
+        fm.setType(field.typeName());
+        fm.setAnnotations(annotations.stream().map(AnnotationInfo::name).toList());
+
+        findAnnotation(annotations, "Column").ifPresent(col -> {
+            fm.setColumn(stripQuotes(col.getArgument("name")));
+            String nullable = col.getArgument("nullable");
+            fm.setNullable(nullable != null ? "true".equals(nullable) : null);
+            String unique = col.getArgument("unique");
+            fm.setUnique(unique != null ? "true".equals(unique) : null);
+        });
+
+        fm.setTransientField(hasAnnotation(annotations, "Transient"));
         entity.getFields().add(fm);
 
-        if (fa.stream().anyMatch(a -> a.contains("@Id"))) {
-            String strategy = AnnotationUtils.simpleName(
-                    getAnnotationValue(fa, "@GeneratedValue", "strategy"));
-            String generator = getAnnotationValue(fa, "@GeneratedValue", "generator");
+        if (hasAnnotation(annotations, "Id")) {
             IdGenerationModel idGen = new IdGenerationModel();
-            idGen.setStrategy(strategy);
-            idGen.setGenerator(generator);
+            findAnnotation(annotations, "GeneratedValue").ifPresent(gv -> {
+                idGen.setStrategy(simpleName(gv.getArgument("strategy")));
+                idGen.setGenerator(stripQuotes(gv.getArgument("generator")));
+            });
             entity.setIdGeneration(idGen);
         }
 
-        String joinColAnn = fa.stream().filter(a -> a.contains("@JoinColumn")).findFirst().orElse(null);
-        for (String ann : fa) {
-            for (String rel : Arrays.asList("OneToMany", "ManyToOne", "ManyToMany", "OneToOne")) {
-                if (!ann.contains("@" + rel)) {
-                    continue;
-                }
-                String[] normalized = AnnotationUtils.normalizeType(field.getType());
-                String fetch = AnnotationUtils.extractAnnotationField(ann, "fetch");
+        AnnotationInfo joinColumnAnn = findAnnotation(annotations, "JoinColumn").orElse(null);
+        for (String relType : RELATIONSHIP_TYPES) {
+            findAnnotation(annotations, relType).ifPresent(relAnn -> {
+                String[] normalized = normalizeType(field.typeName());
                 RelationshipModel rm = new RelationshipModel();
-                rm.setType(rel);
+                rm.setType(relType);
                 rm.setCollectionType(normalized[0]);
                 rm.setTargetEntity(normalized[1]);
-                rm.setMappedBy(AnnotationUtils.extractAnnotationField(ann, "mappedBy"));
-                rm.setFetch(AnnotationUtils.simpleName(fetch));
-                rm.setCascade(AnnotationUtils.parseCascade(ann));
-                rm.setColumn(joinColAnn != null
-                        ? AnnotationUtils.extractAnnotationField(joinColAnn, "name")
-                        : null);
+                rm.setMappedBy(stripQuotes(relAnn.getArgument("mappedBy")));
+                rm.setFetch(simpleName(relAnn.getArgument("fetch")));
+                rm.setCascade(parseCascade(relAnn.getArgument("cascade")));
+                rm.setColumn(joinColumnAnn != null ? stripQuotes(joinColumnAnn.getArgument("name")) : null);
                 entity.getRelationships().add(rm);
-            }
+            });
         }
     }
 
-    private String getAnnotationValue(List<String> annotations, String target, String key) {
-        for (String ann : annotations) {
-            if (ann.contains(target)) {
-                return AnnotationUtils.extractAnnotationField(ann, key);
-            }
-        }
-        return null;
+    private static Optional<AnnotationInfo> findAnnotation(List<AnnotationInfo> annotations, String name) {
+        return annotations.stream().filter(a -> name.equals(a.name())).findFirst();
     }
 
-    private static <T> List<T> orEmpty(List<T> list) {
-        return list != null ? list : new ArrayList<>();
+    private static boolean hasAnnotation(List<AnnotationInfo> annotations, String name) {
+        return annotations.stream().anyMatch(a -> name.equals(a.name()));
+    }
+
+    private static String stripQuotes(String value) {
+        if (value == null) {
+            return null;
+        }
+        if (value.startsWith("\"") && value.endsWith("\"") && value.length() >= 2) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
+    }
+
+    private static String simpleName(String s) {
+        if (s == null) {
+            return null;
+        }
+        int dot = s.lastIndexOf('.');
+        return dot >= 0 ? s.substring(dot + 1) : s;
+    }
+
+    static String[] normalizeType(String typeStr) {
+        if (typeStr != null && typeStr.contains("<") && typeStr.contains(">")) {
+            int lt = typeStr.indexOf('<');
+            int gt = typeStr.indexOf('>');
+            String collection = typeStr.substring(0, lt);
+            if (collection.contains(".")) {
+                collection = collection.substring(collection.lastIndexOf('.') + 1);
+            }
+            String inner = typeStr.substring(lt + 1, gt);
+            return new String[] { collection, inner };
+        }
+        return new String[] { null, typeStr };
+    }
+
+    static List<String> parseCascade(String cascade) {
+        if (cascade == null) {
+            return null;
+        }
+        cascade = cascade.replace("{", "").replace("}", "");
+        List<String> result = new ArrayList<>();
+        for (String c : cascade.split(",")) {
+            String trimmed = c.trim();
+            int dot = trimmed.lastIndexOf('.');
+            result.add(dot >= 0 ? trimmed.substring(dot + 1) : trimmed);
+        }
+        return result;
     }
 }

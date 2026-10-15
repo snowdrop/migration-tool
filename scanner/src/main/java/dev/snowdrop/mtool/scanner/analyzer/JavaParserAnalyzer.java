@@ -5,6 +5,9 @@ import dev.snowdrop.mtool.model.codeanalysis.AnalysisResult;
 import dev.snowdrop.mtool.model.codeanalysis.CompilationUnit;
 import dev.snowdrop.mtool.model.codeanalysis.FieldDeclaration;
 import dev.snowdrop.mtool.model.codeanalysis.TypeDeclaration;
+import dev.snowdrop.mtool.model.java.JavaSource;
+import dev.snowdrop.mtool.model.java.JavaTypeDeclaration;
+import dev.snowdrop.mtool.scanner.javaparser.index.JavaParserTypeExtractor;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
@@ -122,6 +125,26 @@ public class JavaParserAnalyzer implements JavaAnalyzer {
         }
 
         return fields;
+    }
+
+    @Override
+    public List<JavaTypeDeclaration> extractTypes(Path projectPath) {
+        List<Path> javaFiles = findJavaFiles(projectPath);
+        List<JavaTypeDeclaration> allTypes = new ArrayList<>();
+
+        for (Path file : javaFiles) {
+            try {
+                String source = Files.readString(file);
+                JavaSource javaSource = new JavaSource(file.toString(), source);
+                allTypes.addAll(JavaParserTypeExtractor.extract(javaSource));
+            } catch (IOException e) {
+                logger.warnf("Failed to read file %s: %s", file, e.getMessage());
+            } catch (Exception e) {
+                logger.warnf("Failed to parse file %s: %s", file, e.getMessage());
+            }
+        }
+
+        return allTypes;
     }
 
     @Override
