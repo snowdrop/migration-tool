@@ -15,7 +15,7 @@ import org.jboss.logging.Logger;
 
 public class AnalyzeTools {
 
-    private static final Logger LOG = Logger.getLogger(AnalyseTools.class);
+    private static final Logger LOG = Logger.getLogger(AnalyzeTools.class);
 
     @Tool(description = "Analyze the source to discover the java classes, annotations, properties, etc files. "
             + "Accepts multiple queries separated by semicolons, e.g. 'java class all;java annotation all'")
