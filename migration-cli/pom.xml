@@ -56,7 +56,7 @@
         <!-- Quarkus -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-picocli</artifactId>
+            <artifactId>quarkus-aesh</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>

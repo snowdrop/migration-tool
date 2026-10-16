@@ -7,26 +7,15 @@ import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.*;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFile;
-import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFolder;
+import static dev.snowdrop.mtool.parser.rule.YamlRuleParser.parseRulesFromFile;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MatchServiceCookBookTest extends BaseRulesTest {

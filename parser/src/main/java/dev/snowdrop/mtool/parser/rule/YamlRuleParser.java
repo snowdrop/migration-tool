@@ -1,4 +1,4 @@
-package dev.snowdrop.mtool.analyze.utils;
+package dev.snowdrop.mtool.parser.rule;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

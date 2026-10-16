@@ -23,7 +23,7 @@ The project has been designed using the following technologies:
 
 ### Framework & Client
 
-- [Quarkus](https://github.com/quarkusio/quarkus) and [Picocli](https://github.com/remkop/picocli) to manage the CLI part and commands (module: `migration-cli`)
+- [Quarkus](https://github.com/quarkusio/quarkus) and [Aesh](https://github.com/aeshell/aesh) to manage the CLI part and commands (module: `migration-cli`)
 
 ### AI
 

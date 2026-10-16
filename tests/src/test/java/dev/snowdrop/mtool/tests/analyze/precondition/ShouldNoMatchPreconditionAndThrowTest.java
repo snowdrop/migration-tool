@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFile;
+import static dev.snowdrop.mtool.parser.rule.YamlRuleParser.parseRulesFromFile;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ShouldNoMatchPreconditionAndThrowTest extends BaseRulesTest {

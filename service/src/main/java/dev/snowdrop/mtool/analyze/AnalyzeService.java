@@ -1,4 +1,4 @@
-package dev.snowdrop.mtool.analyze.services;
+package dev.snowdrop.mtool.analyze;
 
 import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.analyze.Result;
