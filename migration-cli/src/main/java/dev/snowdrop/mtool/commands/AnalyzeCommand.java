@@ -36,7 +36,7 @@ public class AnalyzeCommand implements Command<CommandInvocation> {
     @Argument(description = "Path to the Java project to analyze", required = true)
     public String appPath;
 
-    @Option(shortName = 'r', name = "rules", description = "Path to rules directory (default: from config)")
+    @Option(shortName = 'r', name = "rules", description = "Path to rules directory (default: ./cookbook/rules)")
     public String rulesPath;
 
     @Option(shortName = 's', name = "source", description = "Source technology to consider for analysis")
