@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>scanner</artifactId>
+    <description>Scanners scanning, analyzing or transforming code source</description>
     <name>Migration Tool :: Scanner</name>
 
     <properties>

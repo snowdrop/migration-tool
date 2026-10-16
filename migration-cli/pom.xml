@@ -12,8 +12,6 @@
     <artifactId>migration-cli</artifactId>
     <description>Quarkus CLI tool to migrate Java applications</description>
     <name>Migration Tool :: Client</name>
-    <inceptionYear>2025</inceptionYear>
-    <url>https://github.com/snowdrop/migration-tool</url>
 
     <properties>
         <jreleaser.version>1.26.0</jreleaser.version>

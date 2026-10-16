@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>tests</artifactId>
+    <description>Project tests</description>
     <name>Migration tool :: Tests</name>
 
     <dependencies>

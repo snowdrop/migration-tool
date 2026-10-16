@@ -78,7 +78,7 @@ jobs:
 
       - name: Deploy the maven GAV on central
         run: |
-          mvn -B deploy -Prelease -DskipTests
+          mvn -B clean deploy -Prelease -DskipTests
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}

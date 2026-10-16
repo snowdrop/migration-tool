@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>parser</artifactId>
+    <description>Antlr - Query parser</description>
     <name>Migration Tool :: Query parser</name>
 
     <properties>

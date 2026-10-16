@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>model</artifactId>
+    <description>Java model classes used by the scanners or parsers</description>
     <name>Migration Tool :: Model</name>
 
     <properties>

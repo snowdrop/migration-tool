@@ -7,7 +7,7 @@ project:
   # authors: [ "snowdrop" ]
   # license: Apache-2.0
   links:
-    homepage: https://github.com/snowdrop/rewrite-client
+    homepage: https://github.com/snowdrop/migration-tool
 
 release:
   github:
