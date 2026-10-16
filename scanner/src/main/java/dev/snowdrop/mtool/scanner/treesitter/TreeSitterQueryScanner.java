@@ -1,5 +1,6 @@
 package dev.snowdrop.mtool.scanner.treesitter;
 
+import dev.snowdrop.mtool.model.analyze.AnnotationInfo;
 import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.analyze.Result;
 import dev.snowdrop.mtool.model.parser.Query;
@@ -19,7 +20,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -30,8 +33,8 @@ public class TreeSitterQueryScanner implements QueryScanner {
     private static final String SCANNER_TYPE = "treesitter";
 
     private static final String JAVA_ALL_ANNOTATION_QUERY = """
-            (marker_annotation name: (identifier) @annotation_name)
-            (annotation name: (identifier) @annotation_name)
+            (marker_annotation) @annotation_name
+            (annotation) @annotation_name
             """;
 
     private static final String JAVA_ALL_IMPORT_QUERY = """
@@ -137,8 +140,12 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
                 try (TreeSitterTree tree = parser.parseString(source)) {
                     List<TreeSitterQueryResult> results = tsQuery.exec(tree.rootNode(), source);
-                    matches.addAll(generateMatchesFromResults(results, query, source.getBytes(StandardCharsets.UTF_8),
-                            config.appPath(), javaFile));
+                    if ("annotation".equals(query.symbol())) {
+                        matches.addAll(generateAnnotationMatches(results, query, source, config.appPath(), javaFile));
+                    } else {
+                        matches.addAll(generateMatchesFromResults(results, query, source.getBytes(StandardCharsets.UTF_8),
+                                config.appPath(), javaFile));
+                    }
                 }
             }
         } catch (IOException e) {
@@ -151,14 +158,15 @@ public class TreeSitterQueryScanner implements QueryScanner {
 
     private List<Result> scanPomDependencies(Config config, Query query) {
         String gavs = query.keyValues().get("gavs");
-        if (gavs == null) {
-            logger.warn("No 'gavs' key provided for pom.dependency query");
-            return List.of();
-        }
+        String targetGroupId = null;
+        String targetArtifactId = null;
+        boolean matchAll = (gavs == null || gavs.isBlank());
 
-        String[] gavParts = gavs.split(":");
-        String targetGroupId = gavParts.length > 0 ? gavParts[0] : null;
-        String targetArtifactId = gavParts.length > 1 ? gavParts[1] : null;
+        if (!matchAll) {
+            String[] gavParts = gavs.split(":");
+            targetGroupId = gavParts.length > 0 ? gavParts[0] : null;
+            targetArtifactId = gavParts.length > 1 ? gavParts[1] : null;
+        }
 
         List<Result> matches = new ArrayList<>();
         List<Path> pomFiles = findFiles(Paths.get(config.appPath()), "glob:**/pom.xml");
@@ -187,8 +195,9 @@ public class TreeSitterQueryScanner implements QueryScanner {
                                 currentArtifactId = source.substring(
                                         result.node().startByte(), result.node().endByte()).trim();
 
-                                if (matchesGav(currentGroupId, currentArtifactId, targetGroupId, targetArtifactId)
-                                        && blockNode != null) {
+                                if (blockNode != null
+                                        && (matchAll || matchesGav(currentGroupId, currentArtifactId, targetGroupId,
+                                                targetArtifactId))) {
                                     int line = blockNode.startRow() + 1;
                                     String relativePath = Paths.get(config.appPath()).relativize(pomFile).toString();
                                     String formatted = String.format("%s:%d | %s:%s",
@@ -211,7 +220,7 @@ public class TreeSitterQueryScanner implements QueryScanner {
             logger.errorf("Error scanning POM files for dependencies: %s", e.getMessage());
         }
 
-        logger.infof("Found %d dependency matches for '%s'", matches.size(), gavs);
+        logger.infof("Found %d dependency matches for '%s'", matches.size(), matchAll ? "all" : gavs);
         return matches;
     }
 
@@ -224,6 +233,51 @@ public class TreeSitterQueryScanner implements QueryScanner {
             return groupMatch;
         }
         return groupMatch && targetArtifactId.equals(artifactId);
+    }
+
+    private List<Result> generateAnnotationMatches(List<TreeSitterQueryResult> results, Query query, String source,
+            String appPath, Path filePath) {
+        List<Result> matches = new ArrayList<>();
+        String relativePath = Paths.get(appPath).relativize(filePath).toString();
+
+        for (TreeSitterQueryResult result : results) {
+            AnnotationInfo info = parseAnnotationNode(result.node(), source, relativePath);
+            matches.add(new Result(
+                    query.fileType() + "-" + query.symbol(),
+                    SCANNER_TYPE,
+                    info));
+        }
+        return matches;
+    }
+
+    private AnnotationInfo parseAnnotationNode(TreeSitterNode node, String source, String filePath) {
+        String annotationName = "";
+        Map<String, String> arguments = new LinkedHashMap<>();
+
+        for (int i = 0; i < node.namedChildCount(); i++) {
+            TreeSitterNode child = node.namedChild(i);
+            if ("identifier".equals(child.type())) {
+                annotationName = child.text(source);
+            } else if ("annotation_argument_list".equals(child.type())) {
+                extractArguments(child, source, arguments);
+            }
+        }
+
+        return new AnnotationInfo(annotationName, arguments, filePath,
+                node.startRow() + 1, node.startColumn() + 1);
+    }
+
+    private void extractArguments(TreeSitterNode argListNode, String source, Map<String, String> arguments) {
+        for (int i = 0; i < argListNode.namedChildCount(); i++) {
+            TreeSitterNode child = argListNode.namedChild(i);
+            if ("element_value_pair".equals(child.type()) && child.namedChildCount() >= 2) {
+                String key = child.namedChild(0).text(source);
+                String value = child.namedChild(1).text(source);
+                arguments.put(key, value);
+            } else if (!"element_value_pair".equals(child.type())) {
+                arguments.put("value", child.text(source));
+            }
+        }
     }
 
     private List<Result> generateMatchesFromResults(List<TreeSitterQueryResult> results, Query query, byte[] sourceBytes,

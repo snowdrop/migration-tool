@@ -26,13 +26,14 @@
         <google-auth-library-oauth2-http.version>1.54.0</google-auth-library-oauth2-http.version>
         <jackson.version>2.18.0</jackson.version>
         <langchain4j-vertex-ai-anthropic.version>1.22.0-beta32</langchain4j-vertex-ai-anthropic.version>
-        <langchain4j-anthropic.version>1.18.1</langchain4j-anthropic.version>
         <lombok.version>1.18.48</lombok.version>
+        <langchain4j-anthropic.version>1.22.0</langchain4j-anthropic.version>
         <org.eclipse.lsp4j.version>0.24.0</org.eclipse.lsp4j.version>
         <openrewrite-recipe-bom.version>3.36.0</openrewrite-recipe-bom.version>
         <opencsv.version>5.12.0</opencsv.version>
         <quarkus-langchain4j-testing-internal.version>0.20.3</quarkus-langchain4j-testing-internal.version>
         <quarkus-langchain4j.version>1.14.1</quarkus-langchain4j.version>
+        <quarkus-mcp-server.version>2.0.2</quarkus-mcp-server.version>
         <quarkus.platform.version>3.40.1</quarkus.platform.version>
         <quarkus-wiremock.version>1.6.3</quarkus-wiremock.version>
         <rewrite-client.version>0.3.4</rewrite-client.version>
@@ -43,7 +44,7 @@
         <maven-formatter-plugin.version>2.29.0</maven-formatter-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
-        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+        <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
         <maven-jreleaser-plugin.version>1.26.0</maven-jreleaser-plugin.version>
         <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
@@ -60,8 +61,10 @@
         <module>model</module>
         <module>parser</module>
         <module>scanner</module>
+        <module>service</module>
         <module>migration-cli</module>
         <module>tests</module>
+        <module>mcp</module>
     </modules>
 
     <developers>
@@ -95,6 +98,14 @@
             <dependency>
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>${quarkus.platform.artifact-id}</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.quarkus.platform</groupId>
+                <artifactId>quarkus-mcp-server-bom</artifactId>
                 <version>${quarkus.platform.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
