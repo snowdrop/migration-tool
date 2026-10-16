@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dev.snowdrop.mtool</groupId>
     <artifactId>migration-tool-parent</artifactId>
-    <version>1.0.7-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Migration Tool :: Parent</name>
     <description>Migration Tool - Parent project</description>

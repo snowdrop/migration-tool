@@ -46,10 +46,10 @@ The MCP server restricts tool access to a set of allowed directories, following 
 
 ```shell
 // Restrict to only the applications directory
---mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dmtool.allowed-dirs=./applications", "-jar", "./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar"]}'
+--mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dmtool.allowed-dirs=./applications", "-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}'
 
 // Allow access to multiple directories
---mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dmtool.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar"]}'
+--mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dmtool.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}'
 ```
 
 ## stdio
@@ -61,7 +61,7 @@ The MCP server restricts tool access to a set of allowed directories, following 
 acp run \
   -a claude-acp \
   --backup no \
-  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar"]}' \
+  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}' \
   -p "The Project path of the code to analyze using the MCP tool: sourceAnalyze is: ./applications/spring-boot-todo-app"
 ```
 
@@ -72,7 +72,7 @@ acp run \
   -a claude-acp \
   --backup no \
   -s ./mcp/skills/validate/SKILLS.md \
-  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar"]}' \
+  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}' \
   -p "Validate the migration of the spring project: ./applications/spring-jpa-crud against the quarkus project: ./applications/spring-jpa-crud-quarkus. Only run the validator: persistence"
 ```
 
@@ -86,7 +86,7 @@ acp run \
   -a claude-acp \
   --backup no \
   -s ./mcp/skills/analyze/SKILLS.md \
-  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar"]}' \
+  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}' \
   -p "Analyze the application: ./applications/quarkus-todo-demo-app"
 ```
 
@@ -98,6 +98,6 @@ acp run \
   -a bob \
   --backup no \
   -s ./mcp/skills/analyze/SKILLS.md \
-  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar"]}' \
+  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}' \
   -p "Analyze the application: ./applications/quarkus-todo-demo-app"
 ```

@@ -155,7 +155,7 @@ class RulesTest extends BaseRulesTest {
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
                 null, // recipeList (aquí podrías añadir los recipes si los necesitas)
-                new String[] { "dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
+                new String[] { "dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT",
                         "org.openrewrite:rewrite-maven:8.73.0" }) };
 
         Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
@@ -192,7 +192,7 @@ class RulesTest extends BaseRulesTest {
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
                 null, // recipeList (aquí podrías añadir los recipes si los necesitas)
-                new String[] { "dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
+                new String[] { "dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT",
                         "org.openrewrite:rewrite-maven:8.73.0" }) };
 
         Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
@@ -230,7 +230,7 @@ class RulesTest extends BaseRulesTest {
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
                 null, // recipeList (aquí podrías añadir los recipes si los necesitas)
-                new String[] { "dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
+                new String[] { "dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT",
                         "org.openrewrite:rewrite-maven:8.73.0" }) };
 
         Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
@@ -273,7 +273,7 @@ class RulesTest extends BaseRulesTest {
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
                 null, // recipeList (aquí podrías añadir los recipes si los necesitas)
-                new String[] { "dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT",
+                new String[] { "dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT",
                         "org.openrewrite:rewrite-maven:8.73.0" }) };
 
         Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,

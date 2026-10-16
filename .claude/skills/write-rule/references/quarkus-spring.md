@@ -67,6 +67,6 @@ Standard OpenRewrite:
 - `org.openrewrite.recipe:rewrite-spring-to-quarkus:0.3.1`
 
 Custom mtool:
-- `dev.snowdrop.mtool:openrewrite-recipes:1.0.7-SNAPSHOT`
+- `dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT`
 
 ## Next available file number: 060

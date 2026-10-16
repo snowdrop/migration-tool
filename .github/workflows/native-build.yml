@@ -90,7 +90,7 @@ jobs:
       #  if: runner.os == 'macOS'
       #  run: |
       #    # Sign the native binary
-      #    BINARY_PATH="migration-cli/target/migration-cli-1.0.0-SNAPSHOT-runner"
+      #    BINARY_PATH="migration-cli/target/migration-cli-2.0.0-SNAPSHOT-runner"
       #    if [ -f "$BINARY_PATH" ]; then
       #      echo "Signing binary: $BINARY_PATH"
       #      # List available certificates for debugging
