@@ -17,7 +17,6 @@ on:
         default: 'openrewrite'
         type: choice
         options:
-          - jdtls
           - openrewrite
 
 jobs:
@@ -45,52 +44,18 @@ jobs:
           echo "Install the runner application using jbang"
           jbang app install --name mtool migration-cli/target/migration-cli-*-runner.jar
 
-      - name: Install konveyor jdt-ls
-        if: ${{ inputs.analysis_tool == 'jdtls' || github.event_name != 'workflow_dispatch' }}
-        run: |
-          export VERSION=latest
-          ID=$(docker create --name kantra-download quay.io/konveyor/kantra:$VERSION)
-          mkdir -p ./jdt
-          docker cp $ID:/jdtls ./jdt/konveyor-jdtls
-          docker rm $ID
-
       - name: Run analysis
         run: |
           echo "🔍 Starting scanner analysis..."
 
-          # Determine analysis tool to use
-          if [[ "${{ inputs.analysis_tool }}" == "openrewrite" ]]; then
-            SCANNER="openrewrite"
-            REPORT_PATTERN="*analysing-openrewrite-report*"
-          else
-            SCANNER="jdtls"
-            REPORT_PATTERN="*analysing-jdtls-report*"
-          fi
-
-          # For non-workflow_dispatch events, default to openrewrite
-          if [[ "${{ github.event_name }}" != "workflow_dispatch" ]]; then
-            SCANNER="openrewrite"
-            REPORT_PATTERN="*analysing-openrewrite-report*"
-          fi
-
+          SCANNER="openrewrite"
           echo "Using scanner: $SCANNER"
 
-          # Set environment variables for the analysis
           export ANALYZER_RULES_PATH="$(pwd)/cookbook/rules/quarkus-spring"
 
-          # Set JDT-LS specific environment variables only if using jdtls
-          if [[ "$SCANNER" == "jdtls" ]]; then
-            export ANALYZER_JDT_LS_PATH="$(pwd)/jdt/konveyor-jdtls"
-            export ANALYZER_JDT_WORKSPACE_PATH="$(pwd)/jdt"
-            # Create jdt workspace directory if it doesn't exist
-            mkdir -p ./jdt
-          fi
-
-          # Run analysis using the uber jar
-          timeout 300 mtool analyze ./applications/spring-boot-todo-app -r $ANALYZER_RULES_PATH --scanner $SCANNER|| {
-            echo "❌ $SCANNER analysis failed or timed out"
-            echo "Checking for any generated files..."
-            find ./applications/spring-boot-todo-app -name "$REPORT_PATTERN" -type f 2>/dev/null || true
+          timeout 300 mtool analyze ./applications/spring-boot-todo-app -r $ANALYZER_RULES_PATH --scanner $SCANNER || {
+            echo "❌ Analysis failed or timed out"
+            find ./applications/spring-boot-todo-app -name "*analysing-openrewrite-report*" -type f 2>/dev/null || true
             exit 1
           }
 

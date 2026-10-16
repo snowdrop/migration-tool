@@ -42,16 +42,6 @@ public class AnalyzeCommand implements Runnable {
             "--target" }, description = "Target technology to consider for analysis")
     public String target;
 
-    @Deprecated(since = "1.0.7", forRemoval = true)
-    @CommandLine.Option(names = {
-            "--jdt-ls-path" }, description = "Path to JDT-LS installation (deprecated)", required = false, hidden = true)
-    public String jdtLsPath;
-
-    @Deprecated(since = "1.0.7", forRemoval = true)
-    @CommandLine.Option(names = {
-            "--jdt-workspace" }, description = "Path to JDT workspace directory (deprecated)", required = false, hidden = true)
-    public String jdtWorkspace;
-
     @CommandLine.Option(names = { "-v",
             "--verbose" }, description = "Enable verbose output")
     public boolean verbose;
@@ -61,7 +51,7 @@ public class AnalyzeCommand implements Runnable {
     private String output;
 
     @CommandLine.Option(names = {
-            "--scanner" }, description = "Scanner tool to be used to analyse the code: openrewrite (default), jdtls (deprecated)", defaultValue = "openrewrite")
+            "--scanner" }, description = "Scanner tool to be used to analyse the code: openrewrite (default)", defaultValue = "openrewrite")
     public String scanner;
 
     @Override
@@ -110,30 +100,12 @@ public class AnalyzeCommand implements Runnable {
                 .orElseThrow(
                         () -> new RuntimeException("Target technology for migration is required but not configured"));
 
-        if ("jdtls".equalsIgnoreCase(scanner)) {
-            logger.warnf(
-                    "The JDTLS scanner is deprecated and will be removed in a future release. Use '--scanner openrewrite' instead.");
-        }
-
-        String jdtLsPathString = Optional.ofNullable(jdtLsPath)
-                .or(() -> ConfigProvider.getConfig().getOptionalValue("analyzer.jdt-ls-path", String.class))
-                .map(p -> resolvePath(p).toString())
-                .orElse(null);
-
-        String jdtWksString = Optional.ofNullable(jdtWorkspace)
-                .or(() -> ConfigProvider.getConfig().getOptionalValue("analyzer.jdt-workspace-path", String.class))
-                .map(p -> resolvePath(p).toString())
-                .orElse(null);
-
-        String lsCmd = ConfigProvider.getConfig().getOptionalValue("analyzer.jdt-ls-command", String.class)
-                .orElse(null);
-
         String openRewriteMavenPluginVersion = Optional
                 .ofNullable(ConfigProvider.getConfig().getValue("openrewrite.maven-plugin.version", String.class))
                 .orElseThrow(() -> new RuntimeException("Openrewrite maven plugin version not define"));
 
-        Config config = new Config(appPathString, resolvedRulesPath, sourceTechnology, targetTechnology, jdtLsPathString,
-                jdtWksString, lsCmd, verbose, output, scanner, openRewriteMavenPluginVersion);
+        Config config = new Config(appPathString, resolvedRulesPath, sourceTechnology, targetTechnology,
+                verbose, output, scanner, openRewriteMavenPluginVersion);
 
         logger.infof("Application path: %s", appPath);
         logger.infof("Source technology: %s", sourceTechnology);

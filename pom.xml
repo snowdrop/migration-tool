@@ -28,7 +28,6 @@
         <langchain4j-vertex-ai-anthropic.version>1.22.0-beta32</langchain4j-vertex-ai-anthropic.version>
         <langchain4j-anthropic.version>1.18.1</langchain4j-anthropic.version>
         <lombok.version>1.18.46</lombok.version>
-        <org.eclipse.lsp4j.version>0.24.0</org.eclipse.lsp4j.version>
         <openrewrite-recipe-bom.version>3.36.0</openrewrite-recipe-bom.version>
         <opencsv.version>5.12.0</opencsv.version>
         <quarkus-langchain4j-testing-internal.version>0.20.3</quarkus-langchain4j-testing-internal.version>
@@ -131,18 +130,6 @@
                 <groupId>io.roastedroot</groupId>
                 <artifactId>treesitter4j</artifactId>
                 <version>0.0.3</version>
-            </dependency>
-
-            <!-- lsp4j -->
-            <dependency>
-                <groupId>org.eclipse.lsp4j</groupId>
-                <artifactId>org.eclipse.lsp4j</artifactId>
-                <version>${org.eclipse.lsp4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.lsp4j</groupId>
-                <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
-                <version>${org.eclipse.lsp4j.version}</version>
             </dependency>
 
             <!-- ASCII Table for better table formatting -->

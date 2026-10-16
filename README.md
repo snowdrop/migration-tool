@@ -234,27 +234,6 @@ Otherwise, if you plan to contribute to the project, git clone and compile it
 mvn clean install -DskipTests
 ```
 
-## Konveyor jdt-ls (deprecated)
-
-> [!WARNING]
-> The JDTLS scanner is **deprecated since 1.0.7** and will be removed in a future release. Use `--scanner openrewrite` instead.
-
-<details>
-<summary>Legacy instructions (click to expand)</summary>
-
-Download the [konveyor language server](https://github.com/konveyor/java-analyzer-bundle) using the image packaging it:
-```shell
-set VERSION latest
-
-set ID $(podman create --name kantra-download quay.io/konveyor/kantra:$VERSION)
-podman cp $ID:/jdtls ./jdt/konveyor-jdtls
-```
-
-> [!NOTE]
-> If you're using bash and not fishell, remember to export the environment variables too!
-
-</details>
-
 ## mtool client's commands
 
 Our Migration Tool client (aka mtool) proposes 2 commands: 
@@ -294,7 +273,7 @@ Analyze a project for migration
   -r, --rules=<rulesPath>   Path to rules directory (default: from config)
   -s, --source=<source>     Source technology to consider for analysis
       --scanner=<scanner>   Scanner tool to be used to analyse the code:
-                              openrewrite (default), jdtls (deprecated)
+                              openrewrite (default)
   -t, --target=<target>     Target technology to consider for analysis
   -v, --verbose             Enable verbose output
 ```
@@ -348,7 +327,7 @@ java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication
 pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')
 ```
 
-You can also combine different queries defined part of yaml file that we call a plan
+You can also combine different queries defined part of YAML file that we call a plan
 
 ```shell
 mtool scan <appPath> --plan <planPath>/java-app.yml --scanner treesitter
@@ -513,9 +492,6 @@ The `analyze` or `transform` commands can be executed using the quarkus uber jar
 ```properties
 # .env file content
 ANALYZER_RULES_PATH=cookbook/rules
-# Deprecated since 1.0.7:
-# ANALYZER_JDT_LS_PATH=jdt/konveyor-jdtls
-# ANALYZER_JDT_WORKSPACE_PATH=jdt
 ```
 Next source it and execute the following java commands within or outside the project to analyze/transform:
 
@@ -542,7 +518,7 @@ mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
 ```
 When done, open the diff patch generated: `/PATH/TO/spring-boot-todo-app/target/rewrite/rewrite.patch`
 
-To execute several recipes aggregated in a yaml file placed at the root of the project, execute this command:
+To execute several recipes aggregated in a YAML file placed at the root of the project, execute this command:
 ```shell
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
   -Drewrite.activeRecipes=dev.snowdrop.text.SearchText,dev.snowdrop.java.StandardJavaConventions,dev.snowdrop.java.spring.SearchSpringBootAnnotation \
@@ -567,61 +543,3 @@ mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
   -Drewrite.exportDatatables=true \
   -Drewrite.configLocation=my-rewrite-2.yml
 ```
-
-## TODO
-
-| Task   | Status | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Comment |
-|--------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
-| MT-001 |        | Check what [spring-migrator-tool](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-support-boot/src/main/resources/recipes/initialize-spring-boot-migration.yaml) did to reuse some ideas to configure the instructions using `Actions` able to configure the recipe. The [action](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-core/src/main/java/org/springframework/sbm/build/migration/actions/AddMavenDependencyManagementAction.java)'s definition is used as input to apply the corresponding openrewrite's [recipe](https://github.com/spring-projects-experimental/spring-boot-migrator/blob/main/components/sbm-core/src/main/java/org/springframework/sbm/build/impl/OpenRewriteMavenBuildFile.java#L376). |         |
-| MT-002 |        | Investigate if the language server could be replaced using Openrewrite concepts such as: [searchResult](https://docs.openrewrite.org/concepts-and-explanations/markers#searchresult)'s marker, [DataTable](https://docs.openrewrite.org/authoring-recipes/data-tables#writing-a-recipe-that-produces-a-data-table) or [Scanning recipe](https://docs.openrewrite.org/concepts-and-explanations/recipes#scanning-recipes)                                                                                                                                                                                                                                                                                                                                                                                            |         |
-| MT-003 |        | Discuss and define the level of granularity between what the rule targets to do and the steps/actions that the provider will support. Such a granularity can start with a `1` to `1` relation to a `1` to `many` but where the `many` is executed as a composite component or pipeline: https://docs.openrewrite.org/concepts-and-explanations/recipes#recipe-execution-pipeline, https://docs.openrewrite.org/concepts-and-explanations/recipes#scanning-recipes                                                                                                                                                                                                                                                                                                                                                   |         |
-| MT-004 |        | What about creating a migration plan like this one: https://docs.openrewrite.org/recipes/java/migrate/search/planjavamigration ?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |         |
-| MT-005 |        | Do we have to integrate a workflow engine part of the solution to externalize the sequential approach of the openrewrite framework within a separate engine ?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |         |
-
-
-## Deprecated (JDTLS — since 1.0.7)
-
-> [!WARNING]
-> The entire JDTLS scanner subsystem is deprecated since 1.0.7 and will be removed in a future release. Use `--scanner openrewrite` instead.
-
-<details>
-<summary>Legacy JDTLS instructions (click to expand)</summary>
-
-### Start using the JdtlsFactory Main application
-
-Before to run the server and client, configure the following system properties or override the Quarkus properties[application.properties](src/main/resources/application.properties):
-- `JDT_WKS`: Path of the folder containing the jdt-ls workspace, .metadata and log. Default: `./jdt/`
-- `JDT_LS_PATH`: Path of the jdt language server folder. Default: `./jdt/konveyor-jdtls`
-- `LS_CMD`: Language server command to be executed. Default: `io.konveyor.tackle.ruleEntry`, etc
-- `APP_PATH`: Path of the java project to analyze. Default: `./applications/spring-boot-todo-app`
-- `RULES_PATH`: Path of the rules. Default: `./rules`
-
-```shell
-mvn exec:java
-```
-
-### Trick to path the eclipse osgi server
-
-Here is the trick to do to add a bundle to the OSGI jdt-ls server. This step is optional as we will pass the bundle path as initialization parameter to the language server !
-
-Edit the `config.ini` file corresponding to your architecture: mac, linux, mac_arm under the folder konveyor-jdtls/config_<ARCH>
-
-Modify within the config.ini file the `osgi.bundles` property and include after the `org.apache.commons.lang3...` jar the BundleSymbolicName of: java-analyzer-bundle.core-2.0.0-SNAPSHOT.jar
-```text
-osgi.bundles=...org.apache.commons.lang3_3.14.0.jar@4,reference\:file\:java-analyzer-bundle.core-2.0.0-SNAPSHOT.jar@2,...
-```
-
-Copy the java-analyzer-bundle.core-2.0.0-SNAPSHOT.jar file from the path `konveyor-jdtls/java-analyzer-bundle/java-analyzer-bundle.core/target/` to the `plugins` folder
-
-### Download jdt-ls
-
-Alternatively, you can also download the [Eclipse JDT Language Server](https://github.com/eclipse-jdtls/eclipse.jdt.ls):
-
-```shell
-wget https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.50.0/jdt-language-server-1.50.0-202509041425.tar.gz > jdt-language-server-1.50.0.tar.gz
-mkdir jdt-ls
-tar -vxf jdt-language-server-1.50.0.tar.gz -C jdt-ls
-```
-
-</details>
-

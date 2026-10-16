@@ -15,7 +15,6 @@ import dev.snowdrop.mtool.analyze.utils.TerminalUtils;
 import dev.snowdrop.mtool.model.transform.MigrationTasksExport;
 import dev.snowdrop.mtool.model.transform.ScanResultsExport;
 import io.quarkus.qute.*;
-import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -268,11 +267,6 @@ public class ResultsService {
     private static String formatResultEntry(Result result) {
 
         switch (result.scannerType()) {
-            case "jdtls":
-                var symbolInformations = (ArrayList<SymbolInformation>) result.result();
-                var symbolDetails = formatSymbolInformation(symbolInformations.get(0));
-                symbolDetails.append("\n").append(symbolInformations.get(0).getLocation().getUri());
-                return symbolDetails.toString();
             case "openrewrite":
                 return formatRewrite(result);
             case "maven", "file-search", "treesitter":
@@ -304,14 +298,6 @@ public class ResultsService {
         String matchResult = (String) result.result();
         String[] parts = matchResult.split("\\|");
         return String.format("Find '%s' in file: %s using the recipe: \"%s\"", parts[1], parts[0], parts[2]);
-    }
-
-    private static StringBuilder formatSymbolInformation(SymbolInformation si) {
-        var formatStr = String.format("Found %s at line %s, char: %s - %s", si.getName(),
-                si.getLocation().getRange().getStart().getLine() + 1,
-                si.getLocation().getRange().getStart().getCharacter(),
-                si.getLocation().getRange().getEnd().getCharacter());
-        return new StringBuilder(formatStr);
     }
 
     public void exportAsJson(Config config, Map<String, MigrationTask> tasks) {

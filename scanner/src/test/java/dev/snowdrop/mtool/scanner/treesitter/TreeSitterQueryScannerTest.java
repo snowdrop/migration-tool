@@ -59,7 +59,7 @@ class TreeSitterQueryScannerTest {
                 }
                 """);
 
-        Config config = new Config(tempDir.toString(), null, null, null, null, null, null, false, null, "treesitter", null);
+        Config config = new Config(tempDir.toString(), null, null, null, false, null, "treesitter", null);
         Query query = new Query("java", "annotation", "", Map.of("name", "jakarta.ws.rs.Path"));
 
         List<Result> matches = scanner.scansCodeFor(config, query);
@@ -81,7 +81,7 @@ class TreeSitterQueryScannerTest {
                 }
                 """);
 
-        Config config = new Config(tempDir.toString(), null, null, null, null, null, null, false, null, "treesitter", null);
+        Config config = new Config(tempDir.toString(), null, null, null, false, null, "treesitter", null);
         Query query = new Query("java", "class", "", Map.of("name", "TaskController"));
 
         List<Result> matches = scanner.scansCodeFor(config, query);
@@ -108,7 +108,7 @@ class TreeSitterQueryScannerTest {
                 </project>
                 """);
 
-        Config config = new Config(tempDir.toString(), null, null, null, null, null, null, false, null, "treesitter", null);
+        Config config = new Config(tempDir.toString(), null, null, null, false, null, "treesitter", null);
         Query query = new Query("pom", "dependency", "",
                 Map.of("gavs", "org.springframework.boot:spring-boot-starter-web"));
 

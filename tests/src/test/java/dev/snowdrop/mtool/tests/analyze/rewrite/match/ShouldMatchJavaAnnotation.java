@@ -29,8 +29,6 @@ class ShouldMatchJavaAnnotation extends BaseRulesTest {
     @TempDir
     Path tempDir;
 
-    String jdtls = "";
-
     @BeforeEach
     void setUp() throws Exception {
         // Copy the code of the project to analyze within the temp dir
@@ -44,7 +42,7 @@ class ShouldMatchJavaAnnotation extends BaseRulesTest {
         copyFolder(cookBook, rulesPath);
 
         // Configure the test with parameters
-        config = createTestConfig(destinationPath, rulesPath, jdtls);
+        config = createTestConfig(destinationPath, rulesPath);
 
         ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
         codeScannerService = new CodeScannerService(config, scanCommandExecutor);

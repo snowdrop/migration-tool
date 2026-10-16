@@ -47,16 +47,6 @@
             <classifier>shaded</classifier>
         </dependency>
 
-        <!-- lsp4j -->
-        <dependency>
-            <groupId>org.eclipse.lsp4j</groupId>
-            <artifactId>org.eclipse.lsp4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.lsp4j</groupId>
-            <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
-        </dependency>
-
         <!-- Search maven dependencies -->
         <!-- Simplify the dependencies to be used first by using the maven-resolver pom before to move to 2.x -->
         <dependency>

@@ -127,7 +127,7 @@ class RulesTest extends BaseRulesTest {
 
         return new Rule("optional", Collections.emptyList(), "Remove the SpringBoot @SpringBootApplication annotation",
                 1, List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
-                "The dummy.SpringApplication annotation do not exist", "000-springboot-annotation-notfound", null, when,
+                "The dummy.SpringApplication annotation do not exist", "000-springboot-annotation-notfound", when,
                 Collections.emptyList(), 0, // no order specified in YAML
                 instructions);
     }
@@ -163,7 +163,7 @@ class RulesTest extends BaseRulesTest {
 
         return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
                 List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
-                "SpringBoot to Quarkus.", "001-springboot-replace-bom-quarkus", null, when, Collections.emptyList(), 1,
+                "SpringBoot to Quarkus.", "001-springboot-replace-bom-quarkus", when, Collections.emptyList(), 1,
                 instructions);
     }
 
@@ -200,7 +200,7 @@ class RulesTest extends BaseRulesTest {
 
         return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
                 List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
-                "SpringBoot to Quarkus.", "002-springboot-add-class-quarkus", null, when, Collections.emptyList(), 2,
+                "SpringBoot to Quarkus.", "002-springboot-add-class-quarkus", when, Collections.emptyList(), 2,
                 instructions);
     }
 
@@ -238,7 +238,7 @@ class RulesTest extends BaseRulesTest {
 
         return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
                 List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
-                "SpringBoot to Quarkus.", "003-springboot-to-quarkusmain-annotation", null, when,
+                "SpringBoot to Quarkus.", "003-springboot-to-quarkusmain-annotation", when,
                 Collections.emptyList(), 3, instructions);
     }
 
@@ -281,7 +281,7 @@ class RulesTest extends BaseRulesTest {
 
         return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
                 List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
-                "SpringBoot to Quarkus.", "004-springboot-to-quarkus-rest-annotations", null, when,
+                "SpringBoot to Quarkus.", "004-springboot-to-quarkus-rest-annotations", when,
                 Collections.emptyList(), 4, instructions);
     }
 

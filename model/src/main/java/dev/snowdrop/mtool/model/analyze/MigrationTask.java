@@ -1,7 +1,6 @@
 package dev.snowdrop.mtool.model.analyze;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.eclipse.lsp4j.SymbolInformation;
 
 import java.util.List;
 
@@ -10,11 +9,6 @@ public class MigrationTask {
     private Rule rule;
     private Rule.Instruction instruction;
     private List<Result> matchResults;
-
-    @Deprecated
-    private List<SymbolInformation> lsResults;
-    @Deprecated
-    private List<Result> rewriteResults;
 
     public MigrationTask() {
     }
@@ -39,28 +33,6 @@ public class MigrationTask {
     }
 
     public List<Result> getMatchResults() {
-        return matchResults;
-    }
-
-    @Deprecated
-    public MigrationTask withLsResults(List<SymbolInformation> lsResults) {
-        this.lsResults = lsResults;
-        return this;
-    }
-
-    @Deprecated
-    public MigrationTask withRewriteResults(List<Result> rewriteResults) {
-        this.rewriteResults = rewriteResults;
-        return this;
-    }
-
-    @Deprecated
-    public List<SymbolInformation> getLsResults() {
-        return lsResults;
-    }
-
-    @Deprecated
-    public List<Result> getRewriteResults() {
         return matchResults;
     }
 }

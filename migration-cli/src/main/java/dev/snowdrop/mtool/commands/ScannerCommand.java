@@ -39,7 +39,7 @@ public class ScannerCommand implements Runnable {
     public String query;
 
     @CommandLine.Option(names = {
-            "--scanner" }, description = "Scanner tool to be used to analyse the code: openrewrite (default), file, maven, treesitter, jdtls (deprecated)", defaultValue = "openrewrite")
+            "--scanner" }, description = "Scanner tool to be used to analyse the code: openrewrite (default), file, maven, treesitter", defaultValue = "openrewrite")
     public String scanner;
 
     @CommandLine.Option(names = {
@@ -60,7 +60,7 @@ public class ScannerCommand implements Runnable {
             throw new IllegalStateException("Project path of the application does not exist: " + appPath);
         }
         String appPathString = resolvePath(appPath).toString();
-        Config config = new Config(appPathString, null, null, null, null, null, null, false, null, scanner, null);
+        Config config = new Config(appPathString, null, null, null, false, null, scanner, null);
 
         if (planFile != null && !planFile.isBlank()) {
             executePlan(config, startTime);

@@ -25,12 +25,6 @@
             <artifactId>jboss-logging</artifactId>
         </dependency>
 
-        <!-- lsp4j -->
-        <dependency>
-            <groupId>org.eclipse.lsp4j</groupId>
-            <artifactId>org.eclipse.lsp4j</artifactId>
-        </dependency>
-
         <!-- CSV parsing -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>

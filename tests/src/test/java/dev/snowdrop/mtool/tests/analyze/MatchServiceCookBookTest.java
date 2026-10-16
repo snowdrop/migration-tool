@@ -37,8 +37,6 @@ class MatchServiceCookBookTest extends BaseRulesTest {
     @TempDir
     Path tempDir;
 
-    String jdtls;
-
     @BeforeEach
     void setUp() throws Exception {
         // Copy the code of the project to analyze within the temp dir
@@ -51,12 +49,8 @@ class MatchServiceCookBookTest extends BaseRulesTest {
         rulesPath = tempDir.resolve(cookBook);
         copyFolder(cookBook, rulesPath);
 
-        // Copy the jdt-ls server
-        String jdtls = "jdt/konveyor-jdtls";
-        copyFolder(jdtls, tempDir.resolve(jdtls));
-
         // Configure the test with the parameters
-        config = createTestConfig(destinationPath, rulesPath, jdtls);
+        config = createTestConfig(destinationPath, rulesPath);
 
         ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
         codeScannerService = new CodeScannerService(config, scanCommandExecutor);
