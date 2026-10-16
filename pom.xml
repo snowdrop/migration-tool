@@ -35,7 +35,7 @@
         <quarkus-langchain4j.version>1.14.1</quarkus-langchain4j.version>
         <quarkus-mcp-server.version>2.0.2</quarkus-mcp-server.version>
         <quarkus.platform.version>3.40.1</quarkus.platform.version>
-        <quarkus-wiremock.version>1.6.3</quarkus-wiremock.version>
+        <quarkus-wiremock.version>1.8.1</quarkus-wiremock.version>
         <rewrite-client.version>0.3.4</rewrite-client.version>
         <spring-boot.version>4.1.1</spring-boot.version>
 
