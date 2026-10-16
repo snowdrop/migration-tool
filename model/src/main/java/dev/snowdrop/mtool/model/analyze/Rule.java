@@ -11,10 +11,7 @@ public record Rule(String category, @JsonProperty("customVariables") List<String
         @Deprecated @JsonProperty("actions") List<String> actions, int order, Instruction instructions) {
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    public record Instruction(Ai[] ai, Manual[] manual, Openrewrite[] openrewrite) {
-    }
-
-    public record Ai(@Deprecated String promptMessage, List<String> tasks) {
+    public record Instruction(Manual[] manual, Openrewrite[] openrewrite) {
     }
 
     public record Manual(String todo) {

@@ -1,6 +1,5 @@
 package dev.snowdrop.mtool.transform.provider;
 
-import dev.snowdrop.mtool.transform.provider.impl.AiProvider;
 import dev.snowdrop.mtool.transform.provider.impl.ManualProvider;
 import dev.snowdrop.mtool.transform.provider.impl.OpenRewriteProvider;
 
@@ -17,7 +16,6 @@ public class ProviderFactory {
 
     static {
         registerProvider(new OpenRewriteProvider());
-        registerProvider(new AiProvider());
         registerProvider(new ManualProvider());
     }
 
@@ -35,7 +33,7 @@ public class ProviderFactory {
      * Gets a provider by type.
      *
      * @param providerType
-     *        the provider type (ai, openrewrite, manual)
+     *        the provider type (openrewrite, manual)
      *
      * @return the provider if found, empty otherwise
      */

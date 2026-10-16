@@ -23,18 +23,12 @@
         <ascii-table.version>1.13.0</ascii-table.version>
         <assertj.version>3.27.7</assertj.version>
         <gson.version>2.13.2</gson.version>
-        <google-auth-library-oauth2-http.version>1.54.0</google-auth-library-oauth2-http.version>
         <jackson.version>2.18.0</jackson.version>
-        <langchain4j-vertex-ai-anthropic.version>1.22.0-beta32</langchain4j-vertex-ai-anthropic.version>
-        <langchain4j-anthropic.version>1.18.1</langchain4j-anthropic.version>
         <lombok.version>1.18.46</lombok.version>
         <openrewrite-recipe-bom.version>3.36.0</openrewrite-recipe-bom.version>
         <opencsv.version>5.12.0</opencsv.version>
-        <quarkus-langchain4j-testing-internal.version>0.20.3</quarkus-langchain4j-testing-internal.version>
-        <quarkus-langchain4j.version>1.14.1</quarkus-langchain4j.version>
         <quarkus-mcp-server.version>2.0.2</quarkus-mcp-server.version>
         <quarkus.platform.version>3.40.1</quarkus.platform.version>
-        <quarkus-wiremock.version>1.6.3</quarkus-wiremock.version>
         <rewrite-client.version>0.3.4</rewrite-client.version>
         <spring-boot.version>4.1.1</spring-boot.version>
 
@@ -55,15 +49,14 @@
     </properties>
 
     <modules>
-        <module>ai-providers</module>
         <module>openrewrite-recipes</module>
         <module>model</module>
         <module>parser</module>
         <module>scanner</module>
         <module>service</module>
+        <module>mcp</module>
         <module>migration-cli</module>
         <module>tests</module>
-        <module>mcp</module>
     </modules>
 
     <developers>
@@ -150,60 +143,6 @@
                 <artifactId>service</artifactId>
                 <classifier>shaded</classifier>
                 <version>${rewrite-client.version}</version>
-            </dependency>
-
-            <!-- Google Cloud Auth -->
-            <dependency>
-                <groupId>com.google.auth</groupId>
-                <artifactId>google-auth-library-oauth2-http</artifactId>
-                <version>${google-auth-library-oauth2-http.version}</version>
-            </dependency>
-
-            <!-- Quarkus and Langchain4j -->
-            <dependency>
-                <groupId>io.quarkiverse.langchain4j</groupId>
-                <artifactId>quarkus-langchain4j-core</artifactId>
-                <version>${quarkus-langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.quarkiverse.langchain4j</groupId>
-                <artifactId>quarkus-langchain4j-core-deployment</artifactId>
-                <version>${quarkus-langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.quarkiverse.langchain4j</groupId>
-                <artifactId>quarkus-langchain4j-jaxrs-client</artifactId>
-                <version>${quarkus-langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.quarkiverse.langchain4j</groupId>
-                <artifactId>quarkus-langchain4j-agentic</artifactId>
-                <version>${quarkus-langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.quarkiverse.langchain4j</groupId>
-                <artifactId>quarkus-langchain4j-openai</artifactId>
-                <version>${quarkus-langchain4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-anthropic</artifactId>
-                <version>${langchain4j-anthropic.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-vertex-ai-anthropic</artifactId>
-                <version>${langchain4j-vertex-ai-anthropic.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.quarkiverse.langchain4j</groupId>
-                <artifactId>quarkus-langchain4j-testing-internal</artifactId>
-                <version>${quarkus-langchain4j-testing-internal.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.quarkiverse.wiremock</groupId>
-                <artifactId>quarkus-wiremock</artifactId>
-                <version>${quarkus-wiremock.version}</version>
             </dependency>
 
             <!-- Spring Boot -->

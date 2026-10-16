@@ -5,8 +5,8 @@ import dev.snowdrop.mtool.transform.provider.model.ExecutionContext;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionResult;
 
 /**
- * Interface for migration providers that handle different types of transformations based on YAML rule instructions (AI,
- * OpenRewrite, Manual).
+ * Interface for migration providers that handle different types of transformations based on YAML rule instructions
+ * (OpenRewrite, Manual).
  */
 public interface MigrationProvider {
 

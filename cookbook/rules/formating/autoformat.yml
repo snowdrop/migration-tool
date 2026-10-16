@@ -2,8 +2,8 @@
   description: Format the Java code to respect best practices formating conventions
   effort: 1
   labels:
-    - konveyor.io/source=java
-    - konveyor.io/target=code-formated
+    - /source=java
+    - /target=code-formated
   message: "Automatic format the Java code"
   ruleID: 000-java-format
   when:

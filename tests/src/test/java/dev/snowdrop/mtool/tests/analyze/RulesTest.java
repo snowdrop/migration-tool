@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -94,8 +93,8 @@ class RulesTest extends BaseRulesTest {
         Rule rule = createRule001_ReplaceBomQuarkus();
 
         // Then
-        assertTrue(rule.labels().contains("konveyor.io/source=springboot"));
-        assertTrue(rule.labels().contains("konveyor.io/target=quarkus"));
+        assertTrue(rule.labels().contains("/source=springboot"));
+        assertTrue(rule.labels().contains("/target=quarkus"));
     }
 
     @ParameterizedTest
@@ -120,13 +119,10 @@ class RulesTest extends BaseRulesTest {
         Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
                 "java.annotation is 'dummy.SpringApplication'", null);
 
-        Rule.Instruction instructions = new Rule.Instruction(null, // no AI instructions
-                null, // no manual instructions
-                null // no openrewrite instructions
-        );
+        Rule.Instruction instructions = new Rule.Instruction(null, null);
 
         return new Rule("optional", Collections.emptyList(), "Remove the SpringBoot @SpringBootApplication annotation",
-                1, List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
+                1, List.of("/source=springboot", "/target=quarkus"), Collections.emptyList(),
                 "The dummy.SpringApplication annotation do not exist", "000-springboot-annotation-notfound", when,
                 Collections.emptyList(), 0, // no order specified in YAML
                 instructions);
@@ -139,30 +135,20 @@ class RulesTest extends BaseRulesTest {
         Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
                 "pom.dependency is (gavs='org.springframework.boot:spring-boot-starter-web')", null);
 
-        // AI Instructions
-        Rule.Ai[] aiInstructions = new Rule.Ai[] { new Rule.Ai(null,
-                // promptMessage (deprecated en favor de tasks)
-                Arrays.asList(
-                        "Add to the pom.xml file the Quarkus BOM dependency within the dependencyManagement section and the following dependencies: quarkus-arc, quarkus-core",
-                        "The version of quarkus to be used and to included within the pom.xml properties is 3.31.3.")) };
-
-        // Manual Instructions
         Rule.Manual[] manualInstructions = new Rule.Manual[] { new Rule.Manual(
                 "Add the Quarkus BOM and quarkus-arc, quarkus-core dependencies within the pom.xml file") };
 
-        // OpenRewrite Instructions
         Rule.Openrewrite[] openrewriteInstructions = new Rule.Openrewrite[] { new Rule.Openrewrite(
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
-                "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
-                null, // recipeList (aquí podrías añadir los recipes si los necesitas)
+                "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null,
+                null,
                 new String[] { "dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT",
                         "org.openrewrite:rewrite-maven:8.73.0" }) };
 
-        Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
-                openrewriteInstructions);
+        Rule.Instruction instructions = new Rule.Instruction(manualInstructions, openrewriteInstructions);
 
         return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
-                List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
+                List.of("/source=springboot", "/target=quarkus"), Collections.emptyList(),
                 "SpringBoot to Quarkus.", "001-springboot-replace-bom-quarkus", when, Collections.emptyList(), 1,
                 instructions);
     }
@@ -174,32 +160,19 @@ class RulesTest extends BaseRulesTest {
         Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
                 "java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'", null);
 
-        List<String> aiTasks = List.of(
-                "Add a new class com.todo.app.TodoApplication which implements QuarkusApplication.",
-                "Don't add the annotation @QuarkusMain to this class.",
-                "Use stdout to send a message: Hello user using args[0] within the method which override run().");
-
-        // AI Instructions
-        Rule.Ai[] aiInstructions = new Rule.Ai[] { new Rule.Ai(null,
-                // promptMessage (deprecated en favor de tasks)
-                aiTasks) };
-
-        // Manual Instructions
         Rule.Manual[] manualInstructions = new Rule.Manual[] { new Rule.Manual("See openrewrite instructions") };
 
-        // OpenRewrite Instructions
         Rule.Openrewrite[] openrewriteInstructions = new Rule.Openrewrite[] { new Rule.Openrewrite(
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
-                "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
-                null, // recipeList (aquí podrías añadir los recipes si los necesitas)
+                "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null,
+                null,
                 new String[] { "dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT",
                         "org.openrewrite:rewrite-maven:8.73.0" }) };
 
-        Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
-                openrewriteInstructions);
+        Rule.Instruction instructions = new Rule.Instruction(manualInstructions, openrewriteInstructions);
 
         return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
-                List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
+                List.of("/source=springboot", "/target=quarkus"), Collections.emptyList(),
                 "SpringBoot to Quarkus.", "002-springboot-add-class-quarkus", when, Collections.emptyList(), 2,
                 instructions);
     }
@@ -211,33 +184,19 @@ class RulesTest extends BaseRulesTest {
         Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
                 "java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'", null);
 
-        List<String> aiTasks = List.of(
-                "Can you remove the @SpringBootApplication from the java file com.todo.app.AppApplication.java.",
-                "Next add to the same java class the @QuarkusMain annotation.",
-                "The AppApplication should not implement QuarkusApplication.",
-                "Pass as first argument: TodoApplication.class to the Quarkus.run() method");
-
-        // AI Instructions
-        Rule.Ai[] aiInstructions = new Rule.Ai[] { new Rule.Ai(null,
-                // promptMessage (deprecated en favor de tasks)
-                aiTasks) };
-
-        // Manual Instructions
         Rule.Manual[] manualInstructions = new Rule.Manual[] { new Rule.Manual("See openrewrite instructions") };
 
-        // OpenRewrite Instructions
         Rule.Openrewrite[] openrewriteInstructions = new Rule.Openrewrite[] { new Rule.Openrewrite(
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
-                "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
-                null, // recipeList (aquí podrías añadir los recipes si los necesitas)
+                "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null,
+                null,
                 new String[] { "dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT",
                         "org.openrewrite:rewrite-maven:8.73.0" }) };
 
-        Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
-                openrewriteInstructions);
+        Rule.Instruction instructions = new Rule.Instruction(manualInstructions, openrewriteInstructions);
 
         return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
-                List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
+                List.of("/source=springboot", "/target=quarkus"), Collections.emptyList(),
                 "SpringBoot to Quarkus.", "003-springboot-to-quarkusmain-annotation", when,
                 Collections.emptyList(), 3, instructions);
     }
@@ -260,27 +219,19 @@ class RulesTest extends BaseRulesTest {
 
         Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(), complexCondition, null);
 
-        // AI Instructions
-        Rule.Ai[] aiInstructions = new Rule.Ai[] { new Rule.Ai(null,
-                // promptMessage (deprecated en favor de tasks)
-                List.of("TODO")) };
-
-        // Manual Instructions
         Rule.Manual[] manualInstructions = new Rule.Manual[] { new Rule.Manual("See openrewrite instructions") };
 
-        // OpenRewrite Instructions
         Rule.Openrewrite[] openrewriteInstructions = new Rule.Openrewrite[] { new Rule.Openrewrite(
                 "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file",
-                "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null, // preconditions
-                null, // recipeList (aquí podrías añadir los recipes si los necesitas)
+                "Replace the SpringBoot parent dependency with Quarkus BOM within the pom.xml file.", null,
+                null,
                 new String[] { "dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT",
                         "org.openrewrite:rewrite-maven:8.73.0" }) };
 
-        Rule.Instruction instructions = new Rule.Instruction(aiInstructions, manualInstructions,
-                openrewriteInstructions);
+        Rule.Instruction instructions = new Rule.Instruction(manualInstructions, openrewriteInstructions);
 
         return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
-                List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(),
+                List.of("/source=springboot", "/target=quarkus"), Collections.emptyList(),
                 "SpringBoot to Quarkus.", "004-springboot-to-quarkus-rest-annotations", when,
                 Collections.emptyList(), 4, instructions);
     }

@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.snowdrop.mtool.model.analyze.MigrationTask;
 import dev.snowdrop.mtool.transform.TransformationService;
 import dev.snowdrop.mtool.model.transform.MigrationTasksExport;
-import dev.snowdrop.mtool.transform.provider.ai.Assistant;
-import dev.snowdrop.mtool.transform.provider.ai.FileSystemTool;
 import dev.snowdrop.mtool.transform.provider.impl.OpenRewriteProvider;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionContext;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionResult;
-import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import picocli.CommandLine;
@@ -40,7 +37,7 @@ public class TransformCommand implements Runnable {
     private boolean dryRun;
 
     @CommandLine.Option(names = { "-p",
-            "--provider" }, description = "Migration provider to use (ai, openrewrite, manual). Default: from migration.provider property")
+            "--provider" }, description = "Migration provider to use (openrewrite, manual). Default: from migration.provider property")
     @ConfigProperty(name = "migration.provider")
     private String provider;
 
@@ -49,12 +46,6 @@ public class TransformCommand implements Runnable {
 
     @ConfigProperty(name = "openrewrite.maven-plugin.version")
     private String openRewriteMavenPluginVersion;
-
-    @Inject
-    Assistant aiAssistant;
-
-    @Inject
-    FileSystemTool fileSystemTool;
 
     @Override
     public void run() {
@@ -160,9 +151,7 @@ public class TransformCommand implements Runnable {
 
         logger.infof("Found %d migration tasks to process", migrationTasks.size());
 
-        // Configure the Context with the information used by the Provider
-        fileSystemTool.setBasePath(projectPath);
-        ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider, aiAssistant,
+        ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider,
                 openRewriteMavenPluginVersion, compositeRecipeName);
 
         if ("openrewrite".equals(provider)) {
@@ -182,7 +171,6 @@ public class TransformCommand implements Runnable {
                 ts.logExecutionResult(result, verbose);
             }
         } else {
-            // For other providers (ai, manual), execute tasks individually
             for (Map.Entry<String, MigrationTask> entry : migrationTasks.entrySet()) {
                 String taskId = entry.getKey();
                 MigrationTask task = entry.getValue();
@@ -208,11 +196,9 @@ public class TransformCommand implements Runnable {
             logger.infof("   Effort: %d", task.getRule().effort());
         }
 
-        // Check if the task has instructions for the selected provider
         var instructions = task.getRule().instructions();
         boolean hasInstructions = instructions != null && switch (provider) {
             case "openrewrite" -> instructions.openrewrite() != null;
-            case "ai" -> instructions.ai() != null;
             case "manual" -> instructions.manual() != null;
             default -> false;
         };

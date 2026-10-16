@@ -3,8 +3,8 @@
   description: SpringBoot DataSource configuration to Quarkus
   effort: 3
   labels:
-    - konveyor.io/source=springboot
-    - konveyor.io/target=quarkus
+    - /source=springboot
+    - /target=quarkus
   links: []
   message: "Spring Boot DataSource configuration found. Needs migration to Quarkus datasource properties."
   ruleID: springboot-datasource-config

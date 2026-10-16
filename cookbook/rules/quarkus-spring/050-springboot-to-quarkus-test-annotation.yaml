@@ -3,8 +3,8 @@
   description: Replace @SpringBootTest with @QuarkusTest
   effort: 1
   labels:
-    - konveyor.io/source=springboot
-    - konveyor.io/target=quarkus
+    - /source=springboot
+    - /target=quarkus
   links: []
   message: "Replace @SpringBootTest with @QuarkusTest and add quarkus-junit5 test dependency."
   ruleID: 050-springboot-to-quarkus-test-annotation

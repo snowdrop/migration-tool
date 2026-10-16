@@ -6,8 +6,8 @@
   description: SpringBoot to Quarkus
   effort: 1
   labels:
-    - konveyor.io/source=springboot
-    - konveyor.io/target=quarkus
+    - /source=springboot
+    - /target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
   ruleID: java-annotation-controller-found
