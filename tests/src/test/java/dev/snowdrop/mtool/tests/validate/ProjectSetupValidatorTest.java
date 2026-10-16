@@ -3,7 +3,7 @@ package dev.snowdrop.mtool.tests.validate;
 import dev.snowdrop.mtool.model.validate.ValidationReport;
 import dev.snowdrop.mtool.model.validate.ValidationResult;
 import dev.snowdrop.mtool.model.validate.ValidationResult.Status;
-import dev.snowdrop.mtool.validate.ProjectSetupValidator;
+import dev.snowdrop.mtool.validate.project.ProjectSetupValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -11,7 +11,6 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

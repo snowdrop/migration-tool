@@ -5,7 +5,7 @@ import dev.snowdrop.mtool.model.validate.ValidationResult;
 import dev.snowdrop.mtool.scanner.analyzer.JavaAnalyzer;
 import dev.snowdrop.mtool.scanner.analyzer.JavaParserAnalyzer;
 import dev.snowdrop.mtool.scanner.analyzer.TreeSitterAnalyzer;
-import dev.snowdrop.mtool.validate.ProjectSetupValidator;
+import dev.snowdrop.mtool.validate.project.ProjectSetupValidator;
 import dev.snowdrop.mtool.validate.Validator;
 import dev.snowdrop.mtool.validate.persistence.PersistenceValidator;
 import org.jboss.logging.Logger;

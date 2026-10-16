@@ -43,9 +43,16 @@
         </dependency>
         <dependency>
             <groupId>dev.snowdrop.mtool</groupId>
+            <artifactId>service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.snowdrop.mtool</groupId>
             <artifactId>openrewrite-recipes</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Quarkus -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-picocli</artifactId>
