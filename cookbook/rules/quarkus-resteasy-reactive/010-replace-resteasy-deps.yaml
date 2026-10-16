@@ -3,8 +3,8 @@
   description: Replace RESTEasy Classic dependencies with RESTEasy Reactive
   effort: 1
   labels:
-    - /source=quarkus
-    - /target=quarkus
+    - source=quarkus
+    - target=quarkus
   links: []
   message: "Migrate from RESTEasy Classic to RESTEasy Reactive (quarkus-rest)."
   ruleID: 010-replace-resteasy-deps

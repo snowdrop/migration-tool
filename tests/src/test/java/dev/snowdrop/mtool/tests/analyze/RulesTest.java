@@ -93,8 +93,8 @@ class RulesTest extends BaseRulesTest {
         Rule rule = createRule001_ReplaceBomQuarkus();
 
         // Then
-        assertTrue(rule.labels().contains("/source=springboot"));
-        assertTrue(rule.labels().contains("/target=quarkus"));
+        assertTrue(rule.labels().contains("source=springboot"));
+        assertTrue(rule.labels().contains("target=quarkus"));
     }
 
     @ParameterizedTest
@@ -122,7 +122,7 @@ class RulesTest extends BaseRulesTest {
         Rule.Instruction instructions = new Rule.Instruction(null, null);
 
         return new Rule("optional", Collections.emptyList(), "Remove the SpringBoot @SpringBootApplication annotation",
-                1, List.of("/source=springboot", "/target=quarkus"), Collections.emptyList(),
+                1, List.of("source=springboot", "target=quarkus"), Collections.emptyList(),
                 "The dummy.SpringApplication annotation do not exist", "000-springboot-annotation-notfound", when,
                 Collections.emptyList(), 0, // no order specified in YAML
                 instructions);
@@ -148,7 +148,7 @@ class RulesTest extends BaseRulesTest {
         Rule.Instruction instructions = new Rule.Instruction(manualInstructions, openrewriteInstructions);
 
         return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
-                List.of("/source=springboot", "/target=quarkus"), Collections.emptyList(),
+                List.of("source=springboot", "target=quarkus"), Collections.emptyList(),
                 "SpringBoot to Quarkus.", "001-springboot-replace-bom-quarkus", when, Collections.emptyList(), 1,
                 instructions);
     }
@@ -172,7 +172,7 @@ class RulesTest extends BaseRulesTest {
         Rule.Instruction instructions = new Rule.Instruction(manualInstructions, openrewriteInstructions);
 
         return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
-                List.of("/source=springboot", "/target=quarkus"), Collections.emptyList(),
+                List.of("source=springboot", "target=quarkus"), Collections.emptyList(),
                 "SpringBoot to Quarkus.", "002-springboot-add-class-quarkus", when, Collections.emptyList(), 2,
                 instructions);
     }
@@ -196,7 +196,7 @@ class RulesTest extends BaseRulesTest {
         Rule.Instruction instructions = new Rule.Instruction(manualInstructions, openrewriteInstructions);
 
         return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
-                List.of("/source=springboot", "/target=quarkus"), Collections.emptyList(),
+                List.of("source=springboot", "target=quarkus"), Collections.emptyList(),
                 "SpringBoot to Quarkus.", "003-springboot-to-quarkusmain-annotation", when,
                 Collections.emptyList(), 3, instructions);
     }
@@ -231,7 +231,7 @@ class RulesTest extends BaseRulesTest {
         Rule.Instruction instructions = new Rule.Instruction(manualInstructions, openrewriteInstructions);
 
         return new Rule("mandatory", Collections.emptyList(), "SpringBoot to Quarkus", 1,
-                List.of("/source=springboot", "/target=quarkus"), Collections.emptyList(),
+                List.of("source=springboot", "target=quarkus"), Collections.emptyList(),
                 "SpringBoot to Quarkus.", "004-springboot-to-quarkus-rest-annotations", when,
                 Collections.emptyList(), 4, instructions);
     }

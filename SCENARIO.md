@@ -120,8 +120,8 @@ public class TodoApplication implements QuarkusApplication {
   description: SpringBoot to Quarkus
   effort: 1
   labels:
-    - /source=springboot
-    - /target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
   ruleID: springboot-replace-bom-quarkus-0000
@@ -170,8 +170,8 @@ public class TodoApplication implements QuarkusApplication {
   description: SpringBoot to Quarkus
   effort: 1
   labels:
-    - /source=springboot
-    - /target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
   ruleID: springboot-to-quarkus-00000
@@ -208,8 +208,8 @@ public class TodoApplication implements QuarkusApplication {
   description: SpringBoot to Quarkus
   effort: 1
   labels:
-    - /source=springboot
-    - /target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
   ruleID: springboot-add-class-quarkus-00000

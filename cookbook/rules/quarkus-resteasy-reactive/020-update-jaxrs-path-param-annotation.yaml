@@ -3,8 +3,8 @@
   description: Adopt RESTEasy Reactive response types
   effort: 2
   labels:
-    - /source=quarkus
-    - /target=quarkus
+    - source=quarkus
+    - target=quarkus
   links: []
   message: "Replace Resteasy classic PathParam annotations."
   ruleID: 020-update-jaxrs-response

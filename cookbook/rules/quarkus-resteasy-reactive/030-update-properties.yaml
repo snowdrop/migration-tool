@@ -3,8 +3,8 @@
   description: Rename RESTEasy Classic properties to RESTEasy Reactive equivalents
   effort: 1
   labels:
-    - /source=quarkus
-    - /target=quarkus
+    - source=quarkus
+    - target=quarkus
   links: []
   message: "Rename quarkus.resteasy.* properties to quarkus.rest.* equivalents."
   ruleID: 030-update-properties

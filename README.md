@@ -82,8 +82,8 @@ As presented hereafter, we have introduced different new fields part of the Rule
   category: mandatory
   description: Replace the Spring Boot Application Annotation with QuarkusMain
   labels:
-    - /source=springboot
-    - /target=quarkus
+    - source=springboot
+    - target=quarkus
 
   message: "Replace the Spring Boot Application Annotation with QuarkusMain"
   
@@ -123,8 +123,8 @@ a new field for that purpose: `precondition`. If, during the `analysis` of the a
   description: SpringBoot to Quarkus
   effort: 1
   labels:
-    - /source=springboot
-    - /target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
   ruleID: spring-boot-parent-precondition-match

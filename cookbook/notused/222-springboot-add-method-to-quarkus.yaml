@@ -3,8 +3,8 @@
   description: Add the Quarkus.run() method within the main void method
   effort: 1
   labels:
-    - /source=springboot
-    - /target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "Add the Quarkus.run() method within the main void method."
   ruleID: springboot-add-method-to-quarkus-00000

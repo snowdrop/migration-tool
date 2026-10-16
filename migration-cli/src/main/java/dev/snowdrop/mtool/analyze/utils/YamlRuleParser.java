@@ -37,8 +37,8 @@ public class YamlRuleParser {
 
     public static List<Rule> filterRules(List<Rule> rules, String source, String target) {
         List<Rule> filteredRules = new ArrayList<>();
-        String sourceLabel = "/source=" + source;
-        String targetLabel = "/target=" + target;
+        String sourceLabel = "source=" + source;
+        String targetLabel = "target=" + target;
 
         // The two labels we need to search about
         List<String> requiredLabels = List.of(sourceLabel, targetLabel);
