@@ -4,6 +4,8 @@
 
 # Migration Tool & AI
 
+**Important**: The original code and documentation of this project is still available under the branch: https://github.com/snowdrop/migration-tool/tree/1.x
+
 This project provides tooling to **analyze**, **scan**, and **validate** Java applications targeted for migration — primarily from Spring Boot to Quarkus. It exposes its capabilities as a [Quarkus MCP server](./mcp), enabling AI agents to leverage the tool's analysis and validation features through the [Model Context Protocol](https://modelcontextprotocol.io/). While the architecture is designed to support migration from any technology A to B, the current focus is Spring Boot to Quarkus.
 
 ## Dictionary
