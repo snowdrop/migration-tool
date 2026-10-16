@@ -26,6 +26,7 @@
     </properties>
 
     <dependencies>
+        <!-- mtool -->
         <dependency>
             <groupId>dev.snowdrop.mtool</groupId>
             <artifactId>model</artifactId>
@@ -56,6 +57,10 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-picocli</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-qute</artifactId>
         </dependency>
 
         <!-- CSV parsing -->
