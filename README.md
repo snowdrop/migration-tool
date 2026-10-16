@@ -19,15 +19,29 @@ This project provides tooling to **analyze**, **scan**, and **validate** Java ap
 
 ## Design & Components
 
-The project uses the [Spring TODO](./applications/spring-boot-todo-app) example as the Java project to be analyzed using augmented [rules](./cookbook/rules).
+The project has been designed using the following technologies:
 
-The project has been designed using the following technology:
-- [Quarkus and Picocli](https://quarkus.io/guides/picocli) to manage the CLI part and commands
-- [Quarkus MCP server](./mcp) to expose analyze and validate tools to AI agents
-- [OpenRewrite recipe](https://docs.openrewrite.org/concepts-and-explanations/recipes) to execute the transformations as defined in the rule's instructions
-- [Antlr](https://www.antlr.org/) as parser tool to generate the code for the Query language used to `match` conditions
-- [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) for fast, accurate Java source code analysis
-- The different applications: `mvn command` are executed as OS processes using Java `ProcessBuilder`
+### Framework & Client
+
+- [Quarkus](https://github.com/quarkusio/quarkus) and [Picocli](https://github.com/remkop/picocli) to manage the CLI part and commands (module: `migration-cli`)
+
+### AI
+
+- [Quarkus MCP server](https://github.com/quarkiverse/quarkus-mcp-server) to expose analyze and validate tools to AI agents when running SKILL instructions (module: `mcp`)
+
+### YAML Rule & Query
+
+- [Antlr](https://github.com/antlr/antlr4) as parser tool to generate the code for the query language used to `match` conditions (module: `parser`)
+
+### Scanner
+
+- [Treesitter4j](https://github.com/roastedroot/treesitter4j) for fast, accurate source code analysis: java, properties, json, yaml, etc (module: `scanner`)
+- [JavaParser](https://github.com/javaparser/javaparser) for Java source parsing and entity comparison (modules: `scanner`, `service`)
+- [Maven](https://github.com/apache/maven) to discover POM dependencies by executing Maven commands (module: `scanner`)
+
+### Transformation
+
+- [OpenRewrite](https://github.com/openrewrite/rewrite) recipes to execute the transformations as defined in the rule's instructions (module: `openrewrite-recipes`)
 
 ## Requirements
 
