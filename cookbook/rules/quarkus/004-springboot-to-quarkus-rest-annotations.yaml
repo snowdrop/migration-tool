@@ -3,8 +3,8 @@
   description: SpringBoot to Quarkus
   effort: 1
   labels:
-    - konveyor.io/source=springboot
-    - konveyor.io/target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
   ruleID: 004-springboot-to-quarkus-rest-annotations
@@ -32,4 +32,4 @@
     #     recipeList:
     #     -
     #     gav:
-    #     - dev.snowdrop.mtool:openrewrite-recipes:1.0.7-SNAPSHOT
+    #     - dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT

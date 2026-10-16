@@ -3,8 +3,8 @@
   description: Remove the statement SpringApplication.run() from the main void method
   effort: 1
   labels:
-    - konveyor.io/source=springboot
-    - konveyor.io/target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "Remove the statement SpringApplication.run() from the main void method."
   ruleID: springboot-method-to-quarkus-00000
@@ -32,4 +32,4 @@
               methodPattern: "org.springframework.boot.SpringApplication run(..)"
           #- dev.snowdrop.mtool.openrewrite.recipe.AddQuarkusRun
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.2-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT

@@ -26,7 +26,7 @@ public class AnalyzeTools {
                     + "Example: 'java class all;java annotation all';pom dependency all; properties all") String userQueries,
             @ToolArg(description = "Project path", defaultValue = ".") String projectPath) {
 
-        Config cfg = new Config(projectPath, null, null, null, null, null, null, false, null, "treesitter", null);
+        Config cfg = new Config(projectPath, null, null, null, false, null, "treesitter", null);
         ScanCommandExecutor executor = new ScanCommandExecutor();
 
         String[] queryStrings = userQueries.split(";");

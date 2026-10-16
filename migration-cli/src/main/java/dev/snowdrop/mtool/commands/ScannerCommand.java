@@ -3,7 +3,7 @@ package dev.snowdrop.mtool.commands;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import dev.snowdrop.mtool.analyze.services.ResultsService;
+import dev.snowdrop.mtool.analyze.reporting.ResultsService;
 import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.analyze.Plan;
 import dev.snowdrop.mtool.model.analyze.Result;
@@ -12,8 +12,14 @@ import dev.snowdrop.mtool.parser.QueryParserUtil;
 import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
 import dev.snowdrop.mtool.scanner.ScanningResult;
+import org.aesh.command.Command;
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
+import org.aesh.command.CommandResult;
+import org.aesh.command.invocation.CommandInvocation;
+import org.aesh.command.option.Arguments;
+import org.aesh.command.option.Option;
 import org.jboss.logging.Logger;
-import picocli.CommandLine;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,48 +31,52 @@ import java.util.Optional;
 
 import static dev.snowdrop.mtool.scanner.utils.FileUtils.resolvePath;
 
-@CommandLine.Command(name = "scan", description = "Scan an application against a query or a plan")
-public class ScannerCommand implements Runnable {
+@CommandDefinition(name = "scan", description = "Scan an application against a query or a plan")
+public class ScannerCommand implements Command<CommandInvocation> {
     private static final Logger logger = Logger.getLogger(ScannerCommand.class);
 
     private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    @CommandLine.Parameters(index = "0", description = "Path to the Java project to analyze")
-    public String appPath;
+    @Arguments(description = "Path to the Java project to analyze, optionally followed by a query", required = true)
+    public List<String> arguments;
 
-    @CommandLine.Parameters(index = "1", description = "Query to be executed", defaultValue = "")
-    public String query;
-
-    @CommandLine.Option(names = {
-            "--scanner" }, description = "Scanner tool to be used to analyse the code: openrewrite (default), file, maven, treesitter, jdtls (deprecated)", defaultValue = "openrewrite")
+    @Option(name = "scanner", description = "Scanner tool to be used to analyse the code: openrewrite (default), file, maven, treesitter", defaultValue = {
+            "openrewrite" })
     public String scanner;
 
-    @CommandLine.Option(names = {
-            "--plan" }, description = "Path to a YAML plan file containing queries to execute")
+    @Option(name = "plan", description = "Path to a YAML plan file containing queries to execute")
     public String planFile;
 
-    @CommandLine.Option(names = { "-o",
-            "--output" }, description = "Export the scan result using as format: json, csv, html")
+    @Option(shortName = 'o', name = "output", description = "Export the scan result using as format: json, csv, html")
     private String output;
 
     @Override
-    public void run() {
+    public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        if (arguments == null || arguments.isEmpty()) {
+            logger.error("Usage: mtool scan <appPath> [query]");
+            return CommandResult.FAILURE;
+        }
+
+        String appPath = arguments.get(0);
+        String query = arguments.size() > 1 ? String.join(" ", arguments.subList(1, arguments.size())) : "";
+
         long startTime = System.nanoTime();
 
         Path path = Paths.get(appPath);
         if (!path.toFile().exists()) {
             logger.errorf("Project path of the application does not exist: %s", appPath);
-            throw new IllegalStateException("Project path of the application does not exist: " + appPath);
+            throw new CommandException("Project path of the application does not exist: " + appPath);
         }
         String appPathString = resolvePath(appPath).toString();
-        Config config = new Config(appPathString, null, null, null, null, null, null, false, null, scanner, null);
+        Config config = new Config(appPathString, null, null, null, false, null, scanner, null);
 
         if (planFile != null && !planFile.isBlank()) {
             executePlan(config, startTime);
         } else {
-            executeSingleQuery(config, startTime);
+            executeSingleQuery(config, query, startTime);
         }
+        return CommandResult.SUCCESS;
     }
 
     private void executePlan(Config config, long startTime) {
@@ -98,7 +108,7 @@ public class ScannerCommand implements Runnable {
         logger.infof("%d result(s) from plan '%s'. Elapsed: %d ms", totalResults, plan.getName(), elapsedMs);
     }
 
-    private void executeSingleQuery(Config config, long startTime) {
+    private void executeSingleQuery(Config config, String query, long startTime) {
         Query q;
 
         if (!query.isBlank()) {

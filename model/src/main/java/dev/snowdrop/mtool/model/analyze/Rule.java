@@ -7,14 +7,11 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public record Rule(String category, @JsonProperty("customVariables") List<String> customVariables, String description,
-        int effort, List<String> labels, List<String> links, String message, String ruleID, String lsCmd, When when,
+        int effort, List<String> labels, List<String> links, String message, String ruleID, When when,
         @Deprecated @JsonProperty("actions") List<String> actions, int order, Instruction instructions) {
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    public record Instruction(Ai[] ai, Manual[] manual, Openrewrite[] openrewrite) {
-    }
-
-    public record Ai(@Deprecated String promptMessage, List<String> tasks) {
+    public record Instruction(Manual[] manual, Openrewrite[] openrewrite) {
     }
 
     public record Manual(String todo) {

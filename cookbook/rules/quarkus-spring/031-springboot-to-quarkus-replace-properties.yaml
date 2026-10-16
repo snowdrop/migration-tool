@@ -3,8 +3,8 @@
   description: SpringBoot to Quarkus
   effort: 1
   labels:
-    - konveyor.io/source=springboot
-    - konveyor.io/target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
   ruleID: 031-springboot-to-quarkus-replace-properties
@@ -30,7 +30,7 @@
       - name: SpringBoot to Quarkus
         description: Replace the Spring properties with Quarkus equivalent
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.7-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT
           - org.openrewrite:rewrite-java:8.73.0
         recipeList:
           - org.openrewrite.properties.ChangePropertyKey:

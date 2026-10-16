@@ -3,8 +3,8 @@
   description: Rename RESTEasy Classic properties to RESTEasy Reactive equivalents
   effort: 1
   labels:
-    - konveyor.io/source=quarkus
-    - konveyor.io/target=quarkus
+    - source=quarkus
+    - target=quarkus
   links: []
   message: "Rename quarkus.resteasy.* properties to quarkus.rest.* equivalents."
   ruleID: 030-update-properties
@@ -21,7 +21,7 @@
       - name: Rename RESTEasy Classic properties to RESTEasy Reactive
         description: Convert quarkus.resteasy.* configuration properties to quarkus.rest.* equivalents.
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.7-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT
           - org.openrewrite:rewrite-java:8.73.0
         recipeList:
           - org.openrewrite.properties.ChangePropertyKey:

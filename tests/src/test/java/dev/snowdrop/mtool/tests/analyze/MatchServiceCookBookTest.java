@@ -7,26 +7,15 @@ import dev.snowdrop.mtool.scanner.CodeScannerService;
 import dev.snowdrop.mtool.scanner.ScanCommandExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.*;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFile;
-import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFolder;
+import static dev.snowdrop.mtool.parser.rule.YamlRuleParser.parseRulesFromFile;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MatchServiceCookBookTest extends BaseRulesTest {
@@ -36,8 +25,6 @@ class MatchServiceCookBookTest extends BaseRulesTest {
 
     @TempDir
     Path tempDir;
-
-    String jdtls;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -51,12 +38,8 @@ class MatchServiceCookBookTest extends BaseRulesTest {
         rulesPath = tempDir.resolve(cookBook);
         copyFolder(cookBook, rulesPath);
 
-        // Copy the jdt-ls server
-        String jdtls = "jdt/konveyor-jdtls";
-        copyFolder(jdtls, tempDir.resolve(jdtls));
-
         // Configure the test with the parameters
-        config = createTestConfig(destinationPath, rulesPath, jdtls);
+        config = createTestConfig(destinationPath, rulesPath);
 
         ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
         codeScannerService = new CodeScannerService(config, scanCommandExecutor);

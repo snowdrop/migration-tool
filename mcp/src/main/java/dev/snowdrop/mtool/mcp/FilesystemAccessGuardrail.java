@@ -55,7 +55,7 @@ public class FilesystemAccessGuardrail implements ToolInputGuardrail {
                             + "To grant access, the user must restart the MCP server with the directory added to the launch args.\n"
                             + "Example for the ACP --mcp-server-config:\n"
                             + "  \"args\":[\"-Dmtool.allowed-dirs=" + suggestedDir
-                            + "\", \"-jar\", \"./mcp/target/mcp-1.0.7-SNAPSHOT-runner.jar\"]\n"
+                            + "\", \"-jar\", \"./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar\"]\n"
                             + "Tell the user to update their acp run command accordingly.");
         }
     }

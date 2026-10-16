@@ -8,8 +8,14 @@ import dev.snowdrop.mtool.scanner.analyzer.TreeSitterAnalyzer;
 import dev.snowdrop.mtool.validate.project.ProjectSetupValidator;
 import dev.snowdrop.mtool.validate.Validator;
 import dev.snowdrop.mtool.validate.persistence.PersistenceValidator;
+import org.aesh.command.Command;
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
+import org.aesh.command.CommandResult;
+import org.aesh.command.invocation.CommandInvocation;
+import org.aesh.command.option.Arguments;
+import org.aesh.command.option.Option;
 import org.jboss.logging.Logger;
-import picocli.CommandLine;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,8 +23,8 @@ import java.util.List;
 
 import static dev.snowdrop.mtool.scanner.utils.FileUtils.resolvePath;
 
-@CommandLine.Command(name = "validate", description = "Validate that a migration is correct and complete")
-public class ValidateCommand implements Runnable {
+@CommandDefinition(name = "validate", description = "Validate that a migration is correct and complete")
+public class ValidateCommand implements Command<CommandInvocation> {
 
     private static final Logger logger = Logger.getLogger(ValidateCommand.class);
 
@@ -28,44 +34,48 @@ public class ValidateCommand implements Runnable {
     private static final String BOLD = "\u001B[1m";
     private static final String RESET = "\u001B[0m";
 
-    @CommandLine.Parameters(index = "0", description = "Validator to run (e.g. project-setup, persistence)")
-    public String validatorName;
+    @Arguments(description = "Validator to run (e.g. project-setup, persistence) and path to the project to validate", required = true)
+    public List<String> arguments;
 
-    @CommandLine.Parameters(index = "1", description = "Path to the project to validate")
-    public String appPath;
-
-    @CommandLine.Option(names = { "-v",
-            "--verbose" }, description = "Enable verbose output")
+    @Option(shortName = 'v', name = "verbose", hasValue = false, description = "Enable verbose output")
     public boolean verbose;
 
-    @CommandLine.Option(names = { "--skip-compile" }, description = "Skip the mvn compile check")
+    @Option(name = "skip-compile", hasValue = false, description = "Skip the mvn compile check")
     public boolean skipCompile;
 
-    @CommandLine.Option(names = {
-            "--spring-project" }, description = "Path to the original Spring project (required for persistence validator)")
+    @Option(name = "spring-project", description = "Path to the original Spring project (required for persistence validator)")
     public String springProjectPath;
 
-    @CommandLine.Option(names = {
-            "--parser" }, description = "Java parser to use: treesitter (default) or javaparser", defaultValue = "treesitter")
+    @Option(name = "parser", description = "Java parser to use: treesitter (default) or javaparser", defaultValue = {
+            "treesitter" })
     public String parser;
 
     @Override
-    public void run() {
+    public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
+        if (arguments == null || arguments.size() < 2) {
+            logger.error("Usage: mtool validate <validatorName> <appPath>");
+            return CommandResult.FAILURE;
+        }
+
+        String validatorName = arguments.get(0);
+        String appPath = arguments.get(1);
+
         Path projectPath = resolvePath(appPath);
         if (!projectPath.toFile().exists()) {
             logger.errorf("Project path does not exist: %s", appPath);
-            return;
+            return CommandResult.FAILURE;
         }
 
-        Validator validator = resolveValidator();
+        Validator validator = resolveValidator(validatorName);
         if (validator == null) {
             logger.errorf("Unknown validator: %s", validatorName);
-            return;
+            return CommandResult.FAILURE;
         }
 
         logger.infof("Validating project: %s", projectPath);
         ValidationReport report = validator.validate(projectPath);
         printReport(report);
+        return CommandResult.SUCCESS;
     }
 
     private JavaAnalyzer resolveAnalyzer() {
@@ -74,7 +84,7 @@ public class ValidateCommand implements Runnable {
                 : new TreeSitterAnalyzer();
     }
 
-    private Validator resolveValidator() {
+    private Validator resolveValidator(String validatorName) {
         List<Validator> validators = new ArrayList<>();
         validators.add(new ProjectSetupValidator(skipCompile));
 

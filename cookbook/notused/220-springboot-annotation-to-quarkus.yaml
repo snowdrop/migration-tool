@@ -3,8 +3,8 @@
   description: Replace the Spring Boot Application annotation with QuarkusMain annotation
   effort: 1
   labels:
-    - konveyor.io/source=springboot
-    - konveyor.io/target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "Replace the @SpringBootApplication annotation with @QuarkusMain annotation."
   ruleID: springboot-annotation-to-quarkus-00000
@@ -32,4 +32,4 @@
           #    methodPattern: "org.springframework.boot.SpringApplication run(..)"
           #- dev.snowdrop.mtool.openrewrite.recipe.AddQuarkusRun
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.2-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT

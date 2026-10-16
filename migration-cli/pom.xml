@@ -5,7 +5,7 @@
     <parent>
         <groupId>dev.snowdrop.mtool</groupId>
         <artifactId>migration-tool-parent</artifactId>
-        <version>1.0.7-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -26,6 +26,7 @@
     </properties>
 
     <dependencies>
+        <!-- mtool -->
         <dependency>
             <groupId>dev.snowdrop.mtool</groupId>
             <artifactId>model</artifactId>
@@ -55,7 +56,11 @@
         <!-- Quarkus -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-picocli</artifactId>
+            <artifactId>quarkus-aesh</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-qute</artifactId>
         </dependency>
 
         <!-- CSV parsing -->
@@ -70,31 +75,6 @@
             <artifactId>ascii-table</artifactId>
         </dependency>
 
-        <!-- AI -->
-        <!-- This client only works if we have an API_KEY to access the Anthropic Claude API !
-        <dependency>
-            <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-anthropic</artifactId>
-            <version>1.8.4</version>
-        </dependency>
-        -->
-        <!-- Using the Vertex AI Anthropic API able to access Anthropic on Google Cloud platform -->
-        <dependency>
-            <groupId>dev.snowdrop.mtool.ai</groupId>
-            <artifactId>vertex-ai-anthropic</artifactId>
-            <version>1.0.7-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-openai</artifactId>
-        </dependency>
-
-        <!-- lsp4j -->
-        <dependency>
-            <groupId>org.eclipse.lsp4j</groupId>
-            <artifactId>org.eclipse.lsp4j</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

@@ -120,8 +120,8 @@ public class TodoApplication implements QuarkusApplication {
   description: SpringBoot to Quarkus
   effort: 1
   labels:
-    - konveyor.io/source=springboot
-    - konveyor.io/target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
   ruleID: springboot-replace-bom-quarkus-0000
@@ -159,7 +159,7 @@ public class TodoApplication implements QuarkusApplication {
               artifactId: spring-boot-maven-plugin
           - spring.recipe.dev.snowdrop.mtool.openrewrite.AddQuarkusMavenPlugin
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT
           - org.openrewrite:rewrite-maven:8.73.0
 ```
 
@@ -170,8 +170,8 @@ public class TodoApplication implements QuarkusApplication {
   description: SpringBoot to Quarkus
   effort: 1
   labels:
-    - konveyor.io/source=springboot
-    - konveyor.io/target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
   ruleID: springboot-to-quarkus-00000
@@ -199,7 +199,7 @@ public class TodoApplication implements QuarkusApplication {
               methodPattern: "org.springframework.boot.SpringApplication run(..)"
           - spring.recipe.dev.snowdrop.mtool.openrewrite.AddQuarkusRun
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT
 ```
 **Step 4**
 ```yaml
@@ -208,8 +208,8 @@ public class TodoApplication implements QuarkusApplication {
   description: SpringBoot to Quarkus
   effort: 1
   labels:
-    - konveyor.io/source=springboot
-    - konveyor.io/target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
   ruleID: springboot-add-class-quarkus-00000
@@ -243,6 +243,6 @@ public class TodoApplication implements QuarkusApplication {
                     }
                 }
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.0-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT
 ```
 

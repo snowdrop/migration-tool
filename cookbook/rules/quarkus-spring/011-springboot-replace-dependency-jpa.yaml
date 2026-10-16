@@ -3,8 +3,8 @@
   description: SpringBoot to Quarkus
   effort: 1
   labels:
-    - konveyor.io/source=springboot
-    - konveyor.io/target=quarkus
+    - source=springboot
+    - target=quarkus
   links: []
   message: "SpringBoot to Quarkus."
   ruleID: 011-springboot-replace-dependency-jpa
@@ -32,7 +32,7 @@
               artifactId: quarkus-jdbc-mysql
               version: 3.31.3
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:1.0.7-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT
           - org.openrewrite:rewrite-maven:8.73.0
           - org.openrewrite:rewrite-java:8.73.0
           - org.openrewrite.recipe:rewrite-java-dependencies:1.46.0

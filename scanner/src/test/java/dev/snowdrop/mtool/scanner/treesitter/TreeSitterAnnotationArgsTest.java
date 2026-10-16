@@ -50,7 +50,7 @@ class TreeSitterAnnotationArgsTest {
                 }
                 """);
 
-        Config config = new Config(tempDir.toString(), null, null, null, null, null, null, false, null, "treesitter", null);
+        Config config = new Config(tempDir.toString(), null, null, null, false, null, "treesitter", null);
         Query query = new Query("java", "annotation", "all", Collections.emptyMap());
 
         List<Result> matches = scanner.scansCodeFor(config, query);

@@ -4,15 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.snowdrop.mtool.model.analyze.MigrationTask;
 import dev.snowdrop.mtool.transform.TransformationService;
 import dev.snowdrop.mtool.model.transform.MigrationTasksExport;
-import dev.snowdrop.mtool.transform.provider.ai.Assistant;
-import dev.snowdrop.mtool.transform.provider.ai.FileSystemTool;
 import dev.snowdrop.mtool.transform.provider.impl.OpenRewriteProvider;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionContext;
 import dev.snowdrop.mtool.transform.provider.model.ExecutionResult;
-import jakarta.inject.Inject;
+import org.aesh.command.Command;
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
+import org.aesh.command.CommandResult;
+import org.aesh.command.invocation.CommandInvocation;
+import org.aesh.command.option.Argument;
+import org.aesh.command.option.Option;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
-import picocli.CommandLine;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -24,23 +27,21 @@ import java.util.stream.Stream;
 
 import static dev.snowdrop.mtool.scanner.utils.FileUtils.resolvePath;
 
-@CommandLine.Command(name = "transform", description = "Transform a java application")
-public class TransformCommand implements Runnable {
+@CommandDefinition(name = "transform", description = "Transform a java application")
+public class TransformCommand implements Command<CommandInvocation> {
     private static final Logger logger = Logger.getLogger(TransformCommand.class);
 
-    @CommandLine.Parameters(index = "0", description = "Path to the Java project to transform")
+    @Argument(description = "Path to the Java project to transform", required = true)
     @ConfigProperty(name = "analyzer.app.path", defaultValue = "./applications/spring-boot-todo-app")
     public String appPath;
 
-    @CommandLine.Option(names = { "-v", "--verbose" }, description = "Enable verbose output")
+    @Option(shortName = 'v', name = "verbose", hasValue = false, description = "Enable verbose output")
     private boolean verbose;
 
-    @CommandLine.Option(names = { "-d",
-            "--dry-run" }, description = "Execute OpenRewrite in dry-run mode (preview changes without applying them)")
+    @Option(shortName = 'd', name = "dry-run", hasValue = false, description = "Execute OpenRewrite in dry-run mode (preview changes without applying them)")
     private boolean dryRun;
 
-    @CommandLine.Option(names = { "-p",
-            "--provider" }, description = "Migration provider to use (ai, openrewrite, manual). Default: from migration.provider property")
+    @Option(shortName = 'p', name = "provider", description = "Migration provider to use (openrewrite, manual). Default: from migration.provider property")
     @ConfigProperty(name = "migration.provider")
     private String provider;
 
@@ -50,18 +51,12 @@ public class TransformCommand implements Runnable {
     @ConfigProperty(name = "openrewrite.maven-plugin.version")
     private String openRewriteMavenPluginVersion;
 
-    @Inject
-    Assistant aiAssistant;
-
-    @Inject
-    FileSystemTool fileSystemTool;
-
     @Override
-    public void run() {
+    public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
         Path path = resolvePath(appPath);
         if (!path.toFile().exists()) {
             logger.errorf("❌ Project path of the application does not exist: %s", appPath);
-            return;
+            return CommandResult.FAILURE;
         }
         try {
             startTransformation();
@@ -71,17 +66,9 @@ public class TransformCommand implements Runnable {
                 e.printStackTrace();
             }
         }
-
+        return CommandResult.SUCCESS;
     }
 
-    /**
-     * Finds the latest analysed report JSON file in the project path and load it
-     *
-     * @param projectPath
-     *        The path to the project directory
-     *
-     * @return Map of migration tasks from the latest JSON file, or empty map if no file found
-     */
     private Map<String, MigrationTask> loadLatestAnalysisReport(Path projectPath) {
         try {
             Optional<Path> latestJsonFile = findLatestAnalysingReportJson(projectPath);
@@ -113,14 +100,6 @@ public class TransformCommand implements Runnable {
         }
     }
 
-    /**
-     * Finds the latest analysing report JSON file based on timestamp in filename
-     *
-     * @param projectPath
-     *        The path to search for JSON files
-     *
-     * @return Optional containing the latest JSON file path, or empty if none found
-     */
     private Optional<Path> findLatestAnalysingReportJson(Path projectPath) {
         FileSystem fs = FileSystems.getDefault();
         PathMatcher matcher = fs.getPathMatcher("glob:analysing-*-report_*.json");
@@ -140,9 +119,6 @@ public class TransformCommand implements Runnable {
         }
     }
 
-    /**
-     * Execute the transformation using the provider
-     */
     private void startTransformation() {
         Instant start = Instant.now();
 
@@ -160,13 +136,10 @@ public class TransformCommand implements Runnable {
 
         logger.infof("Found %d migration tasks to process", migrationTasks.size());
 
-        // Configure the Context with the information used by the Provider
-        fileSystemTool.setBasePath(projectPath);
-        ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider, aiAssistant,
+        ExecutionContext context = new ExecutionContext(projectPath, verbose, dryRun, provider,
                 openRewriteMavenPluginVersion, compositeRecipeName);
 
         if ("openrewrite".equals(provider)) {
-            // Batch all OpenRewrite tasks into a single Maven execution
             List<MigrationTask> openrewriteTasks = migrationTasks.values().stream()
                     .filter(task -> task.getRule().instructions() != null
                             && task.getRule().instructions().openrewrite() != null)
@@ -182,7 +155,6 @@ public class TransformCommand implements Runnable {
                 ts.logExecutionResult(result, verbose);
             }
         } else {
-            // For other providers (ai, manual), execute tasks individually
             for (Map.Entry<String, MigrationTask> entry : migrationTasks.entrySet()) {
                 String taskId = entry.getKey();
                 MigrationTask task = entry.getValue();
@@ -197,9 +169,6 @@ public class TransformCommand implements Runnable {
         logger.info("----------------------------------------");
     }
 
-    /**
-     * Execute a specific migration task with the configured provider
-     */
     private void executeTaskWithProvider(String taskId, MigrationTask task, ExecutionContext context) {
         logger.infof("Processing migration task: %s", taskId);
         if (verbose) {
@@ -208,11 +177,9 @@ public class TransformCommand implements Runnable {
             logger.infof("   Effort: %d", task.getRule().effort());
         }
 
-        // Check if the task has instructions for the selected provider
         var instructions = task.getRule().instructions();
         boolean hasInstructions = instructions != null && switch (provider) {
             case "openrewrite" -> instructions.openrewrite() != null;
-            case "ai" -> instructions.ai() != null;
             case "manual" -> instructions.manual() != null;
             default -> false;
         };

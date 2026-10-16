@@ -10,14 +10,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.openrewrite.table.SearchResults;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFile;
+import static dev.snowdrop.mtool.parser.rule.YamlRuleParser.parseRulesFromFile;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ShouldMatchPropertiesKey extends BaseRulesTest {
@@ -27,8 +26,6 @@ class ShouldMatchPropertiesKey extends BaseRulesTest {
 
     @TempDir
     Path tempDir;
-
-    String jdtls = "";
 
     @BeforeEach
     void setUp() throws Exception {
@@ -43,7 +40,7 @@ class ShouldMatchPropertiesKey extends BaseRulesTest {
         copyFolder(cookBook, rulesPath);
 
         // Configure the test with parameters
-        config = createTestConfig(destinationPath, rulesPath, jdtls);
+        config = createTestConfig(destinationPath, rulesPath);
 
         ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
         codeScannerService = new CodeScannerService(config, scanCommandExecutor);

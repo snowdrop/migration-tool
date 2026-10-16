@@ -16,7 +16,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFile;
+import static dev.snowdrop.mtool.parser.rule.YamlRuleParser.parseRulesFromFile;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ShouldMatchJavaAnnotationWithAnd extends BaseRulesTest {
@@ -28,7 +28,6 @@ class ShouldMatchJavaAnnotationWithAnd extends BaseRulesTest {
     Path tempDir;
 
     Path rulesPath;
-    String jdtls = "";
 
     @BeforeEach
     void setUp() throws Exception {
@@ -43,7 +42,7 @@ class ShouldMatchJavaAnnotationWithAnd extends BaseRulesTest {
         copyFolder(cookBook, rulesPath);
 
         // Configure the test with parameters
-        config = createTestConfig(destinationPath, rulesPath, jdtls);
+        config = createTestConfig(destinationPath, rulesPath);
 
         ScanCommandExecutor scanCommandExecutor = new ScanCommandExecutor();
         codeScannerService = new CodeScannerService(config, scanCommandExecutor);

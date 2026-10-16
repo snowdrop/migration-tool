@@ -36,8 +36,8 @@ class CodeScannerServiceTest {
     @BeforeEach
     void setup() throws IOException {
         tempDir = Files.createTempDirectory("rewrite-test");
-        config = new Config(tempDir.toString(), Paths.get("./rules"), "springboot", "quarkus", "./jdt/konveyor-jdtls",
-                "./jdt", "io.konveyor.tackle.ruleEntry", false, "json", "openrewrite", "6.36.0");
+        config = new Config(tempDir.toString(), Paths.get("./rules"), "springboot", "quarkus", false, "json",
+                "openrewrite", "6.36.0");
         scanCommandExecutor = Mockito.mock(ScanCommandExecutor.class);
         codeScannerService = new CodeScannerService(config, scanCommandExecutor);
     }
@@ -55,8 +55,8 @@ class CodeScannerServiceTest {
         Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
                 "java.annotation is 'org.springframework.boot.autoconfigure.SpringBootApplication'", null);
         Rule rule = new Rule("mandatory", Collections.emptyList(), "desc", 1,
-                List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
-                "simple-condition-rule", null, when, Collections.emptyList(), 1, null);
+                List.of("source=springboot", "target=quarkus"), Collections.emptyList(), "help",
+                "simple-condition-rule", when, Collections.emptyList(), 1, null);
 
         QueryVisitor queryVisitor = QueryUtils.parseAndVisit(rule.when().condition());
         List<Result> matches = List.of(new Result("1", "openrewrite",
@@ -86,8 +86,8 @@ class CodeScannerServiceTest {
                         + "      java.annotation is 'org.springframework.web.bind.annotation.GetMapping'",
                 null);
         Rule rule = new Rule("mandatory", Collections.emptyList(), "desc", 1,
-                List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
-                "or-condition-test", null, when, Collections.emptyList(), 1, null);
+                List.of("source=springboot", "target=quarkus"), Collections.emptyList(), "help",
+                "or-condition-test", when, Collections.emptyList(), 1, null);
 
         QueryVisitor queryVisitor = QueryUtils.parseAndVisit(rule.when().condition());
         Result controller = new Result("1", "openrewrite",
@@ -115,8 +115,8 @@ class CodeScannerServiceTest {
         Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
                 "java.annotation is 'Autowired' AND java.annotation is 'RestController'", null);
         Rule rule = new Rule("mandatory", Collections.emptyList(), "desc", 1,
-                List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
-                "and-condition-test", null, when, Collections.emptyList(), 1, null);
+                List.of("source=springboot", "target=quarkus"), Collections.emptyList(), "help",
+                "and-condition-test", when, Collections.emptyList(), 1, null);
 
         Result controller = new Result("1", "openrewrite",
                 "2025-11-11_15-43-31-451/dev.snowdrop.openrewrite.java.table.AnnotationsReport.csv:13|JAVA.ANNOTATION|org.springframework.stereotype.RestController");
@@ -147,8 +147,8 @@ class CodeScannerServiceTest {
         Rule.When when = new Rule.When(null, Collections.emptyList(), Collections.emptyList(),
                 "pom.dependency is spring-boot AND java.annotation is 'RestController'", null);
         Rule rule = new Rule("mandatory", Collections.emptyList(), "desc", 1,
-                List.of("konveyor.io/source=springboot", "konveyor.io/target=quarkus"), Collections.emptyList(), "help",
-                "and-condition-test", null, when, Collections.emptyList(), 1, null);
+                List.of("source=springboot", "target=quarkus"), Collections.emptyList(), "help",
+                "and-condition-test", when, Collections.emptyList(), 1, null);
 
         ScanningResult scanningResult = codeScannerService.scan(rule);
         Assertions.assertFalse(scanningResult.isMatchSucceeded());

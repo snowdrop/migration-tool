@@ -3,11 +3,17 @@ package dev.snowdrop.mtool.commands;
 import dev.snowdrop.mtool.model.analyze.Config;
 import dev.snowdrop.mtool.model.analyze.MigrationTask;
 import dev.snowdrop.mtool.model.analyze.Rule;
-import dev.snowdrop.mtool.analyze.services.AnalyzeService;
-import dev.snowdrop.mtool.analyze.services.ResultsService;
+import dev.snowdrop.mtool.analyze.AnalyzeService;
+import dev.snowdrop.mtool.analyze.reporting.ResultsService;
+import org.aesh.command.Command;
+import org.aesh.command.CommandDefinition;
+import org.aesh.command.CommandException;
+import org.aesh.command.CommandResult;
+import org.aesh.command.invocation.CommandInvocation;
+import org.aesh.command.option.Argument;
+import org.aesh.command.option.Option;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.logging.Logger;
-import picocli.CommandLine;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,58 +25,42 @@ import java.util.Map;
 import java.util.Optional;
 
 import static dev.snowdrop.mtool.scanner.utils.FileUtils.resolvePath;
-import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.filterRules;
-import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFile;
-import static dev.snowdrop.mtool.analyze.utils.YamlRuleParser.parseRulesFromFolder;
+import static dev.snowdrop.mtool.parser.rule.YamlRuleParser.filterRules;
+import static dev.snowdrop.mtool.parser.rule.YamlRuleParser.parseRulesFromFile;
+import static dev.snowdrop.mtool.parser.rule.YamlRuleParser.parseRulesFromFolder;
 
-@CommandLine.Command(name = "analyze", description = "Analyze a project for migration")
-public class AnalyzeCommand implements Runnable {
+@CommandDefinition(name = "analyze", description = "Analyze a project for migration")
+public class AnalyzeCommand implements Command<CommandInvocation> {
     private static final Logger logger = Logger.getLogger(AnalyzeCommand.class);
 
-    @CommandLine.Parameters(index = "0", description = "Path to the Java project to analyze")
+    @Argument(description = "Path to the Java project to analyze", required = true)
     public String appPath;
 
-    @CommandLine.Option(names = { "-r",
-            "--rules" }, description = "Path to rules directory (default: from config)")
+    @Option(shortName = 'r', name = "rules", description = "Path to rules directory (default: from config)")
     public String rulesPath;
 
-    @CommandLine.Option(names = { "-s",
-            "--source" }, description = "Source technology to consider for analysis")
+    @Option(shortName = 's', name = "source", description = "Source technology to consider for analysis")
     public String source;
 
-    @CommandLine.Option(names = { "-t",
-            "--target" }, description = "Target technology to consider for analysis")
+    @Option(shortName = 't', name = "target", description = "Target technology to consider for analysis")
     public String target;
 
-    @Deprecated(since = "1.0.7", forRemoval = true)
-    @CommandLine.Option(names = {
-            "--jdt-ls-path" }, description = "Path to JDT-LS installation (deprecated)", required = false, hidden = true)
-    public String jdtLsPath;
-
-    @Deprecated(since = "1.0.7", forRemoval = true)
-    @CommandLine.Option(names = {
-            "--jdt-workspace" }, description = "Path to JDT workspace directory (deprecated)", required = false, hidden = true)
-    public String jdtWorkspace;
-
-    @CommandLine.Option(names = { "-v",
-            "--verbose" }, description = "Enable verbose output")
+    @Option(shortName = 'v', name = "verbose", hasValue = false, description = "Enable verbose output")
     public boolean verbose;
 
-    @CommandLine.Option(names = { "-o",
-            "--output" }, description = "Export the analysing result using as format: json (default), csv, html")
+    @Option(shortName = 'o', name = "output", description = "Export the analysing result using as format: json (default), csv, html")
     private String output;
 
-    @CommandLine.Option(names = {
-            "--scanner" }, description = "Scanner tool to be used to analyse the code: openrewrite (default), jdtls (deprecated)", defaultValue = "openrewrite")
+    @Option(name = "scanner", description = "Scanner tool to be used to analyse the code: openrewrite (default)", defaultValue = {
+            "openrewrite" })
     public String scanner;
 
     @Override
-    public void run() {
+    public CommandResult execute(CommandInvocation commandInvocation) throws CommandException, InterruptedException {
         Config config = fromCommandOrElseProperties();
         try {
             List<Rule> rules = loadRules(config.rulesPath(), config.sourceTechnology(), config.targetTechnology());
 
-            // Switch to the new analyseService able to map a query using its scanner to the corresponding DTO to issue a command
             AnalyzeService analyzeService = new AnalyzeService(config);
             Map<String, MigrationTask> tasks = analyzeService.analyze(rules);
 
@@ -82,7 +72,7 @@ public class AnalyzeCommand implements Runnable {
                 e.printStackTrace();
             }
         }
-
+        return CommandResult.SUCCESS;
     }
 
     public Config fromCommandOrElseProperties() {
@@ -110,30 +100,12 @@ public class AnalyzeCommand implements Runnable {
                 .orElseThrow(
                         () -> new RuntimeException("Target technology for migration is required but not configured"));
 
-        if ("jdtls".equalsIgnoreCase(scanner)) {
-            logger.warnf(
-                    "The JDTLS scanner is deprecated and will be removed in a future release. Use '--scanner openrewrite' instead.");
-        }
-
-        String jdtLsPathString = Optional.ofNullable(jdtLsPath)
-                .or(() -> ConfigProvider.getConfig().getOptionalValue("analyzer.jdt-ls-path", String.class))
-                .map(p -> resolvePath(p).toString())
-                .orElse(null);
-
-        String jdtWksString = Optional.ofNullable(jdtWorkspace)
-                .or(() -> ConfigProvider.getConfig().getOptionalValue("analyzer.jdt-workspace-path", String.class))
-                .map(p -> resolvePath(p).toString())
-                .orElse(null);
-
-        String lsCmd = ConfigProvider.getConfig().getOptionalValue("analyzer.jdt-ls-command", String.class)
-                .orElse(null);
-
         String openRewriteMavenPluginVersion = Optional
                 .ofNullable(ConfigProvider.getConfig().getValue("openrewrite.maven-plugin.version", String.class))
                 .orElseThrow(() -> new RuntimeException("Openrewrite maven plugin version not define"));
 
-        Config config = new Config(appPathString, resolvedRulesPath, sourceTechnology, targetTechnology, jdtLsPathString,
-                jdtWksString, lsCmd, verbose, output, scanner, openRewriteMavenPluginVersion);
+        Config config = new Config(appPathString, resolvedRulesPath, sourceTechnology, targetTechnology,
+                verbose, output, scanner, openRewriteMavenPluginVersion);
 
         logger.infof("Application path: %s", appPath);
         logger.infof("Source technology: %s", sourceTechnology);
@@ -151,7 +123,6 @@ public class AnalyzeCommand implements Runnable {
             rules = parseRulesFromFolder(rulesPath);
         }
 
-        // Filter the rules according to the source and target technology
         List<Rule> filteredRules = filterRules(rules, sourceTech, targetTech);
         if (filteredRules.isEmpty()) {
             logger.warnf("No rules found !!");
@@ -165,15 +136,12 @@ public class AnalyzeCommand implements Runnable {
             logger.warnf("No migration tasks found !!");
         }
 
-        // Render by default the Ascii Table of results
         List<String[]> tableData = resultsService.generateDataTable(tasks, config.sourceTechnology(),
                 config.targetTechnology());
         resultsService.showCsvTable(tableData);
 
-        // Always generate the json report as it is needed to perform the transformation step
         resultsService.exportAsJson(config, tasks);
 
-        // Export also the report using the selected format if the user used the option: -o, --output.
         if (config.output() != null && !config.output().isEmpty()) {
             switch (output) {
                 case "html" -> resultsService.exportAsHtml(config, tableData);

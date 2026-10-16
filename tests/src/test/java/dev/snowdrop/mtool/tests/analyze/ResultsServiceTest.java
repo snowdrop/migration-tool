@@ -1,6 +1,6 @@
 package dev.snowdrop.mtool.tests.analyze;
 
-import dev.snowdrop.mtool.analyze.services.ResultsService;
+import dev.snowdrop.mtool.analyze.reporting.ResultsService;
 import dev.snowdrop.mtool.model.analyze.Result;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

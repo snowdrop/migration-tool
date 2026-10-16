@@ -3,8 +3,8 @@ package dev.snowdrop.mtool.render;
 import com.github.freva.asciitable.AsciiTable;
 import com.github.freva.asciitable.Column;
 import com.github.freva.asciitable.HorizontalAlign;
-import dev.snowdrop.mtool.analyze.services.ResultsService;
-import dev.snowdrop.mtool.analyze.utils.TerminalUtils;
+import dev.snowdrop.mtool.analyze.reporting.ResultsService;
+import dev.snowdrop.mtool.formatting.TerminalStyles;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +20,7 @@ public class AsciiTableWithHyperlink {
     static void main(String[] args) {
 
         System.out.println("==== Print an hyperlink using createLink method ======");
-        System.out.println(TerminalUtils.createLink("https://google.com", "Google me"));
+        System.out.println(TerminalStyles.createLink("https://google.com", "Google me"));
 
         List<String[]> tableData = new ArrayList<>();
         tableData.add(
@@ -35,7 +35,7 @@ public class AsciiTableWithHyperlink {
                 "Found PostMapping at line 77, char: 5 - 17\nfile:///Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/demo-spring-boot-todo-app/src/main/java/com/todo/app/controller/TaskController.java\n--- rewrite ---\nFound ResponseBody at line 77, char: 5 - 17\nfile:///Users/cmoullia/code/application-modernisation/migration-tool-parent/applications/demo-spring-boot-todo-app/src/main/java/com/todo/app/controller/TaskController.java" });
 
         System.out.println("\n=== Migration data with Styler ===");
-        var asciiTable = AsciiTable.builder().styler(TerminalUtils.customizeStyle(ResultsService.RULE_REPO_URL_FORMAT))
+        var asciiTable = AsciiTable.builder().styler(TerminalStyles.customizeStyle(ResultsService.RULE_REPO_URL_FORMAT))
                 .data(tableData,
                         Arrays.asList(
                                 new Column().header("Rule ID").headerAlign(HorizontalAlign.LEFT)

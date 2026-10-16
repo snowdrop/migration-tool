@@ -421,7 +421,7 @@ public class Todos extends Controller {
 
 --
 
-### Localisation: jdtLSConfiguration
+### Localisation: Configuration
 
 Configure it in your `application.properties`:
 
