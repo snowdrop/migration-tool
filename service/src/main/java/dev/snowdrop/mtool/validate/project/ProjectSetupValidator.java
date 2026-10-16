@@ -1,9 +1,10 @@
-package dev.snowdrop.mtool.validate;
+package dev.snowdrop.mtool.validate.project;
 
 import dev.snowdrop.mtool.model.validate.ValidationReport;
 import dev.snowdrop.mtool.model.validate.ValidationResult;
 import dev.snowdrop.mtool.model.validate.ValidationResult.Status;
 import dev.snowdrop.mtool.model.validate.ValidationRule;
+import dev.snowdrop.mtool.validate.Validator;
 import org.jboss.logging.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

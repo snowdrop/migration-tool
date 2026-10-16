@@ -10,9 +10,9 @@ import dev.snowdrop.mtool.model.validate.ValidationResult;
 import dev.snowdrop.mtool.scanner.analyzer.JavaAnalyzer;
 import dev.snowdrop.mtool.scanner.analyzer.JavaParserAnalyzer;
 import dev.snowdrop.mtool.scanner.analyzer.TreeSitterAnalyzer;
-import dev.snowdrop.mtool.validate.ProjectSetupValidator;
-import dev.snowdrop.mtool.validate.Validator;
+import dev.snowdrop.mtool.validate.project.ProjectSetupValidator;
 import dev.snowdrop.mtool.validate.persistence.PersistenceValidator;
+import dev.snowdrop.mtool.validate.Validator;
 import io.quarkiverse.mcp.server.Tool;
 import io.quarkiverse.mcp.server.ToolArg;
 import io.quarkiverse.mcp.server.ToolGuardrails;
@@ -22,7 +22,7 @@ public class ValidateTools {
 
     private static final Logger LOG = Logger.getLogger(ValidateTools.class);
 
-    @ToolGuardrails(input = FilesystemAccessGuardrail.class)
+    @ToolGuardrails(input = { FilesystemAccessGuardrail.class, ValidatorNameGuardrail.class })
     @Tool(description = "Validate that a Spring-to-Quarkus migration is correct and complete. "
             + "Runs validators (project-setup, persistence) against the migrated Quarkus project, "
             + "comparing it with the original Spring project to detect missing entities, "

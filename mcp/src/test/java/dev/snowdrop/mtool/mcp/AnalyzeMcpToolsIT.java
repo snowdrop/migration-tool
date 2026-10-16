@@ -27,12 +27,12 @@ public class AnalyzeMcpToolsIT {
             client.when()
                     .toolsCall("sourceAnalyze", Map.of("projectPath", tempDir.toString(),
                             "userQueries", "java class all;properties all"), r -> {
-                        Assertions.assertFalse(r.isError());
-                        String text = r.firstContent().asText().text();
-                        Assertions.assertTrue(text.startsWith("Total: 2 match(es) across 2 query(ies)"));
-                        Assertions.assertTrue(text.contains("src/main/java/demo/Hello.java"));
-                        Assertions.assertTrue(text.contains("src/main/resources/application.properties"));
-                    })
+                                Assertions.assertFalse(r.isError());
+                                String text = r.firstContent().asText().text();
+                                Assertions.assertTrue(text.startsWith("Total: 2 match(es) across 2 query(ies)"));
+                                Assertions.assertTrue(text.contains("src/main/java/demo/Hello.java"));
+                                Assertions.assertTrue(text.contains("src/main/resources/application.properties"));
+                            })
                     .thenAssertResults();
         }
     }
