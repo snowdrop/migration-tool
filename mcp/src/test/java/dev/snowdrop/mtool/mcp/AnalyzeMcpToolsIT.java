@@ -20,7 +20,7 @@ public class AnalyzeMcpToolsIT {
 
         try (McpAssured.McpStdioTestClient client = McpAssured.newStdioClient()
                 .setStateless()
-                .setCommand("java", "-jar", "target/quarkus-app/quarkus-run.jar")
+                .setCommand("java", "-Dmtool.allowed-dirs=" + tempDir.toString(), "-jar", "target/quarkus-app/quarkus-run.jar")
                 .build()
                 .connect()) {
 
