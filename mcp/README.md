@@ -31,7 +31,7 @@ Compile the Quarkus MCP server first
 mvn package -pl mcp
 
 // To run the IT tests
-mvn clean verify -Pit -pl mcp
+mvn verify -Pit -pl mcp
 ```
 
 Next, launch the ACP client and pass the parameters to configure the Quarkus MCP server using stdio mode
@@ -52,7 +52,7 @@ The MCP server restricts tool access to a set of allowed directories, following 
 --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dmtool.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}'
 ```
 
-## stdio
+## Transport: stdio
 
 ### Analyze Tool
 
@@ -76,28 +76,47 @@ acp run \
   -p "Validate the migration of the spring project: ./applications/spring-jpa-crud against the quarkus project: ./applications/spring-jpa-crud-quarkus. Only run the validator: persistence"
 ```
 
-## To be reviewed
+## Transport: HTTP
 
-**claude**
+- Create a mcp json file or use the file `mco-server.json` under the module: `mcp`
+```json
+{
+  "type": "http",
+  "name": "quarkus-tools",
+  "url": "http://localhost:8080/mcp"
+}
+```
+- Launch the Quarkus MCP server: `mvn quarkus:dev` and define the allowed directories: `-Dmtool.allowed-dirs=/path/to/migration-tool`
+**NOTE**: To log the JSON-RPC messages, pass the following property: `-Dquarkus.mcp.server.traffic-logging.enabled=true`
 
+Example:
 ```shell
-# Using a SKILL
+cd mcp
+mvn -Dmtool.allowed-dirs=/path/to/migration-tool -Dquarkus.mcp.server.traffic-logging.enabled=true quarkus:dev
+```
+
+- Execute one of the previous commands to test: `analyze` or `validate` tools but where you pass the path of the JSON file
+```shell
 acp run \
   -a claude-acp \
   --backup no \
-  -s ./mcp/skills/analyze/SKILLS.md \
-  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}' \
-  -p "Analyze the application: ./applications/quarkus-todo-demo-app"
+  -s ./mcp/skills/<ANALYZE_OR_VALIDATE>/SKILLS.md \
+  --mcp-server-config ./mcp/mcp-server.json \
+  -p ...
 ```
 
-**IBM bob**
-
+- Example to analyze an application using the analyze SKILL
 ```shell
-# Using a SKILL
-acp run \
-  -a bob \
+# Without MCP Tools
+acp run -a claude-acp \
+  -s ./mcp/skills/analyze/SKILL.md \
   --backup no \
-  -s ./mcp/skills/analyze/SKILLS.md \
-  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}' \
-  -p "Analyze the application: ./applications/quarkus-todo-demo-app"
+  -p "Analyze the project: /Users/cmoullia/code/quarkus/rewrite-mtool/migration-tool/applications/spring-jpa-crud"
+
+# With MCP
+acp run -a claude-acp \
+  --mcp-server-config ./mcp/mcp-server.json \
+  -s ./mcp/skills/analyze/SKILL.md \
+  --backup no \
+  -p "Analyze the project with tools: /Users/cmoullia/code/quarkus/rewrite-mtool/migration-tool/applications/spring-jpa-crud"
 ```
