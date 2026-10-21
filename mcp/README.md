@@ -78,7 +78,7 @@ acp run \
 
 ## Transport: HTTP
 
-- Create a mcp json file or use the file `mco-server.json` under the module: `mcp`
+- Create a mcp JSON file or use the file `mcp-server.json` under the module: `mcp`
 ```json
 {
   "type": "http",
@@ -105,18 +105,18 @@ acp run \
   -p ...
 ```
 
-- Example to analyze an application using the analyze SKILL
+- Example to analyze an application using the `analyze` SKILL
 ```shell
 # Without MCP Tools
 acp run -a claude-acp \
   -s ./mcp/skills/analyze/SKILL.md \
   --backup no \
-  -p "Analyze the project: /Users/cmoullia/code/quarkus/rewrite-mtool/migration-tool/applications/spring-jpa-crud"
+  -p "Analyze the project: /path/to/migration-tool/applications/spring-jpa-crud"
 
 # With MCP
 acp run -a claude-acp \
   --mcp-server-config ./mcp/mcp-server.json \
   -s ./mcp/skills/analyze/SKILL.md \
   --backup no \
-  -p "Analyze the project with tools: /Users/cmoullia/code/quarkus/rewrite-mtool/migration-tool/applications/spring-jpa-crud"
+  -p "Analyze the project with tools: /path/to/migration-tool/applications/spring-jpa-crud"
 ```
