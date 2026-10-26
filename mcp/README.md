@@ -38,7 +38,7 @@ Next, launch the ACP client and pass the parameters to configure the Quarkus MCP
 
 ## Filesystem access guardrail
 
-The MCP server restricts tool access to a set of allowed directories, following the [MCP local server security](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security#limit-filesystem-access) convention. The `sourceAnalyze` and `sourceValidate` tools will reject any path outside these boundaries.
+The MCP server restricts tool access to a set of allowed directories, following the [MCP local server security](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security#limit-filesystem-access) convention. The `quarkit_analyze` and `quarkit_validate` tools will reject any path outside these boundaries.
 
 **Default:** the current working directory (`.`) where the server is started. When you run `acp run` from the repository root, all relative paths like `./applications/...` are allowed automatically.
 

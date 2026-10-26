@@ -23,11 +23,11 @@ public class ValidateTools {
     private static final Logger LOG = Logger.getLogger(ValidateTools.class);
 
     @ToolGuardrails(input = { FilesystemAccessGuardrail.class, ValidatorNameGuardrail.class })
-    @Tool(description = "Validate that a Spring-to-Quarkus migration is correct and complete. "
-            + "Runs validators (project-setup, persistence) against the migrated Quarkus project, "
+    @Tool(name = "quarkit_validate", description = "Validate that a Spring to Quarkus migration is correct and complete. "
+            + "Runs validators (project-setup, persistence, messaging, REST, transaction, etc) against the migrated Quarkus project, "
             + "comparing it with the original Spring project to detect missing entities, "
             + "field mismatches, ID strategy changes, and relationship differences.")
-    public String sourceValidate(
+    public String validate(
             @ToolArg(description = "Path to the migrated Quarkus project to validate") String target,
             @ToolArg(description = "Path to the original Spring project (required for persistence validation)") String source,
             @ToolArg(description = "Validator to run: 'project-setup', 'persistence', or 'all'", defaultValue = "all") String validator,
