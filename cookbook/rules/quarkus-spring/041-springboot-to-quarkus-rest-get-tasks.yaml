@@ -35,5 +35,5 @@
               methodPattern: "com.todo.app.controller.TaskController viewHome(..)"
               newReturnType: "org.springframework.http.ResponseEntity<List<Task>>"
         gav:
-        - dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT
+        - dev.snowdrop.mtool:openrewrite-recipes:2.0.1
         - org.openrewrite:rewrite-java:8.73.0
