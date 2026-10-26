@@ -25,7 +25,7 @@ public class AnalyzeMcpToolsIT {
                 .connect()) {
 
             client.when()
-                    .toolsCall("sourceAnalyze", Map.of("projectPath", tempDir.toString(),
+                    .toolsCall("quarkit_analyze", Map.of("projectPath", tempDir.toString(),
                             "userQueries", "java class all;properties all"), r -> {
                                 Assertions.assertFalse(r.isError());
                                 String text = r.firstContent().asText().text();

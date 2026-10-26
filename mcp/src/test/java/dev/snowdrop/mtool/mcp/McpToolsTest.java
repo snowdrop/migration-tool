@@ -26,16 +26,16 @@ public class McpToolsTest {
         client.when()
                 .toolsList(page -> {
                     assertEquals(2, page.size());
-                    McpAssured.ToolInfo sourceAnalyze = page.findByName("sourceAnalyze");
-                    assertEquals("sourceAnalyze", sourceAnalyze.name());
+                    McpAssured.ToolInfo analyze = page.findByName("quarkit_analyze");
+                    assertEquals("quarkit_analyze", analyze.name());
 
-                    JsonObject sourceAnalyzeSchema = sourceAnalyze.inputSchema();
+                    JsonObject sourceAnalyzeSchema = analyze.inputSchema();
                     JsonObject sourceAnalyzeProperties = sourceAnalyzeSchema.getJsonObject("properties");
                     assertNotNull(sourceAnalyzeProperties.getJsonObject("project_path"), sourceAnalyzeProperties.toString());
                     assertNotNull(sourceAnalyzeProperties.getJsonObject("query"), sourceAnalyzeProperties.toString());
 
-                    McpAssured.ToolInfo validate = page.findByName("validate");
-                    assertEquals("validate", validate.name());
+                    McpAssured.ToolInfo validate = page.findByName("quarkit_validate");
+                    assertEquals("quarkit_validate", validate.name());
                 })
                 .thenAssertResults();
     }
@@ -53,7 +53,7 @@ public class McpToolsTest {
 
         McpStreamableTestClient client = McpAssured.newConnectedStreamableClient();
         client.when()
-                .toolsCall("sourceAnalyze", Map.of("project_path", tempDir.toString(), "query", "java class all"),
+                .toolsCall("quarkit_analyze", Map.of("project_path", tempDir.toString(), "query", "java class all"),
                         toolResponse -> {
                             assertEquals(1, toolResponse.content().size());
                             for (Content c : toolResponse.content()) {

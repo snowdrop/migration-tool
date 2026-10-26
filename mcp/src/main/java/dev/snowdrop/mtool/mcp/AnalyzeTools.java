@@ -19,9 +19,9 @@ public class AnalyzeTools {
     private static final Logger LOG = Logger.getLogger(AnalyzeTools.class);
 
     @ToolGuardrails(input = FilesystemAccessGuardrail.class)
-    @Tool(title = "quarkit_source_analyze", description = "Analyze the source to discover the java classes, annotations, properties, etc files. "
+    @Tool(name = "quarkit_analyze", description = "Analyze the source to discover the java classes, annotations, properties, etc files. "
             + "Accepts multiple queries separated by semicolons, e.g. 'java class all;java annotation all'")
-    public String sourceAnalyze(
+    public String analyze(
             @ToolArg(name = "query", description = "Queries to perform, separated by ';'. Each query has 3 parts: <fileType> <symbol> <operation>. "
                     + "Example: 'java class all;java annotation all';pom dependency all; properties all") String userQueries,
             @ToolArg(name = "project_path", description = "Project path", defaultValue = ".") String projectPath) {

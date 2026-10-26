@@ -23,7 +23,7 @@ public class ValidateTools {
     private static final Logger LOG = Logger.getLogger(ValidateTools.class);
 
     @ToolGuardrails(input = { FilesystemAccessGuardrail.class, ValidatorNameGuardrail.class })
-    @Tool(title = "quarkit_validate", description = "Validate that a Spring to Quarkus migration is correct and complete. "
+    @Tool(name = "quarkit_validate", description = "Validate that a Spring to Quarkus migration is correct and complete. "
             + "Runs validators (project-setup, persistence, messaging, REST, transaction, etc) against the migrated Quarkus project, "
             + "comparing it with the original Spring project to detect missing entities, "
             + "field mismatches, ID strategy changes, and relationship differences.")
