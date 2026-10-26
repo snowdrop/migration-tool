@@ -46,19 +46,20 @@ public class McpToolsTest {
         Files.writeString(tempDir.resolve("src/main/java/demo/Hello.java"), "package demo; public class Hello {}");
         String result = """
                 Total: 1 match(es) across 1 query(ies)
-                
+
                 ## Query: java class all
                 Found 1 match(es):
                 Path: src/main/java/demo/Hello.java, start: (1, 28), end: (1-33), text: Hello""";
 
         McpStreamableTestClient client = McpAssured.newConnectedStreamableClient();
         client.when()
-                .toolsCall("sourceAnalyze", Map.of("project_path",tempDir.toString(),"query","java class all"), toolResponse -> {
-                    assertEquals(1, toolResponse.content().size());
-                    for (Content c : toolResponse.content()) {
-                        assertEquals(result,c.asText().text());
-                    }
-                })
+                .toolsCall("sourceAnalyze", Map.of("project_path", tempDir.toString(), "query", "java class all"),
+                        toolResponse -> {
+                            assertEquals(1, toolResponse.content().size());
+                            for (Content c : toolResponse.content()) {
+                                assertEquals(result, c.asText().text());
+                            }
+                        })
                 .thenAssertResults();
     }
 }
