@@ -54,6 +54,7 @@
         <module>parser</module>
         <module>scanner</module>
         <module>service</module>
+        <module>references</module>
         <module>mcp</module>
         <module>migration-cli</module>
         <module>tests</module>

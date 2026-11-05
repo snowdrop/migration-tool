@@ -1,0 +1,261 @@
+[
+  {
+    "section": "Core",
+    "spring": "spring-boot-starter-web",
+    "quarkus": "quarkus-rest",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-web"
+  },
+  {
+    "section": "Core",
+    "spring": "spring-boot-starter-webflux",
+    "quarkus": "quarkus-rest with reactive",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-web"
+  },
+  {
+    "section": "Core",
+    "spring": "spring-boot-starter-data-jpa",
+    "quarkus": "quarkus-hibernate-orm-panache",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-data-jpa"
+  },
+  {
+    "section": "Core",
+    "spring": "spring-boot-starter-data-rest",
+    "quarkus": "quarkus-rest + quarkus-hibernate-orm-panache",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-data-rest"
+  },
+  {
+    "section": "Core",
+    "spring": "spring-boot-starter-validation",
+    "quarkus": "quarkus-hibernate-validator",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-hibernate-validator"
+  },
+  {
+    "section": "Core",
+    "spring": "spring-boot-starter-security",
+    "quarkus": "quarkus-security + quarkus-oidc (or quarkus-elytron-security-properties-file)",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-security"
+  },
+  {
+    "section": "Core",
+    "spring": "spring-boot-starter-actuator",
+    "quarkus": "quarkus-smallrye-health + quarkus-micrometer",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-boot-properties"
+  },
+  {
+    "section": "Core",
+    "spring": "spring-boot-starter-cache",
+    "quarkus": "quarkus-cache",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-cache"
+  },
+  {
+    "section": "Core",
+    "spring": "spring-boot-starter-test",
+    "quarkus": "quarkus-junit + io.rest-assured:rest-assured",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-junit"
+  },
+  {
+    "section": "Data / Persistence",
+    "spring": "spring-boot-starter-data-mongodb",
+    "quarkus": "quarkus-mongodb-panache",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": "Compatibility: quarkus-spring-data-api (limited)"
+  },
+  {
+    "section": "Data / Persistence",
+    "spring": "spring-boot-starter-data-redis",
+    "quarkus": "quarkus-redis-client",
+    "compat": "NOT_SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Data / Persistence",
+    "spring": "spring-boot-starter-jdbc",
+    "quarkus": "quarkus-agroal + quarkus-jdbc-*",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-data-jpa"
+  },
+  {
+    "section": "Data / Persistence",
+    "spring": "h2 (test DB)",
+    "quarkus": "quarkus-jdbc-h2",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-jdbc-h2"
+  },
+  {
+    "section": "Data / Persistence",
+    "spring": "postgresql",
+    "quarkus": "quarkus-jdbc-postgresql",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-jdbc-postgresql"
+  },
+  {
+    "section": "Data / Persistence",
+    "spring": "mysql-connector-j",
+    "quarkus": "quarkus-jdbc-mysql",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-jdbc-mysql"
+  },
+  {
+    "section": "Data / Persistence",
+    "spring": "flyway",
+    "quarkus": "quarkus-flyway",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-flyway"
+  },
+  {
+    "section": "Data / Persistence",
+    "spring": "liquibase",
+    "quarkus": "quarkus-liquibase",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-liquibase"
+  },
+  {
+    "section": "Messaging",
+    "spring": "spring-kafka",
+    "quarkus": "quarkus-messaging-kafka",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension for messaging. Connector: smallrye-kafka"
+  },
+  {
+    "section": "Messaging",
+    "spring": "spring-boot-starter-amqp (RabbitMQ / AMQP 0-9-1)",
+    "quarkus": "quarkus-messaging-rabbitmq",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension for messaging. Connector: smallrye-rabbitmq"
+  },
+  {
+    "section": "Messaging",
+    "spring": "AMQP 1.0 brokers (Azure Service Bus, Artemis AMQP mode)",
+    "quarkus": "quarkus-messaging-amqp",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension for messaging. Connector: smallrye-amqp"
+  },
+  {
+    "section": "Messaging",
+    "spring": "spring-boot-starter-activemq / spring-boot-starter-artemis",
+    "quarkus": "io.quarkiverse.artemis:quarkus-artemis-jms¹ + io.smallrye.reactive:smallrye-reactive-messaging-jms²",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension for messaging. Connector: smallrye-jms; ¹ Quarkiverse extension — not in the Quarkus platform; declare with explicit groupId.; ² In the Quarkus 3.x BOM — no version declaration needed."
+  },
+  {
+    "section": "Templating / View Layer",
+    "spring": "spring-boot-starter-thymeleaf",
+    "quarkus": "quarkus-rest-qute (when controllers return TemplateInstance) or quarkus-qute-web (auto-serve templates without REST resources). **Never** use quarkus-qute alone — it lacks REST integration.",
+    "compat": "NOT_SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Templating / View Layer",
+    "spring": "spring-boot-starter-freemarker",
+    "quarkus": "quarkus-rest-qute",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: io.quarkiverse.freemarker:quarkus-freemarker"
+  },
+  {
+    "section": "Templating / View Layer",
+    "spring": "JSP (jstl, tomcat-embed-jasper)",
+    "quarkus": "quarkus-rest-qute",
+    "compat": "NOT_SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Templating / View Layer",
+    "spring": "JSF / PrimeFaces",
+    "quarkus": "quarkus-rest-qute",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: org.apache.myfaces.core.extensions.quarkus:myfaces-quarkus (+ io.quarkiverse.primefaces:quarkus-primefaces)"
+  },
+  {
+    "section": "Scheduling / DI / Config",
+    "spring": "spring-boot-starter (DI)",
+    "quarkus": "quarkus-arc (included by default)",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-di"
+  },
+  {
+    "section": "Scheduling / DI / Config",
+    "spring": "spring-tx / @Transactional",
+    "quarkus": "quarkus-narayana-jta (usually pulled in by Hibernate ORM; add explicitly if needed)",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-tx"
+  },
+  {
+    "section": "Scheduling / DI / Config",
+    "spring": "spring-boot-configuration-processor",
+    "quarkus": "quarkus-arc (built-in config mapping)",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-boot-properties"
+  },
+  {
+    "section": "Scheduling / DI / Config",
+    "spring": "spring-boot-starter-quartz",
+    "quarkus": "quarkus-quartz or quarkus-scheduler",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-scheduled"
+  },
+  {
+    "section": "Data REST / Cloud / Testing",
+    "spring": "spring-boot-starter-data-rest",
+    "quarkus": "quarkus-rest + quarkus-hibernate-orm-panache",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-data-rest"
+  },
+  {
+    "section": "Data REST / Cloud / Testing",
+    "spring": "spring-cloud-starter-config",
+    "quarkus": "--",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-cloud-config-client"
+  },
+  {
+    "section": "Data REST / Cloud / Testing",
+    "spring": "spring-boot-starter-test (with @SpringBootTest)",
+    "quarkus": "quarkus-junit",
+    "compat": "SUPPORTED",
+    "notes": "Compatibility: quarkus-spring-boot-test"
+  },
+  {
+    "section": "Observability",
+    "spring": "micrometer-registry-prometheus",
+    "quarkus": "quarkus-micrometer-registry-prometheus",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension"
+  },
+  {
+    "section": "Observability",
+    "spring": "spring-boot-starter-logging",
+    "quarkus": "quarkus-logging-json (JSON) or built-in JBoss Logging",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension"
+  },
+  {
+    "section": "Observability",
+    "spring": "opentelemetry",
+    "quarkus": "quarkus-opentelemetry",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension"
+  },
+  {
+    "section": "Build Plugin",
+    "spring": "spring-boot-maven-plugin",
+    "quarkus": "quarkus-maven-plugin",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension"
+  },
+  {
+    "section": "Build Plugin",
+    "spring": "spring-boot-gradle-plugin",
+    "quarkus": "io.quarkus Gradle plugin",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension"
+  }
+]
