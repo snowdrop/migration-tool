@@ -121,7 +121,7 @@ jbang --catalog <repo>/jbang-catalog-dev.json mcp
 
 In the MCP client config:
 ```shell
---mcp-server-config '{"type":"stdio","name":"mtools","command":"jbang","args":["--deps","dev.snowdrop.mtool:references:2.0.0-SNAPSHOT","mcp@mtool"]}'
+--mcp-server-config '{"type":"stdio","name":"mtools","command":"jbang","args":["--deps","dev.snowdrop.mtool:references:2.0.0-SNAPSHOT","mcp@quarkit"]}'
 ```
 
 ### Override the references with `quarkit.references.path`
@@ -130,13 +130,13 @@ Point `quarkit.references.path` to a directory, or to a jar/zip, containing `ann
 
 ```shell
 // Point to the references jar
-jbang -Dquarkit.references.path=./references/target/references-2.0.0-SNAPSHOT.jar mcp@mtool
+jbang -Dquarkit.references.path=./references/target/references-2.0.0-SNAPSHOT.jar mcp@quarkit
 
 // Or as an environment variable in the MCP client config
---mcp-server-config '{"type":"stdio","name":"mtools","command":"jbang","args":["mcp@mtool"],"env":{"MTOOL_REFERENCES_PATH":"./references/target/references-2.0.0-SNAPSHOT.jar"}}'
+--mcp-server-config '{"type":"stdio","name":"mtools","command":"jbang","args":["mcp@quarkit"],"env":{"MTOOL_REFERENCES_PATH":"./references/target/references-2.0.0-SNAPSHOT.jar"}}'
 
 // Or point to a plain directory containing the JSON files
-jbang -Dquarkit.references.path=/path/to/references-dir mcp@mtool
+jbang -Dquarkit.references.path=/path/to/references-dir mcp@quarkit
 ```
 
 ## stdio
