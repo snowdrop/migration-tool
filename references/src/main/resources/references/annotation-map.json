@@ -1,0 +1,695 @@
+[
+  {
+    "section": "Dependency Injection",
+    "spring": "@Component",
+    "quarkus": "@ApplicationScoped",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": "Compat maps to `@Singleton` by default, not `@ApplicationScoped`"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Service",
+    "quarkus": "@ApplicationScoped",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": "Same as `@Component` in compat"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Repository",
+    "quarkus": "@ApplicationScoped",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": "Same as `@Component` in compat"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Autowired",
+    "quarkus": "@Inject",
+    "compat": "SUPPORTED",
+    "notes": "Field, constructor, and setter injection all supported"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Qualifier(\"name\")",
+    "quarkus": "@jakarta.inject.Named or custom @Qualifier",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Value(\"${prop}\")",
+    "quarkus": "@ConfigProperty(name = \"prop\")",
+    "compat": "SUPPORTED",
+    "notes": "**SpEL `#{...}` NOT supported** — only `${...}` property placeholders"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Value(\"${prop:default}\")",
+    "quarkus": "@ConfigProperty(name = \"prop\", defaultValue = \"default\")",
+    "compat": "SUPPORTED",
+    "notes": "Inline defaults work"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Configuration",
+    "quarkus": "@ApplicationScoped",
+    "compat": "SUPPORTED",
+    "notes": "Always application-scoped in compat"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Bean",
+    "quarkus": "@Produces",
+    "compat": "SUPPORTED",
+    "notes": "**Must be inside `@Configuration` class** — fails otherwise"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Primary",
+    "quarkus": "@io.quarkus.arc.DefaultBean or @Alternative + @Priority",
+    "compat": "NOT_SUPPORTED",
+    "notes": "Not processed by `quarkus-spring-di`"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Conditional*",
+    "quarkus": "@IfBuildProfile or @LookupIfProperty",
+    "compat": "NOT_SUPPORTED",
+    "notes": "Not processed by `quarkus-spring-di`"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Scope(\"singleton\")",
+    "quarkus": "@Singleton",
+    "compat": "SUPPORTED",
+    "notes": "Default scope for stereotypes"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Scope(\"prototype\")",
+    "quarkus": "@Dependent",
+    "compat": "SUPPORTED",
+    "notes": "New instance per injection point"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Scope(\"request\")",
+    "quarkus": "@RequestScoped",
+    "compat": "SUPPORTED",
+    "notes": "Per-HTTP-request lifecycle"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Scope(\"session\")",
+    "quarkus": "@SessionScoped",
+    "compat": "SUPPORTED",
+    "notes": "Per-session lifecycle"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Scope(\"application\")",
+    "quarkus": "@ApplicationScoped",
+    "compat": "SUPPORTED",
+    "notes": "Application-wide singleton with proxy"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@Lazy",
+    "quarkus": "No direct equivalent",
+    "compat": "NOT_SUPPORTED",
+    "notes": "Quarkus beans are lazy by default"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@PostConstruct",
+    "quarkus": "@PostConstruct",
+    "compat": "SUPPORTED",
+    "notes": "Same annotation, no mapping needed"
+  },
+  {
+    "section": "Dependency Injection",
+    "spring": "@PreDestroy",
+    "quarkus": "@PreDestroy",
+    "compat": "SUPPORTED",
+    "notes": "Same annotation, no mapping needed"
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@RestController",
+    "quarkus": "@Path + @ApplicationScoped",
+    "compat": "SUPPORTED",
+    "notes": "Only `@RestController`, **NOT plain `@Controller`**"
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@Controller",
+    "quarkus": "@Path + @ApplicationScoped",
+    "compat": "NOT_SUPPORTED",
+    "notes": "Compat only supports `@RestController`"
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@RequestMapping(\"/path\")",
+    "quarkus": "@Path(\"/path\")",
+    "compat": "SUPPORTED",
+    "notes": "Supports `method`, `produces`, `consumes` attributes"
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@GetMapping",
+    "quarkus": "@GET",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@PostMapping",
+    "quarkus": "@POST",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@PutMapping",
+    "quarkus": "@PUT",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@DeleteMapping",
+    "quarkus": "@DELETE",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@PatchMapping",
+    "quarkus": "@PATCH",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@PathVariable",
+    "quarkus": "@PathParam or @RestPath",
+    "compat": "SUPPORTED",
+    "notes": "Auto-converts types (String, int, Long...)"
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@RequestParam",
+    "quarkus": "@QueryParam or @RestQuery",
+    "compat": "SUPPORTED",
+    "notes": "`required`, `defaultValue`, `Optional<T>` all work"
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@RequestBody",
+    "quarkus": "No annotation needed",
+    "compat": "SUPPORTED",
+    "notes": "Auto JSON deserialization"
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@RequestHeader",
+    "quarkus": "@HeaderParam or @RestHeader",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@CookieValue",
+    "quarkus": "@CookieParam or @RestCookie",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@MatrixVariable",
+    "quarkus": "@MatrixParam",
+    "compat": "SUPPORTED",
+    "notes": "Not commonly used but supported"
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@ResponseStatus",
+    "quarkus": "Return Response or RestResponse",
+    "compat": "SUPPORTED",
+    "notes": "Works on methods and exception classes"
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@ExceptionHandler",
+    "quarkus": "@ServerExceptionMapper",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": "**Only one `@RestControllerAdvice` per app**"
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@RestControllerAdvice",
+    "quarkus": "@ServerExceptionMapper on a class",
+    "compat": "SUPPORTED",
+    "notes": "**Limited to one per application**"
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@CrossOrigin",
+    "quarkus": "Configure quarkus.http.cors in properties",
+    "compat": "NOT_SUPPORTED",
+    "notes": "Use Quarkus CORS config instead"
+  },
+  {
+    "section": "REST / Web",
+    "spring": "@ResponseBody",
+    "quarkus": "Default in Quarkus REST",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "@Entity",
+    "quarkus": "@Entity",
+    "compat": "SUPPORTED",
+    "notes": "jakarta.persistence — no mapping needed"
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "@Table",
+    "quarkus": "@Table",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "@Id / @EmbeddedId",
+    "quarkus": "Same",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "@GeneratedValue",
+    "quarkus": "Same",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "@Transactional",
+    "quarkus": "jakarta.transaction.Transactional",
+    "compat": "SUPPORTED",
+    "notes": "Compat: keeps Spring's `@Transactional` as-is. Full: replace with `jakarta.transaction.Transactional`. See [compat notes](#compat-transactional-notes-quarkus-spring-tx)"
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "@Query(\"JPQL\")",
+    "quarkus": "Panache find() / named queries",
+    "compat": "SUPPORTED",
+    "notes": "Named `:param` and positional `?1` both work. **SpEL `#{...}` NOT supported**"
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "@Param(\"name\")",
+    "quarkus": "—",
+    "compat": "SUPPORTED",
+    "notes": "Binds named parameters in `@Query`"
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "@Modifying",
+    "quarkus": "—",
+    "compat": "SUPPORTED",
+    "notes": "For UPDATE/DELETE queries; returns void, int, or long"
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "CrudRepository<T,ID>",
+    "quarkus": "PanacheRepository<T>",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "ListCrudRepository<T,ID>",
+    "quarkus": "PanacheRepository<T>",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "JpaRepository<T,ID>",
+    "quarkus": "PanacheRepository<T>",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "PagingAndSortingRepository<T,ID>",
+    "quarkus": "PanacheRepository<T>",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "ListPagingAndSortingRepository<T,ID>",
+    "quarkus": "PanacheRepository<T>",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "@RepositoryDefinition",
+    "quarkus": "—",
+    "compat": "SUPPORTED",
+    "notes": "Custom repository without extending interface"
+  },
+  {
+    "section": "Data / JPA",
+    "spring": "@NoRepositoryBean",
+    "quarkus": "—",
+    "compat": "SUPPORTED",
+    "notes": "For intermediate base repository interfaces"
+  },
+  {
+    "section": "Scheduling",
+    "spring": "@Scheduled(cron=...)",
+    "quarkus": "@io.quarkus.scheduler.Scheduled(cron=...)",
+    "compat": "SUPPORTED",
+    "notes": "Property placeholders `${...}` → `{...}` format"
+  },
+  {
+    "section": "Scheduling",
+    "spring": "@Scheduled(fixedRate=1000)",
+    "quarkus": "@Scheduled(every=\"1s\")",
+    "compat": "SUPPORTED",
+    "notes": "Converted to ISO duration"
+  },
+  {
+    "section": "Scheduling",
+    "spring": "@Scheduled(fixedDelay=1000)",
+    "quarkus": "@Scheduled(every=\"1s\")",
+    "compat": "NOT_SUPPORTED",
+    "notes": "Throws `IllegalArgumentException`"
+  },
+  {
+    "section": "Scheduling",
+    "spring": "@Scheduled(initialDelay=5000)",
+    "quarkus": "@Scheduled(delay=5000, delayUnit=MILLISECONDS)",
+    "compat": "SUPPORTED",
+    "notes": "**Cannot combine with cron**"
+  },
+  {
+    "section": "Scheduling",
+    "spring": "@Schedules({...})",
+    "quarkus": "Multiple @Scheduled",
+    "compat": "SUPPORTED",
+    "notes": "Container annotation unwrapped"
+  },
+  {
+    "section": "Scheduling",
+    "spring": "@EnableScheduling",
+    "quarkus": "Not needed",
+    "compat": "SUPPORTED",
+    "notes": "Auto-enabled with extension"
+  },
+  {
+    "section": "Scheduling",
+    "spring": "@Async",
+    "quarkus": "Return Uni<T> or CompletionStage",
+    "compat": "NOT_SUPPORTED",
+    "notes": "Use managed executor"
+  },
+  {
+    "section": "Security",
+    "spring": "@Secured(\"ROLE_ADMIN\")",
+    "quarkus": "@RolesAllowed(\"ADMIN\")",
+    "compat": "SUPPORTED",
+    "notes": "Cannot mix with `@PreAuthorize` on same method"
+  },
+  {
+    "section": "Security",
+    "spring": "@PreAuthorize(\"hasRole('ADMIN')\")",
+    "quarkus": "@RolesAllowed(\"ADMIN\")",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": "See supported expressions below"
+  },
+  {
+    "section": "Security",
+    "spring": "@EnableWebSecurity",
+    "quarkus": "Not needed",
+    "compat": "SUPPORTED",
+    "notes": "Configure in `application.properties`"
+  },
+  {
+    "section": "Security",
+    "spring": "@AuthenticationPrincipal",
+    "quarkus": "@Context SecurityContext or inject SecurityIdentity",
+    "compat": "NOT_SUPPORTED",
+    "notes": "Use Quarkus `SecurityIdentity`"
+  },
+  {
+    "section": "Cache",
+    "spring": "@Cacheable(\"name\")",
+    "quarkus": "@CacheResult(cacheName = \"name\")",
+    "compat": "SUPPORTED",
+    "notes": "**Single cache name only** — no arrays"
+  },
+  {
+    "section": "Cache",
+    "spring": "@CacheEvict(\"name\")",
+    "quarkus": "@CacheInvalidate(cacheName = \"name\")",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Cache",
+    "spring": "@CacheEvict(value=\"name\", allEntries=true)",
+    "quarkus": "@CacheInvalidateAll(cacheName = \"name\")",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Cache",
+    "spring": "@CachePut(\"name\")",
+    "quarkus": "@CacheInvalidate + @CacheResult",
+    "compat": "SUPPORTED",
+    "notes": "Invalidates then caches new result"
+  },
+  {
+    "section": "Cache",
+    "spring": "@Caching(...)",
+    "quarkus": "Combine annotations",
+    "compat": "NOT_SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Cache",
+    "spring": "@CacheConfig",
+    "quarkus": "—",
+    "compat": "NOT_SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Cache",
+    "spring": "@EnableCaching",
+    "quarkus": "Not needed",
+    "compat": "SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Configuration Properties",
+    "spring": "@ConfigurationProperties(prefix=\"app\")",
+    "quarkus": "@ConfigMapping(prefix=\"app\")",
+    "compat": "SUPPORTED",
+    "notes": "Class-based (with setters) and interface-based"
+  },
+  {
+    "section": "Configuration Properties",
+    "spring": "@ConstructorBinding",
+    "quarkus": "@ConfigMapping (record/interface)",
+    "compat": "NOT_SUPPORTED",
+    "notes": "Compat requires no-arg constructor + setters"
+  },
+  {
+    "section": "Configuration Properties",
+    "spring": "@EnableConfigurationProperties",
+    "quarkus": "Not needed",
+    "compat": "SUPPORTED",
+    "notes": "Auto-detected"
+  },
+  {
+    "section": "Configuration Properties",
+    "spring": "@Validated on config class",
+    "quarkus": "@Valid",
+    "compat": "SUPPORTED",
+    "notes": "Auto-validates if Hibernate Validator present"
+  },
+  {
+    "section": "Spring Data REST",
+    "spring": "@RepositoryRestResource",
+    "quarkus": "quarkus-spring-data-rest",
+    "compat": "SUPPORTED",
+    "notes": "Auto-generates CRUD endpoints"
+  },
+  {
+    "section": "Spring Data REST",
+    "spring": "@RepositoryRestResource(path=\"custom\")",
+    "quarkus": "quarkus-spring-data-rest",
+    "compat": "SUPPORTED",
+    "notes": "Custom resource path"
+  },
+  {
+    "section": "Spring Data REST",
+    "spring": "@RepositoryRestResource(exported=false)",
+    "quarkus": "quarkus-spring-data-rest",
+    "compat": "SUPPORTED",
+    "notes": "Disables REST exposure"
+  },
+  {
+    "section": "Spring Data REST",
+    "spring": "@RestResource(exported=false)",
+    "quarkus": "quarkus-spring-data-rest",
+    "compat": "SUPPORTED",
+    "notes": "Disables specific method endpoint"
+  },
+  {
+    "section": "Testing",
+    "spring": "@SpringBootTest",
+    "quarkus": "@QuarkusTest",
+    "compat": "SUPPORTED",
+    "notes": "Works as Quarkus test annotation"
+  },
+  {
+    "section": "Testing",
+    "spring": "@WebMvcTest",
+    "quarkus": "@QuarkusTest + RestAssured",
+    "compat": "NOT_SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Testing",
+    "spring": "@DataJpaTest",
+    "quarkus": "@QuarkusTest with test profile",
+    "compat": "NOT_SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Testing",
+    "spring": "@MockBean",
+    "quarkus": "@InjectMock (io.quarkus.test.InjectMock)",
+    "compat": "NOT_SUPPORTED",
+    "notes": "**Moved in 3.2**: old `io.quarkus.test.junit.mockito.InjectMock` deprecated, removed in 4.0"
+  },
+  {
+    "section": "Testing",
+    "spring": "@TestConfiguration",
+    "quarkus": "@QuarkusTestResource",
+    "compat": "NOT_SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Testing",
+    "spring": "@ActiveProfiles(\"test\")",
+    "quarkus": "@TestProfile(TestProfile.class)",
+    "compat": "NOT_SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Testing",
+    "spring": "TestRestTemplate",
+    "quarkus": "RestAssured (given().when().get(...))",
+    "compat": "NOT_SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Testing",
+    "spring": "@LocalServerPort",
+    "quarkus": "@TestHTTPResource",
+    "compat": "NOT_SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "Messaging",
+    "spring": "@KafkaListener(topics = \"t\", groupId = \"g\")",
+    "quarkus": "@Incoming(\"t\") on method + mp.messaging.incoming.t.group.id=g in properties",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension for messaging. Connector: smallrye-kafka"
+  },
+  {
+    "section": "Messaging",
+    "spring": "@RabbitListener(queues = \"q\")",
+    "quarkus": "@Incoming(\"q\") on method",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension for messaging. Connector: smallrye-rabbitmq — not smallrye-amqp"
+  },
+  {
+    "section": "Messaging",
+    "spring": "@JmsListener(destination = \"d\")",
+    "quarkus": "@Incoming(\"d\") on method",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension for messaging. Connector: smallrye-jms"
+  },
+  {
+    "section": "Messaging",
+    "spring": "@SendTo(\"reply\")",
+    "quarkus": "@Outgoing(\"reply-out\") paired with @Incoming on same method",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension for messaging. Connector: Fixed destinations only; no SpEL equivalent"
+  },
+  {
+    "section": "Messaging",
+    "spring": "KafkaTemplate.send(\"t\", payload)",
+    "quarkus": "@Channel(\"t-out\") Emitter<T> + emitter.send(payload)",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension for messaging. Connector: smallrye-kafka"
+  },
+  {
+    "section": "Messaging",
+    "spring": "RabbitTemplate.convertAndSend(\"q\", payload)",
+    "quarkus": "@Channel(\"q-out\") Emitter<T> + emitter.send(payload)",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension for messaging. Connector: smallrye-rabbitmq"
+  },
+  {
+    "section": "Messaging",
+    "spring": "JmsTemplate.convertAndSend(\"d\", payload)",
+    "quarkus": "@Channel(\"d-out\") Emitter<T> + emitter.send(payload)",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension for messaging. Connector: smallrye-jms"
+  },
+  {
+    "section": "Application Lifecycle",
+    "spring": "@SpringBootApplication",
+    "quarkus": "No equivalent needed",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension. Quarkus auto-discovers beans"
+  },
+  {
+    "section": "Application Lifecycle",
+    "spring": "SpringApplication.run()",
+    "quarkus": "Quarkus.run() or just quarkus:dev",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension. Usually no main class needed"
+  },
+  {
+    "section": "Application Lifecycle",
+    "spring": "CommandLineRunner",
+    "quarkus": "@Observes StartupEvent",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension. `io.quarkus.runtime.StartupEvent`"
+  },
+  {
+    "section": "Application Lifecycle",
+    "spring": "ApplicationRunner",
+    "quarkus": "@Observes StartupEvent",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension."
+  },
+  {
+    "section": "Application Lifecycle",
+    "spring": "@EventListener",
+    "quarkus": "@Observes",
+    "compat": "NOT_SUPPORTED",
+    "notes": "No compat extension. CDI events"
+  }
+]

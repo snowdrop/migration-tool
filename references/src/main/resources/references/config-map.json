@@ -1,0 +1,380 @@
+[
+  {
+    "section": "Server",
+    "spring": "server.port=8080",
+    "quarkus": "quarkus.http.port=8080",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Server",
+    "spring": "server.servlet.context-path=/api",
+    "quarkus": "quarkus.http.root-path=/api",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Server",
+    "spring": "server.ssl.key-store",
+    "quarkus": "quarkus.http.ssl.certificate.key-store-file",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Server",
+    "spring": "server.compression.enabled=true",
+    "quarkus": "quarkus.http.enable-compression=true",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Server",
+    "spring": "server.error.include-message=always",
+    "quarkus": "Configure via exception mappers",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Datasource",
+    "spring": "spring.datasource.url",
+    "quarkus": "%prod.quarkus.datasource.jdbc.url",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Datasource",
+    "spring": "spring.datasource.username",
+    "quarkus": "%prod.quarkus.datasource.username",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Datasource",
+    "spring": "spring.datasource.password",
+    "quarkus": "%prod.quarkus.datasource.password",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Datasource",
+    "spring": "spring.datasource.driver-class-name",
+    "quarkus": "quarkus.datasource.db-kind (auto-detected, no %prod. needed)",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "JPA / Hibernate",
+    "spring": "spring.jpa.hibernate.ddl-auto=update",
+    "quarkus": "quarkus.hibernate-orm.schema-management.strategy=update (before Quarkus 3.40: quarkus.hibernate-orm.database.generation=update)",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "JPA / Hibernate",
+    "spring": "spring.jpa.show-sql=true",
+    "quarkus": "quarkus.hibernate-orm.log.sql=true",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "JPA / Hibernate",
+    "spring": "spring.jpa.properties.hibernate.dialect",
+    "quarkus": "quarkus.hibernate-orm.dialect (usually auto-detected)",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "JPA / Hibernate",
+    "spring": "spring.jpa.properties.hibernate.format_sql",
+    "quarkus": "quarkus.hibernate-orm.log.format-sql=true",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "JPA / Hibernate",
+    "spring": "spring.jpa.open-in-view=false",
+    "quarkus": "Not applicable (no OSIV in Quarkus)",
+    "compat": "NOT_SUPPORTED",
+    "notes": ""
+  },
+  {
+    "section": "JPA / Hibernate",
+    "spring": "spring.jpa.defer-datasource-initialization",
+    "quarkus": "Use Flyway or import.sql",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "JPA / Hibernate",
+    "spring": "spring.jpa.hibernate.naming.physical-strategy",
+    "quarkus": "quarkus.hibernate-orm.physical-naming-strategy",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "JPA / Hibernate",
+    "spring": "spring.jpa.hibernate.naming.implicit-strategy",
+    "quarkus": "quarkus.hibernate-orm.implicit-naming-strategy",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Flyway",
+    "spring": "spring.flyway.enabled=true",
+    "quarkus": "quarkus.flyway.migrate-at-start=true",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Flyway",
+    "spring": "spring.flyway.locations=classpath:db/migration",
+    "quarkus": "quarkus.flyway.locations=db/migration",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Flyway",
+    "spring": "spring.flyway.baseline-on-migrate=true",
+    "quarkus": "quarkus.flyway.baseline-on-migrate=true",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Logging",
+    "spring": "logging.level.root=INFO",
+    "quarkus": "quarkus.log.level=INFO",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Logging",
+    "spring": "logging.level.com.example=DEBUG",
+    "quarkus": "quarkus.log.category.\"com.example\".level=DEBUG",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Logging",
+    "spring": "logging.file.name=app.log",
+    "quarkus": "quarkus.log.file.enable=true + quarkus.log.file.path=app.log",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Logging",
+    "spring": "logging.pattern.console",
+    "quarkus": "quarkus.log.console.format",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Profiles",
+    "spring": "application-{profile}.properties",
+    "quarkus": "application-{profile}.properties (same convention)",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Profiles",
+    "spring": "spring.profiles.active=dev",
+    "quarkus": "quarkus.profile=dev or -Dquarkus.profile=dev",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Profiles",
+    "spring": "SPRING_PROFILES_ACTIVE=prod (env var)",
+    "quarkus": "QUARKUS_PROFILE=prod (env var)",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Profiles",
+    "spring": "@Profile(\"dev\")",
+    "quarkus": "@IfBuildProfile(\"dev\")",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Profiles",
+    "spring": "application-test.properties",
+    "quarkus": "%test. prefix in application.properties, or application-test.properties",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "CORS",
+    "spring": "@CrossOrigin or WebMvcConfigurer",
+    "quarkus": "quarkus.http.cors=true",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": "Related Quarkus property: quarkus.http.cors.origins=http://localhost:3000; Related Quarkus property: quarkus.http.cors.methods=GET,POST,PUT,DELETE"
+  },
+  {
+    "section": "Cache",
+    "spring": "spring.cache.type=caffeine",
+    "quarkus": "Extension quarkus-cache (Caffeine-based by default)",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Cache",
+    "spring": "@Cacheable(\"name\")",
+    "quarkus": "@io.quarkus.cache.CacheResult(cacheName = \"name\")",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Cache",
+    "spring": "@CacheEvict(\"name\")",
+    "quarkus": "@io.quarkus.cache.CacheInvalidate(cacheName = \"name\")",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Security",
+    "spring": "spring.security.user.name",
+    "quarkus": "quarkus.security.users.embedded.users.<name>.password",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Security",
+    "spring": "spring.security.oauth2.client.*",
+    "quarkus": "quarkus.oidc.*",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Security",
+    "spring": "spring.security.oauth2.resourceserver.jwt.issuer-uri",
+    "quarkus": "quarkus.oidc.auth-server-url",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Actuator / Health",
+    "spring": "management.endpoints.web.exposure.include=*",
+    "quarkus": "Endpoints auto-exposed at /q/",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Actuator / Health",
+    "spring": "management.endpoint.health.show-details=always",
+    "quarkus": "quarkus.smallrye-health.ui.always-include=true",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Actuator / Health",
+    "spring": "/actuator/health",
+    "quarkus": "/q/health",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Actuator / Health",
+    "spring": "/actuator/metrics",
+    "quarkus": "/q/metrics",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Actuator / Health",
+    "spring": "/actuator/info",
+    "quarkus": "/q/info (with quarkus-info)",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Static Resources",
+    "spring": "src/main/resources/static/",
+    "quarkus": "src/main/resources/META-INF/resources/",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Static Resources",
+    "spring": "src/main/resources/public/",
+    "quarkus": "src/main/resources/META-INF/resources/",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Static Resources",
+    "spring": "spring.web.resources.static-locations",
+    "quarkus": "Quarkus always uses META-INF/resources/",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Templating (Thymeleaf → Qute)",
+    "spring": "spring.thymeleaf.prefix=classpath:/templates/",
+    "quarkus": "Templates in src/main/resources/templates/ (same)",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Templating (Thymeleaf → Qute)",
+    "spring": "spring.thymeleaf.cache=false",
+    "quarkus": "Automatic in dev mode",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Templating (Thymeleaf → Qute)",
+    "spring": "Missing variable → empty string (silent)",
+    "quarkus": "Missing variable → **exception** (strict by default)",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Spring Cloud Config Server",
+    "spring": "spring.cloud.config.uri",
+    "quarkus": "quarkus.spring-cloud-config.url (default: http://localhost:8888)",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Spring Cloud Config Server",
+    "spring": "spring.cloud.config.name",
+    "quarkus": "quarkus.spring-cloud-config.name",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Spring Cloud Config Server",
+    "spring": "spring.cloud.config.label",
+    "quarkus": "quarkus.spring-cloud-config.label",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Spring Cloud Config Server",
+    "spring": "spring.cloud.config.username",
+    "quarkus": "quarkus.spring-cloud-config.username",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Spring Cloud Config Server",
+    "spring": "spring.cloud.config.password",
+    "quarkus": "quarkus.spring-cloud-config.password",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Spring Cloud Config Server",
+    "spring": "spring.cloud.config.fail-fast",
+    "quarkus": "quarkus.spring-cloud-config.fail-fast (default: false)",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  },
+  {
+    "section": "Spring Cloud Config Server",
+    "spring": "spring.profiles.active",
+    "quarkus": "quarkus.spring-cloud-config.profiles",
+    "compat": "SUPPORTED_WITH_CHANGE",
+    "notes": ""
+  }
+]

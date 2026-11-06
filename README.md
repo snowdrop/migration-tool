@@ -161,7 +161,7 @@ Key fields:
           - dev.snowdrop.mtool.openrewrite.recipe.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
           - spring.recipe.dev.snowdrop.mtool.openrewrite.AddQuarkusRun
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:2.0.2-SNAPSHOT
 ```
 
 Scan the code source using the rules matching conditions and generate a JSON report augmented with the provider's instructions.
@@ -337,56 +337,6 @@ curl -X POST http://localhost:8080/home \
 
 The migration tool includes a [Quarkus MCP server](./mcp) that exposes its different capabilities (analyze, validate, ...) as MCP tools. AI agents can use these tools to programmatically analyze source code, discover annotations/dependencies, and validate migration correctness.
 
-### Install the ACP client
-
-Before using the MCP server with an AI agent, we recommend locally to use and install the [Smallrye ACP client](https://github.com/smallrye/smallrye-ai) (>= 0.2.1) as you will be able to use your favorite agent and launch the MCP server with just a few parameters:
-```shell
-jbang app install --name acp io.smallrye.ai:acp-java-client:0.2.1:runner
-```
-
-Install an AI agent from the [ACP registry](https://agentclientprotocol.com/get-started/registry):
-```shell
-acp registry install claude-acp
-```
-**Note**: Use the command `acp registry list -r` to get the full list of ACP agents !
-
-### Build the MCP server
-
-```shell
-mvn package -pl mcp
-```
-
-### Analyze with an AI agent
-
-Run the MCP server in stdio mode and ask the agent to analyze a project:
-```shell
-acp run \
-  -a claude-acp \
-  --backup no \
-  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}' \
-  -p "The Project path of the code to analyze using the MCP tool: sourceAnalyze is: ./applications/spring-boot-todo-app"
-```
-
-### Validate with an AI agent
-
-Run the validate tool to check that a migration from Spring to Quarkus is correct:
-```shell
-acp run \
-  -a claude-acp \
-  --backup no \
-  -s ./mcp/skills/validate/SKILLS.md \
-  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}' \
-  -p "Validate the migration of the spring project: ./applications/spring-jpa-crud against the quarkus project: ./applications/spring-jpa-crud-quarkus. Only run the validator: persistence"
-```
-
-### Filesystem access guardrail
-
-The MCP server restricts tool access to a set of allowed directories, following the [MCP local server security](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security#limit-filesystem-access) convention. By default, the current working directory (`.`) is allowed. Override with `-Dmtool.allowed-dirs`:
-
-```shell
---mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dmtool.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}'
-```
-
 ## Tips
 
 The `analyze` or `transform` commands can be executed using the Quarkus uber jar. Create an `.env` file to configure the properties:
@@ -407,6 +357,6 @@ To test OpenRewrite recipes separately, use the [maven plugin](https://docs.open
 ```shell
 cd applications/spring-boot-todo-app
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
-   -Drewrite.recipeArtifactCoordinates=dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT \
+   -Drewrite.recipeArtifactCoordinates=dev.snowdrop.mtool:openrewrite-recipes:2.0.2-SNAPSHOT \
    -Drewrite.activeRecipes=spring.recipe.dev.snowdrop.mtool.openrewrite.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
 ```

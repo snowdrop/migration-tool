@@ -18,7 +18,7 @@ public class FilesystemAccessGuardrail implements ToolInputGuardrail {
 
     private static final List<String> PATH_ARG_NAMES = List.of("projectPath", "target", "source");
 
-    @ConfigProperty(name = "mtool.allowed-dirs", defaultValue = ".")
+    @ConfigProperty(name = "quarkit.allowed-dirs", defaultValue = ".")
     List<String> allowedDirs;
 
     @Override
@@ -54,8 +54,8 @@ public class FilesystemAccessGuardrail implements ToolInputGuardrail {
                     "Access denied: path '" + requested + "' is outside the allowed directories " + allowed + ".\n"
                             + "To grant access, the user must restart the MCP server with the directory added to the launch args.\n"
                             + "Example for the ACP --mcp-server-config:\n"
-                            + "  \"args\":[\"-Dmtool.allowed-dirs=" + suggestedDir
-                            + "\", \"-jar\", \"./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar\"]\n"
+                            + "  \"args\":[\"-Dquarkit.allowed-dirs=" + suggestedDir
+                            + "\", \"-jar\", \"./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar\"]\n"
                             + "Tell the user to update their acp run command accordingly.");
         }
     }
