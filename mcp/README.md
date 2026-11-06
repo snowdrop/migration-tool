@@ -6,7 +6,8 @@ Quarkus MCP server supporting stdio and HTTP modes and Tools able to analyze the
 
 Before to execute the commands described hereafter, you must install the Smallrye ACP Client (>= 0.2.1):
 ```shell
-jbang app install --name acp io.smallrye.ai:acp-java-client:0.2.1:runner
+# Latest version defined in the catalog
+jbang app install acp@smallrye/smallrye-acp-client
 
 // To get the list of the ACP Agents ...
 acp registry list -r 
