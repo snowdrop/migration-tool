@@ -43,7 +43,7 @@
             <groupId>dev.snowdrop.mtool</groupId>
             <artifactId>references</artifactId>
             <version>${project.version}</version>
-            <!-- Not embedded in the server jar: provided at runtime as a jbang dependency or with mtool.references.path -->
+            <!-- Not embedded in the server jar: provided at runtime as a jbang dependency or with quarkit.references.path -->
             <scope>test</scope>
         </dependency>
         <!-- Quarkus -->

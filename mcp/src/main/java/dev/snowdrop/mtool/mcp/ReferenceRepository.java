@@ -26,7 +26,7 @@ import org.jboss.logging.Logger;
  * Loads the Spring to Quarkus reference maps (annotation, config, dependency) once at startup.
  * <p>
  * For each map, the file {@code <map>-map.json} is looked up first in the directory or jar given by the
- * {@code mtool.references.path} property, then on the classpath under {@code references/}.
+ * {@code quarkit.references.path} property, then on the classpath under {@code references/}.
  */
 @ApplicationScoped
 public class ReferenceRepository {
@@ -40,7 +40,7 @@ public class ReferenceRepository {
     @Inject
     ObjectMapper objectMapper;
 
-    @ConfigProperty(name = "mtool.references.path")
+    @ConfigProperty(name = "quarkit.references.path")
     Optional<String> referencesPath;
 
     private final Map<String, List<ReferenceItem>> referenceData = new LinkedHashMap<>();
@@ -115,7 +115,7 @@ public class ReferenceRepository {
                     }
                 }
             }
-            LOG.warnf("mtool.references.path does not exist: %s", path);
+            LOG.warnf("quarkit.references.path does not exist: %s", path);
         } catch (IOException | RuntimeException e) {
             LOG.errorf(e, "Failed to read %s from %s", fileName, path);
         }

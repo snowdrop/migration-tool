@@ -17,7 +17,7 @@ import io.vertx.core.json.JsonArray;
 import org.junit.jupiter.api.Test;
 
 /**
- * Verifies that mtool.references.path takes precedence over the classpath references.
+ * Verifies that quarkit.references.path takes precedence over the classpath references.
  */
 @QuarkusTest
 @TestProfile(ReferencesPathOverrideTest.ReferencesPathProfile.class)
@@ -51,7 +51,7 @@ public class ReferencesPathOverrideTest {
                 Files.writeString(dir.resolve("annotation-map.json"), """
                         [{"section":"Dependency Injection","spring":"@Primary","quarkus":"@Primary",
                           "compat":"SUPPORTED","notes":"override"}]""");
-                return Map.of("mtool.references.path", dir.toString());
+                return Map.of("quarkit.references.path", dir.toString());
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }

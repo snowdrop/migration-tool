@@ -73,7 +73,7 @@ The `references` module packages the three JSON map files into a standalone jar 
 | `references/config-map.json` | 54 |
 | `references/dependency-map.json` | 37 |
 
-The maps are **not embedded** in the MCP server jar (the `references` dependency of the `mcp` module has the `test` scope): they must be provided at runtime, either as a Maven dependency on the classpath (`jbang --deps`) or with the `mtool.references.path` property. Otherwise the server starts with a `Reference file not found` warning and the reference tools return empty results.
+The maps are **not embedded** in the MCP server jar (the `references` dependency of the `mcp` module has the `test` scope): they must be provided at runtime, either as a Maven dependency on the classpath (`jbang --deps`) or with the `quarkit.references.path` property. Otherwise the server starts with a `Reference file not found` warning and the reference tools return empty results.
 
 Build and install the jar in the local Maven repository:
 ```shell
@@ -87,8 +87,8 @@ jbang resolves the `references` artifact from the Maven repositories (local `~/.
 
 ```shell
 // Using the jbang catalog of the project (alias: mcp, catalog: mtool)
-jbang catalog add --name mtool https://github.com/snowdrop/migration-tool/blob/main/jbang-catalog.json
-jbang --deps dev.snowdrop.mtool:references:2.0.0-SNAPSHOT mcp@mtool
+jbang catalog add --name quarkit https://github.com/snowdrop/migration-tool/blob/main/jbang-catalog.json
+jbang --deps dev.snowdrop.mtool:references:2.0.0-SNAPSHOT mcp@quarkit
 
 // Or using the runner jar directly
 jbang --deps dev.snowdrop.mtool:references:2.0.0-SNAPSHOT ./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar
@@ -106,13 +106,13 @@ mvn install -DskipTests -pl references,mcp
 mvn install -DskipTests -pl migration-cli -Dquarkus.package.jar.type=uber-jar
 
 // 2. Register the catalog globally. Use a file:// URL: jbang only accepts a local path when the file is named jbang-catalog.json
-jbang --fresh catalog add --global --name mtool file://$(pwd)/jbang-catalog-dev.json
+jbang --fresh catalog add --global --name quarkit file://$(pwd)/jbang-catalog-dev.json
 
-// 3. Launch the MCP server (or the client: jbang mtool@mtool)
-jbang mcp@mtool
+// 3. Launch the MCP server (or the client: jbang mtool@quarkit)
+jbang mcp@quarkit
 ```
 
-jbang caches the catalogs read from a URL: after changing `jbang-catalog-dev.json`, run `jbang --fresh catalog update` (or remove and add the catalog again). A new `mvn install` of the jars is picked up without updating the catalog. To unregister it: `jbang catalog remove --global mtool`.
+jbang caches the catalogs read from a URL: after changing `jbang-catalog-dev.json`, run `jbang --fresh catalog update` (or remove and add the catalog again). A new `mvn install` of the jars is picked up without updating the catalog. To unregister it: `jbang catalog remove --global quarkit`.
 
 Without registering it, the catalog can also be used with `--catalog` (run it from a folder having no `mcp` subfolder, otherwise jbang tries to run this folder):
 ```shell
@@ -124,19 +124,19 @@ In the MCP client config:
 --mcp-server-config '{"type":"stdio","name":"mtools","command":"jbang","args":["--deps","dev.snowdrop.mtool:references:2.0.0-SNAPSHOT","mcp@mtool"]}'
 ```
 
-### Override the references with `mtool.references.path`
+### Override the references with `quarkit.references.path`
 
-Point `mtool.references.path` to a directory, or to a jar/zip, containing `annotation-map.json`, `config-map.json` and `dependency-map.json` (in a jar, at the root or under `references/`). A file found there takes precedence over the one available on the classpath; a missing file falls back to the classpath.
+Point `quarkit.references.path` to a directory, or to a jar/zip, containing `annotation-map.json`, `config-map.json` and `dependency-map.json` (in a jar, at the root or under `references/`). A file found there takes precedence over the one available on the classpath; a missing file falls back to the classpath.
 
 ```shell
 // Point to the references jar
-jbang -Dmtool.references.path=./references/target/references-2.0.0-SNAPSHOT.jar mcp@mtool
+jbang -Dquarkit.references.path=./references/target/references-2.0.0-SNAPSHOT.jar mcp@mtool
 
 // Or as an environment variable in the MCP client config
 --mcp-server-config '{"type":"stdio","name":"mtools","command":"jbang","args":["mcp@mtool"],"env":{"MTOOL_REFERENCES_PATH":"./references/target/references-2.0.0-SNAPSHOT.jar"}}'
 
 // Or point to a plain directory containing the JSON files
-jbang -Dmtool.references.path=/path/to/references-dir mcp@mtool
+jbang -Dquarkit.references.path=/path/to/references-dir mcp@mtool
 ```
 
 ## stdio
