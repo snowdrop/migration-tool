@@ -3,7 +3,7 @@
   "aliases": {
     "mtool": {
       "description": "Migration tool client to migrate Java applications",
-      "script-ref": "dev.snowdrop.mtool:migration-cli:RELEASE:runner"
+      "script-ref": "https://github.com/snowdrop/migration-tool/releases/download/2.0.2/migration-cli-2.0.2-runner.jar"
     },
     "mcp": {
       "description": "Quarkus MCP server of the migration tool",
