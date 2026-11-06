@@ -381,10 +381,10 @@ acp run \
 
 ### Filesystem access guardrail
 
-The MCP server restricts tool access to a set of allowed directories, following the [MCP local server security](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security#limit-filesystem-access) convention. By default, the current working directory (`.`) is allowed. Override with `-Dmtool.allowed-dirs`:
+The MCP server restricts tool access to a set of allowed directories, following the [MCP local server security](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security#limit-filesystem-access) convention. By default, the current working directory (`.`) is allowed. Override with `-Dquarkit.allowed-dirs`:
 
 ```shell
---mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dmtool.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}'
+--mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dquarkit.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}'
 ```
 
 ## Tips

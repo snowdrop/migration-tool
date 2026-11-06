@@ -35,22 +35,22 @@ mvn install -pl references,mcp
 mvn clean verify -Pit -pl mcp
 ```
 
-Next, launch the ACP client and pass the parameters to configure the Quarkus MCP server using stdio mode
+Next, we can now launch the ACP client and pass the parameter `--mcp-server-config` to configure and start the Quarkus MCP server during AI conversation.
 
 ## Filesystem access guardrail
 
-The MCP server restricts tool access to a set of allowed directories, following the [MCP local server security](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security#limit-filesystem-access) convention. The `quarkit_analyze` and `quarkit_validate` tools will reject any path outside these boundaries.
+The MCP server restricts `tool access` to a set of allowed directories, following the [MCP local server security](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security#limit-filesystem-access) convention. The `quarkit_analyze` and `quarkit_validate` tools will reject any path outside these boundaries.
 
 **Default:** the current working directory (`.`) where the server is started. When you run `acp run` from the repository root, all relative paths like `./applications/...` are allowed automatically.
 
-**Override:** pass `-Dmtool.allowed-dirs=<dir1>,<dir2>` in the MCP server args to restrict or expand access:
+**Override:** pass `-Dquarkit.allowed-dirs=<dir1>,<dir2>` in the MCP server args to restrict or expand access:
 
 ```shell
 // Restrict to only the applications directory
---mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dmtool.allowed-dirs=./applications", "-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}'
+--mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dquarkit.allowed-dirs=./applications", "-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}'
 
 // Allow access to multiple directories
---mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dmtool.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}'
+--mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dquarkit.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}'
 ```
 
 ## Spring to Quarkus references
@@ -114,11 +114,6 @@ jbang mcp@quarkit
 ```
 
 jbang caches the catalogs read from a URL: after changing `jbang-catalog-dev.json`, run `jbang --fresh catalog update` (or remove and add the catalog again). A new `mvn install` of the jars is picked up without updating the catalog. To unregister it: `jbang catalog remove --global quarkit`.
-
-Without registering it, the catalog can also be used with `--catalog` (run it from a folder having no `mcp` subfolder, otherwise jbang tries to run this folder):
-```shell
-jbang --catalog <repo>/jbang-catalog-dev.json mcp
-```
 
 In the MCP client config:
 ```shell
