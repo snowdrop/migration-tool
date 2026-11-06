@@ -20,13 +20,14 @@ public class AnalyzeMcpToolsIT {
 
         try (McpAssured.McpStdioTestClient client = McpAssured.newStdioClient()
                 .setStateless()
-                .setCommand("java", "-jar", "target/quarkus-app/quarkus-run.jar")
+                .setCommand("java", "-Dquarkit.allowed-dirs=" + tempDir.toAbsolutePath(),
+                        "-jar", "target/quarkus-app/quarkus-run.jar")
                 .build()
                 .connect()) {
 
             client.when()
-                    .toolsCall("quarkit_analyze", Map.of("projectPath", tempDir.toString(),
-                            "userQueries", "java class all;properties all"), r -> {
+                    .toolsCall("quarkit_analyze", Map.of("project_path", tempDir.toString(),
+                            "query", "java class all;properties all"), r -> {
                                 Assertions.assertFalse(r.isError());
                                 String text = r.firstContent().asText().text();
                                 Assertions.assertTrue(text.startsWith("Total: 2 match(es) across 2 query(ies)"));
