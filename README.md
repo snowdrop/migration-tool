@@ -161,7 +161,7 @@ Key fields:
           - dev.snowdrop.mtool.openrewrite.recipe.ReplaceSpringBootApplicationAnnotationWithQuarkusMain
           - spring.recipe.dev.snowdrop.mtool.openrewrite.AddQuarkusRun
         gav:
-          - dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT
+          - dev.snowdrop.mtool:openrewrite-recipes:2.0.2-SNAPSHOT
 ```
 
 Scan the code source using the rules matching conditions and generate a JSON report augmented with the provider's instructions.
@@ -363,7 +363,7 @@ Run the MCP server in stdio mode and ask the agent to analyze a project:
 acp run \
   -a claude-acp \
   --backup no \
-  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}' \
+  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar"]}' \
   -p "The Project path of the code to analyze using the MCP tool: sourceAnalyze is: ./applications/spring-boot-todo-app"
 ```
 
@@ -375,7 +375,7 @@ acp run \
   -a claude-acp \
   --backup no \
   -s ./mcp/skills/validate/SKILLS.md \
-  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}' \
+  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar"]}' \
   -p "Validate the migration of the spring project: ./applications/spring-jpa-crud against the quarkus project: ./applications/spring-jpa-crud-quarkus. Only run the validator: persistence"
 ```
 
@@ -384,7 +384,7 @@ acp run \
 The MCP server restricts tool access to a set of allowed directories, following the [MCP local server security](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security#limit-filesystem-access) convention. By default, the current working directory (`.`) is allowed. Override with `-Dquarkit.allowed-dirs`:
 
 ```shell
---mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dquarkit.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-2.0.0-SNAPSHOT-runner.jar"]}'
+--mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dquarkit.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar"]}'
 ```
 
 ## Tips
@@ -407,6 +407,6 @@ To test OpenRewrite recipes separately, use the [maven plugin](https://docs.open
 ```shell
 cd applications/spring-boot-todo-app
 mvn -U org.openrewrite.maven:rewrite-maven-plugin:dryRun \
-   -Drewrite.recipeArtifactCoordinates=dev.snowdrop.mtool:openrewrite-recipes:2.0.0-SNAPSHOT \
+   -Drewrite.recipeArtifactCoordinates=dev.snowdrop.mtool:openrewrite-recipes:2.0.2-SNAPSHOT \
    -Drewrite.activeRecipes=spring.recipe.dev.snowdrop.mtool.openrewrite.ReplaceSpringBootApplicationWithQuarkusMainAnnotation
 ```
