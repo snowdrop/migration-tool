@@ -12,7 +12,7 @@ Quarkus MCP server exposing the following MCP Tools using stdio or HTTP mode.
 ## Compile the MCP server
 
 ```shell
-mvn install -pl references,mcp
+mvn clean install
 ```
 
 To run the IT tests of the Quarkus MCP server (compiled as described above):
@@ -64,9 +64,13 @@ curl -s http://localhost:8080/mcp \
 
 ### Option 2: ACP client
 
-The ACP client, which is a Java client supporting the Agent Client Protocol - https://agentclientprotocol.com/get-started/introduction allows to interact with different LLMS using an `ACP` agent, to send prompt's message, specify SKILLS like also how to access the HTTP endpoint of the MCP Server.
+The [ACP client](https://github.com/smallrye/smallrye-acp-client) is a Java client for the [Agent Client Protocol (ACP)](https://agentclientprotocol.com/get-started/introduction). It lets you talk to different LLMs through an `ACP` agent. With it, you can:
 
-Before to play with the `acp` java client, you must install it first like an `ACP` agent using the following commands
+- send prompt messages to the agent (`-p`),
+- provide skills to guide the agent (`-s`),
+- declare how the agent reaches the Quarkus MCP server, either over HTTP or by launching it in `stdio` mode (`--mcp-server-config`).
+
+Before using the `acp` client, install it and then install an `ACP` agent using the following commands:
 ```shell
 # Latest version defined in the catalog
 jbang app install acp@smallrye/smallrye-acp-client
@@ -89,9 +93,9 @@ autohand                  0.2.1        npx            Autohand Code - AI coding 
 acp registry install claude-acp
 ```
 
-Next, we can now launch the ACP client, configure different parameters like the `--mcp-server-config` to access the Quarkus MCP server during AI conversation.
+You can then launch the ACP client and configure its parameters, such as `--mcp-server-config`, so that the agent can use the Quarkus MCP server during the conversation.
 
-**Note**: Instead of starting separately the Quarkus MCP server, you can provide the instructions to the ACP client to launch it using JBang and set the Quarkus MCP mode to `stdio` !
+**Note**: You don't have to start the Quarkus MCP server separately. Instead, you can tell the ACP client how to launch it (using `java -jar` or JBang) in `stdio` mode, as shown in the examples of the [Tools](#tools) section.
 
 ## Tools
 
@@ -152,7 +156,18 @@ acp run \
 
 List the available Spring to Quarkus reference maps (`annotation`, `config`, `dependency`) with their sections and number of records.
 
-This tool has no parameter.
+This tool has no parameter but user can override using the property `quarkit.references.path` the path to point to a directory, or to a jar/zip, containing the JSON files. In a jar, at the root or under `references/`. A file found there takes precedence over the one available on the classpath; a missing file falls back to the classpath.
+
+```shell
+// Point to the references jar
+jbang -Dquarkit.references.path=./references/target/references-2.0.2-SNAPSHOT.jar mcp@quarkit
+
+// Define the jar as jbang dependency
+jbang --deps dev.snowdrop.mtool:references:2.0.2-SNAPSHOT mcp@quarkit
+
+// Or point to a plain directory containing the JSON files
+jbang -Dquarkit.references.path=/path/to/references-dir mcp@quarkit
+```
 
 #### `quarkit_reference_lookup`
 
@@ -166,60 +181,11 @@ Look up how a Spring annotation, configuration property or dependency is migrate
 
 #### Resources
 
-The same data is available as MCP resources: `mtool://references/annotation-map`, `mtool://references/config-map`, `mtool://references/dependency-map` and the resource template `mtool://references/{map}/{key}`.
-
-### Provide the references as a Maven dependency with `jbang --deps`
-
-jbang resolves the `references` artifact from the Maven repositories (local `~/.m2` included) and adds it to the classpath of the MCP server:
-
-```shell
-// Using the jbang catalog of the project (alias: mcp, catalog: mtool)
-jbang catalog add --name quarkit https://github.com/snowdrop/migration-tool/blob/main/jbang-catalog.json
-jbang --deps dev.snowdrop.mtool:references:2.0.2-SNAPSHOT mcp@quarkit
-
-// Or using the runner jar directly
-jbang --deps dev.snowdrop.mtool:references:2.0.2-SNAPSHOT ./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar
-```
-
-Use `--repos` to resolve the artifact from another Maven repository, e.g. `--repos central,snapshots=https://central.sonatype.com/repository/maven-snapshots/`.
-
-#### Register the catalog locally, using the local Maven repository
-
-Until the jars are published as early access, use the `jbang-catalog-dev.json` catalog. Its aliases point to Maven coordinates (`dev.snowdrop.mtool:mcp:2.0.2-SNAPSHOT:runner`, `dev.snowdrop.mtool:migration-cli:2.0.2-SNAPSHOT:runner`) which jbang resolves from the local Maven repository (`~/.m2`), and the `mcp` alias declares the `references` jar as dependency, so `--deps` is not needed.
-
-```shell
-// 1. Install the jars in ~/.m2 (the migration-cli must be packaged as an uber-jar to get the runner jar)
-mvn install -DskipTests -pl references,mcp
-mvn install -DskipTests -pl migration-cli -Dquarkus.package.jar.type=uber-jar
-
-// 2. Register the catalog globally. Use a file:// URL: jbang only accepts a local path when the file is named jbang-catalog.json
-jbang --fresh catalog add --global --name quarkit file://$(pwd)/jbang-catalog-dev.json
-
-// 3. Launch the MCP server (or the client: jbang mtool@quarkit)
-jbang mcp@quarkit
-```
-
-jbang caches the catalogs read from a URL: after changing `jbang-catalog-dev.json`, run `jbang --fresh catalog update` (or remove and add the catalog again). A new `mvn install` of the jars is picked up without updating the catalog. To unregister it: `jbang catalog remove --global quarkit`.
-
-In the MCP client config:
-```shell
---mcp-server-config '{"type":"stdio","name":"mtools","command":"jbang","args":["--deps","dev.snowdrop.mtool:references:2.0.2-SNAPSHOT","mcp@quarkit"]}'
-```
-
-### Override the references with `quarkit.references.path`
-
-Point `quarkit.references.path` to a directory, or to a jar/zip, containing `annotation-map.json`, `config-map.json` and `dependency-map.json` (in a jar, at the root or under `references/`). A file found there takes precedence over the one available on the classpath; a missing file falls back to the classpath.
-
-```shell
-// Point to the references jar
-jbang -Dquarkit.references.path=./references/target/references-2.0.2-SNAPSHOT.jar mcp@quarkit
-
-// Or as an environment variable in the MCP client config
---mcp-server-config '{"type":"stdio","name":"mtools","command":"jbang","args":["mcp@quarkit"],"env":{"MTOOL_REFERENCES_PATH":"./references/target/references-2.0.2-SNAPSHOT.jar"}}'
-
-// Or point to a plain directory containing the JSON files
-jbang -Dquarkit.references.path=/path/to/references-dir mcp@quarkit
-```
+The reference JSON data are also available as MCP resources: 
+- `mtool://references/annotation-map`, 
+- `mtool://references/config-map`, 
+- `mtool://references/dependency-map` 
+and the resource template `mtool://references/{map}/{key}`
 
 ## Filesystem access guardrail
 
