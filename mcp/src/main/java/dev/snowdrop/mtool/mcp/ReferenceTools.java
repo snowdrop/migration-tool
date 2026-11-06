@@ -48,25 +48,35 @@ public class ReferenceTools {
     }
 
     @Tool(name = "quarkit_reference_lookup", description = "Look up how a Spring annotation, configuration property or dependency "
-            + "is migrated to Quarkus. Returns the matching rows as JSON: section, spring, quarkus, compat "
+            + "is migrated to Quarkus. Query by map/section to list all the rows of a section, by map/key to find a row, "
+            + "or by map/section/key to find a row within a section. "
+            + "Returns the matching rows as JSON: section, spring, quarkus, compat "
             + "(SUPPORTED, NOT_SUPPORTED or SUPPORTED_WITH_CHANGE with the Quarkus Spring compatibility extensions) and notes.")
     public String lookup(
             @ToolArg(name = "map", description = "Reference map to search: 'annotation', 'config' or 'dependency'") String map,
+            @ToolArg(name = "section", description = "Section of the map, as returned by quarkit_references_list, e.g. 'Dependency Injection'. "
+                    + "When 'key' is omitted, all the rows of the section are returned. Exact match (case-insensitive) is preferred, "
+                    + "otherwise a substring match is used", required = false) String section,
             @ToolArg(name = "key", description = "Spring annotation, property or dependency to look for, e.g. '@Primary'. "
-                    + "Exact match (case-insensitive) is preferred, otherwise a substring match is used") String key,
+                    + "Exact match (case-insensitive) is preferred, otherwise a substring match is used. "
+                    + "Restricted to 'section' when provided", required = false) String key,
             @ToolArg(name = "mode", description = "'full' returns all fields, 'compat' returns only spring, quarkus and compat", defaultValue = MODE_FULL) String mode) {
 
         if (map == null || !ReferenceRepository.MAP_NAMES.contains(map.trim().toLowerCase())) {
             return error("Unknown map '" + map + "'. Use one of: " + ReferenceRepository.MAP_NAMES);
         }
-        if (key == null || key.isBlank()) {
-            return error("The 'key' argument must not be empty");
+        boolean hasSection = section != null && !section.isBlank();
+        boolean hasKey = key != null && !key.isBlank();
+        if (!hasSection && !hasKey) {
+            return error("At least one of the 'section' or 'key' arguments must be provided");
         }
         if (mode != null && !MODE_FULL.equals(mode) && !MODE_COMPAT.equals(mode)) {
             return error("Unknown mode '" + mode + "'. Use 'full' or 'compat'");
         }
 
-        List<ReferenceItem> matches = repository.lookup(map.trim().toLowerCase(), key);
+        String mapName = map.trim().toLowerCase();
+        List<ReferenceItem> matches = hasSection ? repository.lookupInSection(mapName, section, key)
+                : repository.lookup(mapName, key);
         if (MODE_COMPAT.equals(mode)) {
             List<Map<String, Object>> rows = matches.stream().map(i -> {
                 Map<String, Object> row = new LinkedHashMap<>();
@@ -98,7 +108,10 @@ public class ReferenceTools {
     @ResourceTemplate(uriTemplate = "mtool://references/{map}/{key}", name = "reference-lookup", description = "Look up a Spring annotation, property or dependency in a reference map (annotation, config or dependency)", mimeType = "application/json")
     public String referenceLookup(@ResourceTemplateArg(name = "map") String map,
             @ResourceTemplateArg(name = "key") String key) {
-        return lookup(map, key, MODE_FULL);
+        if (map != null && key != null && repository.hasSection(map.trim().toLowerCase(), key)) {
+            return lookup(map, key, null, MODE_FULL);
+        }
+        return lookup(map, null, key, MODE_FULL);
     }
 
     private String error(String message) {

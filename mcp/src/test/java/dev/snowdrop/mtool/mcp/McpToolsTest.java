@@ -126,6 +126,46 @@ public class McpToolsTest {
     }
 
     @Test
+    public void testReferenceLookupBySection() {
+        McpStreamableTestClient client = McpAssured.newConnectedStreamableClient();
+        client.when()
+                .toolsCall("quarkit_reference_lookup",
+                        Map.of("map", "annotation", "section", "Dependency Injection"),
+                        toolResponse -> {
+                            JsonArray rows = new JsonArray(toolResponse.content().get(0).asText().text());
+                            assertTrue(rows.size() > 1);
+                            for (int i = 0; i < rows.size(); i++) {
+                                assertEquals("Dependency Injection", rows.getJsonObject(i).getString("section"));
+                            }
+                        })
+                .thenAssertResults();
+    }
+
+    @Test
+    public void testReferenceLookupBySectionAndKey() {
+        McpStreamableTestClient client = McpAssured.newConnectedStreamableClient();
+        client.when()
+                .toolsCall("quarkit_reference_lookup",
+                        Map.of("map", "annotation", "section", "Dependency Injection", "key", "@Primary"),
+                        toolResponse -> {
+                            JsonArray rows = new JsonArray(toolResponse.content().get(0).asText().text());
+                            assertEquals(1, rows.size());
+                            assertEquals("@Primary", rows.getJsonObject(0).getString("spring"));
+                        })
+                .thenAssertResults();
+    }
+
+    @Test
+    public void testReferenceLookupWithoutSectionNorKey() {
+        McpStreamableTestClient client = McpAssured.newConnectedStreamableClient();
+        client.when()
+                .toolsCall("quarkit_reference_lookup", Map.of("map", "annotation"), toolResponse -> {
+                    assertTrue(new JsonObject(toolResponse.content().get(0).asText().text()).containsKey("error"));
+                })
+                .thenAssertResults();
+    }
+
+    @Test
     public void testReferenceLookupUnknownMap() {
         McpStreamableTestClient client = McpAssured.newConnectedStreamableClient();
         client.when()

@@ -173,11 +173,27 @@ jbang -Dquarkit.references.path=/path/to/references-dir mcp@quarkit
 
 Look up how a Spring annotation, configuration property or dependency is migrated to Quarkus. Returns the matching rows as JSON: `section`, `spring`, `quarkus`, `compat` (`SUPPORTED`, `NOT_SUPPORTED` or `SUPPORTED_WITH_CHANGE` with the Quarkus Spring compatibility extensions) and `notes`.
 
+At least one of `section` or `key` must be provided:
+- `map` + `section`: returns the list of all the rows of the section
+- `map` + `key`: returns the rows matching the key in the whole map
+- `map` + `section` + `key`: returns the rows matching the key within the section
+
 | Parameter | Required | Default | Description |
 |---|---|---|---|
 | `map` | yes | | Reference map to search: `annotation`, `config` or `dependency` |
-| `key` | yes | | Spring annotation, property or dependency to look for, e.g. `@Primary`. Exact match (case-insensitive) is preferred, otherwise a substring match is used |
+| `section` | no | | Section of the map (see `quarkit_references_list`), e.g. `Dependency Injection`. Exact match (case-insensitive) is preferred, otherwise a substring match is used |
+| `key` | no | | Spring annotation, property or dependency to look for, e.g. `@Primary`. Exact match (case-insensitive) is preferred, otherwise a substring match is used. Restricted to `section` when provided |
 | `mode` | no | `full` | `full` returns all fields, `compat` returns only `spring`, `quarkus` and `compat` |
+
+An error JSON (`{"error": "..."}`) is returned when the `map` is unknown, when neither `section` nor `key` is provided, or when the `mode` is not `full` or `compat`.
+
+Example of tool arguments:
+
+```json
+{ "map": "annotation", "section": "Dependency Injection", "key": "@Primary", "mode": "compat" }
+```
+
+See [`cmds.md`](cmds.md) for ready-to-use HTTPie queries.
 
 #### Resources
 
@@ -185,7 +201,7 @@ The reference JSON data are also available as MCP resources:
 - `mtool://references/annotation-map`, 
 - `mtool://references/config-map`, 
 - `mtool://references/dependency-map` 
-and the resource template `mtool://references/{map}/{key}`
+and the resource template `mtool://references/{map}/{key}`, where `{key}` is either a Spring key or the name of a section (which returns all its rows).
 
 ## Filesystem access guardrail
 

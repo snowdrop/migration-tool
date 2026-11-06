@@ -75,8 +75,34 @@ public class ReferenceRepository {
      * match, returns the rows whose Spring side contains {@code key}.
      */
     public List<ReferenceItem> lookup(String map, String key) {
-        String needle = key.trim().toLowerCase(Locale.ROOT);
+        return matchKey(get(map), key);
+    }
+
+    /**
+     * Returns all the rows of {@code map} in {@code section}. The section name is matched case-insensitively: an
+     * exact match is preferred, otherwise the rows whose section contains {@code section} are returned. If
+     * {@code key} is not blank, the rows are further filtered as in {@link #lookup(String, String)}.
+     */
+    public List<ReferenceItem> lookupInSection(String map, String section, String key) {
+        String needle = section.trim().toLowerCase(Locale.ROOT);
         List<ReferenceItem> items = get(map);
+        List<ReferenceItem> exact = items.stream()
+                .filter(i -> i.section().toLowerCase(Locale.ROOT).equals(needle))
+                .toList();
+        List<ReferenceItem> inSection = !exact.isEmpty() ? exact
+                : items.stream().filter(i -> i.section().toLowerCase(Locale.ROOT).contains(needle)).toList();
+        return key == null || key.isBlank() ? inSection : matchKey(inSection, key);
+    }
+
+    /**
+     * Returns true if {@code section} is the exact (case-insensitive) name of a section of {@code map}.
+     */
+    public boolean hasSection(String map, String section) {
+        return get(map).stream().anyMatch(i -> i.section().equalsIgnoreCase(section.trim()));
+    }
+
+    private static List<ReferenceItem> matchKey(List<ReferenceItem> items, String key) {
+        String needle = key.trim().toLowerCase(Locale.ROOT);
         List<ReferenceItem> exact = items.stream()
                 .filter(i -> i.spring().toLowerCase(Locale.ROOT).equals(needle))
                 .toList();
