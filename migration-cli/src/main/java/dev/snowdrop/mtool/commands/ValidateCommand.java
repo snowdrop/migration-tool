@@ -8,6 +8,8 @@ import dev.snowdrop.mtool.scanner.analyzer.TreeSitterAnalyzer;
 import dev.snowdrop.mtool.validate.project.ProjectSetupValidator;
 import dev.snowdrop.mtool.validate.Validator;
 import dev.snowdrop.mtool.validate.persistence.PersistenceValidator;
+import dev.snowdrop.mtool.validate.ui.UiMigrationType;
+import dev.snowdrop.mtool.validate.ui.UiValidator;
 import org.aesh.command.Command;
 import org.aesh.command.CommandDefinition;
 import org.aesh.command.CommandException;
@@ -34,17 +36,21 @@ public class ValidateCommand implements Command<CommandInvocation> {
     private static final String BOLD = "\u001B[1m";
     private static final String RESET = "\u001B[0m";
 
-    @Arguments(description = "Validator to run (e.g. project-setup, persistence) and path to the project to validate", required = true)
+    @Arguments(description = "Validator to run (e.g. project-setup, persistence, ui) and path to the project to validate", required = true)
     public List<String> arguments;
 
     @Option(shortName = 'v', name = "verbose", hasValue = false, description = "Enable verbose output")
     public boolean verbose;
 
-    @Option(name = "skip-compile", hasValue = false, description = "Skip the mvn compile check")
+    @Option(name = "skip-compile", hasValue = false, description = "Skip the build check")
     public boolean skipCompile;
 
-    @Option(name = "spring-project", description = "Path to the original Spring project (required for persistence validator)")
+    @Option(name = "spring-project", description = "Path to the original Spring project (required for persistence and ui validators)")
     public String springProjectPath;
+
+    @Option(name = "ui-type", description = "UI migration type(s) (required for ui validator): jsp-qute, thymeleaf-qute, freemarker-qute, freemarker-quarkus, jsf-qute or jsf-myfaces. "
+            + "Use a comma-separated list for projects mixing view technologies")
+    public String uiType;
 
     @Option(name = "parser", description = "Java parser to use: treesitter (default) or javaparser", defaultValue = {
             "treesitter" })
@@ -75,7 +81,7 @@ public class ValidateCommand implements Command<CommandInvocation> {
         logger.infof("Validating project: %s", projectPath);
         ValidationReport report = validator.validate(projectPath);
         printReport(report);
-        return CommandResult.SUCCESS;
+        return report.failed() > 0 ? CommandResult.FAILURE : CommandResult.SUCCESS;
     }
 
     private JavaAnalyzer resolveAnalyzer() {
@@ -94,6 +100,25 @@ public class ValidateCommand implements Command<CommandInvocation> {
         } else if ("persistence".equals(validatorName)) {
             logger.error("--spring-project is required for the persistence validator");
             return null;
+        }
+
+        if ("ui".equals(validatorName)) {
+            if (uiType == null) {
+                logger.errorf("--ui-type is required for the ui validator. Valid types: %s",
+                        UiMigrationType.validTypes());
+                return null;
+            }
+            if (springProjectPath == null) {
+                logger.error("--spring-project is required for the ui validator");
+                return null;
+            }
+            try {
+                validators.add(new UiValidator(UiMigrationType.fromValues(uiType), resolvePath(springProjectPath),
+                        skipCompile));
+            } catch (IllegalArgumentException e) {
+                logger.error(e.getMessage());
+                return null;
+            }
         }
 
         return validators.stream()

@@ -122,22 +122,29 @@ acp run \
   -a claude-acp \
   --backup no \
   --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar"]}' \
-  -p "The Project path of the code to analyze using the MCP tool: sourceAnalyze is: ./applications/spring-boot-todo-app"
+  -p "The Project path of the code to analyze using the MCP tool: quarkit_analyze is: ./applications/spring-boot-todo-app"
 ```
 
 ### Validate tool
 
 Tool name: `quarkit_validate`
 
-Validate that a Spring to Quarkus migration is correct and complete. Runs validators (project-setup, persistence, messaging, REST, transaction, etc) against the migrated Quarkus project, comparing it with the original Spring project to detect missing entities, field mismatches, ID strategy changes, and relationship differences.
+Validate that a Spring to Quarkus migration is correct and complete. Runs validators against the migrated Quarkus project, comparing it with the original Spring project:
+
+- `project-setup`: project structure, no Spring annotations or dependencies, Quarkus BOM and plugin, `mvn compile`
+- `persistence`: missing entities, field mismatches, ID strategy changes, relationship differences, and compilation (Maven or Gradle)
+- `ui`: view layer migration for the given `uiMigrationType` (legacy view technology removed, Qute, FreeMarker or MyFaces setup, template locations, static resources, CSRF tokens, view parity, Quarkus build)
 
 | Parameter | Required | Default | Description |
 |---|---|---|---|
 | `target` | yes | | Path to the migrated Quarkus project to validate |
-| `source` | yes | | Path to the original Spring project (required for persistence validation) |
-| `validator` | no | `all` | Validator to run: `project-setup`, `persistence`, or `all` |
-| `skipCompile` | no | `false` | Skip the `mvn compile` check |
+| `source` | for `persistence`, `ui` and `all` | | Path to the original Spring project |
+| `validator` | no | `all` | Validator to run: `project-setup`, `persistence`, `ui`, or `all` |
+| `skipCompile` | no | `false` | Skip the build check |
 | `parser` | no | `treesitter` | Java parser to use: `treesitter` (default) or `javaparser` |
+| `uiMigrationType` | for `ui` | | UI migration type(s), comma-separated for projects mixing view technologies (e.g. `thymeleaf-qute,jsp-qute`). With `all`, the `ui` validator only runs when it is set |
+
+UI migration types: `jsp-qute`, `thymeleaf-qute`, `freemarker-qute`, `freemarker-quarkus` (FreeMarker preserved with `quarkus-freemarker`), `jsf-qute`, `jsf-myfaces` (JSF preserved with MyFaces). A view technology is either migrated to Qute or preserved, so `freemarker-qute` cannot be combined with `freemarker-quarkus`, nor `jsf-qute` with `jsf-myfaces`.
 
 The tool access is restricted to the allowed directories (see [Filesystem access guardrail](#filesystem-access-guardrail)) and the `validator` value is checked before execution.
 
@@ -148,6 +155,12 @@ acp run \
   -s ./mcp/skills/validate/SKILLS.md \
   --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar"]}' \
   -p "Validate the migration of the spring project: ./applications/spring-jpa-crud against the quarkus project: ./applications/spring-jpa-crud-quarkus. Only run the validator: persistence"
+```
+
+To validate the view layer, run the `ui` validator with the UI migration type. For example, for the Thymeleaf application `./applications/spring-boot-todo-app` migrated to `<quarkus-project>`:
+
+```shell
+-p "Validate the migration of the spring project: ./applications/spring-boot-todo-app against the quarkus project: <quarkus-project>. Only run the validator: ui, with the UI migration type: thymeleaf-qute"
 ```
 
 ### References tool
