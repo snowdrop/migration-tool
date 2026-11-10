@@ -2,7 +2,7 @@
 
 Start the Quarkus MCP server (HTTP endpoint: `http://localhost:8080/mcp`):
 ```shell
-jbang mcp@quarkit
+jbang mcp-http@quarkit
 ```
 
 Define the common headers and `_meta` once (fish shell):
