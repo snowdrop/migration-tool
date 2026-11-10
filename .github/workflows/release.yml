@@ -88,6 +88,8 @@ jobs:
         run: |
           VERSION=${{ github.event.inputs.version }}
           mvn -ntp -B clean deploy -Prelease -DskipTests -Dmcp.transport=stdio -Dmcp.attach.jar=${{ runner.temp }}/mcp-$VERSION-http.jar
+          git tag "$VERSION"
+          git push origin "refs/tags/$VERSION"
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
