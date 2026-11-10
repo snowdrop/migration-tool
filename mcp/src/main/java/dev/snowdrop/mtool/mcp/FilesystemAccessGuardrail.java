@@ -16,7 +16,7 @@ public class FilesystemAccessGuardrail implements ToolInputGuardrail {
 
     private static final Logger LOG = Logger.getLogger(FilesystemAccessGuardrail.class);
 
-    private static final List<String> PATH_ARG_NAMES = List.of("projectPath", "target", "source");
+    private static final List<String> PATH_ARG_NAMES = List.of("project_path", "target", "source");
 
     @ConfigProperty(name = "quarkit.allowed-dirs", defaultValue = ".")
     List<String> allowedDirs;
@@ -52,11 +52,12 @@ public class FilesystemAccessGuardrail implements ToolInputGuardrail {
                     .toString();
             throw new ToolCallException(
                     "Access denied: path '" + requested + "' is outside the allowed directories " + allowed + ".\n"
-                            + "To grant access, the user must restart the MCP server with the directory added to the launch args.\n"
-                            + "Example for the ACP --mcp-server-config:\n"
-                            + "  \"args\":[\"-Dquarkit.allowed-dirs=" + suggestedDir
-                            + "\", \"-jar\", \"./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar\"]\n"
-                            + "Tell the user to update their acp run command accordingly.");
+                            + "To grant access, the user must restart the MCP server with the directory added to the "
+                            + "property quarkit.allowed-dirs, either as a system property or as an environment variable:\n"
+                            + "  java -Dquarkit.allowed-dirs=" + suggestedDir + " -jar mcp-<version>-<stdio|http>.jar\n"
+                            + "  QUARKIT_ALLOWED_DIRS=" + suggestedDir + " jbang mcp@quarkit\n"
+                            + "  acp mcp serve -e QUARKIT_ALLOWED_DIRS=" + suggestedDir + " <id>\n"
+                            + "Tell the user to update the configuration of their MCP server accordingly.");
         }
     }
 }
