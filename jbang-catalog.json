@@ -6,8 +6,12 @@
       "script-ref": "dev.snowdrop.mtool:migration-cli:RELEASE:runner"
     },
     "mcp": {
-      "description": "Quarkus MCP server of the migration tool",
-      "script-ref": "dev.snowdrop.mtool:mcp:RELEASE:runner"
+      "description": "Quarkus MCP server of the migration tool (stdio transport)",
+      "script-ref": "dev.snowdrop.mtool:mcp:RELEASE:stdio"
+    },
+    "mcp-http": {
+      "description": "Quarkus MCP server of the migration tool (HTTP transport)",
+      "script-ref": "dev.snowdrop.mtool:mcp:RELEASE:http"
     }
   },
   "templates": {}
