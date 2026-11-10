@@ -10,17 +10,14 @@ import dev.snowdrop.mtool.model.validate.persistence.FieldModel;
 import dev.snowdrop.mtool.model.validate.persistence.IdGenerationModel;
 import dev.snowdrop.mtool.model.validate.persistence.RelationshipModel;
 import dev.snowdrop.mtool.scanner.analyzer.JavaAnalyzer;
+import dev.snowdrop.mtool.validate.CompileCheck;
 import dev.snowdrop.mtool.validate.Validator;
 import org.jboss.logging.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -79,7 +76,7 @@ public class PersistenceValidator implements Validator {
         validateEntities(springEntities, quarkusEntities, report);
 
         if (!skipCompile) {
-            checkMavenCompile(report, quarkusProjectPath);
+            checkCompile(report, quarkusProjectPath);
         }
 
         return report;
@@ -345,47 +342,8 @@ public class PersistenceValidator implements Validator {
         }
     }
 
-    private void checkMavenCompile(ValidationReport report, Path projectPath) {
-        ValidationRule rule = new ValidationRule("mvn compile", "Project compiles successfully");
-        try {
-            ProcessBuilder pb = new ProcessBuilder("mvn", "compile", "-B", "--no-transfer-progress");
-            pb.directory(projectPath.toFile());
-            pb.redirectErrorStream(true);
-
-            Process process = pb.start();
-            StringBuilder outputBuilder = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    outputBuilder.append(line).append("\n");
-                }
-            }
-
-            boolean finished = process.waitFor(180, TimeUnit.SECONDS);
-            if (!finished) {
-                process.destroyForcibly();
-                report.add(new ValidationResult(rule, Status.FAILED, "Maven compile timed out after 180s"));
-                return;
-            }
-
-            String output = outputBuilder.toString();
-            if (process.exitValue() == 0 && output.toUpperCase().contains("BUILD SUCCESS")) {
-                report.add(new ValidationResult(rule, Status.PASSED, "mvn compile — BUILD SUCCESS"));
-            } else {
-                String errors = output.lines()
-                        .filter(l -> l.contains("[ERROR]"))
-                        .limit(5)
-                        .collect(Collectors.joining("\n  "));
-                report.add(new ValidationResult(rule, Status.FAILED,
-                        "mvn compile — BUILD FAILURE\n  " + errors));
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            report.add(new ValidationResult(rule, Status.FAILED, "Maven compile interrupted"));
-        } catch (IOException e) {
-            report.add(new ValidationResult(rule, Status.FAILED,
-                    "Maven (mvn) not found in PATH"));
-        }
+    private void checkCompile(ValidationReport report, Path projectPath) {
+        report.add(CompileCheck.run("Project compiles successfully", projectPath));
     }
 
     private String relationshipKey(RelationshipModel rel) {
