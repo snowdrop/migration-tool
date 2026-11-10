@@ -11,9 +11,17 @@ Quarkus MCP server exposing the following MCP Tools using stdio or HTTP mode.
 
 ## Compile the MCP server
 
-```shell
-mvn clean install
-```
+The MCP transport extensions packaged within the uber-jar are selected using the property `mcp.transport`, which activates one of the following Maven profiles:
+
+| Profile | Command | Transports | Uber-jar | Usage |
+|---|---|---|---|---|
+| `all` (default) | `mvn clean install` | `stdio` + `http` | `mcp/target/mcp-<version>-runner.jar` | Local development: `mvn quarkus:dev -pl mcp` |
+| `stdio` | `mvn clean install -Dmcp.transport=stdio` | `stdio` | `mcp/target/mcp-<version>-stdio.jar` | Released |
+| `http` | `mvn clean install -Dmcp.transport=http` | `http` | `mcp/target/mcp-<version>-http.jar` | Released |
+
+**Note**: The default `-runner.jar` also starts an HTTP server on port `8080` when launched in `stdio` mode by an MCP client. Build the `stdio` uber-jar (`-Dmcp.transport=stdio`) to only use the stdio transport.
+
+The two uber-jars are released on Maven Central under the GAV `dev.snowdrop.mtool:mcp:<version>` with the classifiers `stdio` and `http`.
 
 To run the IT tests of the Quarkus MCP server (compiled as described above):
 ```shell
@@ -24,20 +32,31 @@ mvn clean verify -Pit -pl mcp
 
 Using `java -jar`:
 ```shell
-java -jar ./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar
+# stdio transport (compiled with -Dmcp.transport=stdio)
+java -jar ./mcp/target/mcp-2.0.2-SNAPSHOT-stdio.jar
+
+# HTTP transport (compiled with -Dmcp.transport=http)
+java -jar ./mcp/target/mcp-2.0.2-SNAPSHOT-http.jar
 ```
 
-Or using `jbang` and the [`jbang-catalog.json`](../jbang-catalog.json) of the project (alias: `mcp`):
+Or using `jbang` and the [`jbang-catalog.json`](../jbang-catalog.json) of the project (aliases: `mcp` for `stdio` and `mcp-http` for HTTP):
 ```shell
+# stdio transport
 jbang app install mcp@quarkit
 jbang mcp@quarkit
+
+# HTTP transport
+jbang app install mcp-http@quarkit
+jbang mcp-http@quarkit
 ```
 
-The HTTP endpoint is then available at `http://localhost:8080/mcp`.
+Using the HTTP transport, the endpoint is then available at `http://localhost:8080/mcp`.
 
 ## Query the MCP server
 
 ### Option 1: curl
+
+**Note**: Requires the MCP server started with the HTTP transport (see [Start the MCP server](#start-the-mcp-server)).
 
 The server is stateless: each request must include the `MCP-Protocol-Version`, `Mcp-Method` (and `Mcp-Name` for `tools/call`) headers and the `_meta` object.
 
@@ -95,7 +114,7 @@ acp registry install claude-acp
 
 You can then launch the ACP client and configure its parameters, such as `--mcp-server-config`, so that the agent can use the Quarkus MCP server during the conversation.
 
-**Note**: You don't have to start the Quarkus MCP server separately. Instead, you can tell the ACP client how to launch it (using `java -jar` or JBang) in `stdio` mode, as shown in the examples of the [Tools](#tools) section.
+**Note**: You don't have to start the Quarkus MCP server separately. Instead, you can tell the ACP client how to launch it (using `java -jar` or JBang) with the `stdio` uber-jar, as shown in the examples of the [Tools](#tools) section.
 
 ## Tools
 
@@ -121,7 +140,7 @@ The tool access is restricted to the allowed directories (see [Filesystem access
 acp run \
   -a claude-acp \
   --backup no \
-  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar"]}' \
+  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-stdio.jar"]}' \
   -p "The Project path of the code to analyze using the MCP tool: sourceAnalyze is: ./applications/spring-boot-todo-app"
 ```
 
@@ -146,7 +165,7 @@ acp run \
   -a claude-acp \
   --backup no \
   -s ./mcp/skills/validate/SKILLS.md \
-  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar"]}' \
+  --mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-stdio.jar"]}' \
   -p "Validate the migration of the spring project: ./applications/spring-jpa-crud against the quarkus project: ./applications/spring-jpa-crud-quarkus. Only run the validator: persistence"
 ```
 
@@ -208,12 +227,15 @@ and the resource template `mtool://references/{map}/{key}`, where `{key}` is eit
 The MCP server restricts `tool access` to a set of allowed directories, following the [MCP local server security](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security#limit-filesystem-access) convention. The `quarkit_analyze` and `quarkit_validate` tools will reject any path outside these boundaries.
 
 By default, when we start the MCP server, the current working directory (`.`) will be set as `auhtorized` path to access files when running the tools.
-To override, pass the following system property `-Dquarkit.allowed-dirs=<dir1>,<dir2>` to expand access
+To override, pass the following system property `-Dquarkit.allowed-dirs=<dir1>,<dir2>` or the environment variable `QUARKIT_ALLOWED_DIRS=<dir1>,<dir2>` to expand access (the same applies to `quarkit.references.path` / `QUARKIT_REFERENCES_PATH`)
 
 ```shell
 // Restrict to only the applications directory
---mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dquarkit.allowed-dirs=./applications", "-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar"]}'
+--mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dquarkit.allowed-dirs=./applications", "-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-stdio.jar"]}'
 
 // Allow access to multiple directories
---mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dquarkit.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-runner.jar"]}'
+--mcp-server-config '{"type":"stdio","name":"mtools","command":"java","args":["-Dquarkit.allowed-dirs=./applications,/tmp/projects", "-jar", "./mcp/target/mcp-2.0.2-SNAPSHOT-stdio.jar"]}'
+
+// HTTP server registered in the acp registry and launched with: acp mcp serve
+acp mcp serve -e QUARKIT_ALLOWED_DIRS=./applications,/tmp/projects -e QUARKIT_REFERENCES_PATH=./references/target/references-2.0.2-SNAPSHOT.jar quarkit-http
 ```

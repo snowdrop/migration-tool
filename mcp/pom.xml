@@ -15,6 +15,11 @@
 
     <properties>
         <quarkus.package.jar.type>uber-jar</quarkus.package.jar.type>
+        <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
+        <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
+        <!-- Default build (no mcp.transport property): both transports are packaged within mcp-<version>-runner.jar -->
+        <!-- The profiles stdio and http override the suffix: mcp-<version>-stdio.jar or mcp-<version>-http.jar -->
+        <quarkus.package.runner-suffix>-runner</quarkus.package.runner-suffix>
     </properties>
 
     <dependencies>
@@ -46,15 +51,7 @@
             <!-- Not embedded in the server jar: provided at runtime as a jbang dependency or with quarkit.references.path -->
             <scope>test</scope>
         </dependency>
-        <!-- Quarkus -->
-        <dependency>
-            <groupId>io.quarkiverse.mcp</groupId>
-            <artifactId>quarkus-mcp-server-stdio</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkiverse.mcp</groupId>
-            <artifactId>quarkus-mcp-server-http</artifactId>
-        </dependency>
+        <!-- Quarkus MCP transport: quarkus-mcp-server-stdio or quarkus-mcp-server-http are declared within the profiles -->
 
         <!-- Test -->
         <dependency>
@@ -89,6 +86,155 @@
     </build>
 
     <profiles>
+        <!--
+          Transport profiles, activated using the property mcp.transport (and NOT activeByDefault, which would be
+          deactivated as soon as another profile of this pom, e.g. -Pit, is activated):
+          - all   (no mcp.transport): stdio + http, for local development: mvn quarkus:dev => target/mcp-<version>-runner.jar
+          - stdio (-Dmcp.transport=stdio): stdio only, released                            => target/mcp-<version>-stdio.jar
+          - http  (-Dmcp.transport=http) : http only, released                             => target/mcp-<version>-http.jar
+          The unit tests use the streamable HTTP test client, so the http extension is always available with the test scope.
+        -->
+        <profile>
+            <id>all</id>
+            <activation>
+                <property>
+                    <name>!mcp.transport</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.quarkiverse.mcp</groupId>
+                    <artifactId>quarkus-mcp-server-stdio</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.quarkiverse.mcp</groupId>
+                    <artifactId>quarkus-mcp-server-http</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>stdio</id>
+            <activation>
+                <property>
+                    <name>mcp.transport</name>
+                    <value>stdio</value>
+                </property>
+            </activation>
+            <properties>
+                <quarkus.package.runner-suffix>-stdio</quarkus.package.runner-suffix>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>io.quarkiverse.mcp</groupId>
+                    <artifactId>quarkus-mcp-server-stdio</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.quarkiverse.mcp</groupId>
+                    <artifactId>quarkus-mcp-server-http</artifactId>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>http</id>
+            <activation>
+                <property>
+                    <name>mcp.transport</name>
+                    <value>http</value>
+                </property>
+            </activation>
+            <properties>
+                <quarkus.package.runner-suffix>-http</quarkus.package.runner-suffix>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>io.quarkiverse.mcp</groupId>
+                    <artifactId>quarkus-mcp-server-http</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+        <!--
+          Fail the build when mcp.transport is set to an unsupported value (e.g. -Dmcp.transport=foo), as no transport
+          profile would then be activated and the uber-jar would not contain any MCP transport extension.
+        -->
+        <profile>
+            <id>check-transport</id>
+            <activation>
+                <property>
+                    <name>mcp.transport</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>${maven-enforcer-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>check-mcp-transport</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireProperty>
+                                            <property>mcp.transport</property>
+                                            <regex>^(stdio|http)$</regex>
+                                            <regexMessage>Unsupported value for the property mcp.transport: use stdio or http, or omit it to package both transports (local development).</regexMessage>
+                                        </requireProperty>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!--
+          Attach an uber-jar built previously with the other transport (e.g. the http one) to the current build,
+          so that both uber-jars are deployed on Maven Central within the same deployment (see .github/workflows/release.yml).
+          Usage: mvn deploy -Prelease -Dmcp.transport=stdio -Dmcp.attach.jar=/path/to/mcp-<version>-http.jar -Dmcp.attach.classifier=http
+        -->
+        <profile>
+            <id>attach-transport-jar</id>
+            <activation>
+                <property>
+                    <name>mcp.attach.jar</name>
+                </property>
+            </activation>
+            <properties>
+                <mcp.attach.classifier>http</mcp.attach.classifier>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>${build-helper-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-transport-jar</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        <artifact>
+                                            <file>${mcp.attach.jar}</file>
+                                            <type>jar</type>
+                                            <classifier>${mcp.attach.classifier}</classifier>
+                                        </artifact>
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>it</id>
             <properties>
