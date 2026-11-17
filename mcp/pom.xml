@@ -93,6 +93,7 @@
           - stdio (-Dmcp.transport=stdio): stdio only, released                            => target/mcp-<version>-stdio.jar
           - http  (-Dmcp.transport=http) : http only, released                             => target/mcp-<version>-http.jar
           The unit tests use the streamable HTTP test client, so the http extension is always available with the test scope.
+          The integration tests (-Pit) launch the packaged server and use the client matching its transport (mcp.it.transport).
         -->
         <profile>
             <id>all</id>
@@ -101,6 +102,10 @@
                     <name>!mcp.transport</name>
                 </property>
             </activation>
+            <properties>
+                <!-- Both transports are packaged: AnalyzeMcpToolsIT uses the stdio one -->
+                <mcp.it.transport>stdio</mcp.it.transport>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>io.quarkiverse.mcp</groupId>
@@ -122,6 +127,7 @@
             </activation>
             <properties>
                 <quarkus.package.runner-suffix>-stdio</quarkus.package.runner-suffix>
+                <mcp.it.transport>stdio</mcp.it.transport>
             </properties>
             <dependencies>
                 <dependency>
@@ -145,6 +151,7 @@
             </activation>
             <properties>
                 <quarkus.package.runner-suffix>-http</quarkus.package.runner-suffix>
+                <mcp.it.transport>http</mcp.it.transport>
             </properties>
             <dependencies>
                 <dependency>
@@ -246,6 +253,12 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <!-- AnalyzeMcpToolsIT uses the MCP client matching the packaged transport -->
+                                <mcp.it.transport>${mcp.it.transport}</mcp.it.transport>
+                            </systemPropertyVariables>
+                        </configuration>
                         <executions>
                             <execution>
                                 <goals>
