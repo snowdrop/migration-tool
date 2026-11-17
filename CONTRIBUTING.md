@@ -12,8 +12,8 @@ Thank you for your interest in contributing to the Migration Tool project! This 
 
 1. Fork and clone the repository:
 ```shell
-git clone https://github.com/<your-username>/migration-tool.git
-cd migration-tool
+git clone https://github.com/<your-username>/quarkit.git
+cd quarkit
 ```
 
 2. Build the project:
@@ -43,7 +43,7 @@ mvn test
 
 ### Reporting issues
 
-- Use [GitHub Issues](https://github.com/snowdrop/migration-tool/issues) to report bugs or request features
+- Use [GitHub Issues](https://github.com/snowdrop/quarkit/issues) to report bugs or request features
 - Include steps to reproduce, expected behavior, and actual behavior
 - Mention the version you are using (`mtool --version`)
 

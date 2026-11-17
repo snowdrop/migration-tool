@@ -15,7 +15,7 @@ env:
 
 jobs:
   precheck:
-    if: github.repository == 'snowdrop/migration-tool' && startsWith(github.event.head_commit.message, 'Releasing version') != true
+    if: github.repository == 'snowdrop/quarkit' && startsWith(github.event.head_commit.message, 'Releasing version') != true
     runs-on: ubuntu-latest
     outputs:
       VERSION: ${{ steps.vars.outputs.VERSION }}

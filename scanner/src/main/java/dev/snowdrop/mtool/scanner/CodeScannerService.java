@@ -114,7 +114,7 @@ public class CodeScannerService {
          * artifactId='spring-boot', version='3.4.2')
          *
          * See grammar definition:
-         * https://raw.githubusercontent.com/snowdrop/migration-tool/refs/heads/main/parser/src/main/antlr4/Query.g4
+         * https://raw.githubusercontent.com/snowdrop/quarkit/refs/heads/main/parser/src/main/antlr4/Query.g4
          */
 
         if (!visitor.getSimpleQueries().isEmpty()) {
