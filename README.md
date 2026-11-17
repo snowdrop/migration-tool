@@ -1,10 +1,10 @@
-[![GitHub Actions :: Build status](<https://img.shields.io/github/actions/workflow/status/snowdrop/migration-tool/mvn-build.yml?branch=main&logo=GitHub&style=for-the-badge&label=Compilation>)](https://github.com/snowdrop/migration-tool/actions/workflows/mvn-build.yml)
-[![GitHub Actions :: e2e status](<https://img.shields.io/github/actions/workflow/status/snowdrop/migration-tool/e2e-tests.yml?branch=main&logo=GitHub&style=for-the-badge&label=Integration-tests>)](https://github.com/snowdrop/migration-tool/actions/workflows/e2e-tests.yml)
-[![License](https://img.shields.io/github/license/snowdrop/migration-tool?style=for-the-badge&logo=apache)](https://www.apache.org/licenses/LICENSE-2.0)
+[![GitHub Actions :: Build status](<https://img.shields.io/github/actions/workflow/status/snowdrop/quarkit/mvn-build.yml?branch=main&logo=GitHub&style=for-the-badge&label=Compilation>)](https://github.com/snowdrop/quarkit/actions/workflows/mvn-build.yml)
+[![GitHub Actions :: e2e status](<https://img.shields.io/github/actions/workflow/status/snowdrop/quarkit/e2e-tests.yml?branch=main&logo=GitHub&style=for-the-badge&label=Integration-tests>)](https://github.com/snowdrop/quarkit/actions/workflows/e2e-tests.yml)
+[![License](https://img.shields.io/github/license/snowdrop/quarkit?style=for-the-badge&logo=apache)](https://www.apache.org/licenses/LICENSE-2.0)
 
 # Migration Tool & AI
 
-**Important**: The original code and documentation of this project is still available under the branch: https://github.com/snowdrop/migration-tool/tree/1.x
+**Important**: The original code and documentation of this project is still available under the branch: https://github.com/snowdrop/quarkit/tree/1.x
 
 This project provides tooling to **analyze**, **scan**, and **validate** Java applications targeted for migration — primarily from Spring Boot to Quarkus. It exposes its capabilities as a [Quarkus MCP server](./mcp), enabling AI agents to leverage the tool's analysis and validation features through the [Model Context Protocol](https://modelcontextprotocol.io/). While the architecture is designed to support migration from any technology A to B, the current focus is Spring Boot to Quarkus.
 
@@ -83,13 +83,13 @@ when:
 
 Install the tool using the [jbang](https://jbang.dev) tool and the following command:
 ```shell
-jbang app install mtool@snowdrop/migration-tool
+jbang app install mtool@snowdrop/quarkit
 ```
 
 > [!NOTE]
 > To install a released version, append the version
 ```shell
-jbang app install mtool@snowdrop/migration-tool/2.0.0
+jbang app install mtool@snowdrop/quarkit/2.0.0
 ```
 
 Otherwise, if you plan to contribute to the project, git clone and compile it
@@ -344,7 +344,7 @@ The `analyze` or `transform` commands can be executed using the Quarkus uber jar
 ```properties
 # .env file content
 ANALYZER_RULES_PATH=cookbook/rules
-ANALYZER_RULES_REPO_URL=https://github.com/snowdrop/migration-tool/blob/main/cookbook/rules/quarkus-spring/%s.yaml
+ANALYZER_RULES_REPO_URL=https://github.com/snowdrop/quarkit/blob/main/cookbook/rules/quarkus-spring/%s.yaml
 ```
 
 Then source it and execute:

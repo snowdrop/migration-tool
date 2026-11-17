@@ -244,7 +244,7 @@ public class OpenRewriteQueryScanner implements QueryScanner {
          * has been also initialized, that a Context and Environment exist too.
          * It is only need in this case to update the config as we are processing a new recipe
          * and to create a new Context to reset the Map of the DataTables otherwise the Context will continue to aggregate them
-         * See: https://github.com/snowdrop/migration-tool/issues/212
+         * See: https://github.com/snowdrop/quarkit/issues/212
          */
         if (svc.isSourceSetInitialized()) {
             svc.createExecutionContext();

@@ -9,7 +9,7 @@
     <name>Migration Tool :: Parent</name>
     <description>Migration Tool - Parent project</description>
     <inceptionYear>2025</inceptionYear>
-    <url>https://github.com/snowdrop/migration-tool</url>
+    <url>https://github.com/snowdrop/quarkit</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -80,9 +80,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/snowdrop/migration-tool</url>
-        <connection>scm:git:https://github.com/snowdrop/migration-tool.git</connection>
-        <developerConnection>scm:git:git:@github.com:snowdrop/migration-tool.git</developerConnection>
+        <url>https://github.com/snowdrop/quarkit</url>
+        <connection>scm:git:https://github.com/snowdrop/quarkit.git</connection>
+        <developerConnection>scm:git:git:@github.com:snowdrop/quarkit.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
