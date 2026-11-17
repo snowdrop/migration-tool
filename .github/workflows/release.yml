@@ -60,7 +60,7 @@ jobs:
         run: |
           VERSION=${{ github.event.inputs.version }}
           git add .
-          git commit -m "release: ${VERSION} and jbang catalog update"
+          git commit -m "release: ${VERSION}"
 
       - name: Build the project
         run: |
