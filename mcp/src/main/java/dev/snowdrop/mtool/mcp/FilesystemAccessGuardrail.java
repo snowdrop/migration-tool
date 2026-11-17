@@ -47,15 +47,18 @@ public class FilesystemAccessGuardrail implements ToolInputGuardrail {
         if (!isAllowed) {
             LOG.warnf("Blocked access to '%s' (argument '%s') — not within allowed directories: %s",
                     requested, argName, allowed);
-            String suggestedDir = requested.getRoot()
-                    .resolve(requested.subpath(0, Math.min(2, requested.getNameCount())))
-                    .toString();
+            // The filesystem root (e.g. "/") has no name element: Path.subpath(0, 0) would throw an IllegalArgumentException
+            String suggestedDir = requested.getNameCount() == 0
+                    ? requested.toString()
+                    : requested.getRoot()
+                            .resolve(requested.subpath(0, Math.min(2, requested.getNameCount())))
+                            .toString();
             throw new ToolCallException(
                     "Access denied: path '" + requested + "' is outside the allowed directories " + allowed + ".\n"
                             + "To grant access, the user must restart the MCP server with the directory added to the "
                             + "property quarkit.allowed-dirs, either as a system property or as an environment variable:\n"
                             + "  java -Dquarkit.allowed-dirs=" + suggestedDir + " -jar mcp-<version>-<stdio|http>.jar\n"
-                            + "  QUARKIT_ALLOWED_DIRS=" + suggestedDir + " jbang mcp@quarkit\n"
+                            + "  QUARKIT_ALLOWED_DIRS=" + suggestedDir + " jbang <mcp|mcp-http>@quarkit\n"
                             + "  acp mcp serve -e QUARKIT_ALLOWED_DIRS=" + suggestedDir + " <id>\n"
                             + "Tell the user to update the configuration of their MCP server accordingly.");
         }
