@@ -82,7 +82,7 @@
     <scm>
         <url>https://github.com/snowdrop/quarkit</url>
         <connection>scm:git:https://github.com/snowdrop/quarkit.git</connection>
-        <developerConnection>scm:git:git:@github.com:snowdrop/quarkit.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:snowdrop/quarkit.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
