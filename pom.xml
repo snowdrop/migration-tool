@@ -38,7 +38,6 @@
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
         <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
-        <maven-jreleaser-plugin.version>1.26.0</maven-jreleaser-plugin.version>
         <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
@@ -237,15 +236,6 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.jreleaser</groupId>
-                <artifactId>jreleaser-maven-plugin</artifactId>
-                <version>${maven-jreleaser-plugin.version}</version>
-                <configuration>
-                    <configFile>${project.basedir}/jreleaser.yml</configFile>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>

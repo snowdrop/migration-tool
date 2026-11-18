@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   JAVA_VERSION: '21'
@@ -69,48 +69,22 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "Github Action"
 
-      - name: Build the uber-jar of the migration-cli
+      - name: Build the project
         run: |
-          mvn -ntp -B clean install -DskipTests -Dquarkus.package.jar.type=uber-jar
+          mvn -ntp -B clean install -DskipTests
 
-      - name: Update jBang catalog for snapshot
-        if: github.ref == 'refs/heads/main'
+      # See release.yml: the MCP server is published as 2 uber-jars, one per transport (classifiers: stdio and http)
+      - name: Build the MCP server uber-jar using the http transport
         run: |
-          SNAPSHOT_URL="https://github.com/${{ github.repository }}/releases/download/early-access/migration-cli-${{ needs.precheck.outputs.VERSION }}-runner.jar"
-          jq --arg url "$SNAPSHOT_URL" '.aliases.mtool."script-ref" = $url' jbang-catalog.json > tmp.json && mv tmp.json jbang-catalog.json
-
-      - name: Commit the changes
-        run: |
-          VERSION=${{ github.event.inputs.version }}
-          git add .
-          if git diff --cached --quiet; then
-            echo "No changes detected in jbang-catalog.json. Skipping commit."
-          else
-            echo "Changes detected. Committing version ${VERSION}..."
-            git commit -m "update jbang catalog script-ref: ${VERSION}"
-            git push origin main
-          fi
-
-      - name: Release the project and publish the uber-jar as early access release
-        run: |
-          mvn -ntp -B jreleaser:full-release -N
-        env:
-          JRELEASER_PROJECT_VERSION: ${{ needs.precheck.outputs.VERSION }}
-          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION=${{ needs.precheck.outputs.VERSION }}
+          mvn -ntp -B package -pl mcp -DskipTests -Dmcp.transport=http
+          cp mcp/target/mcp-$VERSION-http.jar ${{ runner.temp }}/mcp-$VERSION-http.jar
 
       - name: Deploy the maven GAV on central
         run: |
-          mvn -B deploy -Prelease -DskipTests
+          VERSION=${{ needs.precheck.outputs.VERSION }}
+          mvn -ntp -B clean deploy -Prelease -DskipTests -Dmcp.transport=stdio -Dmcp.attach.jar=${{ runner.temp }}/mcp-$VERSION-http.jar
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-
-      - name: JReleaser output
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: jreleaser-release
-          path: |
-            target/jreleaser/trace.log
-            target/jreleaser/output.properties

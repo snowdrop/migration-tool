@@ -67,6 +67,45 @@ public class McpToolsTest {
     }
 
     @Test
+    public void testProjectPathOutsideAllowedDirsIsRejected(@TempDir Path tempDir) {
+        // The test profile allows "." and ${java.io.tmpdir}: a directory under the root of the filesystem is outside both
+        Path root = tempDir.toAbsolutePath().getRoot();
+        assertProjectPathRejected(root.resolve("quarkit-outside-allowed-dirs"));
+    }
+
+    @Test
+    public void testFilesystemRootIsRejected(@TempDir Path tempDir) {
+        assertProjectPathRejected(tempDir.toAbsolutePath().getRoot());
+    }
+
+    private void assertProjectPathRejected(Path projectPath) {
+        McpStreamableTestClient client = McpAssured.newConnectedStreamableClient();
+        client.when()
+                .toolsCall("quarkit_analyze", Map.of("project_path", projectPath.toString(), "query", "java class all"),
+                        toolResponse -> {
+                            assertTrue(toolResponse.isError(), toolResponse.toString());
+                            String text = toolResponse.firstContent().asText().text();
+                            assertTrue(text.startsWith(
+                                    "Access denied: path '" + projectPath + "' is outside the allowed directories"), text);
+                        })
+                .thenAssertResults();
+    }
+
+    @Test
+    public void testProjectPathTraversalIsRejected(@TempDir Path tempDir) {
+        McpStreamableTestClient client = McpAssured.newConnectedStreamableClient();
+        client.when()
+                .toolsCall("quarkit_analyze",
+                        Map.of("project_path", tempDir.resolve("../..").toString(), "query", "java class all"),
+                        toolResponse -> {
+                            assertTrue(toolResponse.isError(), toolResponse.toString());
+                            String text = toolResponse.firstContent().asText().text();
+                            assertTrue(text.contains("path traversal ('..') not permitted in argument 'project_path'"), text);
+                        })
+                .thenAssertResults();
+    }
+
+    @Test
     public void testReferencesList() {
         McpStreamableTestClient client = McpAssured.newConnectedStreamableClient();
         client.when()
