@@ -12,6 +12,8 @@ import dev.snowdrop.mtool.scanner.analyzer.JavaParserAnalyzer;
 import dev.snowdrop.mtool.scanner.analyzer.TreeSitterAnalyzer;
 import dev.snowdrop.mtool.validate.project.ProjectSetupValidator;
 import dev.snowdrop.mtool.validate.persistence.PersistenceValidator;
+import dev.snowdrop.mtool.validate.ui.UiMigrationType;
+import dev.snowdrop.mtool.validate.ui.UiValidator;
 import dev.snowdrop.mtool.validate.Validator;
 import io.quarkiverse.mcp.server.Tool;
 import io.quarkiverse.mcp.server.ToolArg;
@@ -24,25 +26,33 @@ public class ValidateTools {
 
     @ToolGuardrails(input = { FilesystemAccessGuardrail.class, ValidatorNameGuardrail.class })
     @Tool(name = "quarkit_validate", description = "Validate that a Spring to Quarkus migration is correct and complete. "
-            + "Runs validators (project-setup, persistence, messaging, REST, transaction, etc) against the migrated Quarkus project, "
-            + "comparing it with the original Spring project to detect missing entities, "
-            + "field mismatches, ID strategy changes, and relationship differences.")
+            + "Runs validators (project-setup, persistence, ui, messaging, REST, transaction, etc) against the migrated Quarkus project, "
+            + "comparing it with the original Spring project: missing entities, field mismatches, ID strategy changes, "
+            + "relationship differences, and view layer (templates, static resources, legacy view technology) issues.")
     public String validate(
             @ToolArg(description = "Path to the migrated Quarkus project to validate") String target,
-            @ToolArg(description = "Path to the original Spring project (required for persistence validation)") String source,
-            @ToolArg(description = "Validator to run: 'project-setup', 'persistence', or 'all'", defaultValue = "all") String validator,
-            @ToolArg(description = "Skip the mvn compile check", defaultValue = "false") String skipCompile,
-            @ToolArg(description = "Java parser to use: 'treesitter' (default) or 'javaparser'", defaultValue = "treesitter") String parser) {
+            @ToolArg(description = "Path to the original Spring project (required for the persistence, ui and all "
+                    + "validators)", required = false) String source,
+            @ToolArg(description = "Validator to run: 'project-setup', 'persistence', 'ui', or 'all'", defaultValue = "all") String validator,
+            @ToolArg(description = "Skip the build check", defaultValue = "false") String skipCompile,
+            @ToolArg(description = "Java parser to use: 'treesitter' (default) or 'javaparser'", defaultValue = "treesitter") String parser,
+            @ToolArg(description = "UI migration type(s), required by the 'ui' validator: 'jsp-qute', 'thymeleaf-qute', 'freemarker-qute', "
+                    + "'freemarker-quarkus', 'jsf-qute' or 'jsf-myfaces'. Use a comma-separated list when the project mixes view technologies "
+                    + "(e.g. 'thymeleaf-qute,jsp-qute'). When validator is 'all' the ui validator only runs if this is set", defaultValue = "") String uiMigrationType) {
 
         Path targetPath = Paths.get(target).toAbsolutePath();
-        Path sourcePath = Paths.get(source).toAbsolutePath();
+        Path sourcePath = source == null || source.isBlank() ? null : Paths.get(source).toAbsolutePath();
         boolean skip = Boolean.parseBoolean(skipCompile);
 
         if (!targetPath.toFile().exists()) {
             return "Error: target project path does not exist: " + target;
         }
-        if (!sourcePath.toFile().exists()) {
+        if (sourcePath != null && !sourcePath.toFile().exists()) {
             return "Error: source project path does not exist: " + source;
+        }
+        boolean needsSource = "all".equals(validator) || "persistence".equals(validator) || "ui".equals(validator);
+        if (sourcePath == null && needsSource) {
+            return "Error: source project path is required for the '" + validator + "' validator";
         }
 
         JavaAnalyzer analyzer = "javaparser".equalsIgnoreCase(parser)
@@ -56,9 +66,21 @@ public class ValidateTools {
         if ("all".equals(validator) || "persistence".equals(validator)) {
             validators.add(new PersistenceValidator(analyzer, sourcePath, skip));
         }
+        boolean hasUiType = uiMigrationType != null && !uiMigrationType.isBlank();
+        String skippedUi = null;
+        if ("all".equals(validator) && !hasUiType) {
+            skippedUi = "## ui\nStatus: SKIPPED\n\n[WARN] ui — not run: set uiMigrationType to validate the view layer\n";
+        }
+        if ("ui".equals(validator) || ("all".equals(validator) && hasUiType)) {
+            try {
+                validators.add(new UiValidator(UiMigrationType.fromValues(uiMigrationType), sourcePath, skip));
+            } catch (IllegalArgumentException e) {
+                return "Error: " + e.getMessage();
+            }
+        }
 
         if (validators.isEmpty()) {
-            return "Error: unknown validator '" + validator + "'. Use 'project-setup', 'persistence', or 'all'.";
+            return "Error: unknown validator '" + validator + "'. Use 'project-setup', 'persistence', 'ui', or 'all'.";
         }
 
         StringBuilder sb = new StringBuilder();
@@ -67,6 +89,9 @@ public class ValidateTools {
             ValidationReport report = v.validate(targetPath);
             sb.append(formatReport(report));
             sb.append("\n");
+        }
+        if (skippedUi != null) {
+            sb.append(skippedUi);
         }
 
         return sb.toString().trim();

@@ -4,6 +4,7 @@ import dev.snowdrop.mtool.model.validate.ValidationReport;
 import dev.snowdrop.mtool.model.validate.ValidationResult;
 import dev.snowdrop.mtool.model.validate.ValidationResult.Status;
 import dev.snowdrop.mtool.model.validate.ValidationRule;
+import dev.snowdrop.mtool.validate.CompileCheck;
 import dev.snowdrop.mtool.validate.Validator;
 import org.jboss.logging.Logger;
 import org.w3c.dom.Document;
@@ -12,13 +13,10 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public class ProjectSetupValidator implements Validator {
@@ -280,53 +278,7 @@ public class ProjectSetupValidator implements Validator {
             report.add(new ValidationResult(rule, Status.FAILED, "Cannot compile — pom.xml not found"));
             return;
         }
-
-        try {
-            ProcessBuilder pb = new ProcessBuilder("mvn", "compile", "-B", "--no-transfer-progress")
-                    .directory(projectPath.toFile())
-                    .redirectErrorStream(true);
-            Process process = pb.start();
-
-            StringBuilder output = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    output.append(line).append("\n");
-                }
-            }
-
-            boolean finished = process.waitFor(180, TimeUnit.SECONDS);
-            if (!finished) {
-                process.destroyForcibly();
-                report.add(new ValidationResult(rule, Status.FAILED,
-                        "mvn compile timed out after 180 seconds"));
-                return;
-            }
-
-            int exitCode = process.exitValue();
-            if (exitCode == 0) {
-                report.add(new ValidationResult(rule, Status.PASSED, "mvn compile — BUILD SUCCESS"));
-            } else {
-                String failureHint = extractBuildFailure(output.toString());
-                report.add(new ValidationResult(rule, Status.FAILED,
-                        "mvn compile — BUILD FAILURE" + (failureHint.isEmpty() ? "" : ": " + failureHint)));
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            report.add(new ValidationResult(rule, Status.FAILED, "mvn compile interrupted"));
-        } catch (IOException e) {
-            report.add(new ValidationResult(rule, Status.WARNING,
-                    "Could not run mvn compile: " + e.getMessage()));
-        }
-    }
-
-    private String extractBuildFailure(String output) {
-        for (String line : output.split("\n")) {
-            if (line.contains("[ERROR]") && !line.contains("BUILD FAILURE")) {
-                return line.replaceFirst(".*\\[ERROR]\\s*", "").trim();
-            }
-        }
-        return "";
+        report.add(CompileCheck.run(rule, projectPath));
     }
 
     private Document parsePom(Path pomPath) throws Exception {
