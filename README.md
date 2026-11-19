@@ -27,7 +27,7 @@ The project has been designed using the following technologies:
 
 ### AI
 
-- [Quarkus MCP server](https://github.com/quarkiverse/quarkus-mcp-server) to expose analyze and validate tools to AI agents when running SKILL instructions (module: `mcp`)
+- [Quarkus MCP server](https://github.com/quarkiverse/quarkus-mcp-server) to expose analyze and validate tools to AI agents when running skill instructions (module: `mcp`)
 
 ### YAML Rule & Query
 
