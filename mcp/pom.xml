@@ -15,7 +15,7 @@
 
     <properties>
         <quarkus.package.jar.type>uber-jar</quarkus.package.jar.type>
-        <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
+        <build-helper-maven-plugin.version>3.8.0</build-helper-maven-plugin.version>
         <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
         <!-- Default build (no mcp.transport property): both transports are packaged within mcp-<version>-runner.jar -->
         <!-- The profiles stdio and http override the suffix: mcp-<version>-stdio.jar or mcp-<version>-http.jar -->
